@@ -8,7 +8,7 @@
     "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "highcharts": "12.2.0",
+    "highcharts": "12.6.2",
     "jsdom": "26.1.0",
     "string-pixel-width": "1.11.0"
   },
