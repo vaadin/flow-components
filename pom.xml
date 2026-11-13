@@ -89,7 +89,7 @@
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <exec.maven.plugin.version>3.6.4</exec.maven.plugin.version>
-        <jandex.plugin.version>3.6.0</jandex.plugin.version>
+        <jandex.plugin.version>3.6.1</jandex.plugin.version>
         <!-- Owned by Flow: keep jandex.format.version equal to the value in the
             Flow root POM for the flow.version in use, so that the component
             indexes use the same index format as the Flow ones. Do not change
