@@ -55,6 +55,3 @@ jobs:
             - Run the unit tests of the affected component module(s), e.g. mvn test -pl <module>
             - Run the formatter: mvn spotless:apply
           extra-allowed-tools: Bash(mvn:*)
-          # Trial of the cherry-pick changes from vaadin/platform-build-script#214
-          # (resolution notes, stop reasons, chained picks); remove once it is merged.
-          script-ref: 4d80fb3a528ef91d68db19171f473abbc47dddf4
