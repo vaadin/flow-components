@@ -15,10 +15,26 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.Trigger;
+import com.vaadin.flow.component.trigger.internal.TriggerInputJs;
+import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsSnippets;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
@@ -72,4 +88,115 @@ class LitRendererTest {
         Assertions.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
+    @Test
+    void clientAction_oneBindingSendsTheActionFunctionToTheClient() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+
+        LitRenderer<String> renderer = LitRenderer.<String> of(
+                "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
+                .withProperty("email", ValueProvider.identity())
+                .withClientAction("copy", Clipboard.writeText());
+
+        renderer.render(container.getElement(), new KeyMapper<>(), "renderer");
+        ui.getUI().getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("setLitRenderer"))
+                .findFirst().orElseThrow().getParameters();
+
+        // The action names the template can call, and the functions behind
+        // them: one function for the whole renderer, not one per item.
+        Assertions.assertEquals("[\"copy\"]", parameters.get(6).toString());
+        JsFunction actions = (JsFunction) parameters.get(7);
+        JsFunction copy = (JsFunction) actions.getCaptures().get(0);
+        Assertions.assertEquals(JsFunction.of("return [$0]", copy), actions);
+
+        // The actions come from JavaScript declared in the bundle, so only
+        // their identity and captures are sent.
+        // The renderer calls each action with the event and the context that
+        // carries the template's call arguments.
+        JsCall copyCall = Objects.requireNonNull(copy.getDeclaredCall());
+        Assertions.assertEquals(WriteToClipboardAction.WriteToClipboardJs.class,
+                copyCall.definitionType());
+        Assertions.assertEquals("writeToClipboard", copyCall.methodName());
+        Assertions.assertEquals(List.of("event", "context"),
+                copyCall.getFunctionParameterNames());
+
+        // The copied value is the argument the template passes, so the same
+        // function serves every rendered row.
+        JsFunction text = (JsFunction) copy.getCaptures().get(0);
+        JsCall textCall = Objects.requireNonNull(text.getDeclaredCall());
+        Assertions.assertEquals(TriggerInputJs.class,
+                textCall.definitionType());
+        Assertions.assertEquals("readContextValue", textCall.methodName());
+        Assertions.assertEquals(List.of("event", "context"),
+                textCall.getFunctionParameterNames());
+        Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
+    }
+
+    @Test
+    void noClientActions_clientStillGetsAnEmptyBundle() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+
+        LitRenderer.<String> of("<span>${item}</span>")
+                .render(container.getElement(), new KeyMapper<>(), "renderer");
+        ui.getUI().getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("setLitRenderer"))
+                .findFirst().orElseThrow().getParameters();
+
+        Assertions.assertEquals("[]", parameters.get(6).toString());
+        Assertions.assertEquals(JsFunction.of("return []"), parameters.get(7));
+    }
+
+    @Test
+    void removingTheRenderer_unbindsItsClientActions() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+        AtomicBoolean unbound = new AtomicBoolean();
+        Action action = new Action() {
+            @Override
+            protected JsFunction toJs(Trigger trigger) {
+                trigger.addCleanup(() -> unbound.set(true));
+                return JsSnippets.of(TriggerInputJs.class).returnNull();
+            }
+        };
+
+        Registration registration = LitRenderer.<String> of("<span></span>")
+                .withClientAction("act", action)
+                .render(container.getElement(), new KeyMapper<>(), "renderer")
+                .getRegistration();
+        Assertions.assertFalse(unbound.get());
+
+        registration.remove();
+        Assertions.assertTrue(unbound.get(),
+                "removing the renderer must unbind its client actions");
+    }
+
+    @Test
+    void doNotAllowClientActionNamesWithSpaces() {
+        LitRenderer<Object> renderer = LitRenderer.of("");
+        Action action = Clipboard.writeText();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> renderer.withClientAction("illegal name", action));
+    }
+
+    @Test
+    void doNotAllowClientActionNameAlreadyUsedByAFunction() {
+        LitRenderer<Object> renderer = LitRenderer.of("").withFunction("copy",
+                item -> {
+                });
+        Action action = Clipboard.writeText();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> renderer.withClientAction("copy", action));
+    }
 }
