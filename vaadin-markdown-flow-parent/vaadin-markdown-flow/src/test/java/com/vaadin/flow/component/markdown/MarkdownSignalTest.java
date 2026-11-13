@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.markdown.tests;
+package com.vaadin.flow.component.markdown;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -176,28 +178,13 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     private void assertUpdateMarkdownCall(Component component, String content,
             boolean isAppend) {
-        var pendingJavaScriptInvocations = ui
-                .dumpPendingJavaScriptInvocations();
+        List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
+                MarkdownJs.class);
 
-        Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
-
-        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
-        var parameters = pendingJavaScriptInvocation.getInvocation()
-                .getParameters();
-        var element = component != null ? component.getElement() : null;
-
-        if (isAppend) {
-            Assertions.assertEquals(
-                    "return (async function() { this.content += $0}).apply($1)",
-                    pendingJavaScriptInvocation.getInvocation()
-                            .getExpression());
-        } else {
-            Assertions.assertEquals(
-                    "return (async function() { this.content = $0}).apply($1)",
-                    pendingJavaScriptInvocation.getInvocation()
-                            .getExpression());
-        }
-        Assertions.assertEquals(content, parameters.get(0));
-        Assertions.assertEquals(element, parameters.get(1));
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(isAppend ? "appendContent" : "setContent",
+                calls.get(0).methodName());
+        Assertions.assertEquals(Collections.singletonList(content),
+                calls.get(0).arguments());
     }
 }
