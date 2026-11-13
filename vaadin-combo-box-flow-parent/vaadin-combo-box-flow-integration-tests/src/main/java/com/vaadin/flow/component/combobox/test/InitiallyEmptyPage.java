@@ -15,13 +15,31 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/initially-empty")
 public class InitiallyEmptyPage extends Div {
+
+    @JsDefinition
+    interface ContainerJs extends Serializable {
+
+        @JsExpression("this.__parent = this.parentElement; this.remove();")
+        PendingJavaScriptResult detach();
+
+        @JsExpression("return null")
+        PendingJavaScriptResult roundTrip();
+
+        @JsExpression("this.__parent.appendChild(this);")
+        void reattach();
+    }
 
     public InitiallyEmptyPage() {
         NativeButton addInsideDetachedContainerButton = new NativeButton(
@@ -29,8 +47,7 @@ public class InitiallyEmptyPage extends Div {
                     Div container = new Div();
                     add(container);
                     // Detach the container element with JS
-                    container.getElement().executeJs(
-                            "this.__parent = this.parentElement; this.remove();")
+                    container.getElement().executeJs(ContainerJs.class).detach()
                             .then((res) -> {
                                 // Add a combo box to the detached container
                                 ComboBox<String> comboBox = new ComboBox<>();
@@ -38,10 +55,13 @@ public class InitiallyEmptyPage extends Div {
                                 container.add(comboBox);
 
                                 // Re-attach the container element with JS
-                                container.getElement().executeJs("")
-                                        .then((res2) -> {
-                                            container.getElement().executeJs(
-                                                    "this.__parent.appendChild(this);");
+                                container.getElement()
+                                        .executeJs(ContainerJs.class)
+                                        .roundTrip().then((res2) -> {
+                                            container.getElement()
+                                                    .executeJs(
+                                                            ContainerJs.class)
+                                                    .reattach();
                                         });
 
                             });
