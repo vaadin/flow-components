@@ -25,10 +25,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.ValueJs;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
-import com.vaadin.flow.component.trigger.internal.TriggerJs;
+import com.vaadin.flow.component.trigger.internal.TriggerInputJs;
 import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
@@ -131,7 +130,8 @@ class LitRendererTest {
         // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
         JsCall textCall = Objects.requireNonNull(text.getDeclaredCall());
-        Assertions.assertEquals(TriggerJs.class, textCall.definitionType());
+        Assertions.assertEquals(TriggerInputJs.class,
+                textCall.definitionType());
         Assertions.assertEquals("readContextValue", textCall.methodName());
         Assertions.assertEquals(List.of("event", "context"),
                 textCall.getCalledWithNames());
@@ -167,7 +167,7 @@ class LitRendererTest {
             @Override
             protected JsFunction toJs(Trigger trigger) {
                 trigger.addCleanup(() -> unbound.set(true));
-                return JsSnippets.of(ValueJs.class).returnNull();
+                return JsSnippets.of(TriggerInputJs.class).returnNull();
             }
         };
 
