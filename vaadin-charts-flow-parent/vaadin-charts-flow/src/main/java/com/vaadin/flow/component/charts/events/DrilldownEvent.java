@@ -12,6 +12,10 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.DrilldownCallback;
+import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * The DrilldownEvent class stores information on click events in drilldown
@@ -56,12 +60,43 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
     }
 
     /**
-     * Gets the name of the drilldown
+     * Gets the drilldown value of the clicked point. For a point that you add
+     * with {@link DataSeries#addItemWithDrilldown(DataSeriesItem, Series)},
+     * this is the {@link Series#getId() ID} of the drilldown series. For a
+     * point that you add with
+     * {@link DataSeries#addItemWithDrilldown(DataSeriesItem)}, this is
+     * {@code "true"}.
      *
-     * @return
+     * @return the ID of the drilldown series, or {@code "true"} for a point
+     *         that uses a {@link DrilldownCallback}
+     * @deprecated Use {@link #getDrilldownSeries()} instead.
      */
+    @Deprecated(since = "25.4")
     public String getDrilldown() {
         return drilldown;
+    }
+
+    /**
+     * Gets the drilldown series of the clicked point. This is the series that
+     * you pass to
+     * {@link DataSeries#addItemWithDrilldown(DataSeriesItem, Series)}.
+     * <p>
+     * For a point that you add with
+     * {@link DataSeries#addItemWithDrilldown(DataSeriesItem)}, this method
+     * returns {@code null}. For such a point, the {@link DrilldownCallback}
+     * gives the drilldown series.
+     *
+     * @return the drilldown series of the clicked point, or {@code null} if the
+     *         point uses a {@link DrilldownCallback}
+     * @since 25.4
+     */
+    public Series getDrilldownSeries() {
+        if (drilldown == null) {
+            return null;
+        }
+        return getSource().getConfiguration().getDrilldown().getSeries()
+                .stream().filter(series -> drilldown.equals(series.getId()))
+                .findFirst().orElse(null);
     }
 
     public Double getxValue() {

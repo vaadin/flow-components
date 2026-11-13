@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,6 +43,19 @@ public class Drilldown extends AbstractConfigurationObject {
      */
     void addSeries(Series series) {
         this.series.add(series);
+    }
+
+    /**
+     * Gets the series that the chart uses for drilldown. These are the series
+     * that you pass to
+     * {@link DataSeries#addItemWithDrilldown(DataSeriesItem, Series)}, from all
+     * drilldown levels. The list is empty by default.
+     *
+     * @return an unmodifiable list of the drilldown series, not {@code null}
+     * @since 25.4
+     */
+    public List<Series> getSeries() {
+        return Collections.unmodifiableList(series);
     }
 
     /**
