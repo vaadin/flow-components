@@ -12,6 +12,7 @@
     <description>Vaadin Combo Box</description>
     <properties>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+        <csp.mode>strict</csp.mode>
     </properties>
     <dependencies>
         <dependency>

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test.dataview;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -30,12 +31,21 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.RouterLink;
 
 public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
         implements BeforeEnterObserver {
+
+    @JsDefinition
+    interface OverlayJs extends Serializable {
+
+        @JsExpression("setTimeout(() => this.$.overlay._updateOverlayWidth())")
+        void updateOverlayWidth();
+    }
 
     private class LazyLoadingProvider
             extends AbstractBackEndDataProvider<String, String> {
@@ -116,8 +126,7 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         comboBox.setOpened(true);
-        comboBox.getElement().executeJs(
-                "setTimeout(() => this.$.overlay._updateOverlayWidth())");
+        comboBox.getElement().executeJs(OverlayJs.class).updateOverlayWidth();
     }
 
     private void initNavigationLinks() {
