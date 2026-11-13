@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import com.vaadin.flow.js.JsCalledWith;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippet;
 
 /**
@@ -80,7 +80,7 @@ import com.vaadin.flow.js.JsSnippet;
  *      directive</a>
  * @since 25.4
  */
-@JsCalledWith({ "html", "root", "live", "appId", "itemKey", "model", "item",
-        "index", "functions" })
+@JsFunctionParameterNames({ "html", "root", "live", "appId", "itemKey", "model",
+        "item", "index", "functions" })
 public interface CompiledLitTemplate extends JsSnippet {
 }
