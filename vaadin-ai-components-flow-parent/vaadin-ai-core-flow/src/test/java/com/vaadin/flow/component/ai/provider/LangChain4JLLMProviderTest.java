@@ -73,6 +73,7 @@ import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.service.tool.ToolErrorHandlerResult;
 import reactor.core.publisher.BaseSubscriber;
 import tools.jackson.databind.JsonNode;
 
@@ -2444,6 +2445,331 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
     }
 
+    @Test
+    void customizer_chatMemoryProvider_isUsedInsteadOfTheProviderOwn() {
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.chatMemoryProvider(memoryId -> memory));
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var texts = memory.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+        Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
+    }
+
+    @Test
+    void customizer_contentRetrieverKeepsTextFileAttachment() {
+        var queries = new ArrayList<String>();
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.contentRetriever(query -> {
+                    queries.add(query.text());
+                    return List.of(dev.langchain4j.rag.content.Content
+                            .from("The codename is Bluefin"));
+                }));
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var attachment = new AIAttachment("notes.txt", "text/plain",
+                "Remember the milk".getBytes(StandardCharsets.UTF_8));
+        var request = new TestLLMRequest("What is the codename?", null,
+                List.of(attachment), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        Assertions.assertEquals(List.of("What is the codename?"), queries,
+                "Retrieval should work on the text of the user message alone");
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertEquals(2, texts.size(), texts.toString());
+        Assertions.assertTrue(
+                texts.get(0).contains("What is the codename?")
+                        && texts.get(0).contains("The codename is Bluefin"),
+                "The retrieved content should join the user text: " + texts);
+        Assertions.assertTrue(texts.get(1).contains("Remember the milk"),
+                "The text file should stay: " + texts);
+    }
+
+    @Test
+    void customizer_chatRequestTransformer_isAppliedNextToTheRequestPrompt() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.systemMessage("Configured")
+                        .chatRequestTransformer(request -> {
+                            var messages = new ArrayList<>(request.messages());
+                            messages.add(
+                                    UserMessage.from("From the transformer"));
+                            return request.toBuilder().messages(messages)
+                                    .build();
+                        }));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals("From the transformer",
+                ((UserMessage) messages.getLast()).singleText());
+    }
+
+    @Test
+    void customizer_toolExecutionErrorHandler_handlesToolFailures() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new ErrorThrowingToolClass())
+                        .toolExecutionErrorHandler(
+                                (error, context) -> ToolErrorHandlerResult
+                                        .text("Handled by the application")));
+        var toolCall = mockSimpleResponseWithTool("throwError");
+        var answer = mockSimpleResponse("Sorry");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(createSimpleRequest("Break")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals("Handled by the application",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void customizer_toolExecutionErrorHandler_limitStillFailsTurn() {
+        var handledErrors = new AtomicInteger();
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service
+                        .toolExecutionErrorHandler((error, context) -> {
+                            handledErrors.incrementAndGet();
+                            return ToolErrorHandlerResult.text("Handled");
+                        }));
+        customized.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Assertions.assertEquals(0, handledErrors.get(),
+                "The limit is not a tool failure for the application to handle");
+        Mockito.verify(mockChatModel, Mockito.times(2))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_toolCalledPastMaxCallsPerTool_failsTurn() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        customized.setMaxCallsPerTool(2);
+        var toolResponse = mockSimpleResponseWithTool("getTemperature");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Loop"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'getTemperature'"),
+                error.getMessage());
+        Mockito.verify(mockChatModel, Mockito.times(3))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_streamingToolCalledPastMaxCallsPerTool_failsTurn() {
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        customized.setMaxCallsPerTool(2);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockSimpleResponseWithTool("getTemperature"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Loop"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void customizer_chatModel_constructorModelIsUsed() {
+        var otherModel = Mockito.mock(ChatModel.class);
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.chatModel(otherModel));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = customized.stream(createSimpleRequest("Hello"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("ok"), results);
+        Mockito.verify(otherModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_userMessageWithBraces_sendsTextAsIs() {
+        var text = "Explain {{name}} and {\"a\": {{1}}} on {{current_date}}";
+
+        mockSimpleChat(createSimpleRequest(text), "ok");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        Assertions.assertEquals(text, userMessage.singleText());
+    }
+
+    @Test
+    void stream_withAttachments_sendsUserTextBeforeAttachments() {
+        var textFile = new AIAttachment("notes.txt", "text/plain",
+                "Remember the milk".getBytes(StandardCharsets.UTF_8));
+        var image = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var request = new TestLLMRequest("What is this?", null,
+                List.of(textFile, image), new Object[0]);
+
+        mockSimpleChat(request, "ok");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var contents = ((UserMessage) captor.getValue().messages().getFirst())
+                .contents();
+        Assertions.assertEquals(3, contents.size(), contents.toString());
+        Assertions.assertEquals("What is this?",
+                ((TextContent) contents.get(0)).text());
+        Assertions.assertTrue(((TextContent) contents.get(1)).text()
+                .contains("Remember the milk"));
+        Assertions.assertInstanceOf(ImageContent.class, contents.get(2));
+    }
+
+    @Test
+    void stream_withAttachment_keepsAttachmentInChatMemory() {
+        var image = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        mockSimpleChat(new TestLLMRequest("What is this?", null, List.of(image),
+                new Object[0]), "A photo");
+
+        provider.stream(createSimpleRequest("And the colors?")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(1,
+                getUserMessageContents(captor.getAllValues().get(1),
+                        ImageContent.class).size(),
+                "The attachment of the first turn should be replayed");
+    }
+
+    @Test
+    void stream_streamingWithSystemPromptInRequest_usesRequestPrompt() {
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponse("ok"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel).chat(captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) captor.getValue().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_chatModelWithItsOwnChatMethods_usesRequestPrompt() {
+        // Unlike a mock, a model implements doChat and inherits the chat
+        // methods the service calls
+        var requests = new ArrayList<ChatRequest>();
+        var model = new ChatModel() {
+            @Override
+            public ChatResponse doChat(ChatRequest chatRequest) {
+                requests.add(chatRequest);
+                return ChatResponse.builder().aiMessage(AiMessage.from("Hi"))
+                        .build();
+            }
+        };
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        var results = new LangChain4JLLMProvider(model).stream(request)
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Hi"), results);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) requests.getFirst().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_streamingChatModelWithItsOwnChatMethods_usesRequestPrompt() {
+        var requests = new ArrayList<ChatRequest>();
+        var model = new StreamingChatModel() {
+            @Override
+            public void doChat(ChatRequest chatRequest,
+                    StreamingChatResponseHandler handler) {
+                requests.add(chatRequest);
+                handler.onPartialResponse("Hi");
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi")).build());
+            }
+        };
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        var results = new LangChain4JLLMProvider(model).stream(request)
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Hi"), results);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) requests.getFirst().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_readsRequestDefaultsFromTheModelGiven() {
+        // The service asks the model for more than the chat call, such as
+        // the request parameters it defaults to, and has to reach the model
+        // the application passed in
+        mockSimpleChat(createSimpleRequest("Hello"), "ok");
+
+        Mockito.verify(mockChatModel, Mockito.atLeastOnce())
+                .defaultRequestParameters();
+    }
+
     // --- Tool call limit tests ---
 
     @Test
@@ -2645,6 +2971,36 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals(2, collected.size());
         Assertions.assertEquals(220,
                 collected.getLast().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_metadataSinkThrows_limitStillFailsTurn() {
+        // LangChain4j drops what a listener throws, so a failing sink must
+        // not take the screening of the tool calls down with it
+        provider.setMaxCallsPerTool(1);
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = requestWithMetadataSink("Loop", List.of(tool),
+                (Consumer<ResponseMetadata>) metadata -> {
+                    throw new IllegalStateException("The sink failed");
+                });
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var answer = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, toolResponse, toolResponse, answer);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Mockito.verify(mockChatModel, Mockito.times(2))
+                .chat(Mockito.any(ChatRequest.class));
     }
 
     @Test
@@ -3076,6 +3432,13 @@ class LangChain4JLLMProviderTest {
     private static LLMRequest requestWithMetadataSink(String message,
             List<LLMProvider.ToolSpec> explicitTools,
             List<ResponseMetadata> collected) {
+        return requestWithMetadataSink(message, explicitTools,
+                (Consumer<ResponseMetadata>) collected::add);
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
+            Consumer<ResponseMetadata> sink) {
         return new LLMRequest() {
             @Override
             public String userMessage() {
@@ -3104,7 +3467,7 @@ class LangChain4JLLMProviderTest {
 
             @Override
             public Consumer<ResponseMetadata> metadataSink() {
-                return collected::add;
+                return sink;
             }
         };
     }

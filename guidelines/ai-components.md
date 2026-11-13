@@ -65,6 +65,16 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- A vendor integration uses the vendor's public API only. Because the
+  dependency is optional, the application picks the vendor version, so a
+  member that disappears fails at the application's site, not in this
+  repository's build. LangChain4j marks such types `@Internal`
+  (`AiServiceContext`, `ToolService`). `LangChain4JLLMProvider` therefore
+  never reads back what an application configured on the `AiServices`
+  builder: it sets its replaceable defaults before the customizer runs, and
+  puts the checks of a turn (cancellation, tool call limits, the request's
+  system prompt) in a decorator around the model it was given instead of in
+  a builder setting it would have to share with the application.
 - Provider chat memory holds the user messages and the assistant's final
   answer of each turn. Tool calls and results are sent to the model only
   within their own turn, with both built-in providers, so a controller must
@@ -167,9 +177,13 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
   against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
   the same as Spring AI's) and fails the turn with the public
-  `ToolCallLimitExceededException`. The check runs before any tool of that
-  round runs, and the tool traffic of the failed turn is discarded with it, so
-  the next turn continues from the chat memory as the last completed turn
+  `ToolCallLimitExceededException`. A response is screened before its tools
+  run: in a round that exceeds a limit the provider leaves the tools it
+  supplies unexecuted and fails the turn before the next model call. Tools an
+  application configured on the LangChain4j service itself count against the
+  limits too, but the provider cannot hold them back, so those of that last
+  round still run. The tool traffic of the failed turn is discarded with it,
+  so the next turn continues from the chat memory as the last completed turn
   left it; a cancelled turn likewise stops calling the model and the tools.
   `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
   itself and hands back a synthesized reply carrying its

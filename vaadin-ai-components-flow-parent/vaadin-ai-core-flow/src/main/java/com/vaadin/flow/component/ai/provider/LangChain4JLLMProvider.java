@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +29,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -61,17 +63,15 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.observability.api.event.AiServiceResponseReceivedEvent;
 import dev.langchain4j.observability.api.listener.AiServiceListener;
-import dev.langchain4j.rag.AugmentationRequest;
-import dev.langchain4j.rag.AugmentationResult;
-import dev.langchain4j.rag.RetrievalAugmentor;
-import dev.langchain4j.service.AiServiceContext;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.V;
 import dev.langchain4j.service.memory.ChatMemoryAccess;
 import dev.langchain4j.service.memory.ChatMemoryService;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
@@ -122,20 +122,21 @@ import tools.jackson.databind.JsonNode;
  * {@code {{current_date_time}}} are substituted, so a prompt must not contain
  * braces for any other purpose. A system prompt the orchestrator still sends
  * with a request replaces the service's own on that turn and is sent as it is.
+ * The text of a user message is never rendered as a template.
  * </p>
  * <p>
- * The provider completes the service after the customizer ran, and keeps what
- * it configured: it adds its own chat memory only when none was configured,
- * adds the tool provider that supplies the tools of each turn next to any tool
- * providers of the customizer, composes its cancellation check and its tool
- * error handling with the request transformer and the error handler configured,
- * registers a listener for the response metadata, and wraps the retrieval
- * augmentor so that retrieval also works on a turn with attachments, which
- * LangChain4j's default content injector would otherwise reject. Before the
- * customizer runs it lifts LangChain4j's round trip limit, as the provider
- * bounds the tool-calling loop with its own tool call limits, and makes a tool
- * the model made up an error result for the model rather than a failure of the
- * turn; the customizer may override both.
+ * What the provider adds to the service leaves the configuration of the
+ * customizer as it is. Before the customizer runs, the provider sets defaults,
+ * each of which the customizer may replace: its own chat memory, no limit on
+ * LangChain4j's round trips, as the provider bounds the tool-calling loop with
+ * its own tool call limits, and an error result for the model, rather than a
+ * failure of the turn, when the model calls a tool that does not exist. After
+ * the customizer ran, the provider adds the tool provider that supplies the
+ * tools of each turn, next to any tool providers of the customizer, registers a
+ * listener for the response metadata, and sets the model given to the
+ * constructor, so a model set in the customizer is not used. Retrieval
+ * augmentation works on the text of the user message, and the attachments of
+ * the turn are added to the augmented message.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -160,9 +161,10 @@ import tools.jackson.databind.JsonNode;
  * answering would never end its turn, and each round costs another model call.
  * The provider ends such a turn with a {@link ToolCallLimitExceededException}
  * once the model has requested more than {@code 40} calls to any one tool, or
- * more than {@code 150} tool calls in total, within the turn. Adjust or remove
- * them with {@link #setMaxCallsPerTool(int)} and
- * {@link #setMaxTotalToolCalls(int)}.
+ * more than {@code 150} tool calls in total, within the turn. The limits count
+ * every tool call the model requests, including calls to the tools configured
+ * in the customizer. Adjust or remove them with
+ * {@link #setMaxCallsPerTool(int)} and {@link #setMaxTotalToolCalls(int)}.
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
@@ -171,7 +173,11 @@ import tools.jackson.databind.JsonNode;
  * and their results are sent to the model only within the turn they belong to
  * and are not replayed on later turns. A final answer without text, which a
  * model may give once a tool call has done what was asked, is not stored
- * either, so that the turn leaves only its user message in the memory.
+ * either, so that the turn leaves only its user message in the memory. A chat
+ * memory you configure in the customizer replaces the provider's own, and
+ * LangChain4j fills it as it does for any AI service: it also receives the tool
+ * calls and their results, including those of a turn that failed or was
+ * cancelled.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -188,36 +194,57 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * The AI service the provider drives. LangChain4j implements it through
      * {@link AiServices}; the provider calls {@link #stream} with a
      * {@link StreamingChatModel} and {@link #call} with a {@link ChatModel}.
-     * The user message of a turn is passed as a list of contents, so that
-     * attachments and the session context reach the model as they are, and the
-     * state of the turn travels in the invocation parameters.
+     * <p>
+     * The user message of a turn is passed in two parts, its text and its
+     * attachments. LangChain4j applies retrieval augmentation to the text and
+     * adds the attachments to the result, so retrieval also works on a turn
+     * that carries an image or a file. The text is the value of the one
+     * variable of a template that the provider passes with each call:
+     * LangChain4j renders the text part of a user message as a prompt template,
+     * which the text a user typed must not go through. The state of the turn
+     * travels in the invocation parameters.
      */
     public interface ChatService extends ChatMemoryAccess {
 
         /**
          * Runs a turn against a streaming model.
          *
-         * @param message
-         *            the contents of the user message
+         * @param template
+         *            the template of the user message text, whose only variable
+         *            is the text
+         * @param text
+         *            the text of the user message
+         * @param attachments
+         *            the attachments of the user message, as further contents
+         *            of it
          * @param parameters
          *            the invocation parameters carrying the turn
          * @return the token stream of the turn
          */
-        TokenStream stream(
-                @dev.langchain4j.service.UserMessage List<Content> message,
+        TokenStream stream(@dev.langchain4j.service.UserMessage String template,
+                @V(USER_TEXT_VARIABLE) String text,
+                @dev.langchain4j.service.UserMessage List<Content> attachments,
                 InvocationParameters parameters);
 
         /**
          * Runs a turn against a blocking model.
          *
-         * @param message
-         *            the contents of the user message
+         * @param template
+         *            the template of the user message text, whose only variable
+         *            is the text
+         * @param text
+         *            the text of the user message
+         * @param attachments
+         *            the attachments of the user message, as further contents
+         *            of it
          * @param parameters
          *            the invocation parameters carrying the turn
          * @return the result of the turn
          */
         Result<String> call(
-                @dev.langchain4j.service.UserMessage List<Content> message,
+                @dev.langchain4j.service.UserMessage String template,
+                @V(USER_TEXT_VARIABLE) String text,
+                @dev.langchain4j.service.UserMessage List<Content> attachments,
                 InvocationParameters parameters);
     }
 
@@ -234,6 +261,22 @@ public class LangChain4JLLMProvider implements LLMProvider {
      */
     static final String TURN_PARAMETER = LangChain4JLLMProvider.class.getName()
             + ".turn";
+
+    /**
+     * The variable through which the text of a user message reaches the
+     * service, and the template that consists of that variable alone. The value
+     * of a variable is inserted as it is, so braces in the text stay braces.
+     */
+    private static final String USER_TEXT_VARIABLE = "vaadinUserText";
+    private static final String USER_TEXT_TEMPLATE = "{{" + USER_TEXT_VARIABLE
+            + "}}";
+
+    /**
+     * The result of a tool the provider did not run because the turn was over
+     * when the model's request for it arrived. It is not sent to the model
+     * within the turn, which ends before the next model call.
+     */
+    private static final String TOOL_NOT_EXECUTED = "Not executed: the turn has ended.";
 
     private final transient ChatService service;
     private final transient boolean streaming;
@@ -315,88 +358,141 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private ChatService createService(ChatModel chatModel,
             StreamingChatModel streamingChatModel,
             Consumer<AiServices<ChatService>> customizer) {
-        var context = AiServiceContext.create(ChatService.class);
-        var builder = AiServices.<ChatService> builder(context);
-        if (chatModel != null) {
-            builder.chatModel(chatModel);
-        }
-        if (streamingChatModel != null) {
-            builder.streamingChatModel(streamingChatModel);
-        }
+        var builder = AiServices.builder(ChatService.class);
         prepare(builder);
         if (customizer != null) {
             customizer.accept(builder);
         }
-        wire(context, builder);
+        complete(builder, chatModel, streamingChatModel);
         return builder.build();
     }
 
     /**
      * Applies the defaults the provider wants on the service before the
-     * application gets to customize it, so that each can be overridden: the
-     * tool-calling loop is bounded by the provider's own tool call limits
-     * rather than by LangChain4j's round trip count, and a tool the model made
-     * up is reported back to it instead of failing the turn.
+     * application gets to customize it, so that each can be replaced: the
+     * provider's own chat memory, a tool-calling loop bounded by the provider's
+     * tool call limits rather than by LangChain4j's round trip count, and a
+     * tool the model made up being reported back to it instead of failing the
+     * turn.
      */
-    private void prepare(AiServices<ChatService> builder) {
+    private static void prepare(AiServices<ChatService> builder) {
+        // The service reads the memory before it adds the user message of
+        // the turn, so a request carries the window plus that message. The
+        // window is sized one short to keep a request within MAX_MESSAGES.
+        builder.chatMemory(new TurnScopedChatMemory(
+                MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES - 1)));
         builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
-        builder.hallucinatedToolNameStrategy(this::toolNotFound);
+        builder.hallucinatedToolNameStrategy(
+                LangChain4JLLMProvider::toolNotFound);
     }
 
     /**
-     * Installs the hooks the provider needs on the service: the memory, the
-     * tools of the turn, the metadata and tool call limit observer, the
-     * cancellation check before each model call, and the tool error handling
-     * that lets a limit or a cancellation end the turn. Whatever the service
-     * already carries is kept and composed with.
-     * <p>
-     * A system prompt carried by a request, which the orchestrator's deprecated
-     * {@code builder(provider, systemPrompt)} still sends, is placed on the
-     * model request by the request transformer in place of the service's own
-     * system message. It is sent as it is, not through the service's system
-     * message provider, which renders a prompt template.
+     * Adds what the provider needs on the service whatever the application
+     * configured: the tools of the turn, the metadata and tool call limit
+     * observer, and the model. None of them replaces a setting of the
+     * customizer: tool providers and listeners add up, and the model is the
+     * application's own, given to the constructor. It is set after the
+     * customizer ran, so that the checks in front of it cannot be configured
+     * away.
      */
-    private void wire(AiServiceContext context,
-            AiServices<ChatService> builder) {
-        if (!context.hasChatMemory()) {
-            // The service reads the memory before it adds the user message
-            // of the turn, so a request carries the window plus that
-            // message. The window is sized one short to keep a request
-            // within MAX_MESSAGES.
-            builder.chatMemory(new TurnScopedChatMemory(
-                    MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES - 1)));
-        }
+    private void complete(AiServices<ChatService> builder, ChatModel chatModel,
+            StreamingChatModel streamingChatModel) {
         builder.toolProvider(new TurnToolProvider());
         builder.registerListener(new ResponseObserver());
-        if (context.retrievalAugmentor != null) {
-            context.retrievalAugmentor = new AttachmentKeepingAugmentor(
-                    context.retrievalAugmentor);
+        if (chatModel != null) {
+            builder.chatModel(withTurnChecks(ChatModel.class, chatModel));
+        } else {
+            builder.streamingChatModel(withTurnChecks(StreamingChatModel.class,
+                    streamingChatModel));
+        }
+    }
+
+    /**
+     * Returns a model that passes every call on to the given one, and runs
+     * {@link #beforeModelCall(ChatRequest)} on the request of a call first.
+     * <p>
+     * The checks sit in front of the model, rather than in the request
+     * transformer or the tool error handler of the service, because the model
+     * is the provider's own argument: each of those others is a single setting
+     * the application may use in the customizer. All methods of the model are
+     * passed on, so the service sees the capabilities, the default parameters
+     * and the listeners of the model itself.
+     */
+    private <M> M withTurnChecks(Class<M> modelType, M model) {
+        return modelType.cast(Proxy.newProxyInstance(modelType.getClassLoader(),
+                new Class<?>[] { modelType }, new TurnCheckingModel(model)));
+    }
+
+    /**
+     * The calls on the model the service is given: each is passed on to the
+     * model of the application, a call that carries a {@link ChatRequest} after
+     * {@link #beforeModelCall(ChatRequest)}.
+     */
+    private final class TurnCheckingModel implements InvocationHandler {
+        private final Object model;
+
+        TurnCheckingModel(Object model) {
+            this.model = model;
         }
 
-        BiFunction<ChatRequest, Object, ChatRequest> configuredTransformer = context.chatRequestTransformer;
-        context.chatRequestTransformer = (request, memoryId) -> {
-            var turn = currentTurn.get();
-            if (turn != null && turn.isCancelled()) {
-                // The subscriber is gone, typically because the
-                // orchestrator's timeout fired. Another model call would only
-                // cost money for a result nobody receives.
-                LOGGER.debug("The turn was cancelled, skipping the model call");
-                throw new TurnCancelledException();
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] arguments)
+                throws Throwable {
+            var passedOn = arguments;
+            if (arguments != null && arguments.length > 0
+                    && arguments[0] instanceof ChatRequest request) {
+                ChatRequest checked;
+                try {
+                    checked = beforeModelCall(request);
+                } catch (RuntimeException e) {
+                    var handler = Arrays.stream(arguments).filter(
+                            StreamingChatResponseHandler.class::isInstance)
+                            .map(StreamingChatResponseHandler.class::cast)
+                            .findFirst();
+                    if (handler.isEmpty()) {
+                        throw e;
+                    }
+                    // A streaming model reports a failure to its handler.
+                    // Thrown instead, the exception would surface in the
+                    // handler of the previous response, where what becomes
+                    // of it is up to the model implementation.
+                    handler.get().onError(e);
+                    return null;
+                }
+                passedOn = arguments.clone();
+                passedOn[0] = checked;
             }
-            var prompt = requestSystemPrompt(turn);
-            return configuredTransformer.apply(prompt == null ? request
-                    : withSystemMessage(request, prompt), memoryId);
-        };
+            try {
+                return method.invoke(model, passedOn);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }
+    }
 
-        var configuredErrorHandler = context.toolService
-                .executionErrorHandler();
-        builder.toolExecutionErrorHandler((error, errorContext) -> {
-            if (error instanceof ToolCallLimitExceededException
-                    || error instanceof TurnCancelledException) {
-                throw (RuntimeException) error;
-            }
-            return configuredErrorHandler.handle(error, errorContext);
-        });
+    /**
+     * Runs before each model call of a turn: ends the turn when its subscriber
+     * has cancelled or a tool call exceeded a limit, and puts the system prompt
+     * the request carries on the model request.
+     * <p>
+     * That prompt, which the orchestrator's deprecated
+     * {@code builder(provider, systemPrompt)} still sends, takes the place of
+     * the service's own system message. It is sent as it is, not through the
+     * service's system message provider, which renders a prompt template.
+     *
+     * @throws TurnCancelledException
+     *             if the subscriber of the turn has cancelled
+     * @throws ToolCallLimitExceededException
+     *             if a tool call of the turn exceeded a limit
+     */
+    private ChatRequest beforeModelCall(ChatRequest request) {
+        var turn = currentTurn.get();
+        if (turn == null) {
+            return request;
+        }
+        turn.beforeModelCall();
+        var prompt = requestSystemPrompt(turn);
+        return prompt == null ? request : withSystemMessage(request, prompt);
     }
 
     /**
@@ -405,7 +501,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * applies.
      */
     private static String requestSystemPrompt(Turn turn) {
-        var fromRequest = turn == null ? null : turn.request.systemPrompt();
+        var fromRequest = turn.request.systemPrompt();
         if (fromRequest != null && !fromRequest.isBlank()) {
             return fromRequest.trim();
         }
@@ -445,16 +541,19 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
             currentTurn.set(turn);
             try {
-                var contents = buildContents(request);
+                var text = LLMProviderHelpers.withSessionContext(
+                        request.userMessage(), request.sessionContext());
+                var attachments = buildAttachmentContents(request);
                 var parameters = InvocationParameters.from(TURN_PARAMETER,
                         turn);
                 if (streaming) {
-                    service.stream(contents, parameters)
-                            .onPartialResponse(sink::next)
+                    service.stream(USER_TEXT_TEMPLATE, text, attachments,
+                            parameters).onPartialResponse(sink::next)
                             .onCompleteResponse(turn::complete)
                             .onError(turn::fail).start();
                 } else {
-                    turn.complete(service.call(contents, parameters));
+                    turn.complete(service.call(USER_TEXT_TEMPLATE, text,
+                            attachments, parameters));
                 }
             } catch (Exception e) {
                 turn.fail(e);
@@ -553,7 +652,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * tool: none of the tool calls of that round are executed, the model is not
      * called again, and you receive the exception as the error of the turn. The
      * conversation stays usable: the failed turn leaves only its prompt in the
-     * chat memory, and the next prompt continues from there.
+     * provider's chat memory, and the next prompt continues from there.
+     * <p>
+     * Calls to the tools you configured in the customizer count against the
+     * limit as well, but the provider cannot hold those tools back: the ones
+     * the model requested in that last round still run before the turn fails.
+     * The same goes for every tool when you enable
+     * {@code executeToolsConcurrently()} in the customizer with a
+     * {@link StreamingChatModel}, as LangChain4j then starts a tool before the
+     * response that requests it is complete.
      * <p>
      * The limit applies to each tool separately. See
      * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
@@ -597,8 +704,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * {@link ToolCallLimitExceededException}: none of the tool calls of that
      * round are executed, the model is not called again, and you receive the
      * exception as the error of the turn. The conversation stays usable: the
-     * failed turn leaves only its prompt in the chat memory, and the next
-     * prompt continues from there.
+     * failed turn leaves only its prompt in the provider's chat memory, and the
+     * next prompt continues from there. As with
+     * {@link #setMaxCallsPerTool(int)}, the tools you configured in the
+     * customizer count against the limit, and those requested in that last
+     * round still run.
      * <p>
      * The value is read when a turn starts, so a change applies from the next
      * prompt on.
@@ -665,27 +775,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return UserMessage.from(contents);
     }
 
-    private ToolExecutionResultMessage toolNotFound(
+    private static ToolExecutionResultMessage toolNotFound(
             ToolExecutionRequest toolRequest) {
-        var turn = currentTurn.get();
-        if (turn != null) {
-            turn.beforeTool();
-        }
         return ToolExecutionResultMessage.from(toolRequest,
                 "Tool not found: " + toolRequest.name());
     }
 
-    private static List<Content> buildContents(LLMRequest request) {
-        var contents = new ArrayList<Content>();
-        contents.add(TextContent.from(LLMProviderHelpers.withSessionContext(
-                request.userMessage(), request.sessionContext())));
+    private static List<Content> buildAttachmentContents(LLMRequest request) {
         var attachments = request.attachments();
-        if (attachments != null) {
-            attachments.stream()
-                    .map(LangChain4JLLMProvider::getAttachmentContent)
-                    .flatMap(Optional::stream).forEach(contents::add);
+        if (attachments == null) {
+            return List.of();
         }
-        return contents;
+        return attachments.stream()
+                .map(LangChain4JLLMProvider::getAttachmentContent)
+                .flatMap(Optional::stream).toList();
     }
 
     private static Optional<Content> getAttachmentContent(
@@ -739,9 +842,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * Provides the tools of the turn to the service: the vendor-annotated tool
      * objects and the controller's {@link LLMProvider.ToolSpec} tools of the
      * request the turn was started with, read from the invocation parameters.
-     * Every executor checks the state of the turn before it runs, so a tool
-     * call limit or a cancellation ends the turn before any tool of the round
-     * executes.
+     * Every executor checks the state of the turn before it runs, so no tool of
+     * a round executes once a tool call limit is exceeded or the turn is
+     * cancelled.
      */
     private static final class TurnToolProvider implements ToolProvider {
 
@@ -912,50 +1015,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Lets retrieval augmentation work on a turn that carries attachments.
-     * LangChain4j's default content injector expects a user message with a
-     * single text content and fails on one that also carries an image or a
-     * file. This wrapper hands the augmentor the text alone and puts the other
-     * contents back on the augmented message.
-     */
-    private static final class AttachmentKeepingAugmentor
-            implements RetrievalAugmentor {
-        private final RetrievalAugmentor delegate;
-
-        AttachmentKeepingAugmentor(RetrievalAugmentor delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public AugmentationResult augment(AugmentationRequest request) {
-            if (!(request.chatMessage() instanceof UserMessage userMessage)
-                    || userMessage.hasSingleText()) {
-                return delegate.augment(request);
-            }
-            var texts = userMessage.contents().stream()
-                    .filter(TextContent.class::isInstance).toList();
-            if (texts.size() != 1) {
-                // Not a message the provider built; the augmentor decides
-                return delegate.augment(request);
-            }
-            var textOnly = userMessage.toBuilder().contents(texts).build();
-            var result = delegate.augment(
-                    new AugmentationRequest(textOnly, request.metadata()));
-            if (!(result.chatMessage() instanceof UserMessage augmented)) {
-                return result;
-            }
-            var contents = new ArrayList<>(augmented.contents());
-            userMessage.contents().stream()
-                    .filter(content -> !(content instanceof TextContent))
-                    .forEach(contents::add);
-            return AugmentationResult.builder()
-                    .chatMessage(
-                            augmented.toBuilder().contents(contents).build())
-                    .contents(result.contents()).build();
-        }
-    }
-
-    /**
      * Ends the loop of a turn whose subscriber has cancelled.
      */
     private static final class TurnCancelledException extends RuntimeException {
@@ -1040,26 +1099,43 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         /**
-         * Wraps a tool executor so that the state of the turn is checked before
-         * the tool runs.
+         * Wraps a tool executor so that the tool does not run once the turn is
+         * over: the subscriber has cancelled, or a tool call of the round
+         * exceeded a limit. The round was screened when the model's response
+         * arrived, so none of the tools of a refused round runs.
+         * <p>
+         * The executor answers such a call instead of throwing. An exception
+         * from a tool goes to the tool execution error handler of the service,
+         * which is the application's to configure and by default turns it into
+         * a result for the model. The turn ends in {@link #beforeModelCall()},
+         * which the loop reaches next.
          */
         ToolExecutor guard(ToolExecutor executor) {
             return (toolRequest, memoryId) -> {
-                beforeTool();
+                if (isCancelled()) {
+                    LOGGER.debug("The turn was cancelled, skipping the tool "
+                            + "calls the model requested");
+                    return TOOL_NOT_EXECUTED;
+                }
+                if (limitBreach != null) {
+                    return TOOL_NOT_EXECUTED;
+                }
                 return executor.execute(toolRequest, memoryId);
             };
         }
 
         /**
-         * Ends the turn instead of running a tool when the subscriber has
-         * cancelled or a tool call of the round exceeded a limit. The round was
-         * screened when the model's response arrived, so the first tool of a
-         * refused round is the one that ends the turn.
+         * Ends the turn instead of calling the model when the subscriber has
+         * cancelled or a tool call exceeded a limit. This also bounds a loop
+         * over tools the provider does not wrap, those configured in the
+         * customizer.
          */
-        void beforeTool() {
+        void beforeModelCall() {
             if (isCancelled()) {
-                LOGGER.debug("The turn was cancelled, skipping the tool "
-                        + "calls the model requested");
+                // The subscriber is gone, typically because the
+                // orchestrator's timeout fired. Another model call would only
+                // cost money for a result nobody receives.
+                LOGGER.debug("The turn was cancelled, skipping the model call");
                 throw new TurnCancelledException();
             }
             if (limitBreach != null) {
@@ -1072,7 +1148,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * it requests stay within the limits of the turn.
          */
         void observeResponse(ChatResponse response) {
+            // The limits come first: LangChain4j drops what a listener
+            // throws, and a metadata sink that fails must not leave the tool
+            // calls of the response unscreened.
+            screenToolCalls(response);
             observeMetadata(response);
+        }
+
+        private void screenToolCalls(ChatResponse response) {
             var aiMessage = response.aiMessage();
             if (aiMessage == null || !aiMessage.hasToolExecutionRequests()
                     || limitBreach != null) {
