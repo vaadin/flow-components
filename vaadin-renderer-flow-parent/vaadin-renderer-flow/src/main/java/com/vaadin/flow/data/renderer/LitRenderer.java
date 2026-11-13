@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
@@ -38,6 +37,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.CspViolationReporter;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.ReflectionCache;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
@@ -78,7 +78,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * with the string of {@link #getTemplateExpression()} because a subclass
      * overrides that without overriding {@link #getTemplate()}.
      */
-    private static final Map<Class<?>, Boolean> USES_DECLARED_TEMPLATE = new ConcurrentHashMap<>();
+    private static final ReflectionCache<Object, Boolean> USES_DECLARED_TEMPLATE = ReflectionCache
+            .clearedBeforeHotswap(LitRenderer::usesDeclaredTemplate);
 
     private final String templateExpression;
 
@@ -219,8 +220,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * with the string of {@link #getTemplateExpression()}.
      */
     private CompiledLitTemplate resolveTemplate() {
-        if (!USES_DECLARED_TEMPLATE.computeIfAbsent(getClass(),
-                LitRenderer::usesDeclaredTemplate)) {
+        if (!USES_DECLARED_TEMPLATE.get(getClass())) {
             return null;
         }
         return getTemplate();
