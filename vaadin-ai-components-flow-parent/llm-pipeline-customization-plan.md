@@ -274,15 +274,16 @@ How the bridge is met, LangChain4j side:
 
 - The provider declares a nested interface, for example
   `LangChain4JLLMProvider.ChatService extends ChatMemoryAccess`, with a
-  `TokenStream stream(@UserMessage List<Content> message, InvocationParameters parameters)`
+  `TokenStream stream(@UserMessage String template, @V String text, @UserMessage List<Content> attachments, InvocationParameters parameters)`
   method and a `Result<String> call(...)` counterpart for a blocking model.
-  The customizer receives `AiServices<ChatService>`.
+  The customizer receives `AiServices<ChatService>`. Section 8.9 explains
+  the shape of the signature.
 - Controller tools: the provider registers a `ToolProvider`, asked once per
   turn, that reads the turn's `ToolSpec` list from the invocation parameters
   and converts it the way the provider does today (placeholder schema,
   argument parsing, `ToolException` policy inside the `ToolExecutor`).
-- Attachments and session context go into the `List<Content>`, converted as
-  today.
+- The session context goes into the text, the attachments into the
+  `List<Content>`, both converted as today.
 - Streaming: `TokenStream` events are bridged to the `Flux<String>`; metadata
   comes from `onIntermediateResponse` and `onCompleteResponse`. Blocking mode
   uses the `Result<String>` method and `BackgroundExecution` as today.
@@ -764,22 +765,28 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
 `AiServices`:
 
 - `ChatService extends ChatMemoryAccess` with
-  `TokenStream stream(@UserMessage List<Content>, InvocationParameters)` and
-  `Result<String> call(...)`. The turn travels in the invocation parameters.
+  `TokenStream stream(@UserMessage String template, @V String text, @UserMessage List<Content> attachments, InvocationParameters)`
+  and `Result<String> call(...)`. The turn travels in the invocation
+  parameters. The branch first passed the whole message as one
+  `@UserMessage List<Content>`, see 8.9.
 - `TurnToolProvider`, a static `ToolProvider` asked once per turn, converts
   the controller `ToolSpec`s and the deprecated `@Tool` objects of the turn.
-  Every executor is wrapped in the turn's guard, which enforces the Vaadin
-  tool call limits and the cancellation check before each tool. LangChain4j's
-  loop invokes the wrapped executors, so the `ToolException` policy is kept.
+  Every executor is wrapped in the turn's guard, which leaves the tool
+  unexecuted once a Vaadin tool call limit is exceeded or the turn is
+  cancelled. LangChain4j's loop invokes the wrapped executors, so the
+  `ToolException` policy is kept.
 - `ResponseObserver`, an `AiServiceListener<AiServiceResponseReceivedEvent>`,
   collects finish reason and token usage per round trip and screens the
   limits before the tools of a round run.
-- `prepare()` runs before the customizer and lifts `maxToolCallingRoundTrips`
-  to `Integer.MAX_VALUE` and makes a made-up tool name an error result for
-  the model; `wire()` runs after the customizer and composes with what it
-  configured: memory only when none is set, the tool provider next to the
-  customizer's, the request transformer and the tool execution error handler
-  wrapped around the configured ones.
+- `prepare()` runs before the customizer and sets what the customizer may
+  replace: the provider's memory, `maxToolCallingRoundTrips` lifted to
+  `Integer.MAX_VALUE`, and a made-up tool name as an error result for the
+  model. `complete()` runs after the customizer and adds what replaces none
+  of its settings: the tool provider next to the customizer's, the response
+  observer, and the constructor's model behind a decorator that runs the
+  checks of the turn before each model call. The branch first composed with
+  the customizer's settings by reading them back from LangChain4j's
+  `AiServiceContext`, see 8.9.
 - Streaming with tool calls works through `TokenStream`. A response without
   an AI message is not stored (the service hands the memory a `null`, which
   the window memory would store and fail the next turn on) and fails the
@@ -795,16 +802,19 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
   `{{"answer": ...}}` fails the turn with
   `IllegalArgumentException: Value for the variable ... is missing`, and
   `{{it}}` with `IllegalConfigurationException`. Fixed on A for the prompt a
-  request carries, the deprecated orchestrator prompt: the request transformer
+  request carries, the deprecated orchestrator prompt: the model decorator
   places it on the `ChatRequest` in place of the service's own system
   message, as it is. A `systemMessage(...)` set in the customizer is a
   LangChain4j template, which the `customize` Javadoc documents together with
   the special date variables; that is vendor behaviour and stays.
 - Retrieval with attachments: `DefaultContentInjector` calls `singleText()`
   on the user message, so `contentRetriever(...)` fails a turn that carries an
-  image or a file. Fixed on A: `wire()` wraps `context.retrievalAugmentor`
-  in `AttachmentKeepingAugmentor`, which hands the augmentor the text content
-  alone and puts the other contents back on the augmented message.
+  image or a file. Fixed on A through the `ChatService` signature: with the
+  text and the attachments as separate arguments, LangChain4j augments the
+  text alone and adds the attachments to the augmented message. The first
+  fix, an `AttachmentKeepingAugmentor` wrapped around
+  `context.retrievalAugmentor`, still failed a turn with a text file, see
+  8.9.
 - Guardrail and moderation failures arrive as the error of the turn, as
   predicted. `RequestInterceptor` stays the place for user-facing validation.
 - Output guardrails buffer the stream until they pass; vendor behaviour,
@@ -831,14 +841,15 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
   policy on top of LangChain4j's loop. A memory configured in the customizer
   replaces it and gets LangChain4j's tool-traffic-in-memory behaviour.
 - Limits: the provider setters `setMaxCallsPerTool` and
-  `setMaxTotalToolCalls` stay, so 5.6's proposal is withdrawn. The turn's
-  guard throws `ToolCallLimitExceededException` from the executor wrapper,
-  and the provider's tool execution error handler rethrows it instead of
-  sending it to the model, which ends the turn in both modes: the streaming
-  handler routes a handler exception to `onError`. The response observer
-  screens a round that would breach a limit before its tools run.
+  `setMaxTotalToolCalls` stay, so 5.6's proposal is withdrawn. The response
+  observer screens a round that would breach a limit before its tools run,
+  the turn's guard then leaves the tools of that round unexecuted, and the
+  model decorator ends the turn with `ToolCallLimitExceededException` before
+  the next model call, in both modes: on a streaming model it reports the
+  exception to the handler of the call. No exception leaves a tool executor,
+  so the tool execution error handler stays the application's.
 - Cancellation: `AiServices` has none. The provider checks the cancelled flag
-  in the request transformer before each model call and in the guard before
+  in the model decorator before each model call and in the guard before
   each tool, so an abandoned turn costs at most the in-flight model response.
   Tokens of that response are not forwarded. The `beforeToolExecution` hook
   was not needed, the executor wrapper does it.
@@ -935,6 +946,90 @@ harder than today, a `ToolSpec` one-liner) is still to run before any removal.
    deprecations, docs. Decide whether the OpenAI chat page and the vendor
    dependencies it brought into the integration test module stay.
 
+### 8.9 The bridge without LangChain4j internals
+
+Decision: the provider uses LangChain4j's public API only. The rebuild of 8.1
+first read the customizer's settings back from `AiServiceContext` and
+`ToolService` and wrote the augmentor and the request transformer into the
+context, to combine its own behaviour with a setting the customizer had made.
+Both types are `@Internal`, "may change or be removed at any time without
+notice". The members used are the same in 1.19.0, 1.20.0, 1.22.0 and 1.23.0,
+so a break is not likely in any one release. It would be total, though, and
+it would hit the application, not this repository: LangChain4j is an optional
+dependency, the application picks the version, and a removed member fails the
+provider in its constructor.
+
+The `AiServices` builder has setters and no getters, and each of these
+settings is a single slot. The provider no longer shares a slot with the
+customizer, so nothing has to be read back:
+
+| Was | Is |
+| --- | --- |
+| `context.hasChatMemory()`, memory added when none was configured | the provider's memory is set before the customizer runs, and `chatMemory(...)` or `chatMemoryProvider(...)` in the customizer replaces it |
+| `context.chatRequestTransformer` wrapped: cancellation check and the request's system prompt | a decorator around the model given to the constructor, a `java.lang.reflect.Proxy` that passes every method on and runs the checks on calls that carry a `ChatRequest` |
+| `context.toolService.executionErrorHandler()` wrapped, to let the limit and the cancellation exception through | no exception leaves a tool executor: the guard answers a call of a refused round with a text, and the decorator ends the turn before the next model call |
+| `context.retrievalAugmentor` wrapped in `AttachmentKeepingAugmentor` | the `ChatService` signature: text and attachments are separate arguments, LangChain4j augments the text and adds the attachments |
+
+What follows from it:
+
+- The `ChatService` signature is
+  `(@UserMessage String template, @V String text, @UserMessage List<Content> attachments, InvocationParameters)`,
+  called with a constant template that consists of the one variable. The two
+  simpler shapes fail: `@UserMessage String text` renders the user's text as
+  a prompt template, so `{{x}}` in a message fails the turn, and a
+  method-level `@UserMessage("{{text}}")` drops the user text, or a single
+  text file, when the attachments contain a `TextContent`. The value of a
+  variable is inserted as it is. The shape depends on how LangChain4j
+  assembles the user message, so
+  `stream_userMessageWithBraces_sendsTextAsIs`,
+  `stream_withAttachments_sendsUserTextBeforeAttachments` and
+  `customizer_contentRetrieverKeepsTextFileAttachment` pin it.
+- The model is set after the customizer ran, so a model set in the customizer
+  is not used. The checks of the turn sit in front of the model and must not
+  be configured away.
+- The request's system prompt, the deprecated orchestrator prompt, now
+  replaces the service's own after the customizer's request transformer ran,
+  not before it. `AiServiceListener`s for the request event see the service's
+  prompt, `ChatModelListener`s see the one that is sent.
+- Limits on customizer tools. The guard only wraps the tools the provider
+  supplies, and the first version checked the limit nowhere else, while
+  `maxToolCallingRoundTrips` was lifted: a model looping on a tool from the
+  customizer, an MCP tool for example, was never stopped. The check before
+  each model call stops it. The customizer tools of the refused round still
+  run, which the limit setters document.
+- The response observer screens the tool calls before it publishes the
+  metadata. LangChain4j drops what a listener throws, so a metadata sink that
+  failed used to leave the response unscreened and the limits unenforced.
+- Retrieval with a text file. `AttachmentKeepingAugmentor` passed a message
+  with two text contents on unchanged, and a text file is a text content, so
+  such a turn still failed with "Expecting single text content".
+
+Open:
+
+- The Javadoc of `chatMemory` and `chatMemoryProvider` says that only one of
+  them can be configured. Nothing checks it in 1.23.0, the last call wins.
+  If a release starts to check, a customizer that calls `chatMemoryProvider`
+  fails when the service is built.
+- Quarkus. From memory and not verified: the Quarkus LangChain4j extension
+  replaces the factories behind `AiServices.builder` and the prompt template
+  engine, whose placeholders use single braces. Option A as a whole is
+  untested there, and the constant template adds one more thing to check.
+- A cancelled turn that is still running when the next one starts. The
+  checks before a model call read the provider's current turn, as the request
+  transformer did, because a model call does not carry the invocation
+  parameters. A model call of the earlier turn is then checked against the
+  later one, and both write to the same memory. Found in review, not
+  reproduced, and not new on this branch.
+- `setHistory()` before the first turn with a `chatMemoryProvider`:
+  `ChatMemoryAccess.getChatMemory` returns the memory of a conversation only
+  once the service has created it (`ChatMemoryService.java:38`), so the
+  restored history is dropped with a warning. Not new on this branch either.
+- `executeToolsConcurrently()` with a streaming model: LangChain4j starts a
+  tool when its call is complete, before the response is
+  (`AiServiceStreamingResponseHandler.java:234`), so the tools of the round
+  that exceeds a limit run. The turn still ends before the next model call.
+  The limit setters document it.
+
 ## Appendix: verified facts and where they come from
 
 LangChain4j 1.22.0, from the sources jar in the local Maven repository:
@@ -972,6 +1067,31 @@ LangChain4j 1.22.0, from the sources jar in the local Maven repository:
   `true`.
 - `AiServices` builder methods: listed in 3.1, read with `javap` from
   `langchain4j-1.22.0.jar`.
+
+LangChain4j 1.23.0, from the sources jar on Maven Central, for 8.9. The
+replacements were also run in a standalone program against 1.19.0, 1.20.0,
+1.22.0 and 1.23.0:
+
+- `AiServiceContext.java:24`, `ToolService.java:78` and
+  `AiServices.java:227`: the context, the tool service and the builder
+  overload that takes a context are `@Internal`.
+- `AiServices.java:419` and `:446`: `chatMemory(...)` and
+  `chatMemoryProvider(...)` both call `context.initChatMemories(...)`, which
+  replaces the memory service.
+- `DefaultAiServices.java:735` to `:754`: retrieval augmentation runs on the
+  message built from the template, and `addContentsToUserMessage` adds the
+  `Content` arguments afterwards; `:1853`: with a `@UserMessage String`
+  argument the text comes first, and without one the text is dropped when the
+  contents hold a `TextContent`.
+- `DefaultPromptTemplateFactory.java`: a template is rendered in one pass and
+  has no escape syntax, so the value of a variable is not rendered again.
+- `ToolService.java:1240` and `AiServiceTokenStream.java:231`: the request
+  transformer runs before every model call, the same place in the loop as a
+  call on the model.
+- `ToolService.java:2231`: any exception from a tool executor goes to the
+  arguments or the execution error handler.
+- `AiServiceStreamingResponseHandler.java:590`: `onError` hands the error to
+  the error handler of the `TokenStream`.
 
 Spring AI 2.0.2, from `spring-ai-client-chat-2.0.2`:
 
