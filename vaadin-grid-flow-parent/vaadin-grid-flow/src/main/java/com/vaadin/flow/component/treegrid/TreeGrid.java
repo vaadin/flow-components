@@ -58,6 +58,7 @@ import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -528,9 +529,8 @@ public class TreeGrid<T> extends Grid<T>
      * @return the created hierarchy column
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
-        Column<T> column = addColumn(LitRenderer.<T> of(
-                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!model.hasChildren} .expanded=${live(model.expanded)} .level=${model.level}>"
-                        + "${item.name}</vaadin-grid-tree-toggle>")
+        Column<T> column = addColumn(LitRenderer
+                .<T> of(JsSnippets.of(TreeGridTemplates.class).hierarchy())
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);

@@ -18,8 +18,10 @@ package com.vaadin.flow.component.treegrid;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Renders components as hierarchy column for tree grid.
@@ -58,5 +60,10 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
                 + "} class=${item.cssClassName} .leaf=${!model.hasChildren} .expanded=${live(model.expanded)} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
+    }
+
+    @Override
+    protected CompiledLitTemplate getTemplate() {
+        return JsSnippets.of(TreeGridTemplates.class).hierarchyComponent();
     }
 }
