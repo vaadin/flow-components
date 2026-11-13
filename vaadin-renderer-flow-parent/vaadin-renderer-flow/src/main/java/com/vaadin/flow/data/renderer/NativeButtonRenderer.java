@@ -140,4 +140,9 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
     protected String getTemplateExpression() {
         return "<button @click=${click} .disabled=${item.disabled}>${item.label}</button>";
     }
+
+    @Override
+    protected CompiledLitTemplate getTemplate() {
+        return builtInTemplates().nativeButtonRenderer();
+    }
 }

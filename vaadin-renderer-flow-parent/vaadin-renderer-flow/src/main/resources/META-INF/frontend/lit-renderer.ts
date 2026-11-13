@@ -11,56 +11,29 @@ type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel
 
 type Component = HTMLElement & { [key: string]: Renderer | undefined };
 
+type ReturnChannel = (name: string, itemKey: string, args: any[]) => void;
+
+type Generate = (root: RenderRoot, model: ItemModel, itemKey: string) => unknown;
+
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
 
 /**
- * Assigns the component a renderer function which uses Lit to render
- * the given template expression inside the render root element.
- *
- * @param component The host component to which the renderer runction is to be set
- * @param rendererName The name of the renderer function
- * @param templateExpression The content of the template literal passed to Lit for rendering.
- * @param returnChannel A channel to the server.
- * Calling it will end up invoking a handler in the server-side LitRenderer.
- * @param clientCallables A list of function names that can be called from within the template literal.
- * @param propertyNamespace LitRenderer-specific namespace for properties.
- * Needed to avoid property name collisions between renderers.
+ * Creates the functions that a template calls to invoke the handlers that
+ * the server-side LitRenderer registered with withFunction, for one item.
  */
-_window.Vaadin.setLitRenderer = (
-  component: Component,
-  rendererName: string,
-  templateExpression: string,
-  returnChannel: (name: string, itemKey: string, args: any[]) => void,
-  clientCallables: string[],
-  propertyNamespace: string,
-  appId: string
-) => {
-  const callablesCreator = (itemKey: string) => {
-    return clientCallables.map((clientCallable) => (...args: any[]) => {
-      if (itemKey !== undefined) {
-        returnChannel(clientCallable, itemKey, args[0] instanceof Event ? [] : [...args]);
-      }
-    });
-  };
-  const fnArgs = [
-    'html',
-    'root',
-    'live',
-    'appId',
-    'itemKey',
-    'model',
-    'item',
-    'index',
-    ...clientCallables,
-    `return html\`${templateExpression}\``
-  ];
-  const htmlGenerator = new Function(...fnArgs);
-  const renderFunction = (root: RenderRoot, model: ItemModel, itemKey: string) => {
-    const { item, index } = model;
-    render(htmlGenerator(html, root, live, appId, itemKey, model, item, index, ...callablesCreator(itemKey)), root);
-  };
+const createCallables = (returnChannel: ReturnChannel, clientCallables: string[], itemKey: string) =>
+  clientCallables.map((clientCallable) => (...args: any[]) => {
+    if (itemKey !== undefined) {
+      returnChannel(clientCallable, itemKey, args[0] instanceof Event ? [] : [...args]);
+    }
+  });
 
+/**
+ * Assigns the component a renderer function that renders the template
+ * result of the given generator inside the render root element.
+ */
+const assignRenderer = (component: Component, rendererName: string, generate: Generate, propertyNamespace: string) => {
   const renderer: Renderer = (root, _, model) => {
     const { item } = model;
     // Clean up the root element of any existing content
@@ -86,11 +59,93 @@ _window.Vaadin.setLitRenderer = (
       }
     }
 
-    renderFunction(root, { ...model, item: mappedItem }, item.key);
+    render(generate(root, { ...model, item: mappedItem }, item.key), root);
   };
 
   renderer.__rendererId = propertyNamespace;
   component[rendererName] = renderer;
+};
+
+/**
+ * Assigns the component a renderer function which uses Lit to render a
+ * template declared in the bundle, so that nothing is compiled from a string.
+ *
+ * @param component The host component to which the renderer function is to be set
+ * @param rendererName The name of the renderer function
+ * @param template The declared template, called with html, root, live, appId,
+ * itemKey, model, item, index and an object with the client callables as members.
+ * @param returnChannel A channel to the server.
+ * @param clientCallables A list of function names that can be called from within the template.
+ * @param propertyNamespace LitRenderer-specific namespace for properties.
+ * @param appId The id of the application.
+ */
+_window.Vaadin.setLitRendererTemplate = (
+  component: Component,
+  rendererName: string,
+  template: (...args: any[]) => unknown,
+  returnChannel: ReturnChannel,
+  clientCallables: string[],
+  propertyNamespace: string,
+  appId: string
+) => {
+  const generate: Generate = (root, model, itemKey) => {
+    const callables = createCallables(returnChannel, clientCallables, itemKey);
+    const functions = Object.fromEntries(clientCallables.map((name, i) => [name, callables[i]]));
+    return template(html, root, live, appId, itemKey, model, model.item, model.index, functions);
+  };
+  assignRenderer(component, rendererName, generate, propertyNamespace);
+};
+
+/**
+ * Assigns the component a renderer function which uses Lit to render
+ * the given template expression inside the render root element.
+ *
+ * @param component The host component to which the renderer runction is to be set
+ * @param rendererName The name of the renderer function
+ * @param templateExpression The content of the template literal passed to Lit for rendering.
+ * @param returnChannel A channel to the server.
+ * Calling it will end up invoking a handler in the server-side LitRenderer.
+ * @param clientCallables A list of function names that can be called from within the template literal.
+ * @param propertyNamespace LitRenderer-specific namespace for properties.
+ * Needed to avoid property name collisions between renderers.
+ */
+_window.Vaadin.setLitRenderer = (
+  component: Component,
+  rendererName: string,
+  templateExpression: string,
+  returnChannel: ReturnChannel,
+  clientCallables: string[],
+  propertyNamespace: string,
+  appId: string
+) => {
+  const fnArgs = [
+    'html',
+    'root',
+    'live',
+    'appId',
+    'itemKey',
+    'model',
+    'item',
+    'index',
+    ...clientCallables,
+    `return html\`${templateExpression}\``
+  ];
+  const htmlGenerator = new Function(...fnArgs);
+  const generate: Generate = (root, model, itemKey) => {
+    const { item, index } = model;
+    return htmlGenerator(
+      html,
+      root,
+      live,
+      appId,
+      itemKey,
+      model,
+      item,
+      index,
+      ...createCallables(returnChannel, clientCallables, itemKey)
+    );
+  };
+  assignRenderer(component, rendererName, generate, propertyNamespace);
 };
 
 /**

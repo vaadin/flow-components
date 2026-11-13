@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,12 +34,15 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.CspViolationReporter;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.ReflectionCache;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -69,7 +73,17 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         UsageStatistics.markAsUsed("flow-components/LitRenderer", null);
     }
 
+    /**
+     * Whether a class renders with the template of {@link #getTemplate()}, or
+     * with the string of {@link #getTemplateExpression()} because a subclass
+     * overrides that without overriding {@link #getTemplate()}.
+     */
+    private static final ReflectionCache<Object, Boolean> USES_DECLARED_TEMPLATE = ReflectionCache
+            .clearedBeforeHotswap(LitRenderer::usesDeclaredTemplate);
+
     private final String templateExpression;
+
+    private final CompiledLitTemplate template;
 
     private final String propertyNamespace;
 
@@ -78,15 +92,17 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
-    private LitRenderer(String templateExpression) {
+    private LitRenderer(String templateExpression,
+            CompiledLitTemplate template) {
         this.templateExpression = templateExpression;
+        this.template = template;
 
         propertyNamespace = String.format("lr_%s_",
                 UUID.randomUUID().toString().replace("-", "").substring(0, 16));
     }
 
     LitRenderer() {
-        this("");
+        this("", null);
     }
 
     /**
@@ -130,7 +146,28 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      */
     public static <SOURCE> LitRenderer<SOURCE> of(String templateExpression) {
         Objects.requireNonNull(templateExpression);
-        return new LitRenderer<>(templateExpression);
+        return new LitRenderer<>(templateExpression, null);
+    }
+
+    /**
+     * Creates a new LitRenderer based on a template declared by a method of a
+     * {@link com.vaadin.flow.js.JsDefinition} interface. The build collects the
+     * template into the bundle, so it works with a content security policy that
+     * does not allow <code>unsafe-eval</code>.
+     *
+     * @param <SOURCE>
+     *            the type of the input object used inside the template
+     * @param template
+     *            the template, from the implementation that
+     *            {@link JsSnippets#of(Class)} returns, not <code>null</code>
+     * @return an initialized LitRenderer
+     * @see CompiledLitTemplate
+     * @since 25.4
+     */
+    public static <SOURCE> LitRenderer<SOURCE> of(
+            CompiledLitTemplate template) {
+        Objects.requireNonNull(template);
+        return new LitRenderer<>(null, template);
     }
 
     @Override
@@ -164,10 +201,50 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         String appId = getElementUI(container).getInternals().getAppId();
 
-        container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5)",
-                rendererName, templateExpression, returnChannel,
-                clientCallablesArray, propertyNamespace, appId);
+        CompiledLitTemplate declaredTemplate = resolveTemplate();
+        if (declaredTemplate != null) {
+            container.executeJs(LitRendererJs.class).setLitRendererTemplate(
+                    rendererName, declaredTemplate, returnChannel,
+                    clientCallablesArray, propertyNamespace, appId);
+        } else {
+            // The browser compiles the template from the string
+            CspViolationReporter.reportStringJavaScript();
+            container.executeJs(LitRendererJs.class).setLitRenderer(
+                    rendererName, templateExpression, returnChannel,
+                    clientCallablesArray, propertyNamespace, appId);
+        }
+    }
+
+    /**
+     * Gets the declared template to render with, or <code>null</code> to render
+     * with the string of {@link #getTemplateExpression()}.
+     */
+    private CompiledLitTemplate resolveTemplate() {
+        if (!USES_DECLARED_TEMPLATE.get(getClass())) {
+            return null;
+        }
+        return getTemplate();
+    }
+
+    private static boolean usesDeclaredTemplate(Class<?> type) {
+        Class<?> expressionDeclarer = findDeclarer(type,
+                "getTemplateExpression");
+        Class<?> templateDeclarer = findDeclarer(type, "getTemplate");
+        return expressionDeclarer.isAssignableFrom(templateDeclarer);
+    }
+
+    private static Class<?> findDeclarer(Class<?> type, String methodName) {
+        for (Class<?> current = type; current != null; current = current
+                .getSuperclass()) {
+            for (Method method : current.getDeclaredMethods()) {
+                if (method.getName().equals(methodName)
+                        && method.getParameterCount() == 0) {
+                    return current;
+                }
+            }
+        }
+        throw new IllegalStateException(
+                type.getName() + " has no " + methodName + "()");
     }
 
     /**
@@ -178,6 +255,28 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      */
     protected String getTemplateExpression() {
         return templateExpression;
+    }
+
+    /**
+     * Returns the declared template used to render items, or <code>null</code>
+     * to render with the string of {@link #getTemplateExpression()}.
+     * <p>
+     * A subclass that overrides {@link #getTemplateExpression()} without
+     * overriding this method renders with that string, so that existing
+     * subclasses of the built-in renderers keep working.
+     *
+     * @return the declared template, or <code>null</code> if there is none
+     * @since 25.4
+     */
+    protected CompiledLitTemplate getTemplate() {
+        return template;
+    }
+
+    /**
+     * Gets the implementation of the templates of the built-in renderers.
+     */
+    static LitRendererTemplates builtInTemplates() {
+        return JsSnippets.of(LitRendererTemplates.class);
     }
 
     /**
@@ -233,9 +332,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         // Get the renderer function cleared when the LitRenderer is
         // unregistered
-        registrations.add(() -> container.executeJs(
-                "window.Vaadin.unsetLitRenderer(this, $0, $1)", rendererName,
-                propertyNamespace));
+        registrations.add(() -> container.executeJs(LitRendererJs.class)
+                .unsetLitRenderer(rendererName, propertyNamespace));
 
         return () -> registrations.forEach(Registration::remove);
     }
