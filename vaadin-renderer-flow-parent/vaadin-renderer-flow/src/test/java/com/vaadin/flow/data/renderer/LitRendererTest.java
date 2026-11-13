@@ -124,7 +124,7 @@ class LitRendererTest {
                 copyCall.definitionType());
         Assertions.assertEquals("writeToClipboard", copyCall.methodName());
         Assertions.assertEquals(List.of("event", "context"),
-                copyCall.getCalledWithNames());
+                copyCall.getFunctionParameterNames());
 
         // The copied value is the argument the template passes, so the same
         // function serves every rendered row.
@@ -134,7 +134,7 @@ class LitRendererTest {
                 textCall.definitionType());
         Assertions.assertEquals("readContextValue", textCall.methodName());
         Assertions.assertEquals(List.of("event", "context"),
-                textCall.getCalledWithNames());
+                textCall.getFunctionParameterNames());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
