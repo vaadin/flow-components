@@ -154,12 +154,31 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@link com.vaadin.flow.js.JsDefinition} interface. The build collects the
      * template into the bundle, so it works with a content security policy that
      * does not allow <code>unsafe-eval</code>.
+     * <p>
+     * The template is the body of a function that returns a Lit template. See
+     * {@link CompiledLitTemplate} for the variables it has access to.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * &#64;JsDefinition
+     * interface PersonTemplates extends Serializable {
+     *
+     *     &#64;JsExpression("return html`&lt;div&gt;Name: ${item.name}&lt;/div&gt;`;")
+     *     CompiledLitTemplate name();
+     * }
+     *
+     * LitRenderer.&lt;Person&gt; of(JsSnippets.of(PersonTemplates.class).name())
+     *         .withProperty("name", Person::getName);
+     * </pre>
      *
      * @param <SOURCE>
      *            the type of the input object used inside the template
      * @param template
-     *            the template, from the implementation that
-     *            {@link JsSnippets#of(Class)} returns, not <code>null</code>
+     *            the template, returned by a method of a
+     *            {@link com.vaadin.flow.js.JsDefinition} interface called on
+     *            the object that {@link JsSnippets#of(Class)} returns, not
+     *            <code>null</code>
      * @return an initialized LitRenderer
      * @see CompiledLitTemplate
      * @since 25.4
@@ -207,7 +226,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     rendererName, declaredTemplate, returnChannel,
                     clientCallablesArray, propertyNamespace, appId);
         } else {
-            // The browser compiles the template from the string
             CspViolationReporter.reportStringJavaScript();
             container.executeJs(LitRendererJs.class).setLitRenderer(
                     rendererName, templateExpression, returnChannel,
