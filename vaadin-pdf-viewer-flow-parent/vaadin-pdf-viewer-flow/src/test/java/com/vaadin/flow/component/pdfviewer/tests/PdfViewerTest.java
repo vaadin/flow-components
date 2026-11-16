@@ -163,6 +163,18 @@ class PdfViewerTest {
     }
 
     @Test
+    void scrollToLastPage_scrollToLastPageCalledOnClient() {
+        ui.add(viewer);
+
+        viewer.scrollToLastPage();
+
+        var calls = ui.dumpJsCalls(viewer.getElement(), "scrollToLastPage");
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("scrollToLastPage"),
+                calls.get(0).flattenArguments());
+    }
+
+    @Test
     void defaultPage() {
         Assertions.assertEquals(1, viewer.getPage());
         Assertions.assertEquals(1, viewer.getElement().getProperty("page", 0));
