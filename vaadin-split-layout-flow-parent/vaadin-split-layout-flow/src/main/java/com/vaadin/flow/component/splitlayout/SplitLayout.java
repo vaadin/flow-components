@@ -384,9 +384,8 @@ public class SplitLayout extends Component
         if (innerComponent != null) {
             innerComponent.getElement().getStyle().set(styleName, value);
         } else {
-            getElement().executeJs(
-                    "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",
-                    primary ? 0 : 1, styleName, value);
+            getElement().executeJs(SplitLayoutJs.class)
+                    .setChildStyle(primary ? 0 : 1, styleName, value);
         }
     }
 
