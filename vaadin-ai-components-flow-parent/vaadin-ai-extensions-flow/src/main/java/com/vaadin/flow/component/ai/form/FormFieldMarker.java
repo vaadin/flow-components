@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -18,6 +19,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -192,7 +195,7 @@ final class FormFieldMarker {
      * {@link #reassignContent(Element)}.
      */
     private static void assignContent(Element marker, Element wrapper) {
-        marker.executeJs("this.content = $0;", wrapper);
+        marker.executeJs(FormFieldMarkerJs.class).setContent(wrapper);
     }
 
     /**
@@ -238,12 +241,7 @@ final class FormFieldMarker {
      * observed visually.
      */
     static void forceClientReadOnly(Element field) {
-        field.executeJs("""
-                const marker = this.querySelector(':scope > %s');
-                if (marker) {
-                  this.append(marker);
-                }
-                this.readonly = true;""".formatted(TAG));
+        field.executeJs(FormFieldMarkerJs.class).forceClientReadOnly();
     }
 
     /**
@@ -263,5 +261,37 @@ final class FormFieldMarker {
     private static ObjectNode toI18nJson(FieldMarkerI18n i18n) {
         return i18n == null ? JacksonUtils.createObjectNode()
                 : JacksonUtils.beanToJson(i18n);
+    }
+
+    /**
+     * The JavaScript that {@link FormFieldMarker} runs in the browser, for
+     * {@link Element#executeJs(Class)}.
+     * <p>
+     * For internal use only. May be renamed or removed in a future release.
+     */
+    @JsDefinition
+    interface FormFieldMarkerJs extends Serializable {
+
+        /**
+         * Hands the content wrapper to the web component, which renders it into
+         * the popover. Called on the marker element.
+         *
+         * @param wrapper
+         *            the element that carries the custom popover content
+         */
+        @JsExpression("this.content = $0;")
+        void setContent(Element wrapper);
+
+        /**
+         * Re-appends the field's marker, if it has one, and sets the field
+         * read-only. Called on the field element.
+         */
+        @JsExpression("const marker = this.querySelector(':scope > " + TAG + """
+                ');
+                if (marker) {
+                  this.append(marker);
+                }
+                this.readonly = true;""")
+        void forceClientReadOnly();
     }
 }
