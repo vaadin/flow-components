@@ -125,7 +125,6 @@ window.Vaadin.Flow.gridProConnector = {
     grid.__renderBodyRow = function (row) {
       renderBodyRow.apply(this, arguments);
 
-      // Loading rows have no item and are never marked as updating
       const item = grid.__getRowItem(row);
       iterateRowCells(row, (cell) => {
         const isUpdating = !!item && !!cell._column && grid.__pendingCellUpdate === `${item.key}:${cell._column.path}`;
