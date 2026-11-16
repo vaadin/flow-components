@@ -10,13 +10,13 @@
     <packaging>pom</packaging>
     <name>Vaadin Markdown Parent</name>
     <description>Vaadin Markdown Parent</description>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <modules>
         <module>vaadin-markdown-flow</module>
         <module>vaadin-markdown-testbench</module>
     </modules>
+    <properties>
+        <csp.mode>strict</csp.mode>
+    </properties>
     <dependencies/>
     <profiles>
         <profile>
