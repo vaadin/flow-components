@@ -37,24 +37,29 @@ public class LitRendererDeclaredTemplateIT extends AbstractComponentIT {
         String appId = findElement(By.id("app-id")).getText();
 
         for (int i = 0; i < LitRendererDeclaredTemplatePage.ITEMS.size(); i++) {
-            WebElement args = getArgs(i);
+            WebElement renderedItem = getRenderedItem(i);
             String index = String.valueOf(i);
 
-            Assert.assertEquals("main", args.getDomAttribute("data-root"));
-            Assert.assertEquals(appId, args.getDomAttribute("data-app-id"));
-            Assert.assertEquals(index, args.getDomAttribute("data-index"));
+            Assert.assertEquals("main",
+                    renderedItem.getDomAttribute("data-root"));
+            Assert.assertEquals(appId,
+                    renderedItem.getDomAttribute("data-app-id"));
             Assert.assertEquals(index,
-                    args.getDomAttribute("data-model-index"));
+                    renderedItem.getDomAttribute("data-index"));
+            Assert.assertEquals(index,
+                    renderedItem.getDomAttribute("data-model-index"));
             Assert.assertEquals(LitRendererDeclaredTemplatePage.ITEMS.get(i),
-                    args.getDomAttribute("data-value"));
-            Assert.assertEquals("first", args.getDomAttribute("data-arg0"));
-            Assert.assertEquals("42", args.getDomAttribute("data-arg1"));
+                    renderedItem.getDomAttribute("data-value"));
+            Assert.assertEquals("first",
+                    renderedItem.getDomAttribute("data-arg0"));
+            Assert.assertEquals("42",
+                    renderedItem.getDomAttribute("data-arg1"));
         }
     }
 
     @Test
     public void shouldBindItemKeyAndFunctions() {
-        getArgs(1).click();
+        getRenderedItem(1).click();
 
         String[] clicked = findElement(By.id("clicked")).getText().split(":");
         Assert.assertEquals("b", clicked[0]);
@@ -74,7 +79,7 @@ public class LitRendererDeclaredTemplateIT extends AbstractComponentIT {
         Assert.assertFalse(checkbox.isSelected());
     }
 
-    private WebElement getArgs(int index) {
+    private WebElement getRenderedItem(int index) {
         return findElement(By.cssSelector("#item-" + index + " .args"));
     }
 }

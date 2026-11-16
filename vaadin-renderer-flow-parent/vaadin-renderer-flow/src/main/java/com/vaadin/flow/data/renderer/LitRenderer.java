@@ -222,7 +222,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         CompiledLitTemplate declaredTemplate = resolveTemplate();
         if (declaredTemplate != null) {
-            container.executeJs(LitRendererJs.class).setLitRendererTemplate(
+            container.executeJs(LitRendererJs.class).setCompiledLitRenderer(
                     rendererName, declaredTemplate, returnChannel,
                     clientCallablesArray, propertyNamespace, appId);
         } else {

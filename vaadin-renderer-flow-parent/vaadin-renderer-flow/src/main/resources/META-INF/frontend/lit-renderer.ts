@@ -79,7 +79,7 @@ const assignRenderer = (component: Component, rendererName: string, generate: Ge
  * @param propertyNamespace LitRenderer-specific namespace for properties.
  * @param appId The id of the application.
  */
-_window.Vaadin.setLitRendererTemplate = (
+_window.Vaadin.setCompiledLitRenderer = (
   component: Component,
   rendererName: string,
   template: (...args: any[]) => unknown,

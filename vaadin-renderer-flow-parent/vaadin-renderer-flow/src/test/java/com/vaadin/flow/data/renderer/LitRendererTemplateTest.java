@@ -69,7 +69,7 @@ class LitRendererTemplateTest {
         render(LitRenderer.<String> of(template));
 
         JsCall call = getSingleRendererCall();
-        Assertions.assertEquals("setLitRendererTemplate", call.methodName());
+        Assertions.assertEquals("setCompiledLitRenderer", call.methodName());
         Assertions.assertEquals("renderer", call.arguments().get(0));
         Assertions.assertSame(template, call.arguments().get(1));
     }
@@ -117,7 +117,7 @@ class LitRendererTemplateTest {
         for (LitRenderer<String> renderer : renderers) {
             render(renderer);
             JsCall call = getSingleRendererCall();
-            Assertions.assertEquals("setLitRendererTemplate", call.methodName(),
+            Assertions.assertEquals("setCompiledLitRenderer", call.methodName(),
                     renderer.getClass().getSimpleName()
                             + " should render with a declared template");
         }
@@ -160,7 +160,7 @@ class LitRendererTemplateTest {
         render(renderer);
 
         JsCall call = getSingleRendererCall();
-        Assertions.assertEquals("setLitRendererTemplate", call.methodName());
+        Assertions.assertEquals("setCompiledLitRenderer", call.methodName());
         Assertions.assertSame(template, call.arguments().get(1));
     }
 
@@ -174,7 +174,7 @@ class LitRendererTemplateTest {
         ui.getUI().getElement().appendChild(container);
 
         JsCall call = getSingleRendererCall();
-        Assertions.assertEquals("setLitRendererTemplate", call.methodName());
+        Assertions.assertEquals("setCompiledLitRenderer", call.methodName());
     }
 
     @Test

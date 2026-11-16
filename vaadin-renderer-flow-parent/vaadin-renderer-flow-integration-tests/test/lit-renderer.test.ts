@@ -8,7 +8,7 @@ type Renderer = (root: HTMLElement, owner: HTMLElement, model: { item: any; inde
 type Component = HTMLElement & { renderer?: Renderer };
 
 type LitRendererApi = {
-  setLitRendererTemplate: (
+  setCompiledLitRenderer: (
     component: Component,
     rendererName: string,
     template: (...args: any[]) => unknown,
@@ -50,7 +50,7 @@ describe('lit-renderer', () => {
 
   describe('declared template', () => {
     it('should render the template with the item properties of its namespace', () => {
-      Vaadin.setLitRendererTemplate(
+      Vaadin.setCompiledLitRenderer(
         component,
         'renderer',
         (html: any, _root: any, _live: any, _appId: any, _itemKey: any, _model: any, item: any) =>
@@ -68,7 +68,7 @@ describe('lit-renderer', () => {
 
     it('should call the template with the documented arguments', () => {
       const template = sinon.spy((html: any) => html``);
-      Vaadin.setLitRendererTemplate(component, 'renderer', template, returnChannel, ['select'], NAMESPACE, 'app-1');
+      Vaadin.setCompiledLitRenderer(component, 'renderer', template, returnChannel, ['select'], NAMESPACE, 'app-1');
 
       renderItem({ key: '7', [`${NAMESPACE}name`]: 'Jane' }, 3);
 
@@ -85,7 +85,7 @@ describe('lit-renderer', () => {
     });
 
     it('should call the server through the functions object', () => {
-      Vaadin.setLitRendererTemplate(
+      Vaadin.setCompiledLitRenderer(
         component,
         'renderer',
         (html: any, ...args: any[]) => {
@@ -112,7 +112,7 @@ describe('lit-renderer', () => {
       Vaadin.setLitRenderer(component, 'renderer', '<b>old</b>', returnChannel, [], 'lr_old_', 'ROOT');
       renderItem({ key: '1' });
 
-      Vaadin.setLitRendererTemplate(
+      Vaadin.setCompiledLitRenderer(
         component,
         'renderer',
         (html: any) => html`<i>new</i>`,
@@ -130,7 +130,7 @@ describe('lit-renderer', () => {
 
   describe('unsetLitRenderer', () => {
     it('should remove the renderer with the given id', () => {
-      Vaadin.setLitRendererTemplate(component, 'renderer', (html: any) => html``, returnChannel, [], NAMESPACE, 'ROOT');
+      Vaadin.setCompiledLitRenderer(component, 'renderer', (html: any) => html``, returnChannel, [], NAMESPACE, 'ROOT');
 
       Vaadin.unsetLitRenderer(component, 'renderer', NAMESPACE);
 
@@ -138,7 +138,7 @@ describe('lit-renderer', () => {
     });
 
     it('should keep a renderer with another id', () => {
-      Vaadin.setLitRendererTemplate(component, 'renderer', (html: any) => html``, returnChannel, [], NAMESPACE, 'ROOT');
+      Vaadin.setCompiledLitRenderer(component, 'renderer', (html: any) => html``, returnChannel, [], NAMESPACE, 'ROOT');
 
       Vaadin.unsetLitRenderer(component, 'renderer', 'lr_other_');
 

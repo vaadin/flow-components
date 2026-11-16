@@ -77,8 +77,8 @@ interface LitRendererJs extends Serializable {
      * @param appId
      *            the id of the application
      */
-    @JsExpression("window.Vaadin.setLitRendererTemplate(this, $0, $1, $2, $3, $4, $5);")
-    void setLitRendererTemplate(String rendererName,
+    @JsExpression("window.Vaadin.setCompiledLitRenderer(this, $0, $1, $2, $3, $4, $5);")
+    void setCompiledLitRenderer(String rendererName,
             CompiledLitTemplate template,
             ReturnChannelRegistration returnChannel, ArrayNode clientCallables,
             String propertyNamespace, String appId);
