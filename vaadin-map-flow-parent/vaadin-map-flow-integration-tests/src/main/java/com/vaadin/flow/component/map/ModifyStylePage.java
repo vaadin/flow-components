@@ -8,16 +8,35 @@
  */
 package com.vaadin.flow.component.map;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/modify-style")
 public class ModifyStylePage extends Div {
+
+    @JsDefinition
+    interface RenderCountJs extends Serializable {
+
+        @JsExpression("""
+                const map = $0;
+                map.configuration.on('rendercomplete', () => {
+                  const nextValue = parseInt(this.textContent) + 1;
+                  this.textContent = nextValue.toString();
+                });
+                """)
+        void countRenders(Element map);
+    }
+
     public ModifyStylePage() {
         Map map = new Map();
         map.getFeatureLayer().setId("feature-layer");
@@ -40,16 +59,8 @@ public class ModifyStylePage extends Div {
         renderCount.setId("render-count");
         // Register event listener for the rendercomplete event, and increase
         // render count
-        //@formatter:off
-        renderCount.getElement().executeJs(
-                "const map = $0;" +
-                        "map.configuration.on('rendercomplete', () => {" +
-                        "  const nextValue = parseInt(this.textContent) + 1;" +
-                        "  this.textContent = nextValue.toString();" +
-                        "});",
-                map.getElement()
-        );
-        //@formatter:on
+        renderCount.getElement().executeJs(RenderCountJs.class)
+                .countRenders(map.getElement());
 
         add(map);
         add(new Div(setImage, setImageScale));
