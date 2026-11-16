@@ -54,6 +54,12 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     }
 
     @Test
+    public void getDetailsRow_returnsDetailsCellOfRow() {
+        Assert.assertEquals("Person 1",
+                grid.getRow(1).getDetailsRow().getText());
+    }
+
+    @Test
     public void selectItem_onlyItsDetailsAreDisplayed() {
         grid.getCell(2, 0).click();
 
