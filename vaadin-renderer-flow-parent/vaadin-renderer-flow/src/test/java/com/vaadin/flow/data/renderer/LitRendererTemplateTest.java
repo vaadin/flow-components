@@ -76,6 +76,7 @@ class LitRendererTemplateTest {
 
     @Test
     void stringTemplate_setsStringRenderer() {
+        ui.setCspMode(CspMode.OFF);
         render(LitRenderer.<String> of("<span>${item.name}</span>"));
 
         JsCall call = getSingleRendererCall();
@@ -124,6 +125,7 @@ class LitRendererTemplateTest {
 
     @Test
     void subclassOverridingTemplateExpression_usesStringTemplate() {
+        ui.setCspMode(CspMode.OFF);
         TextRenderer<String> renderer = new TextRenderer<>() {
             @Override
             protected String getTemplateExpression() {
