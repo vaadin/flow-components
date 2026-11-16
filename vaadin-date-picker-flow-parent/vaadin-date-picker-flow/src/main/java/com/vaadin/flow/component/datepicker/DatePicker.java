@@ -943,9 +943,8 @@ public class DatePicker
     }
 
     private void initConnector() {
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
-                getElement()));
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(DatePickerJs.class)
+                .initConnector(getElement()));
     }
 
     /**
