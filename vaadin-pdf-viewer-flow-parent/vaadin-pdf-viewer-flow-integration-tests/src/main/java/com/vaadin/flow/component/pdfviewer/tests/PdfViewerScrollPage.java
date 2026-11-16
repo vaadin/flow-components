@@ -20,10 +20,14 @@ public class PdfViewerScrollPage extends Div {
         var viewer = new PdfViewer("sample.pdf");
         viewer.setHeight("500px");
 
+        var scrollToPage = new NativeButton("Scroll to page 3",
+                event -> viewer.scrollToPage(3));
+        scrollToPage.setId("scroll-to-page");
+
         var scrollToLastPage = new NativeButton("Scroll to last page",
                 event -> viewer.scrollToLastPage());
         scrollToLastPage.setId("scroll-to-last-page");
 
-        add(viewer, scrollToLastPage);
+        add(viewer, scrollToPage, scrollToLastPage);
     }
 }
