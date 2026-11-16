@@ -24,6 +24,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.server.CspMode;
 import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.flow.server.VaadinService;
@@ -31,7 +33,7 @@ import com.vaadin.tests.MockUIExtension;
 
 /**
  * Covers the CSP mode of {@link MockUIExtension}, with a component that runs
- * declared JavaScript through {@link ValidationJs}. This module sets
+ * declared JavaScript through {@link TestJs}. This module sets
  * <code>csp.mode</code> to <code>strict</code>, so every UI starts in the
  * strict mode.
  */
@@ -75,12 +77,12 @@ class MockUIExtensionCspModeTest {
         TestComponent component = new TestComponent();
         ui.add(component);
 
-        component.setInvalid(true);
+        component.setFoo(1);
 
         List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
-                ValidationJs.class);
+                TestJs.class);
         Assertions.assertEquals(1, calls.size());
-        Assertions.assertEquals("setInvalid", calls.get(0).methodName());
+        Assertions.assertEquals("setFoo", calls.get(0).methodName());
     }
 
     @Test
@@ -94,7 +96,17 @@ class MockUIExtensionCspModeTest {
     }
 
     @Tag("test-component")
-    private static class TestComponent extends Component
-            implements HasValidationProperties {
+    private static class TestComponent extends Component {
+
+        void setFoo(int foo) {
+            getElement().executeJs(TestJs.class).setFoo(foo);
+        }
+    }
+
+    @JsDefinition
+    interface TestJs {
+
+        @JsExpression("this.foo = $0")
+        void setFoo(int foo);
     }
 }
