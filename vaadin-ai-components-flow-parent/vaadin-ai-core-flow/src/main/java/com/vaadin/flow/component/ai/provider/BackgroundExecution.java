@@ -73,12 +73,12 @@ final class BackgroundExecution {
     }
 
     /**
-     * Prepares a response that performs its blocking LLM call at subscription
-     * time. When background execution is enabled the subscription is moved off
-     * the subscribing thread, so the caller — the UI thread, for a prompt
-     * triggered from the browser — is released as soon as the turn starts.
-     * Otherwise the response is returned unchanged and the call runs on
-     * whichever thread subscribes.
+     * Prepares a response that does blocking work at subscription time, such as
+     * a blocking LLM call. When background execution is enabled the
+     * subscription is moved off the subscribing thread, so the caller — the UI
+     * thread, for a prompt triggered from the browser — is released as soon as
+     * the turn starts. Otherwise the response is returned unchanged and the
+     * call runs on whichever thread subscribes.
      *
      * @param response
      *            the provider's response stream
