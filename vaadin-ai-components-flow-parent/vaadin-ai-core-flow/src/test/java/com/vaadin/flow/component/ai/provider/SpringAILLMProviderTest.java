@@ -42,6 +42,7 @@ import org.mockito.Mockito;
 import org.slf4j.event.Level;
 import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
@@ -1173,6 +1174,69 @@ class SpringAILLMProviderTest {
                 texts);
         Mockito.verify(advisor, Mockito.times(2)).adviseCall(Mockito.any(),
                 Mockito.any());
+    }
+
+    @Test
+    void chatClientConstructor_withoutMemoryAdvisor_keepsClientConversationId() {
+        var advisor = Mockito.mock(CallAdvisor.class);
+        Mockito.when(advisor.getName()).thenReturn("Other advisor");
+        Mockito.when(advisor.adviseCall(Mockito.any(), Mockito.any()))
+                .thenAnswer(invocation -> invocation
+                        .<CallAdvisorChain> getArgument(1)
+                        .nextCall(invocation.getArgument(0)));
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultAdvisors(a -> a.advisors(advisor)
+                        .param(ChatMemory.CONVERSATION_ID, "user-42"))
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                mockSimpleChatResponse("Response 1"),
+                mockSimpleChatResponse("Response 2"));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockFirst();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockFirst();
+
+        var requestCaptor = ArgumentCaptor.forClass(ChatClientRequest.class);
+        Mockito.verify(advisor, Mockito.times(2))
+                .adviseCall(requestCaptor.capture(), Mockito.any());
+        Assertions.assertEquals(List.of("user-42", "user-42"),
+                requestCaptor
+                        .getAllValues().stream().map(request -> request
+                                .context().get(ChatMemory.CONVERSATION_ID))
+                        .toList());
+        var texts = getPromptCaptor(2).getAllValues().get(1).getInstructions()
+                .stream().map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("First message", "Response 1", "Second message"),
+                texts);
+    }
+
+    @Test
+    void setHistory_chatClientWithConversationIdWithoutMemoryAdvisor_restoresConversation() {
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultAdvisors(
+                        a -> a.param(ChatMemory.CONVERSATION_ID, "user-42"))
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Old message", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Old answer", null,
+                        null));
+
+        chatClientProvider.setHistory(history, Collections.emptyMap());
+        mockSimpleChat("Response");
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var texts = capturePrompt().getInstructions().stream()
+                .map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("Old message", "Old answer", "New question"), texts);
     }
 
     @Test
