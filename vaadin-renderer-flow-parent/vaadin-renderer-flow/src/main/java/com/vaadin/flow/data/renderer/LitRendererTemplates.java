@@ -30,19 +30,44 @@ import com.vaadin.flow.js.JsExpression;
 @JsDefinition
 interface LitRendererTemplates extends Serializable {
 
-    /** The template of {@link ComponentRenderer}. */
+    /**
+     * Returns the template of {@link ComponentRenderer}. It renders the
+     * component of the item, which it finds in the application by the state
+     * node id in the {@code nodeid} property of the item.
+     *
+     * @return the template of {@link ComponentRenderer}
+     */
     @JsExpression("return html`${Vaadin.FlowComponentHost.getNode(appId, item.nodeid)}`;")
     CompiledLitTemplate componentRenderer();
 
-    /** The template of {@link BasicRenderer}. */
+    /**
+     * Returns the template of {@link BasicRenderer}. It renders the
+     * {@code label} property of the item as plain text, without a wrapping
+     * element.
+     *
+     * @return the template of {@link BasicRenderer}
+     */
     @JsExpression("return html`${item.label}`;")
     CompiledLitTemplate basicRenderer();
 
-    /** The template of {@link TextRenderer}. */
+    /**
+     * Returns the template of {@link TextRenderer}. It renders the
+     * {@code label} property of the item as the text of a {@code <span>}
+     * element.
+     *
+     * @return the template of {@link TextRenderer}
+     */
     @JsExpression("return html`<span>${item.label}</span>`;")
     CompiledLitTemplate textRenderer();
 
-    /** The template of {@link NativeButtonRenderer}. */
+    /**
+     * Returns the template of {@link NativeButtonRenderer}. It renders a
+     * {@code <button>} with the {@code label} property of the item as its text.
+     * The {@code disabled} property of the item sets whether the button is
+     * disabled, and a click calls the {@code click} function of the renderer.
+     *
+     * @return the template of {@link NativeButtonRenderer}
+     */
     @JsExpression("return html`<button @click=${functions.click} .disabled=${item.disabled}>${item.label}</button>`;")
     CompiledLitTemplate nativeButtonRenderer();
 }

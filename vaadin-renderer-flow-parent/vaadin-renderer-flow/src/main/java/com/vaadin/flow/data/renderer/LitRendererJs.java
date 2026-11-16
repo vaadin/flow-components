@@ -35,6 +35,22 @@ interface LitRendererJs extends Serializable {
     /**
      * Sets a renderer that compiles the template from a string. Called on the
      * element that owns the renderer.
+     *
+     * @param rendererName
+     *            the name of the renderer property of the element, for example
+     *            {@code renderer}
+     * @param templateExpression
+     *            the content of the Lit template literal
+     * @param returnChannel
+     *            the channel through which the template calls the functions of
+     *            the renderer on the server
+     * @param clientCallables
+     *            the names of the functions of the renderer
+     * @param propertyNamespace
+     *            the prefix of the item properties of the renderer, which also
+     *            identifies the renderer
+     * @param appId
+     *            the id of the application
      */
     @JsExpression("window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5);")
     void setLitRenderer(String rendererName, String templateExpression,
@@ -44,6 +60,22 @@ interface LitRendererJs extends Serializable {
     /**
      * Sets a renderer that runs a template declared in the bundle. Called on
      * the element that owns the renderer.
+     *
+     * @param rendererName
+     *            the name of the renderer property of the element, for example
+     *            {@code renderer}
+     * @param template
+     *            the declared template
+     * @param returnChannel
+     *            the channel through which the template calls the functions of
+     *            the renderer on the server
+     * @param clientCallables
+     *            the names of the functions of the renderer
+     * @param propertyNamespace
+     *            the prefix of the item properties of the renderer, which also
+     *            identifies the renderer
+     * @param appId
+     *            the id of the application
      */
     @JsExpression("window.Vaadin.setLitRendererTemplate(this, $0, $1, $2, $3, $4, $5);")
     void setLitRendererTemplate(String rendererName,
@@ -54,6 +86,12 @@ interface LitRendererJs extends Serializable {
     /**
      * Removes the renderer, unless another renderer replaced it. Called on the
      * element that owns the renderer.
+     *
+     * @param rendererName
+     *            the name of the renderer property of the element
+     * @param propertyNamespace
+     *            the prefix of the item properties of the renderer, which
+     *            identifies the renderer to remove
      */
     @JsExpression("window.Vaadin.unsetLitRenderer(this, $0, $1);")
     void unsetLitRenderer(String rendererName, String propertyNamespace);
