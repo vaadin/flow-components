@@ -19,23 +19,23 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.function.SerializableRunnable;
 
 /**
  * Wrapper for Flow Upload component to implement AIFileReceiver interface.
  * Caches uploaded files in memory until they are consumed via
  * {@link #takeAttachments()}.
  */
-class UploadWrapper implements AIFileReceiver {
+class UploadWrapper implements UploadTrackingReceiver {
 
     final Upload upload;
     private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final UploadTracker uploadTracker = new UploadTracker();
 
     UploadWrapper(Upload upload) {
         this.upload = upload;
-        upload.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+        var handler = uploadTracker.createHandler((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
                     .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
@@ -44,7 +44,8 @@ class UploadWrapper implements AIFileReceiver {
             }
             pendingAttachments.add(new AIAttachment(meta.fileName(),
                     meta.contentType(), data));
-        }));
+        });
+        upload.setUploadHandler(handler);
         upload.addFileRemovedListener(event -> pendingAttachments
                 .removeIf(a -> a.name().equals(event.getFileName())));
     }
@@ -52,6 +53,16 @@ class UploadWrapper implements AIFileReceiver {
     @Override
     public boolean isUploading() {
         return upload.isUploading();
+    }
+
+    @Override
+    public boolean isReceivingFiles() {
+        return uploadTracker.isReceiving();
+    }
+
+    @Override
+    public void setUploadStateListener(SerializableRunnable listener) {
+        uploadTracker.setListener(listener);
     }
 
     @Override

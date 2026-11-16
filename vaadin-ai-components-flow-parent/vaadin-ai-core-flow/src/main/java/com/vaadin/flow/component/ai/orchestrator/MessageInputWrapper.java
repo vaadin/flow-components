@@ -29,4 +29,14 @@ record MessageInputWrapper(MessageInput messageInput) implements AIInput {
         messageInput
                 .addSubmitListener(event -> listener.accept(event.getValue()));
     }
+
+    @Override
+    public void setSubmitDisabled(boolean submitDisabled) {
+        messageInput.setSubmitDisabled(submitDisabled);
+    }
+
+    @Override
+    public boolean isSubmitDisabled() {
+        return messageInput.isSubmitDisabled();
+    }
 }
