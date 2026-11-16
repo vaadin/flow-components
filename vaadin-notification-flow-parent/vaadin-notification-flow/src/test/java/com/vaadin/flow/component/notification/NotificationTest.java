@@ -33,6 +33,7 @@ import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -403,5 +404,22 @@ class NotificationTest {
         Assertions.assertEquals(false, notification.isAssertive());
         Assertions.assertFalse(
                 notification.getElement().getProperty("assertive", false));
+    }
+
+    @Test
+    void attach_patchesVirtualContainerAndConfiguresRenderer() {
+        Notification notification = new Notification();
+        ui.add(notification);
+
+        List<JsCall> calls = ui.dumpJsCalls(notification.getElement(),
+                NotificationJs.class);
+        Assertions.assertEquals(2, calls.size());
+        Assertions.assertEquals("patchVirtualContainer",
+                calls.get(0).methodName());
+        Assertions.assertEquals(List.of(), calls.get(0).arguments());
+        Assertions.assertEquals("configureRenderer", calls.get(1).methodName());
+        Assertions.assertEquals(
+                Arrays.asList(ui.getUI().getInternals().getAppId()),
+                calls.get(1).arguments());
     }
 }
