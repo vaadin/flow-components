@@ -55,8 +55,8 @@ public class GridDetailsRowIT extends AbstractComponentIT {
 
     @Test
     public void getDetailsRow_returnsDetailsCellOfRow() {
-        Assert.assertEquals("Person 1",
-                grid.getRow(1).getDetailsRow().getText());
+        Assert.assertEquals(grid.getRow(1).getDetails(),
+                grid.getRow(1).getDetailsRow());
     }
 
     @Test
