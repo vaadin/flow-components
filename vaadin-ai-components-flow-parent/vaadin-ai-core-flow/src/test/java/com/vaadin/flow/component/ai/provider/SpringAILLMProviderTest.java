@@ -1106,6 +1106,24 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void chatClientConstructor_withSystemPromptInRequest_replacesClientSystemText() {
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultSystem("Client system text").build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        mockSimpleChat("Response");
+
+        chatClientProvider.stream(new TestLLMRequest("Hello",
+                "Request system text", Collections.emptyList(), new Object[0]))
+                .blockFirst();
+
+        var systemTexts = capturePrompt().getInstructions().stream()
+                .filter(SystemMessage.class::isInstance).map(Message::getText)
+                .toList();
+        Assertions.assertEquals(List.of("Request system text"), systemTexts);
+    }
+
+    @Test
     void chatClientConstructor_withoutAdvisors_keepsDefaultAdvisorParams() {
         // Turning off the auto-registered ToolCallingAdvisor is a default
         // advisor parameter on a client without advisors. Kept, the tool call

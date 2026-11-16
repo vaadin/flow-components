@@ -170,8 +170,10 @@ public class SpringAILLMProvider implements LLMProvider {
 
     /**
      * Constructor with a chat client. The provider creates the request of every
-     * turn with this client, so the client's default system text, advisors,
-     * tools and options apply to every turn.
+     * turn with this client, so the client's default advisors, tools and
+     * options apply to every turn. The client's default system text applies
+     * only to a request without a system prompt; a system prompt in the request
+     * replaces it.
      * <p>
      * Unless the client has a {@link MemoryAdvisor} of its own, the provider
      * adds its own chat memory to each request, keeping the last 30 messages,
