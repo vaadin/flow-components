@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.messages.tests;
+package com.vaadin.flow.component.messages;
 
 import java.util.List;
 
@@ -21,9 +21,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
@@ -182,23 +181,21 @@ class MessageListSignalTest extends AbstractSignalsTest {
     }
 
     /**
-     * Asserts that the only pending JavaScript invocation is a full update
-     * (setItems) and that the parameters of the invocation match the items in
-     * the message list.
+     * Asserts that the only pending JavaScript call is a full update (setItems)
+     * and that the arguments of the call match the items in the message list.
      */
     private void assertFullUpdate() {
-        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
-        // Expect only one pending invocation
-        Assertions.assertEquals(1, pendingInvocations.size());
+        List<JsCall> calls = ui.dumpJsCalls(messageList.getElement(),
+                MessageListJs.class);
+        // Expect only one pending call
+        Assertions.assertEquals(1, calls.size());
 
-        var invocation = pendingInvocations.getFirst();
-        // Expect the only invocation to be setItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItems"));
+        var call = calls.getFirst();
+        // Expect the only call to be setItems
+        Assertions.assertEquals("setItems", call.methodName());
 
-        // Expect the parameters to equal the items in the message list
-        var parameterItems = (ArrayNode) invocation.getInvocation()
-                .getParameters().getFirst();
+        // Expect the arguments to equal the items in the message list
+        var parameterItems = (ArrayNode) call.arguments().getFirst();
         var expectedItems = JacksonUtils.listToJson(messageList.getItems());
         Assertions.assertTrue(
                 JacksonUtils.jsonEquals(expectedItems, parameterItems));

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.messages.tests;
+package com.vaadin.flow.component.messages;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,9 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -197,81 +196,60 @@ class MessageListUpdatesTest {
     }
 
     /**
-     * Asserts that the only pending JavaScript invocation is a full update
-     * (setItems) and that the parameters of the invocation match the items in
-     * the message list.
+     * Asserts that the only pending JavaScript call is a full update (setItems)
+     * and that the arguments of the call match the items in the message list.
      */
     private void assertFullUpdate() {
-        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
-        // Expect only one pending invocation
-        Assertions.assertEquals(1, pendingInvocations.size());
+        var call = getSingleCall("setItems");
 
-        var invocation = pendingInvocations.getFirst();
-        // Expect the only invocation to be setItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItems"));
-
-        // Expect the parameters to equal the items in the message list
-        var parameterItems = (ArrayNode) invocation.getInvocation()
-                .getParameters().getFirst();
+        // Expect the arguments to equal the items in the message list
+        var parameterItems = (ArrayNode) call.arguments().getFirst();
         var expectedItems = JacksonUtils.listToJson(messageList.getItems());
         Assertions.assertTrue(
                 JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
     private void assertAddItemUpdate(MessageListItem... items) {
-        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
-        // Expect only one pending invocation
-        Assertions.assertEquals(1, pendingInvocations.size());
+        var call = getSingleCall("addItems");
 
-        var invocation = pendingInvocations.getFirst();
-        // Expect the only invocation to be addItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("addItems"));
-
-        // Expect the parameters to equal the provided items as JSON
-        var parameterItems = (ArrayNode) invocation.getInvocation()
-                .getParameters().getFirst();
+        // Expect the arguments to equal the provided items as JSON
+        var parameterItems = (ArrayNode) call.arguments().getFirst();
         var expectedItems = JacksonUtils.listToJson(Arrays.asList(items));
         Assertions.assertTrue(
                 JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
     private void assertSetItemTextUpdate(MessageListItem item, String newText) {
-        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
-        // Expect only one pending invocation
-        Assertions.assertEquals(1, pendingInvocations.size());
+        var call = getSingleCall("setItemText");
 
-        var invocation = pendingInvocations.getFirst();
-        // Expect the only invocation to be setItemText
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItemText"));
-
-        // Expect the parameters to match the text and item index
-        var parameters = invocation.getInvocation().getParameters();
-        Assertions.assertEquals(newText, parameters.get(0));
+        // Expect the arguments to match the text and item index
+        var arguments = call.arguments();
+        Assertions.assertEquals(newText, arguments.get(0));
         var expectedIndex = messageList.getItems().indexOf(item);
         Assertions.assertEquals(expectedIndex,
-                ((Number) parameters.get(1)).intValue());
+                ((Number) arguments.get(1)).intValue());
     }
 
     private void assertAppendItemTextUpdate(MessageListItem item,
             String appendedText) {
-        var pendingInvocations = ui.dumpPendingJavaScriptInvocations();
-        // Expect only one pending invocation
-        Assertions.assertEquals(1, pendingInvocations.size());
+        var call = getSingleCall("appendItemText");
 
-        var invocation = pendingInvocations.getFirst();
-        // Expect the only invocation to be appendItemText
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("appendItemText"));
-
-        // Expect the parameters to match the text and item index
-        var parameters = invocation.getInvocation().getParameters();
-        Assertions.assertEquals(appendedText, parameters.get(0));
+        // Expect the arguments to match the text and item index
+        var arguments = call.arguments();
+        Assertions.assertEquals(appendedText, arguments.get(0));
         var expectedIndex = messageList.getItems().indexOf(item);
         Assertions.assertEquals(expectedIndex,
-                ((Number) parameters.get(1)).intValue());
+                ((Number) arguments.get(1)).intValue());
+    }
+
+    private JsCall getSingleCall(String methodName) {
+        List<JsCall> calls = ui.dumpJsCalls(messageList.getElement(),
+                MessageListJs.class);
+        // Expect only one pending call
+        Assertions.assertEquals(1, calls.size());
+        var call = calls.getFirst();
+        Assertions.assertEquals(methodName, call.methodName());
+        return call;
     }
 
     private void assertNoUpdate() {
