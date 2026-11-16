@@ -147,7 +147,7 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private final transient ChatClient chatClient;
     private final transient MessageWindowChatMemory chatMemory;
-    private final transient MessageChatMemoryAdvisor memoryAdvisor;
+    private final MessageChatMemoryAdvisor memoryAdvisor;
     private final boolean hasManagedMemory;
     private final boolean isMissingConversationId;
     private boolean isStreaming = true;
