@@ -106,6 +106,32 @@ class StringJavaScriptCheckTest {
     }
 
     @Test
+    void litRendererOf_qualifiedAndScopedStringFlagged() throws Exception {
+        List<Integer> lines = check("strict", MAIN,
+                """
+                        class Test {
+                            private static final String TEMPLATE = "<b>${item.name}</b>";
+                            private String template;
+                            private LitTemplates templates;
+
+                            void run(LitTemplates template) {
+                                LitRenderer.of(this.template);
+                                LitRenderer.of(Test.TEMPLATE);
+                                LitRenderer.of(template.name());
+                                LitRenderer.of(this.templates.name());
+                            }
+
+                            void other(String templates) {
+                                LitRenderer.of(templates);
+                                LitRenderer.of(template);
+                            }
+                        }
+                        """);
+
+        Assertions.assertEquals(List.of(7, 8, 14, 15), lines);
+    }
+
+    @Test
     void addEventData_allButDeclaredEventDataFlagged() throws Exception {
         List<Integer> lines = check("strict", MAIN,
                 """
@@ -154,6 +180,68 @@ class StringJavaScriptCheckTest {
                         """);
 
         Assertions.assertEquals(List.of(), lines);
+    }
+
+    @Test
+    void addEventData_nameResolvedInItsScope() throws Exception {
+        List<Integer> lines = check("strict", MAIN,
+                """
+                        class Test {
+                            private String detail;
+                            private DomEventData<Boolean> uploading;
+
+                            void declared(DomEventData<?> data) {
+                                DomEventData<?> detail = DETAILS;
+                                registration.addEventData(data);
+                                registration.addEventData(detail);
+                            }
+
+                            void other(String data) {
+                                registration.addEventData(data);
+                                registration.addEventData(detail);
+                                registration.addEventData(uploading);
+                                for (String uploading : paths) {
+                                    registration.addEventData(uploading);
+                                }
+                                list.forEach((String uploading) -> registration.addEventData(uploading));
+                            }
+                        }
+                        """);
+
+        Assertions.assertEquals(List.of(12, 13, 16, 18), lines);
+    }
+
+    @Test
+    void addEventData_qualifiedFieldResolved() throws Exception {
+        List<Integer> lines = check("strict", MAIN,
+                """
+                        class Test {
+                            private static final DomEventData<Element> TARGET = TARGETS;
+                            private static final Snippets SNIPPETS = JsSnippets.of(Snippets.class);
+                            private DomEventData<Element> target;
+                            private String path;
+
+                            void run(String target, DomEventData<?> path) {
+                                registration.addEventData(this.target);
+                                registration.addEventData(Test.TARGET);
+                                registration.addEventData(Test.SNIPPETS.detail());
+                                registration.addEventData(this.path);
+                                registration.addEventData(Other.TARGET);
+                                registration.addEventData(other.target);
+                            }
+
+                            class Inner {
+                                private String target;
+
+                                void run() {
+                                    registration.addEventData(Test.this.target);
+                                    registration.addEventData(this.target);
+                                }
+                            }
+                        }
+                        """);
+
+        Assertions.assertEquals(List.of(11, 12, 13, 21), lines);
     }
 
     @Test
@@ -251,6 +339,28 @@ class StringJavaScriptCheckTest {
                         """);
 
         Assertions.assertEquals(List.of(), lines);
+    }
+
+    @Test
+    void setFilter_registrationNameResolvedInItsScope() throws Exception {
+        List<Integer> lines = check("strict", MAIN,
+                """
+                        class Test {
+                            private DomListenerRegistration registration;
+
+                            void listen(DomListenerRegistration reg) {
+                                reg.setFilter("event.isTrusted");
+                            }
+
+                            void filter(ListDataView<String> reg, ListDataView<String> registration) {
+                                reg.setFilter("one"::equals);
+                                registration.setFilter("one"::equals);
+                                this.registration.setFilter("event.isTrusted");
+                            }
+                        }
+                        """);
+
+        Assertions.assertEquals(List.of(5, 11), lines);
     }
 
     @Test

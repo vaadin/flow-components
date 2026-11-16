@@ -16,8 +16,9 @@
 package com.vaadin.checkstyle;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
@@ -57,19 +58,25 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
  * <code>@EventData</code> annotations are not checked: Flow puts their values
  * into the bundle.
  * <p>
- * The rule has no type information. For <code>LitRenderer.of</code>, a string
- * is recognized as a literal, a concatenation, or a name declared as
- * <code>String</code> in the same file. For <code>addEventData</code>, the
- * argument is a declared <code>DomEventData</code> when it is a name declared
- * as <code>DomEventData</code> in the same file, or a method call on
- * <code>JsSnippets.of(...)</code> or on a name initialized with it in the same
- * file. Anything else is flagged, so a <code>DomEventData</code> from another
- * class is kept in a <code>DomEventData</code> variable first. As other APIs,
- * such as data views, also have a <code>setFilter</code> method, it is only
- * flagged on a DOM listener registration: a call chain through
+ * The rule has no type information. A name is resolved to its declaration in
+ * the same file, following the scopes of Java: a local variable or parameter
+ * hides a field, and a declaration in one method does not apply to another.
+ * <code>this.name</code>, <code>Outer.this.name</code> and
+ * <code>Outer.name</code> are resolved to the fields of the class. A name that
+ * is not declared in the file, such as an inherited field, is unknown.
+ * <p>
+ * For <code>LitRenderer.of</code>, a string is recognized as a literal, a
+ * concatenation, or a name declared as <code>String</code>. For
+ * <code>addEventData</code>, the argument is a declared
+ * <code>DomEventData</code> when it is a name declared as
+ * <code>DomEventData</code>, or a method call on
+ * <code>JsSnippets.of(...)</code> or on a name initialized with it. Anything
+ * else is flagged, so a <code>DomEventData</code> from another class is kept in
+ * a <code>DomEventData</code> variable first. As other APIs, such as data
+ * views, also have a <code>setFilter</code> method, it is only flagged on a DOM
+ * listener registration: a call chain through
  * <code>addEventListener(...)</code>, or a name declared as
- * <code>DomListenerRegistration</code> or initialized with such a chain in the
- * same file.
+ * <code>DomListenerRegistration</code> or initialized with such a chain.
  * <p>
  * Code that has to keep sending a string, such as a deprecated public API, is
  * marked with
@@ -92,17 +99,42 @@ public class StringJavaScriptCheck extends AbstractCheck {
      */
     public static final String FILTER_MSG_KEY = "string.filter.call";
 
+    /**
+     * Nodes that start a scope for the names declared directly in them, or in
+     * their parameters, loop header or resources.
+     */
+    private static final Set<Integer> SCOPES = Set.of(TokenTypes.SLIST,
+            TokenTypes.OBJBLOCK, TokenTypes.METHOD_DEF, TokenTypes.CTOR_DEF,
+            TokenTypes.COMPACT_CTOR_DEF, TokenTypes.LAMBDA,
+            TokenTypes.LITERAL_FOR, TokenTypes.LITERAL_TRY,
+            TokenTypes.LITERAL_CATCH);
+
+    private static final Set<Integer> CLASSES = Set.of(TokenTypes.CLASS_DEF,
+            TokenTypes.INTERFACE_DEF, TokenTypes.ENUM_DEF,
+            TokenTypes.RECORD_DEF);
+
+    /**
+     * What a declared name is known to hold.
+     */
+    private enum Kind {
+        STRING, EVENT_DATA, SNIPPETS, REGISTRATION, OTHER
+    }
+
     private String cspMode = "off";
 
     private boolean skipFile;
 
-    private final Set<String> stringNames = new HashSet<>();
+    /**
+     * The declarations of each scope, by name.
+     */
+    private final Map<DetailAST, Map<String, DetailAST>> scopes = new HashMap<>();
 
-    private final Set<String> eventDataNames = new HashSet<>();
+    /**
+     * The bodies of the named classes in the file, by simple name.
+     */
+    private final Map<String, DetailAST> classBodies = new HashMap<>();
 
-    private final Set<String> snippetsNames = new HashSet<>();
-
-    private final Set<String> registrationNames = new HashSet<>();
+    private final Map<DetailAST, Kind> kinds = new HashMap<>();
 
     private final List<DetailAST> calls = new ArrayList<>();
 
@@ -140,10 +172,9 @@ public class StringJavaScriptCheck extends AbstractCheck {
         skipFile = !"strict".equalsIgnoreCase(cspMode)
                 || path.contains("/src/test/")
                 || path.contains("-integration-tests/");
-        stringNames.clear();
-        eventDataNames.clear();
-        snippetsNames.clear();
-        registrationNames.clear();
+        scopes.clear();
+        classBodies.clear();
+        kinds.clear();
         calls.clear();
     }
 
@@ -153,29 +184,35 @@ public class StringJavaScriptCheck extends AbstractCheck {
             return;
         }
         if (ast.getType() != TokenTypes.METHOD_CALL) {
-            // A variable, field or parameter
-            String name = ast.findFirstToken(TokenTypes.IDENT).getText();
-            String type = typeName(ast.findFirstToken(TokenTypes.TYPE));
-            if ("String".equals(type)) {
-                stringNames.add(name);
-            } else if ("DomEventData".equals(type)) {
-                eventDataNames.add(name);
-            } else if ("DomListenerRegistration".equals(type)) {
-                registrationNames.add(name);
-            }
-            DetailAST initializer = ast.findFirstToken(TokenTypes.ASSIGN);
-            if (initializer != null && initializer.getFirstChild() != null) {
-                DetailAST value = unwrap(initializer.getFirstChild());
-                if (isJsSnippetsOf(value)) {
-                    snippetsNames.add(name);
-                } else if (isListenerRegistration(value)) {
-                    registrationNames.add(name);
-                }
-            }
+            declare(ast);
         } else {
             // Checked when the whole file is read, so that a name declared
             // after its use is known
             calls.add(ast);
+        }
+    }
+
+    /**
+     * Records a variable, field or parameter in its scope. Its kind is only
+     * found when a call needs it, as its initializer can refer to names
+     * declared later in the file.
+     */
+    private void declare(DetailAST declaration) {
+        DetailAST scope = declaration.getParent();
+        while (scope != null && !SCOPES.contains(scope.getType())) {
+            scope = scope.getParent();
+        }
+        if (scope == null) {
+            return;
+        }
+        String name = declaration.findFirstToken(TokenTypes.IDENT).getText();
+        scopes.computeIfAbsent(scope, key -> new HashMap<>()).putIfAbsent(name,
+                declaration);
+        DetailAST owner = scope.getParent();
+        if (scope.getType() == TokenTypes.OBJBLOCK && owner != null
+                && CLASSES.contains(owner.getType())) {
+            classBodies.putIfAbsent(
+                    owner.findFirstToken(TokenTypes.IDENT).getText(), scope);
         }
     }
 
@@ -248,13 +285,7 @@ public class StringJavaScriptCheck extends AbstractCheck {
             }
             node = target.getFirstChild();
         }
-        return switch (node.getType()) {
-        case TokenTypes.IDENT -> registrationNames.contains(node.getText());
-        // this.registration
-        case TokenTypes.DOT ->
-            registrationNames.contains(node.getLastChild().getText());
-        default -> false;
-        };
+        return kindOfReference(node) == Kind.REGISTRATION;
     }
 
     /**
@@ -267,8 +298,7 @@ public class StringJavaScriptCheck extends AbstractCheck {
         case TokenTypes.STRING_LITERAL, TokenTypes.TEXT_BLOCK_LITERAL_BEGIN,
                 TokenTypes.PLUS ->
             true;
-        case TokenTypes.IDENT -> stringNames.contains(node.getText());
-        default -> false;
+        default -> kindOfReference(node) == Kind.STRING;
         };
     }
 
@@ -279,22 +309,125 @@ public class StringJavaScriptCheck extends AbstractCheck {
      */
     private boolean isDeclaredEventData(DetailAST expression) {
         DetailAST node = unwrap(expression);
-        if (node.getType() == TokenTypes.IDENT) {
-            return eventDataNames.contains(node.getText());
+        if (node.getType() != TokenTypes.METHOD_CALL) {
+            return kindOfReference(node) == Kind.EVENT_DATA;
         }
-        if (node.getType() != TokenTypes.METHOD_CALL
-                || node.getFirstChild().getType() != TokenTypes.DOT) {
+        if (node.getFirstChild().getType() != TokenTypes.DOT) {
             return false;
         }
         DetailAST receiver = node.getFirstChild().getFirstChild();
-        return switch (receiver.getType()) {
-        case TokenTypes.METHOD_CALL -> isJsSnippetsOf(receiver);
-        case TokenTypes.IDENT -> snippetsNames.contains(receiver.getText());
-        // this.SNIPPETS or Outer.SNIPPETS
-        case TokenTypes.DOT ->
-            snippetsNames.contains(receiver.getLastChild().getText());
-        default -> false;
+        return isJsSnippetsOf(receiver)
+                || kindOfReference(receiver) == Kind.SNIPPETS;
+    }
+
+    /**
+     * The kind of a reference to a declared name: <code>name</code>,
+     * <code>this.name</code>, <code>Outer.this.name</code> or
+     * <code>Outer.name</code>, or <code>null</code> if the name is not declared
+     * in the file or the expression is not such a reference.
+     */
+    private Kind kindOfReference(DetailAST expression) {
+        DetailAST node = unwrap(expression);
+        DetailAST declaration = switch (node.getType()) {
+        case TokenTypes.IDENT -> declarationInScope(node, node.getText());
+        case TokenTypes.DOT -> fieldDeclaration(node);
+        default -> null;
         };
+        return declaration == null ? null : kindOf(declaration);
+    }
+
+    /**
+     * The declaration that a name used at the node refers to: the one in the
+     * innermost enclosing scope, or <code>null</code>.
+     */
+    private DetailAST declarationInScope(DetailAST node, String name) {
+        for (DetailAST scope = node.getParent(); scope != null; scope = scope
+                .getParent()) {
+            Map<String, DetailAST> declarations = scopes.get(scope);
+            if (declarations != null && declarations.containsKey(name)) {
+                return declarations.get(name);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The field declaration of a qualified name, such as <code>this.name</code>
+     * or <code>Outer.name</code>, or <code>null</code>.
+     */
+    private DetailAST fieldDeclaration(DetailAST dot) {
+        DetailAST name = dot.getLastChild();
+        if (name.getType() != TokenTypes.IDENT) {
+            return null;
+        }
+        DetailAST classBody = classBody(dot, dot.getFirstChild());
+        Map<String, DetailAST> fields = classBody == null ? null
+                : scopes.get(classBody);
+        return fields == null ? null : fields.get(name.getText());
+    }
+
+    /**
+     * The body of the class that a qualifier refers to: <code>this</code>,
+     * <code>Outer.this</code> or <code>Outer</code>, or <code>null</code>.
+     */
+    private DetailAST classBody(DetailAST node, DetailAST qualifier) {
+        if (qualifier.getType() == TokenTypes.LITERAL_THIS) {
+            DetailAST body = node.getParent();
+            while (body != null && body.getType() != TokenTypes.OBJBLOCK) {
+                body = body.getParent();
+            }
+            return body;
+        }
+        DetailAST className = qualifier;
+        if (className.getType() == TokenTypes.DOT && className.getLastChild()
+                .getType() == TokenTypes.LITERAL_THIS) {
+            className = className.getFirstChild();
+        }
+        // A variable hides a class of the same name
+        if (className.getType() != TokenTypes.IDENT
+                || declarationInScope(className, className.getText()) != null) {
+            return null;
+        }
+        return classBodies.get(className.getText());
+    }
+
+    private Kind kindOf(DetailAST declaration) {
+        Kind known = kinds.get(declaration);
+        if (known != null) {
+            return known;
+        }
+        // Stops a name whose initializer refers back to it
+        kinds.put(declaration, Kind.OTHER);
+        Kind kind = declaredKind(declaration);
+        kinds.put(declaration, kind);
+        return kind;
+    }
+
+    /**
+     * The kind of a declaration from its type, or else from its initializer.
+     */
+    private Kind declaredKind(DetailAST declaration) {
+        String type = typeName(declaration.findFirstToken(TokenTypes.TYPE));
+        if ("String".equals(type)) {
+            return Kind.STRING;
+        }
+        if ("DomEventData".equals(type)) {
+            return Kind.EVENT_DATA;
+        }
+        if ("DomListenerRegistration".equals(type)) {
+            return Kind.REGISTRATION;
+        }
+        DetailAST initializer = declaration.findFirstToken(TokenTypes.ASSIGN);
+        if (initializer != null && initializer.getFirstChild() != null) {
+            DetailAST value = unwrap(initializer.getFirstChild());
+            if (isJsSnippetsOf(value)) {
+                return Kind.SNIPPETS;
+            }
+            if (isListenerRegistration(value)) {
+                return Kind.REGISTRATION;
+            }
+        }
+        return Kind.OTHER;
     }
 
     private static boolean isJsSnippetsOf(DetailAST node) {
