@@ -97,6 +97,12 @@
         <jandex.format.version>13</jandex.format.version>
         <spotless.plugin.version>3.11.0</spotless.plugin.version>
         <checkstyle.version>14.4.0</checkstyle.version>
+        <!-- Content Security Policy mode of a module: off or strict. A module
+             sets strict once it no longer sends JavaScript as a string. It
+             turns on the StringJavaScriptCheck checkstyle rule, the strict
+             mode in unit tests that use MockUIExtension, and the strict mode
+             of the integration test server. -->
+        <csp.mode>off</csp.mode>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -395,6 +401,7 @@
                             <vaadin.productionMode>false</vaadin.productionMode>
                             <vaadin.reuseDevServer>true</vaadin.reuseDevServer>
                             <vaadin.frontend.hotdeploy>true</vaadin.frontend.hotdeploy>
+                            <vaadin.csp>${csp.mode}</vaadin.csp>
                         </systemProperties>
                     </configuration>
                     <executions>
@@ -424,6 +431,9 @@
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
                         <skip>${skipUnitTests}</skip>
+                        <systemPropertyVariables>
+                            <vaadin.test.csp>${csp.mode}</vaadin.test.csp>
+                        </systemPropertyVariables>
                         <!-- Fail a hung test with a stack trace instead of
                              blocking the build. Only works for code that
                              reacts to an interrupt. -->
@@ -443,6 +453,7 @@
                     <configuration>
                         <configLocation>checkstyle/checkstyle.xml</configLocation>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <propertyExpansion>cspMode=${csp.mode}</propertyExpansion>
                     </configuration>
                     <dependencies>
                         <dependency>

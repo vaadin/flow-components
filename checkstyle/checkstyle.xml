@@ -11,6 +11,10 @@
 
     <module name="TreeWalker">
         <module name="com.vaadin.checkstyle.UiSetCurrentCheck"/>
+        <!-- Only runs in modules whose csp.mode Maven property is strict -->
+        <module name="com.vaadin.checkstyle.StringJavaScriptCheck">
+            <property name="cspMode" value="${cspMode}" default="off"/>
+        </module>
         <module name="SuppressWarningsHolder"/>
     </module>
 </module>
