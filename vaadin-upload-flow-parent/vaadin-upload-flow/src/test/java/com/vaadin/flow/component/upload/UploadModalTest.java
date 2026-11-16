@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.upload.tests;
+package com.vaadin.flow.component.upload;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,12 +29,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamVariable;
@@ -94,9 +94,10 @@ class UploadModalTest {
     private void fireUploadDomEvent(String eventType, boolean filesUploading) {
         Element element = upload.getElement();
         DomEvent event = new DomEvent(element, eventType,
-                JacksonUtils.createObjectNode().put(
-                        "element.files.some(file => file.uploading)",
-                        filesUploading));
+                JacksonUtils.createObjectNode()
+                        .put(ElementListenerMap.getEventDataKey(JsSnippets
+                                .of(UploadEventDataJs.class).filesUploading()),
+                                filesUploading));
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
