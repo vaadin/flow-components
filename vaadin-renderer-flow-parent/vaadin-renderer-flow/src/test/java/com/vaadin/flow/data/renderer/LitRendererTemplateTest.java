@@ -19,12 +19,10 @@ import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -34,7 +32,6 @@ import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.server.CspMode;
 import com.vaadin.flow.server.CspViolationException;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
@@ -64,11 +61,6 @@ class LitRendererTemplateTest {
         ui.dumpPendingJavaScriptInvocations();
     }
 
-    @AfterEach
-    void clearService() {
-        VaadinService.setCurrent(null);
-    }
-
     @Test
     void declaredTemplate_setsTemplateRenderer() {
         CompiledLitTemplate template = JsSnippets.of(TestTemplates.class)
@@ -94,7 +86,7 @@ class LitRendererTemplateTest {
 
     @Test
     void strictCsp_declaredTemplate_rendered() {
-        enableStrictCsp();
+        ui.setCspMode(CspMode.STRICT);
         CompiledLitTemplate template = JsSnippets.of(TestTemplates.class)
                 .name("Name");
 
@@ -104,7 +96,7 @@ class LitRendererTemplateTest {
 
     @Test
     void strictCsp_stringTemplate_throws() {
-        enableStrictCsp();
+        ui.setCspMode(CspMode.STRICT);
         LitRenderer<String> renderer = LitRenderer
                 .of("<span>${item.name}</span>");
 
@@ -114,7 +106,7 @@ class LitRendererTemplateTest {
 
     @Test
     void strictCsp_builtInRenderers_useDeclaredTemplates() {
-        enableStrictCsp();
+        ui.setCspMode(CspMode.STRICT);
 
         List<LitRenderer<String>> renderers = List.of(
                 new ComponentRenderer<>(item -> new TestDiv()),
@@ -214,11 +206,5 @@ class LitRendererTemplateTest {
                 .toList();
         Assertions.assertEquals(1, calls.size());
         return calls.get(0);
-    }
-
-    private void enableStrictCsp() {
-        Mockito.when(ui.getService().getDeploymentConfiguration().getCspMode())
-                .thenReturn(CspMode.STRICT);
-        VaadinService.setCurrent(ui.getService());
     }
 }
