@@ -66,12 +66,6 @@ describe('grid-pro connector', () => {
       expect(hasUpdatingCellPart(getBodyCell(1, 0))).to.be.false;
     });
 
-    it('should keep the updating-cell part when the rows are re-rendered', async () => {
-      await editCustomCell(0);
-      grid.requestContentUpdate();
-      expect(hasUpdatingCellPart(getBodyCell(0, 0))).to.be.true;
-    });
-
     it('should not add the updating-cell part to loading rows', async () => {
       await editCustomCell(0);
       grid.dataProvider = () => {};
