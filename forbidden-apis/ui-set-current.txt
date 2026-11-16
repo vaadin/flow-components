@@ -1,0 +1,7 @@
+# Checked in the main and test classes of every module. Suppress a call with
+# @SuppressForbidden on its method or class.
+
+# Modules without Flow, such as the TestBench elements, cannot call it
+@ignoreMissingClasses
+
+com.vaadin.flow.component.UI#setCurrent(com.vaadin.flow.component.UI) @ Do not set the current UI directly. Use MockUIExtension to set it up in tests

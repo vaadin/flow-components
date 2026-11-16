@@ -1,0 +1,27 @@
+# Flow APIs that send JavaScript to the browser as a string, which the browser
+# compiles and a Content Security Policy without unsafe-eval blocks. Checked in
+# the main classes of modules whose csp.mode Maven property is strict. Suppress
+# a call, such as in a deprecated public API, with @SuppressForbidden on its
+# method or class.
+
+# Modules without Flow, such as the TestBench elements, cannot call them
+@ignoreMissingClasses
+
+@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare it in a @JsDefinition interface and call it through executeJs(Class) or JsSnippets.of(Class)
+com.vaadin.flow.dom.Element#executeJs(java.lang.String,java.lang.Object[])
+com.vaadin.flow.dom.Element#executeJs(java.lang.String,java.io.Serializable[])
+com.vaadin.flow.component.page.Page#executeJs(java.lang.String,java.lang.Object[])
+com.vaadin.flow.component.page.Page#executeJs(java.lang.String,java.io.Serializable[])
+
+@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare a JsFunction in a @JsDefinition interface
+com.vaadin.flow.dom.JsFunction#of(java.lang.String,java.lang.Object[])
+com.vaadin.flow.component.page.Page#addDynamicImport(java.lang.String)
+com.vaadin.flow.dom.Element#addJsInitializer(java.lang.String,java.lang.Object[])
+com.vaadin.flow.component.Shortcuts#setShortcutListenOnElement(java.lang.String,com.vaadin.flow.component.Component)
+
+@defaultMessage Adds event data as a string, which the browser compiles unless it is a property path. Use addEventDataPath(...) or addEventDataElementPath(...) for a property path, or a DomEventData from a @JsDefinition interface
+com.vaadin.flow.dom.DomListenerRegistration#addEventData(java.lang.String)
+com.vaadin.flow.dom.DomListenerRegistration#addEventDataElement(java.lang.String)
+
+@defaultMessage Sets an event filter as a string, which the browser compiles unless it is a property path. Declare a DomEventFilter in a @JsDefinition interface and set it with setFilterExpression(...)
+com.vaadin.flow.dom.DomListenerRegistration#setFilter(java.lang.String)
