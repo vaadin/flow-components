@@ -40,12 +40,16 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.event.Level;
+import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
@@ -987,7 +991,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void setHistory_withChatClientConstructor_isNoOp() {
+    void setHistory_chatClientWithoutMemoryAdvisor_restoresConversation() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         chatClientProvider.setStreaming(false);
@@ -997,19 +1001,213 @@ class SpringAILLMProviderTest {
                 new ChatMessage(ChatMessage.Role.ASSISTANT, "Old answer", null,
                         null));
 
-        Assertions.assertDoesNotThrow(() -> chatClientProvider
-                .setHistory(history, Collections.emptyMap()));
-
-        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
-                .thenReturn(mockSimpleChatResponse("Response"));
+        chatClientProvider.setHistory(history, Collections.emptyMap());
+        mockSimpleChat("Response");
         chatClientProvider.stream(createSimpleRequest("New question"))
                 .blockFirst();
 
+        var texts = capturePrompt().getInstructions().stream()
+                .map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("Old message", "Old answer", "New question"), texts);
+        Assertions.assertEquals(0, warningCount(""));
+    }
+
+    @Test
+    void chatClientConstructor_withoutMemoryAdvisor_retainsHistory() {
+        var chatClientProvider = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                mockSimpleChatResponse("Response 1"),
+                mockSimpleChatResponse("Response 2"));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockFirst();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockFirst();
+
+        var texts = getPromptCaptor(2).getAllValues().get(1).getInstructions()
+                .stream().map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("First message", "Response 1", "Second message"),
+                texts);
+    }
+
+    @Test
+    void chatClientConstructor_withoutMemoryAdvisor_streaming_retainsHistory() {
+        var chatClientProvider = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("Response 1", "STOP")))
+                .thenReturn(Flux.just(mockChatResponse("Response 2", "STOP")));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockLast();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockLast();
+
         var captor = ArgumentCaptor.forClass(Prompt.class);
-        Mockito.verify(mockChatModel).call(captor.capture());
-        var messages = captor.getValue().getInstructions();
-        Assertions.assertFalse(messages.stream()
-                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+        Mockito.verify(mockChatModel, Mockito.times(2))
+                .stream(captor.capture());
+        var texts = captor.getAllValues().get(1).getInstructions().stream()
+                .map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("First message", "Response 1", "Second message"),
+                texts);
+    }
+
+    @Test
+    void chatClientConstructor_withoutMemoryAdvisor_withMaxMessagesLimit_dropsOldestMessages() {
+        var chatClientProvider = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
+        chatClientProvider.setStreaming(false);
+        var history = IntStream.range(0, 20)
+                .mapToObj(i -> List.of(
+                        new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                                null, null),
+                        new ChatMessage(ChatMessage.Role.ASSISTANT,
+                                "Answer " + i, null, null)))
+                .flatMap(List::stream).toList();
+        chatClientProvider.setHistory(history, Collections.emptyMap());
+        mockSimpleChat("Response");
+
+        chatClientProvider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var messages = capturePrompt().getInstructions();
+        // The 30 newest restored messages, then the new prompt
+        Assertions.assertEquals(31, messages.size());
+        Assertions.assertEquals("Question 5", messages.getFirst().getText());
+        Assertions.assertEquals("Check", messages.getLast().getText());
+    }
+
+    @Test
+    void chatClientConstructor_withoutMemoryAdvisor_keepsClientDefaults() {
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultSystem("Client system text")
+                .defaultTools(new SampleToolsClass()).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        mockSimpleChat("Response");
+
+        chatClientProvider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var prompt = capturePrompt();
+        Assertions.assertInstanceOf(SystemMessage.class,
+                prompt.getInstructions().getFirst());
+        Assertions.assertEquals("Client system text",
+                prompt.getInstructions().getFirst().getText());
+        var options = (ToolCallingChatOptions) prompt.getOptions();
+        Assertions.assertTrue(options.getToolCallbacks().stream()
+                .anyMatch(callback -> callback.getToolDefinition().name()
+                        .equals("getTemperature")),
+                "Expected the client's default tool in the prompt, but got: "
+                        + options.getToolCallbacks());
+    }
+
+    @Test
+    void chatClientConstructor_withoutAdvisors_keepsDefaultAdvisorParams() {
+        // Turning off the auto-registered ToolCallingAdvisor is a default
+        // advisor parameter on a client without advisors. Kept, the tool call
+        // reaches the provider unexecuted; lost, Spring AI would call the
+        // model again with the tool's result.
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultAdvisors(
+                        AdvisorParams.toolCallingAdvisorAutoRegister(false))
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponseWithPendingToolCall())
+                .thenReturn(mockSimpleChatResponse("done"));
+
+        chatClientProvider.stream(createToolRequest()).collectList().block();
+
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .call(Mockito.any(Prompt.class));
+        Assertions.assertEquals(1, warningCount("tool calls still pending"));
+    }
+
+    @Test
+    void chatClientConstructor_withOtherAdvisor_addsMemoryAndKeepsAdvisor() {
+        var advisor = Mockito.mock(CallAdvisor.class);
+        Mockito.when(advisor.getName()).thenReturn("Other advisor");
+        Mockito.when(advisor.adviseCall(Mockito.any(), Mockito.any()))
+                .thenAnswer(invocation -> invocation
+                        .<CallAdvisorChain> getArgument(1)
+                        .nextCall(invocation.getArgument(0)));
+        var chatClientProvider = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel).defaultAdvisors(advisor).build());
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                mockSimpleChatResponse("Response 1"),
+                mockSimpleChatResponse("Response 2"));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockFirst();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockFirst();
+
+        var texts = getPromptCaptor(2).getAllValues().get(1).getInstructions()
+                .stream().map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("First message", "Response 1", "Second message"),
+                texts);
+        Mockito.verify(advisor, Mockito.times(2)).adviseCall(Mockito.any(),
+                Mockito.any());
+    }
+
+    @Test
+    void chatClientConstructor_customClient_createsEveryRequestWithClient() {
+        // An application's own ChatClient that creates its requests with a
+        // client built by Spring AI, for example to add something to each
+        // request. The provider must not replace it with a copy.
+        var builtClient = ChatClient.builder(mockChatModel).build();
+        var customClient = Mockito.mock(ChatClient.class);
+        Mockito.when(customClient.prompt())
+                .thenAnswer(invocation -> builtClient.prompt());
+        var chatClientProvider = new SpringAILLMProvider(customClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.clearInvocations(customClient);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                mockSimpleChatResponse("Response 1"),
+                mockSimpleChatResponse("Response 2"));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockFirst();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockFirst();
+
+        Mockito.verify(customClient, Mockito.times(2)).prompt();
+        var texts = getPromptCaptor(2).getAllValues().get(1).getInstructions()
+                .stream().map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("First message", "Response 1", "Second message"),
+                texts);
+    }
+
+    @Test
+    void chatClientConstructor_notInspectable_doesNotAddMemory() {
+        var chatClientProvider = new SpringAILLMProvider(
+                uninspectableClient(ChatClient.builder(mockChatModel).build()));
+        chatClientProvider.setStreaming(false);
+        chatClientProvider
+                .setHistory(
+                        List.of(new ChatMessage(ChatMessage.Role.USER,
+                                "Old message", null, null)),
+                        Collections.emptyMap());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                mockSimpleChatResponse("Response 1"),
+                mockSimpleChatResponse("Response 2"));
+
+        chatClientProvider.stream(createSimpleRequest("First message"))
+                .blockFirst();
+        chatClientProvider.stream(createSimpleRequest("Second message"))
+                .blockFirst();
+
+        var texts = getPromptCaptor(2).getAllValues().get(1).getInstructions()
+                .stream().map(Message::getText).toList();
+        Assertions.assertEquals(List.of("Second message"), texts);
     }
 
     @Test
@@ -1034,26 +1232,10 @@ class SpringAILLMProviderTest {
         var captor = ArgumentCaptor.forClass(Prompt.class);
         Mockito.verify(mockChatModel).call(captor.capture());
         var messages = captor.getValue().getInstructions();
-        Assertions.assertTrue(messages.stream()
-                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
-        Assertions.assertTrue(messages.stream()
-                .anyMatch(msg -> Objects.equals(msg.getText(), "Old answer")));
-        Assertions.assertTrue(messages.stream().anyMatch(
-                msg -> Objects.equals(msg.getText(), "New question")));
-    }
-
-    @Test
-    void setHistory_chatClientWithoutMemoryAdvisor_warns() {
-        var chatClientProvider = new SpringAILLMProvider(
-                ChatClient.builder(mockChatModel).build());
-
-        chatClientProvider.setHistory(List
-                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
-                Collections.emptyMap());
-
-        Assertions.assertEquals(1, warningCount("no chat memory advisor"));
-        Assertions.assertEquals(1, warningCount(""),
-                "Expected the missing-advisor warning to be the only one");
+        var texts = messages.stream().map(Message::getText).toList();
+        // Each message once: the provider adds no memory of its own on top
+        Assertions.assertEquals(
+                List.of("Old message", "Old answer", "New question"), texts);
     }
 
     @Test
@@ -1102,9 +1284,8 @@ class SpringAILLMProviderTest {
                 Collections.emptyMap());
 
         Assertions.assertEquals(0, warningCount(""));
-        Assertions.assertEquals(1,
-                debugCount("provider was created with a ChatClient"));
         Assertions.assertEquals(1, debugCount("cannot be inspected"));
+        Assertions.assertEquals(1, debugCount("Skipping history restoration"));
     }
 
     @Test
@@ -1121,10 +1302,9 @@ class SpringAILLMProviderTest {
 
         Assertions.assertEquals(0, warningCount(""));
         Assertions.assertEquals(1,
-                debugCount("provider was created with a ChatClient"));
-        Assertions.assertEquals(1,
                 debugCount("did not accept a bare prompt()"));
-        Assertions.assertEquals(1, debugCount(""),
+        Assertions.assertEquals(1, debugCount("Skipping history restoration"));
+        Assertions.assertEquals(2, debugCount(""),
                 "Expected the rejected inspection to be reported once");
     }
 
@@ -1310,12 +1490,13 @@ class SpringAILLMProviderTest {
     @Test
     void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
         // Zero-chunk stream: nothing ever flips the terminal gate.
-        // Uses the ChatClient constructor so no MessageChatMemoryAdvisor
-        // sits on the chain. The advisor's stream aggregation requires
-        // at least one emitted chunk to propagate the conversation id,
-        // which would fail an empty-flux test before the warn-on-no-
-        // terminal logic could run.
-        var chatClient = ChatClient.builder(mockChatModel).build();
+        // Uses a ChatClient the provider cannot inspect, so no
+        // MessageChatMemoryAdvisor sits on the chain. The advisor's stream
+        // aggregation requires at least one emitted chunk to propagate the
+        // conversation id, which would fail an empty-flux test before the
+        // warn-on-no-terminal logic could run.
+        var chatClient = uninspectableClient(
+                ChatClient.builder(mockChatModel).build());
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
