@@ -39,8 +39,8 @@ import com.vaadin.flow.server.VaadinSession;
 class SubmitDisabler implements Serializable {
 
     private final ProcessingFlag processing;
-    private AIInput input;
-    private UploadTrackingReceiver uploadReceiver;
+    private final AIInput input;
+    private final UploadTrackingReceiver uploadReceiver;
     /**
      * Whether submitting is disabled by this class, rather than by the
      * application. Accessed only while the session is locked.
@@ -59,31 +59,26 @@ class SubmitDisabler implements Serializable {
     private transient volatile VaadinSession session; // NOSONAR
 
     /**
-     * Creates a disabler that does nothing until an input is set with
-     * {@link #attach(AIInput, AIFileReceiver)}.
+     * Creates a disabler for the given input.
      *
      * @param processing
      *            the busy flag of the orchestrator
-     */
-    SubmitDisabler(ProcessingFlag processing) {
-        this.processing = processing;
-    }
-
-    /**
-     * Starts disabling submitting on the given input.
-     *
      * @param input
      *            the input of the orchestrator
      * @param fileReceiver
      *            the file receiver of the orchestrator, or {@code null} if
      *            there is none
      */
-    void attach(AIInput input, AIFileReceiver fileReceiver) {
+    SubmitDisabler(ProcessingFlag processing, AIInput input,
+            AIFileReceiver fileReceiver) {
+        this.processing = processing;
         this.input = input;
         processing.setListener(this::processingChanged);
         if (fileReceiver instanceof UploadTrackingReceiver receiver) {
             uploadReceiver = receiver;
             receiver.setUploadStateListener(this::update);
+        } else {
+            uploadReceiver = null;
         }
     }
 
@@ -94,9 +89,6 @@ class SubmitDisabler implements Serializable {
      * is locked.
      */
     void update() {
-        if (input == null) {
-            return;
-        }
         var uploading = uploadReceiver != null
                 && uploadReceiver.isReceivingFiles();
         if (processing.get() || uploading) {

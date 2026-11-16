@@ -213,11 +213,11 @@ public class AIOrchestrator implements Serializable {
      */
     private final ProcessingFlag isProcessing = new ProcessingFlag();
     /**
-     * Disables submitting on the input while busy. Notified when
-     * {@link #isProcessing} is released, so the release paths do not call it.
+     * Disables submitting on the input while busy, or {@code null} if there is
+     * no input. Notified when {@link #isProcessing} is released, so the release
+     * paths do not call it.
      */
-    private final SubmitDisabler submitDisabler = new SubmitDisabler(
-            isProcessing);
+    private SubmitDisabler submitDisabler;
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
     /**
@@ -568,7 +568,9 @@ public class AIOrchestrator implements Serializable {
         }
         // Here rather than when the flag is claimed, so that submitting which
         // the interceptor or a request hook disabled is left as it is
-        submitDisabler.update();
+        if (submitDisabler != null) {
+            submitDisabler.update();
+        }
     }
 
     private void processUserInput(String userMessage,
@@ -1144,7 +1146,9 @@ public class AIOrchestrator implements Serializable {
          */
         public void apply() {
             orchestrator.isProcessing.set(false);
-            orchestrator.submitDisabler.update();
+            if (orchestrator.submitDisabler != null) {
+                orchestrator.submitDisabler.update();
+            }
             orchestrator.provider = provider;
             orchestrator.tools = tools;
             orchestrator.controller = controller;
@@ -1708,7 +1712,8 @@ public class AIOrchestrator implements Serializable {
                 if (input != null) {
                     input.addSubmitListener(
                             msg -> orchestrator.doPrompt(msg, null));
-                    orchestrator.submitDisabler.attach(input, fileReceiver);
+                    orchestrator.submitDisabler = new SubmitDisabler(
+                            orchestrator.isProcessing, input, fileReceiver);
                 }
 
                 if (attachmentClickListener != null && messageList != null) {
