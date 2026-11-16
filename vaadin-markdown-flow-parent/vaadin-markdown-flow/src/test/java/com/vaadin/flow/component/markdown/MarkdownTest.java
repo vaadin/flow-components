@@ -13,32 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.markdown.tests;
+package com.vaadin.flow.component.markdown;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.markdown.Markdown;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.js.JsCall;
+import com.vaadin.tests.MockUIExtension;
 
 class MarkdownTest {
 
-    private final UI ui = new UI();
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
+
     private Markdown markdown;
 
     @BeforeEach
     void setup() {
         markdown = new Markdown();
-
-        var mockSession = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(mockSession);
         ui.add(markdown);
     }
 
@@ -106,7 +104,8 @@ class MarkdownTest {
 
         markdown.setContent("**Hello** _World_");
         Assertions.assertEquals("**Hello** _World_", markdown.getContent());
-        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals(0,
+                ui.dumpPendingJavaScriptInvocations().size());
     }
 
     @Test
@@ -131,7 +130,8 @@ class MarkdownTest {
         markdown.removeFromParent();
 
         markdown.setContent("**Hello** _World_");
-        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals(0,
+                ui.dumpPendingJavaScriptInvocations().size());
 
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
@@ -168,39 +168,13 @@ class MarkdownTest {
 
     private void assertUpdateMarkdownCall(Component component, String content,
             boolean isAppend) {
-        var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
+        List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
+                MarkdownJs.class);
 
-        Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
-
-        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
-        var parameters = pendingJavaScriptInvocation.getInvocation()
-                .getParameters();
-        var element = component != null ? component.getElement() : null;
-
-        if (isAppend) {
-            Assertions.assertEquals(
-                    "return (async function() { this.content += $0}).apply($1)",
-                    pendingJavaScriptInvocation.getInvocation()
-                            .getExpression());
-        } else {
-            Assertions.assertEquals(
-                    "return (async function() { this.content = $0}).apply($1)",
-                    pendingJavaScriptInvocation.getInvocation()
-                            .getExpression());
-        }
-        Assertions.assertEquals(content, parameters.get(0));
-        Assertions.assertEquals(element, parameters.get(1));
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(isAppend ? "appendContent" : "setContent",
+                calls.get(0).methodName());
+        Assertions.assertEquals(Collections.singletonList(content),
+                calls.get(0).arguments());
     }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        fakeClientCommunication();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
-    }
-
 }
