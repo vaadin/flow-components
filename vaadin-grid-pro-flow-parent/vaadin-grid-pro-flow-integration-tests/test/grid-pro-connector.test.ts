@@ -52,9 +52,12 @@ describe('grid-pro connector', () => {
       await nextFrame();
     }
 
-    it('should add the updating-cell part to the edited cell after a custom editor change', async () => {
+    it('should add the updating-cell part to the edited cell until the update is done', async () => {
       await editCustomCell(0);
       expect(hasUpdatingCellPart(getBodyCell(0, 0))).to.be.true;
+
+      gridProConnector.clearUpdatingCell(grid);
+      expect(hasUpdatingCellPart(getBodyCell(0, 0))).to.be.false;
     });
 
     it('should not add the updating-cell part to other cells', async () => {
@@ -63,9 +66,15 @@ describe('grid-pro connector', () => {
       expect(hasUpdatingCellPart(getBodyCell(1, 0))).to.be.false;
     });
 
-    it('should remove the updating-cell part when the update is done', async () => {
+    it('should keep the updating-cell part when the rows are re-rendered', async () => {
       await editCustomCell(0);
-      gridProConnector.clearUpdatingCell(grid);
+      grid.requestContentUpdate();
+      expect(hasUpdatingCellPart(getBodyCell(0, 0))).to.be.true;
+    });
+
+    it('should not add the updating-cell part to loading rows', async () => {
+      await editCustomCell(0);
+      grid.dataProvider = () => {};
       expect(hasUpdatingCellPart(getBodyCell(0, 0))).to.be.false;
     });
   });
