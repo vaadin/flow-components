@@ -266,17 +266,6 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Scrolls to the start of the last page.
-     * <p>
-     * While a document is loading, for example right after {@code setSrc}, it
-     * scrolls once the document has loaded, and in a hidden viewer, once the
-     * viewer is shown. Does nothing without a document.
-     */
-    public void scrollToLastPage() {
-        getElement().callJsFunction("scrollToLastPage");
-    }
-
-    /**
      * Gets a read-only signal with the current page, which is the page that
      * takes up most of the visible area.
      * <p>

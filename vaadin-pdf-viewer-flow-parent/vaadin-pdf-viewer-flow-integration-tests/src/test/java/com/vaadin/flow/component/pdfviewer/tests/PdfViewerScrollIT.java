@@ -36,13 +36,4 @@ public class PdfViewerScrollIT extends AbstractComponentIT {
 
         waitUntil(driver -> viewer.getPage() == 3);
     }
-
-    @Test
-    public void scrollToLastPage_lastPageIsCurrent() {
-        Assert.assertEquals(1, viewer.getPage());
-
-        clickElementWithJs("scroll-to-last-page");
-
-        waitUntil(driver -> viewer.getPage() == 6);
-    }
 }

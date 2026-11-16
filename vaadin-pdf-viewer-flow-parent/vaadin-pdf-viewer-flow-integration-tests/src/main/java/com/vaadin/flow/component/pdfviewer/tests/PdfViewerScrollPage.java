@@ -24,10 +24,6 @@ public class PdfViewerScrollPage extends Div {
                 event -> viewer.scrollToPage(3));
         scrollToPage.setId("scroll-to-page");
 
-        var scrollToLastPage = new NativeButton("Scroll to last page",
-                event -> viewer.scrollToLastPage());
-        scrollToLastPage.setId("scroll-to-last-page");
-
-        add(viewer, scrollToPage, scrollToLastPage);
+        add(viewer, scrollToPage);
     }
 }
