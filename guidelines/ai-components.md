@@ -71,36 +71,38 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   repository's build. LangChain4j marks such types `@Internal`
   (`AiServiceContext`, `ToolService`, `CapturedContextSupport`).
 - `LangChain4JLLMProvider` runs each turn through a LangChain4j `AiServices`
-  service, and the customizer constructors hand the application the builder
-  so it can add RAG, MCP tool providers, guardrails and so on. The builder
-  has setters only, so the provider never reads back what the customizer
-  configured: it sets its replaceable defaults (memory, unbounded round
-  trips, the made-up tool result, LangChain4j's own tool error handling set
-  explicitly so LangChain4j logs no notice) before the customizer runs, and
-  adds what must not be replaced afterwards (its tool provider and
-  listeners, which add up with the customizer's, and the constructor's
-  model). The checks of a turn (cancellation, tool call limits, and the
-  orchestrator's system prompt, which wins over a customizer's
-  `systemMessage`) sit in a proxy around that model instead of in a builder
-  setting the application might also use. The session context goes into the
-  user text before the service call, as with `SpringAILLMProvider`, so
-  retrieval and input guardrails see it. The proxy does not pass a cancelled
-  turn's model response on to the service, which would otherwise run the
-  tools it requests, including the customizer's. A model call and a memory
-  access do not say which turn they belong to, so the provider binds the
-  turn to the thread that starts it and to each streaming callback, where
-  the follow-up model calls happen. That keeps a cancelled turn that is
-  still running from passing the next turn's checks or touching its tool
-  traffic. With output guardrails, LangChain4j replays the original streamed
-  tokens after the guardrails ran, also when a guardrail rewrote the answer,
-  so the provider passes on the completed response's text instead.
+  service, and the customizer constructors hand the application the builder so
+  it can add RAG, MCP tool providers, guardrails and so on. The builder has
+  setters only, so the provider never reads back what the customizer
+  configured: it sets its replaceable defaults (memory, unbounded round trips,
+  the made-up tool result) before the customizer runs, and adds what must not
+  be replaced afterwards (its tool provider and listeners, which add up with
+  the customizer's, and the constructor's model). Tools added in the
+  customizer keep LangChain4j's tool error handling, like any vendor `@Tool`
+  tool (see the error hygiene rule below). Only a provider without a
+  customizer sets the error handlers, which none of its own tools reach, so
+  that LangChain4j logs no notice asking for them. The checks of a turn
+  (cancellation, tool call limits, and the orchestrator's system prompt, which
+  wins over a customizer's `systemMessage`) sit in a proxy around that model
+  instead of in a builder setting the application might also use. The session
+  context goes into the user text before the service call, as with
+  `SpringAILLMProvider`, so retrieval and input guardrails see it. The proxy
+  does not pass a cancelled turn's model response on to the service, which
+  would otherwise run the tools it requests, including the customizer's. A
+  model call and a memory access do not say which turn they belong to, so the
+  provider binds the turn to the thread that starts it and to each streaming
+  callback, where the follow-up model calls happen. That keeps a cancelled
+  turn that is still running from passing the next turn's checks or touching
+  its tool traffic. With output guardrails, LangChain4j replays the original
+  streamed tokens after the guardrails ran, also when a guardrail rewrote the
+  answer, so the provider passes on the completed response's text instead.
   Retrieval and input guardrails run inside the service call that starts a
-  turn, also for a `TokenStream`, so `setBackgroundExecution(true)` moves
-  the start of a streaming turn off the subscribing thread too. A moderation
-  model set in the customizer is not used: LangChain4j moderates only
-  `@Moderate` methods, never checks the result for a `TokenStream`, and
-  rejects a `@Moderate` method when no moderation model is set. An input
-  guardrail does that job.
+  turn, also for a `TokenStream`, so `setBackgroundExecution(true)` moves the
+  start of a streaming turn off the subscribing thread too. A moderation model
+  set in the customizer is not used: LangChain4j moderates only `@Moderate`
+  methods, never checks the result for a `TokenStream`, and rejects a
+  `@Moderate` method when no moderation model is set. An input guardrail does
+  that job.
 - Provider chat memory holds the user messages and the assistant's final
   answer of each turn. Tool calls and results are sent to the model only
   within their own turn, with both built-in providers, so a controller must

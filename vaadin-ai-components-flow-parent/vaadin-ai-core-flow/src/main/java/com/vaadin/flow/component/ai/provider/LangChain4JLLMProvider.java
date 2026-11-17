@@ -75,8 +75,6 @@ import dev.langchain4j.service.V;
 import dev.langchain4j.service.memory.ChatMemoryAccess;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
-import dev.langchain4j.service.tool.ToolErrorContext;
-import dev.langchain4j.service.tool.ToolErrorHandlerResult;
 import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import dev.langchain4j.service.tool.ToolExecutor;
 import dev.langchain4j.service.tool.ToolProvider;
@@ -121,10 +119,12 @@ import tools.jackson.databind.JsonNode;
  * for it, whether the provider or the customizer supplied it. Before the
  * customizer runs, the provider sets defaults that the customizer may replace:
  * its own chat memory, no limit on LangChain4j's tool calling round trips (the
- * provider's own tool call limits bound the loop), a result that tells the
- * model when it called a tool that does not exist, and the tool error handling
- * that LangChain4j applies when none is configured. The model is the one given
- * to the constructor, so a model set in the customizer is not used.
+ * provider's own tool call limits bound the loop), and a result that tells the
+ * model when it called a tool that does not exist. The model is the one given
+ * to the constructor, so a model set in the customizer is not used. Errors of
+ * the tools added in the customizer are handled by LangChain4j, with the tool
+ * error handlers set in the customizer or with LangChain4j's defaults; see the
+ * LangChain4j documentation on how to handle them safely.
  * </p>
  * <p>
  * <b>System prompt:</b> you can set a system prompt in the customizer with
@@ -392,6 +392,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
         prepare(builder);
         if (customizer != null) {
             customizer.accept(builder);
+        } else {
+            // The service has only the provider's own tools, whose failures
+            // never leave their executors, so no tool reaches these handlers.
+            // Set explicitly, LangChain4j does not log its notice that asks
+            // for them. With a customizer, the tools it adds are handled as
+            // LangChain4j handles them.
+            builder.toolArgumentsErrorHandler(
+                    ToolArgumentsErrorHandler.failInvocation());
+            builder.toolExecutionErrorHandler(
+                    ToolExecutionErrorHandler.failInvocation());
         }
         complete(builder, chatModel, streamingChatModel);
         this.service = builder.build();
@@ -401,9 +411,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * Applies the defaults the provider wants on the service before the
      * application gets to customize it, so that each can be replaced: the
      * provider's own chat memory, a tool-calling loop bounded by the provider's
-     * tool call limits rather than by LangChain4j's round trip count, a tool
-     * the model made up being reported back to it instead of failing the turn,
-     * and the tool error handling LangChain4j applies when none is configured.
+     * tool call limits rather than by LangChain4j's round trip count, and a
+     * tool the model made up being reported back to it instead of failing the
+     * turn.
      */
     private void prepare(AiServices<ChatService> builder) {
         // The service reads the memory before it adds the user message of
@@ -420,11 +430,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
         builder.hallucinatedToolNameStrategy(
                 LangChain4JLLMProvider::toolNotFound);
-        // Only the tools of the customizer reach these handlers. Set
-        // explicitly, LangChain4j does not log its notice that asks for them.
-        builder.toolArgumentsErrorHandler(
-                ToolArgumentsErrorHandler.failInvocation());
-        builder.toolExecutionErrorHandler(LangChain4JLLMProvider::toolFailed);
     }
 
     /**
@@ -916,19 +921,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 "Tool not found: " + toolRequest.name());
     }
 
-    /**
-     * Handles an exception from a tool of the customizer as LangChain4j does
-     * when no handler is configured: its message is sent to the model, and a
-     * warning is logged.
-     */
-    private static ToolErrorHandlerResult toolFailed(Throwable error,
-            ToolErrorContext context) {
-        LOGGER.warn("Tool '{}' failed, its error message is sent to the LLM",
-                context.toolExecutionRequest().name(), error);
-        return ToolExecutionErrorHandler.sendExceptionMessageToLlm()
-                .handle(error, context);
-    }
-
     private static List<Content> buildAttachmentContents(LLMRequest request) {
         var attachments = request.attachments();
         if (attachments == null) {
@@ -1288,8 +1280,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * <p>
          * The executor answers such a call instead of throwing. An exception
          * from a tool goes to the tool execution error handler of the service,
-         * which is the application's to configure and by default turns it into
-         * a result for the model. The turn ends in
+         * which is the application's to configure. The turn ends in
          * {@link #beforeModelCall(ChatRequest)}, which the loop reaches next.
          */
         ToolExecutor guard(ToolExecutor executor) {

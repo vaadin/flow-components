@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -2727,57 +2728,25 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void constructor_logsNoToolErrorHandlingNotice() {
-        new LangChain4JLLMProvider(mockChatModel);
-        new LangChain4JLLMProvider(mockStreamingChatModel, service -> {
-        });
-
+    void constructor_withoutCustomizer_logsNoToolErrorHandlingNotice()
+            throws ReflectiveOperationException {
         // LangChain4j logs the notice once per JVM, for the first service
-        // built with tools but without explicit tool error handlers
-        Assertions.assertEquals(List.of(),
-                TestLoggerFactory.getTestLogger(
-                        "dev.langchain4j.service.ToolErrorHandlingNotice")
-                        .getAllLoggingEvents());
-    }
+        // built with tools but without explicit tool error handlers. Other
+        // tests build such services with a customizer, so the flag that
+        // remembers the notice is reset first.
+        var alreadyLogged = Class
+                .forName("dev.langchain4j.service.ToolErrorHandlingNotice")
+                .getDeclaredField("ALREADY_LOGGED");
+        alreadyLogged.setAccessible(true);
+        ((AtomicBoolean) alreadyLogged.get(null)).set(false);
+        var notice = TestLoggerFactory.getTestLogger(
+                "dev.langchain4j.service.ToolErrorHandlingNotice");
+        notice.clearAll();
 
-    @Test
-    void customizer_toolFailure_sendsExceptionMessageToModel() {
-        var customized = new LangChain4JLLMProvider(mockChatModel,
-                service -> service.tools(new ErrorThrowingToolClass()));
-        var toolCall = mockSimpleResponseWithTool("throwError");
-        var answer = mockSimpleResponse("Sorry");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolCall).thenReturn(answer);
+        new LangChain4JLLMProvider(mockChatModel);
+        new LangChain4JLLMProvider(mockStreamingChatModel);
 
-        var results = customized.stream(createSimpleRequest("Break"))
-                .collectList().block(TURN_TIMEOUT);
-
-        Assertions.assertEquals(List.of("Sorry"), results);
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
-        Assertions.assertEquals("Tool execution failed",
-                toolResults.getFirst().text());
-        Assertions.assertTrue(
-                logger.getAllLoggingEvents().stream()
-                        .anyMatch(event -> event.getLevel() == Level.WARN
-                                && event.getMessage().contains("failed")),
-                "Expected the tool failure to be logged");
-    }
-
-    @Test
-    void customizer_toolArgumentsInvalid_failsTurn() {
-        var customized = new LangChain4JLLMProvider(mockChatModel,
-                service -> service.tools(new SampleToolsClass()));
-        var toolCall = mockSimpleResponseWithTool("getTemperature", "not json");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolCall);
-
-        Assertions.assertThrows(RuntimeException.class,
-                () -> customized.stream(createSimpleRequest("Temperature?"))
-                        .collectList().block(TURN_TIMEOUT));
-        // Sent to the model instead, the error would start another round
-        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+        Assertions.assertEquals(List.of(), notice.getAllLoggingEvents());
     }
 
     @Test
