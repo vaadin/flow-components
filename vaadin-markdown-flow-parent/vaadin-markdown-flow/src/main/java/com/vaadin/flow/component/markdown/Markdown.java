@@ -35,7 +35,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 24.8
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/markdown", version = "25.4.0-alpha7")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
@@ -199,14 +199,14 @@ public class Markdown extends Component implements HasSize {
                         // If the updated serverContent starts with the
                         // clientContent, we can just send the difference to
                         // the client.
-                        getElement().executeJs("this.content += $0",
-                                serverContent
+                        getElement().executeJs(MarkdownJs.class)
+                                .appendContent(serverContent
                                         .substring(clientContent.length()));
                     } else {
                         // In all other cases, we need to send the whole updated
                         // content.
-                        getElement().executeJs("this.content = $0",
-                                serverContent);
+                        getElement().executeJs(MarkdownJs.class)
+                                .setContent(serverContent);
                     }
 
                     clientContent = serverContent;

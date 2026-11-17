@@ -124,7 +124,7 @@ class HasThemeVariantTest extends AbstractSignalsTest {
     @TestFactory
     Stream<DynamicTest> bindThemeVariant() {
         var variant = TestComponentVariant.TEST_VARIANT;
-        return generateBindingTests(TestComponent::new,
+        return generateOneWayBindingTests(TestComponent::new,
                 (c, s) -> c.bindThemeVariant(variant, s),
                 c -> c.getThemeNames().contains(variant.getVariantName()),
                 (c, v) -> c.setThemeVariant(variant, v), true, false);

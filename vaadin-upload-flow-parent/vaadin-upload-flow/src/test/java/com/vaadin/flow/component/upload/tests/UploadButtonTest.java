@@ -132,9 +132,11 @@ class UploadButtonTest {
         List<PendingJavaScriptInvocation> pendingInvocations = ui
                 .dumpPendingJavaScriptInvocations();
 
-        // Count how many "this.manager = " JS invocations are pending
-        long managerLinkCount = pendingInvocations.stream().filter(inv -> inv
-                .getInvocation().getExpression().contains("this.manager"))
+        // Count how many setManager JS invocations are pending
+        long managerLinkCount = pendingInvocations.stream()
+                .map(inv -> inv.getInvocation().getJsCall())
+                .filter(call -> call != null
+                        && "setManager".equals(call.methodName()))
                 .count();
 
         Assertions.assertEquals(1, managerLinkCount,

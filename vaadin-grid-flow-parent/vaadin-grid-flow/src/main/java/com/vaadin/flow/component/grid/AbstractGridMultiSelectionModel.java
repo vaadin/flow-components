@@ -412,6 +412,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return selectionColumn.isDragSelect();
     }
 
+    @Override
+    public boolean isSelectOnItemClick() {
+        return selectionColumn.isSelectOnItemClick();
+    }
+
+    @Override
+    public void setSelectOnItemClick(boolean selectOnItemClick) {
+        selectionColumn.setSelectOnItemClick(selectOnItemClick);
+    }
+
     /**
      * Method for handling the firing of selection events.
      *

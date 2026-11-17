@@ -427,6 +427,20 @@ class HeaderFooterTest {
     }
 
     @Test
+    void tooltipElementBeforeColumns_joinHeaderCells_oldCellsRemoved() {
+        grid = new Grid<>();
+        grid.setTooltipGenerator(str -> str);
+        addColumns();
+        grid.prependHeaderRow();
+        HeaderRow top = grid.prependHeaderRow();
+        HeaderCell firstCell = top.getCell(firstColumn);
+
+        HeaderCell joined = top.join(secondColumn, thirdColumn);
+
+        Assertions.assertEquals(List.of(firstCell, joined), top.getCells());
+    }
+
+    @Test
     void joinTwoFirstFooterCells() {
         FooterRow bottom = grid.prependFooterRow();
         FooterRow top = grid.prependFooterRow();

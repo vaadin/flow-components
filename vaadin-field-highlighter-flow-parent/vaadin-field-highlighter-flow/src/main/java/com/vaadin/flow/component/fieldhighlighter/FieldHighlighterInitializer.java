@@ -24,12 +24,12 @@ import com.vaadin.flow.shared.Registration;
 /**
  * @since 23.0.15
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.4.0-alpha7")
 @JsModule("@vaadin/field-highlighter/src/vaadin-field-highlighter.js")
 public class FieldHighlighterInitializer {
     protected static Registration init(Element field) {
-        Command initWithJS = () -> field.executeJs(
-                "customElements.get('vaadin-field-highlighter').init(this)");
+        Command initWithJS = () -> field.executeJs(FieldHighlighterJs.class)
+                .init();
         if (field.getNode().isAttached()) {
             initWithJS.execute();
         }

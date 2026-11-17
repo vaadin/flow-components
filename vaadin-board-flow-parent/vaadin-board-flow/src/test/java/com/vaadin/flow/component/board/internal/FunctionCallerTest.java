@@ -21,7 +21,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.tests.JsFunctionCallUtil;
 
 public class FunctionCallerTest {
 
@@ -100,8 +99,8 @@ public class FunctionCallerTest {
                 .invoke(internals);
         List<PendingJavaScriptInvocation> invocations = pendingJS.toList();
         Assertions.assertEquals(1, invocations.size());
-        Assertions.assertEquals(expectedFunction, JsFunctionCallUtil
-                .getFunctionName(invocations.get(0).getInvocation()));
+        Assertions.assertEquals(List.of(expectedFunction), invocations.get(0)
+                .getInvocation().getJsCall().flattenArguments());
 
     }
 }

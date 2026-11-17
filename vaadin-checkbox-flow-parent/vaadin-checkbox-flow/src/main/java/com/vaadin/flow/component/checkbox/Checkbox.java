@@ -83,7 +83,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/checkbox", version = "25.4.0-alpha7")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>,
@@ -387,8 +387,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * @param signal
      *            the signal to bind, not {@code null}
      * @param writeCallback
-     *            the callback to propagate value changes back, or {@code null}
-     *            for one-way binding
+     *            the callback to propagate value changes back, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
@@ -397,6 +396,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     public SignalBinding<Boolean> bindIndeterminate(Signal<Boolean> signal,
             SerializableConsumer<Boolean> writeCallback) {
         Objects.requireNonNull(signal, "Signal cannot be null");
+        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
         return getElement().bindProperty("indeterminate",
                 signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }

@@ -37,11 +37,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.DomEventData;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
@@ -58,7 +60,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/upload", version = "25.4.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -118,13 +120,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             String detailFileName = event.getEventData()
                     .get(eventDetailFileName).asString();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
-        }).addEventData(eventDetailError).addEventData(eventDetailFileName);
+        }).addEventDataPath(eventDetailError)
+                .addEventDataPath(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
                     .get(eventDetailFileName).asString();
             fireEvent(new FileRemovedEvent(this, detailFileName));
-        }).addEventData(eventDetailFileName);
+        }).addEventDataPath(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
         getElement()
@@ -133,10 +136,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
         setUploadHandler(new UploadHelper.FailFastUploadHandler());
 
-        final String filesUploading = "element.files.some(file => file.uploading)";
+        final DomEventData<Boolean> filesUploading = JsSnippets
+                .of(UploadEventDataJs.class).filesUploading();
         DomEventListener allFinishedListener = e -> {
-            boolean isUploading = e.getEventData().get(filesUploading)
-                    .booleanValue();
+            boolean isUploading = e.getEventData(filesUploading);
 
             if (this.uploading && !isUploading) {
                 this.fireAllFinish();
@@ -243,7 +246,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public void setMaxFiles(int maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
-        getElement().executeJs("this.maxFiles = $0", maxFiles);
+        getElement().executeJs(UploadJs.class).setMaxFiles(maxFiles);
     }
 
     /**
@@ -268,7 +271,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     private void removeMaxFiles() {
         getElement().removeProperty("maxFiles");
-        getElement().executeJs("this.maxFiles = Infinity");
+        getElement().executeJs(UploadJs.class).removeMaxFiles();
     }
 
     /**
@@ -1085,7 +1088,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @since 23.0
      */
     public void clearFileList() {
-        getElement().executeJs("this.files = [];");
+        getElement().executeJs(UploadJs.class).clearFileList();
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

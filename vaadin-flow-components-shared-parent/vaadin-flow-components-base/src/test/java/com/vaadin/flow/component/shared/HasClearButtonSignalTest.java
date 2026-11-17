@@ -38,7 +38,7 @@ class HasClearButtonSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindClearButtonVisible() {
-        return generateBindingTests(TestComponent::new,
+        return generateOneWayBindingTests(TestComponent::new,
                 TestComponent::bindClearButtonVisible,
                 TestComponent::isClearButtonVisible,
                 TestComponent::setClearButtonVisible, true, false);

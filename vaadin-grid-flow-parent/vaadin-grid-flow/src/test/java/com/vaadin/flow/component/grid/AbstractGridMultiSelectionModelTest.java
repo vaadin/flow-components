@@ -470,6 +470,25 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void setSelectOnItemClick_isSelectOnItemClick() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        GridMultiSelectionModel<String> selectionModel = (GridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        Assertions.assertFalse(selectionModel.isSelectOnItemClick());
+        Assertions.assertFalse(columnElement.getProperty("autoSelect", false));
+
+        selectionModel.setSelectOnItemClick(true);
+        Assertions.assertTrue(selectionModel.isSelectOnItemClick());
+        Assertions.assertTrue(columnElement.getProperty("autoSelect", false));
+
+        selectionModel.setSelectOnItemClick(false);
+        Assertions.assertFalse(selectionModel.isSelectOnItemClick());
+        Assertions.assertFalse(columnElement.getProperty("autoSelect", false));
+    }
+
+    @Test
     void setFilterUsingDataView_serverSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");

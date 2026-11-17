@@ -31,7 +31,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -193,7 +193,7 @@ class DatePickerDisabledDatesTest {
         picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
         picker.setDisabledWeekdays(Set.of(DayOfWeek.SUNDAY));
 
-        Assertions.assertEquals(1, getDateMetadataConfigInvocations().size());
+        Assertions.assertEquals(1, getDateMetadataConfigCalls().size());
     }
 
     @Test
@@ -201,7 +201,7 @@ class DatePickerDisabledDatesTest {
         picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
         ui.add(picker);
 
-        Assertions.assertEquals(1, getDateMetadataConfigInvocations().size());
+        Assertions.assertEquals(1, getDateMetadataConfigCalls().size());
     }
 
     @Test
@@ -215,8 +215,9 @@ class DatePickerDisabledDatesTest {
         int initIndex = indexOf(invocations, invocation -> invocation
                 .getExpression().contains("datepickerConnector.initLazy"));
         int configIndex = indexOf(invocations,
-                invocation -> "$connector.setDateMetadataConfig".equals(
-                        JsFunctionCallUtil.getFunctionName(invocation)));
+                invocation -> invocation.getJsCall() != null
+                        && invocation.getJsCall().arguments()
+                                .contains("$connector.setDateMetadataConfig"));
         Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
         Assertions.assertTrue(configIndex > initIndex,
                 "Config must be pushed after the connector is initialized");
@@ -226,7 +227,7 @@ class DatePickerDisabledDatesTest {
     void attach_nothingConfigured_noConfigPushed() {
         ui.add(picker);
 
-        Assertions.assertTrue(getDateMetadataConfigInvocations().isEmpty());
+        Assertions.assertTrue(getDateMetadataConfigCalls().isEmpty());
     }
 
     @Test
@@ -330,11 +331,8 @@ class DatePickerDisabledDatesTest {
                 .orElse(-1);
     }
 
-    private List<JavaScriptInvocation> getDateMetadataConfigInvocations() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> "$connector.setDateMetadataConfig"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
-                .toList();
+    private List<JsCall> getDateMetadataConfigCalls() {
+        return ui.dumpJsCalls(picker.getElement(),
+                "$connector.setDateMetadataConfig");
     }
 }

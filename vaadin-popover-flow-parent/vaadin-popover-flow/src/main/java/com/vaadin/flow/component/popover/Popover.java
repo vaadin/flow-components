@@ -49,7 +49,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 24.5
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/popover", version = "25.4.0-alpha7")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasAriaRole,
@@ -149,31 +149,19 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
     }
 
     private static void applyConfigurationForUI(UI ui) {
-        ui.getElement().executeJs(
-                "((window.Vaadin ||= {}).Flow ||= {}).popover ||= {}");
+        PopoverJs popoverJs = ui.getElement().executeJs(PopoverJs.class);
+        popoverJs.initConfiguration();
 
         if (defaultHideDelay != null) {
-            ui.getElement().executeJs(
-                    "const popover = window.Vaadin.Flow.popover;"
-                            + "popover.defaultHideDelay = $0;"
-                            + "popover.setDefaultHideDelay?.($0)",
-                    defaultHideDelay);
+            popoverJs.setDefaultHideDelay(defaultHideDelay);
         }
 
         if (defaultFocusDelay != null) {
-            ui.getElement().executeJs(
-                    "const popover = window.Vaadin.Flow.popover;"
-                            + "popover.defaultFocusDelay = $0;"
-                            + "popover.setDefaultFocusDelay?.($0)",
-                    defaultFocusDelay);
+            popoverJs.setDefaultFocusDelay(defaultFocusDelay);
         }
 
         if (defaultHoverDelay != null) {
-            ui.getElement().executeJs(
-                    "const popover = window.Vaadin.Flow.popover;"
-                            + "popover.defaultHoverDelay = $0;"
-                            + "popover.setDefaultHoverDelay?.($0)",
-                    defaultHoverDelay);
+            popoverJs.setDefaultHoverDelay(defaultHoverDelay);
         }
     }
 
@@ -741,7 +729,7 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
         this.target = target;
 
         if (target == null) {
-            getElement().executeJs("this.target = null");
+            getElement().executeJs(PopoverJs.class).setTarget(null);
             return;
         }
 
@@ -795,7 +783,8 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
 
                 autoAddedToTheUi = true;
             }
-            getElement().executeJs("this.target = $0", target.getElement());
+            getElement().executeJs(PopoverJs.class)
+                    .setTarget(target.getElement());
         }
     }
 

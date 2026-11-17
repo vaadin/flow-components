@@ -13,6 +13,7 @@
     <properties>
         <osgi.export.package>com.vaadin.flow.component.shared</osgi.export.package>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+        <csp.mode>strict</csp.mode>
     </properties>
 
     <dependencies>

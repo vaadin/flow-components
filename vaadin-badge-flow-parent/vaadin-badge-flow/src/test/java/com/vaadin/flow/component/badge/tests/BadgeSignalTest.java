@@ -42,13 +42,13 @@ class BadgeSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindText() {
-        return generateBindingTests(Badge::new, Badge::bindText, Badge::getText,
-                Badge::setText, "foo", "bar");
+        return generateOneWayBindingTests(Badge::new, Badge::bindText,
+                Badge::getText, Badge::setText, "foo", "bar");
     }
 
     @TestFactory
     Stream<DynamicTest> bindNumber() {
-        return generateBindingTests(Badge::new, Badge::bindNumber,
+        return generateOneWayBindingTests(Badge::new, Badge::bindNumber,
                 Badge::getNumber, Badge::setNumber, 5, 10);
     }
 

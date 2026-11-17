@@ -63,7 +63,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.4.0-alpha7")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -678,8 +678,7 @@ public class Dashboard extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
+        getElement().executeJs(DashboardJs.class).patchVirtualContainer();
         customizeItemMovedEvent();
         doUpdateClient();
     }
@@ -741,22 +740,7 @@ public class Dashboard extends Component
         }
 
         String appId = UI.getCurrentOrThrow().getInternals().getAppId();
-        getElement().executeJs(
-                """
-                        const items = $0;
-                        const appId = $1;
-                        function populateComponents(items) {
-                          items.forEach(item => {
-                            item.component = window.Vaadin.Flow.clients[appId].getByNodeId(item.id);
-                            if (item.items) {
-                              populateComponents(item.items);
-                            }
-                          });
-                        }
-                        populateComponents(items);
-                        this.items = items;
-                        """,
-                itemsJson, appId);
+        getElement().executeJs(DashboardJs.class).updateItems(itemsJson, appId);
     }
 
     private static ObjectNode getWidgetRepresentation(DashboardWidget widget) {
@@ -811,8 +795,8 @@ public class Dashboard extends Component
                 return;
             }
             handleItemMovedClientEvent(e, itemKey, itemsKey, sectionKey);
-        }).addEventData(itemKey).addEventData(itemsKey)
-                .addEventData(sectionKey);
+        }).addEventDataPath(itemKey).addEventDataPath(itemsKey)
+                .addEventDataPath(sectionKey);
     }
 
     private void handleItemMovedClientEvent(DomEvent e, String itemKey,
@@ -854,8 +838,8 @@ public class Dashboard extends Component
                 return;
             }
             handleItemResizedClientEvent(e, idKey, colspanKey, rowspanKey);
-        }).addEventData(idKey).addEventData(colspanKey)
-                .addEventData(rowspanKey);
+        }).addEventDataPath(idKey).addEventDataPath(colspanKey)
+                .addEventDataPath(rowspanKey);
     }
 
     private void handleItemResizedClientEvent(DomEvent e, String idKey,
@@ -882,7 +866,8 @@ public class Dashboard extends Component
                 return;
             }
             handleItemBeforeRemoveClientEvent(e, idKey, sectionKey);
-        }).preventDefault().addEventData(idKey).addEventData(sectionKey);
+        }).preventDefault().addEventDataPath(idKey)
+                .addEventDataPath(sectionKey);
     }
 
     private void handleItemBeforeRemoveClientEvent(DomEvent e, String idKey,
@@ -919,24 +904,7 @@ public class Dashboard extends Component
     }
 
     private void customizeItemMovedEvent() {
-        getElement().executeJs(
-                """
-                        this.addEventListener('dashboard-item-moved', (e) => {
-                          function mapItems(items) {
-                            return items.map(({id, items}) => ({
-                              id,
-                              ...(items && { items: mapItems(items) })
-                            }));
-                          }
-                          const flowItemMovedEvent = new CustomEvent('dashboard-item-moved-flow', {
-                            detail: {
-                              item: e.detail.item.id,
-                              items: mapItems(e.detail.items),
-                              section: e.detail.section?.id
-                            }
-                          });
-                          this.dispatchEvent(flowItemMovedEvent);
-                        });""");
+        getElement().executeJs(DashboardJs.class).customizeItemMovedEvent();
     }
 
     private static List<Component> getReorderedItemsList(

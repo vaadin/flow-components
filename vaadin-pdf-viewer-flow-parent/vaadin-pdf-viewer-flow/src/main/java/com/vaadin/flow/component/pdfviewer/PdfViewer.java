@@ -58,7 +58,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * @since 25.4
  */
 @Tag("vaadin-pdf-viewer")
-@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha7")
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
@@ -74,6 +74,7 @@ public class PdfViewer extends Component implements HasSize {
     public PdfViewer() {
         getElement().setProperty("page", 1);
         getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
+        getElement().setProperty("toolbarCollapsed", false);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
@@ -82,6 +83,9 @@ public class PdfViewer extends Component implements HasSize {
         getElement().addPropertyChangeListener("zoom",
                 event -> fireEvent(new ZoomChangeEvent(this,
                         event.isUserOriginated(), getZoom())));
+        getElement().addPropertyChangeListener("toolbarCollapsed",
+                event -> fireEvent(new ToolbarCollapsedChangeEvent(this,
+                        event.isUserOriginated(), isToolbarCollapsed())));
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> resetDocumentState());
@@ -163,6 +167,68 @@ public class PdfViewer extends Component implements HasSize {
         resetDocumentState();
     }
 
+    /**
+     * Gets the file name used by {@link #download()}.
+     *
+     * @return the file name, or {@code null} if the name of the document is
+     *         used
+     */
+    public String getFileName() {
+        return getElement().getProperty("fileName");
+    }
+
+    /**
+     * Sets the file name used by {@link #download()} and shown in the header.
+     * When not set, the name of the document is used.
+     *
+     * @param fileName
+     *            the file name, or {@code null} to use the name of the document
+     */
+    public void setFileName(String fileName) {
+        if (fileName == null) {
+            getElement().removeProperty("fileName");
+        } else {
+            getElement().setProperty("fileName", fileName);
+        }
+    }
+
+    /**
+     * Gets whether the toolbar shows the download button. The default is
+     * {@code true}.
+     *
+     * @return {@code true} if the download button is visible, {@code false}
+     *         otherwise
+     */
+    public boolean isDownloadButtonVisible() {
+        return !getElement().getProperty("downloadButtonHidden", false);
+    }
+
+    /**
+     * Sets whether the toolbar shows the download button. {@link #download()}
+     * works also while the button is hidden.
+     *
+     * @param downloadButtonVisible
+     *            {@code true} to show the download button, {@code false} to
+     *            hide it
+     */
+    public void setDownloadButtonVisible(boolean downloadButtonVisible) {
+        getElement().setProperty("downloadButtonHidden",
+                !downloadButtonVisible);
+    }
+
+    /**
+     * Downloads the document in the browser, like the download button of the
+     * toolbar does. If the document is still loading, it is downloaded once
+     * loaded. Does nothing if no document is set, it could not be loaded, or
+     * the viewer is not attached.
+     */
+    public void download() {
+        if (!isAttached()) {
+            return;
+        }
+        getElement().callJsFunction("download");
+    }
+
     private void resetDocumentState() {
         if (getPage() != 1) {
             getElement().setProperty("page", 1);
@@ -182,6 +248,21 @@ public class PdfViewer extends Component implements HasSize {
     @Synchronize(property = "page", value = "page-changed")
     public int getPage() {
         return getElement().getProperty("page", 1);
+    }
+
+    /**
+     * Scrolls to the start of the given page. A page below {@code 1} scrolls to
+     * the first page, and a page above the page count scrolls to the last page.
+     * <p>
+     * While a document is loading, for example right after {@code setSrc}, it
+     * scrolls once the document has loaded, and in a hidden viewer, once the
+     * viewer is shown. Does nothing without a document.
+     *
+     * @param page
+     *            the page to scroll to, starting from {@code 1}
+     */
+    public void scrollToPage(int page) {
+        getElement().callJsFunction("scrollToPage", page);
     }
 
     /**
@@ -220,6 +301,88 @@ public class PdfViewer extends Component implements HasSize {
      */
     public Signal<Integer> pageCountSignal() {
         return pageCountSignal.asReadonly();
+    }
+
+    /**
+     * Gets whether the viewer shows the header above the toolbar. The default
+     * value is {@code true}.
+     *
+     * @return {@code true} if the header is visible, {@code false} otherwise
+     */
+    public boolean isHeaderVisible() {
+        return !getElement().getProperty("headerHidden", false);
+    }
+
+    /**
+     * Sets whether the viewer shows the header above the toolbar. The header
+     * shows the title, see {@link #setHeaderTitle(String)}, and collapses and
+     * expands the toolbar when the user clicks it.
+     * <p>
+     * While the header is hidden, the toolbar is always shown, also when it is
+     * collapsed with {@link #setToolbarCollapsed(boolean)}.
+     *
+     * @param headerVisible
+     *            {@code true} to show the header, {@code false} to hide it
+     */
+    public void setHeaderVisible(boolean headerVisible) {
+        getElement().setProperty("headerHidden", !headerVisible);
+    }
+
+    /**
+     * Gets the title set with {@link #setHeaderTitle(String)}.
+     *
+     * @return the title, or {@code null} if no title is set
+     */
+    public String getHeaderTitle() {
+        return getElement().getProperty("headerTitle");
+    }
+
+    /**
+     * Sets the title shown in the header. By default, no title is set, and the
+     * header shows the file name of the document, or the text from
+     * {@link PdfViewerI18n#setDocument(String)} if the document has no file
+     * name.
+     *
+     * @param headerTitle
+     *            the title, or {@code null} or an empty string to show the file
+     *            name of the document
+     * @see #setHeaderVisible(boolean)
+     */
+    public void setHeaderTitle(String headerTitle) {
+        if (headerTitle == null) {
+            getElement().removeProperty("headerTitle");
+        } else {
+            getElement().setProperty("headerTitle", headerTitle);
+        }
+    }
+
+    /**
+     * Gets whether the toolbar is collapsed. The default value is
+     * {@code false}.
+     * <p>
+     * While the header is hidden, the toolbar is shown also when this is
+     * {@code true}, see {@link #setHeaderVisible(boolean)}.
+     *
+     * @return {@code true} if the toolbar is collapsed, {@code false} otherwise
+     */
+    @Synchronize(property = "toolbarCollapsed", value = "toolbar-collapsed-changed")
+    public boolean isToolbarCollapsed() {
+        return getElement().getProperty("toolbarCollapsed", false);
+    }
+
+    /**
+     * Sets whether the toolbar is collapsed. A collapsed toolbar is hidden, and
+     * the user can expand it again by clicking the header.
+     * <p>
+     * The toolbar collapses only while the header is visible, see
+     * {@link #setHeaderVisible(boolean)}.
+     *
+     * @param toolbarCollapsed
+     *            {@code true} to collapse the toolbar, {@code false} to expand
+     *            it
+     */
+    public void setToolbarCollapsed(boolean toolbarCollapsed) {
+        getElement().setProperty("toolbarCollapsed", toolbarCollapsed);
     }
 
     /**
@@ -320,6 +483,20 @@ public class PdfViewer extends Component implements HasSize {
     public Registration addZoomChangeListener(
             ComponentEventListener<ZoomChangeEvent> listener) {
         return addListener(ZoomChangeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called when the toolbar is collapsed or expanded,
+     * either by the user clicking the header or with
+     * {@link #setToolbarCollapsed(boolean)}.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addToolbarCollapsedChangeListener(
+            ComponentEventListener<ToolbarCollapsedChangeEvent> listener) {
+        return addListener(ToolbarCollapsedChangeEvent.class, listener);
     }
 
     /**
@@ -441,6 +618,41 @@ public class PdfViewer extends Component implements HasSize {
          */
         public Zoom getZoom() {
             return zoom;
+        }
+    }
+
+    /**
+     * Event fired when the toolbar is collapsed or expanded.
+     */
+    public static class ToolbarCollapsedChangeEvent
+            extends ComponentEvent<PdfViewer> {
+        private final boolean toolbarCollapsed;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param toolbarCollapsed
+         *            {@code true} if the toolbar is now collapsed,
+         *            {@code false} if it is now expanded
+         */
+        public ToolbarCollapsedChangeEvent(PdfViewer source, boolean fromClient,
+                boolean toolbarCollapsed) {
+            super(source, fromClient);
+            this.toolbarCollapsed = toolbarCollapsed;
+        }
+
+        /**
+         * Gets whether the toolbar is now collapsed.
+         *
+         * @return {@code true} if the toolbar is collapsed, {@code false} if it
+         *         is expanded
+         */
+        public boolean isToolbarCollapsed() {
+            return toolbarCollapsed;
         }
     }
 

@@ -45,7 +45,7 @@ class SvgIconSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindSymbol() {
-        return generateBindingTests(SvgIcon::new, SvgIcon::bindSymbol,
+        return generateOneWayBindingTests(SvgIcon::new, SvgIcon::bindSymbol,
                 SvgIcon::getSymbol, SvgIcon::setSymbol, "icon-home",
                 "icon-search");
     }

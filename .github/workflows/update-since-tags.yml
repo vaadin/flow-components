@@ -76,8 +76,8 @@ jobs:
           #  - the artifactId comes from the module's own pom, because the directory
           #    name is not always the published id (vaadin-aura-theme-flow publishes
           #    vaadin-aura-theme, vaadin-lumo-theme-flow publishes vaadin-lumo-theme);
-          #  - a module with no artifact on Central is skipped -- integration tests,
-          #    the checkstyle rules, and a component that has not been released yet
+          #  - a module with no artifact on Central is skipped -- integration tests
+          #    and a component that has not been released yet
           #    (with no release there is no history to reconcile against, and an
           #    empty index would re-date its whole API to the target version);
           #  - test-support artifacts are skipped as well: they are published, but

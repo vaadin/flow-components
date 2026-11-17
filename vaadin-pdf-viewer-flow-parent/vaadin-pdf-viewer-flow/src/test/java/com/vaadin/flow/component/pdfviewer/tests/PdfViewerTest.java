@@ -26,10 +26,13 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.ToolbarCollapsedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.component.pdfviewer.Zoom;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
@@ -37,6 +40,7 @@ import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.shared.JsonConstants;
+import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -45,6 +49,10 @@ class PdfViewerTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+            PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT);
 
     private final PdfViewer viewer = new PdfViewer();
 
@@ -84,6 +92,74 @@ class PdfViewerTest {
 
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
+    }
+
+    @Test
+    void setFileName_getFileName() {
+        Assertions.assertNull(viewer.getFileName());
+        Assertions.assertFalse(viewer.getElement().hasProperty("fileName"));
+
+        viewer.setFileName("report.pdf");
+        Assertions.assertEquals("report.pdf",
+                viewer.getElement().getProperty("fileName"));
+        Assertions.assertEquals("report.pdf", viewer.getFileName());
+
+        viewer.setFileName(null);
+        Assertions.assertFalse(viewer.getElement().hasProperty("fileName"));
+        Assertions.assertNull(viewer.getFileName());
+    }
+
+    @Test
+    void setDownloadButtonVisible_isDownloadButtonVisible() {
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+        Assertions.assertFalse(
+                viewer.getElement().hasProperty("downloadButtonHidden"));
+
+        viewer.setDownloadButtonVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("downloadButtonHidden", false));
+        Assertions.assertFalse(viewer.isDownloadButtonVisible());
+
+        viewer.setDownloadButtonVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("downloadButtonHidden", true));
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+    }
+
+    @Test
+    void download_downloadCalledOnClient() {
+        ui.add(viewer);
+
+        viewer.download();
+
+        var calls = ui.dumpJsCalls(viewer.getElement(),
+                Element.CallFunctionJs.class);
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("download"),
+                calls.get(0).flattenArguments());
+    }
+
+    @Test
+    void download_detached_downloadNotCalledOnAttach() {
+        viewer.download();
+
+        ui.add(viewer);
+
+        var calls = ui.dumpJsCalls(viewer.getElement(),
+                Element.CallFunctionJs.class);
+        Assertions.assertTrue(calls.isEmpty());
+    }
+
+    @Test
+    void scrollToPage_scrollToPageCalledOnClient() {
+        ui.add(viewer);
+
+        viewer.scrollToPage(3);
+
+        var calls = ui.dumpJsCalls(viewer.getElement(), "scrollToPage");
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("scrollToPage", 3),
+                calls.get(0).flattenArguments());
     }
 
     @Test
@@ -248,6 +324,88 @@ class PdfViewerTest {
     void zoomSynchronizedOnZoomChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("zoom-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "zoom"));
+    }
+
+    @Test
+    void setHeaderVisible_isHeaderVisible() {
+        Assertions.assertTrue(viewer.isHeaderVisible());
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerHidden"));
+
+        viewer.setHeaderVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("headerHidden", false));
+        Assertions.assertFalse(viewer.isHeaderVisible());
+
+        viewer.setHeaderVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("headerHidden", true));
+        Assertions.assertTrue(viewer.isHeaderVisible());
+    }
+
+    @Test
+    void setHeaderTitle_getHeaderTitle() {
+        Assertions.assertNull(viewer.getHeaderTitle());
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerTitle"));
+
+        viewer.setHeaderTitle("Annual report");
+        Assertions.assertEquals("Annual report",
+                viewer.getElement().getProperty("headerTitle"));
+        Assertions.assertEquals("Annual report", viewer.getHeaderTitle());
+
+        viewer.setHeaderTitle(null);
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerTitle"));
+        Assertions.assertNull(viewer.getHeaderTitle());
+    }
+
+    @Test
+    void setToolbarCollapsed_isToolbarCollapsed() {
+        Assertions.assertFalse(viewer.isToolbarCollapsed());
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("toolbarCollapsed", true));
+
+        viewer.setToolbarCollapsed(true);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("toolbarCollapsed", false));
+        Assertions.assertTrue(viewer.isToolbarCollapsed());
+
+        viewer.setToolbarCollapsed(false);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("toolbarCollapsed", true));
+        Assertions.assertFalse(viewer.isToolbarCollapsed());
+    }
+
+    @Test
+    void setToolbarCollapsed_toolbarCollapsedChangeEventFired() {
+        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
+        viewer.addToolbarCollapsedChangeListener(events::add);
+
+        viewer.setToolbarCollapsed(true);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isToolbarCollapsed());
+    }
+
+    @Test
+    void toolbarCollapsedOnClient_toolbarCollapsedChangeEventFired() {
+        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
+        viewer.addToolbarCollapsedChangeListener(events::add);
+
+        fakeClientPropertyChange("toolbarCollapsed", true);
+        fakeClientPropertyChange("toolbarCollapsed", false);
+
+        Assertions.assertEquals(2, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isToolbarCollapsed());
+        Assertions.assertTrue(events.get(1).isFromClient());
+        Assertions.assertFalse(events.get(1).isToolbarCollapsed());
+    }
+
+    @Test
+    void toolbarCollapsedSynchronizedOnToolbarCollapsedChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("toolbar-collapsed-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                        + "toolbarCollapsed"));
     }
 
     @Test

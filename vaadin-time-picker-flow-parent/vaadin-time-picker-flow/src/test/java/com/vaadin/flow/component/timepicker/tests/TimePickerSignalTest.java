@@ -28,14 +28,14 @@ class TimePickerSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(TimePicker::new, TimePicker::bindMin,
+        return generateOneWayBindingTests(TimePicker::new, TimePicker::bindMin,
                 TimePicker::getMin, TimePicker::setMin, LocalTime.of(9, 0),
                 LocalTime.of(10, 0));
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(TimePicker::new, TimePicker::bindMax,
+        return generateOneWayBindingTests(TimePicker::new, TimePicker::bindMax,
                 TimePicker::getMax, TimePicker::setMax, LocalTime.of(17, 0),
                 LocalTime.of(18, 0));
     }

@@ -65,4 +65,15 @@ public class PdfViewerIT extends AbstractComponentIT {
         clickElementWithJs("release-slow-handler");
         waitUntil(driver -> !viewer.isLoading());
     }
+
+    @Test
+    public void toggleToolbar_toolbarCollapsed() {
+        Assert.assertFalse(viewer.isToolbarCollapsed());
+
+        viewer.toggleToolbar();
+        Assert.assertTrue(viewer.isToolbarCollapsed());
+
+        viewer.toggleToolbar();
+        Assert.assertFalse(viewer.isToolbarCollapsed());
+    }
 }

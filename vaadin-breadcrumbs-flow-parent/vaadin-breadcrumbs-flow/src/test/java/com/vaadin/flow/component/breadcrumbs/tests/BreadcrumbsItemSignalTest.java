@@ -31,7 +31,7 @@ class BreadcrumbsItemSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindText() {
-        return generateBindingTests(() -> new BreadcrumbsItem("init"),
+        return generateOneWayBindingTests(() -> new BreadcrumbsItem("init"),
                 BreadcrumbsItem::bindText, BreadcrumbsItem::getText,
                 BreadcrumbsItem::setText, "foo", "bar");
     }

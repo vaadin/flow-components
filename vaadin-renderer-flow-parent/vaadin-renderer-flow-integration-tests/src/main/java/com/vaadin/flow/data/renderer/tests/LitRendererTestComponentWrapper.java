@@ -120,6 +120,13 @@ public class LitRendererTestComponentWrapper extends Div
         getComponents().get(componentIndex).setDetailsRenderer(renderer);
     }
 
+    /**
+     * Gets the key that identifies the given item on the client.
+     */
+    public String getItemKey(String item) {
+        return dataCommunicator.getKeyMapper().key(item);
+    }
+
     private List<LitRendererTestComponent> getComponents() {
         return getChildren().map(LitRendererTestComponent.class::cast).toList();
     }

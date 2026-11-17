@@ -117,6 +117,18 @@ class GridMultiSelectionModelTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void customImplementation_selectOnItemClickMethods_throw() {
+        GridMultiSelectionModel<Person> customModel = Mockito.mock(
+                GridMultiSelectionModel.class, Mockito.CALLS_REAL_METHODS);
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                customModel::isSelectOnItemClick);
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> customModel.setSelectOnItemClick(true));
+    }
+
+    @Test
     void select_gridWithStrings() {
         Grid<String> gridWithStrings = new Grid<>();
         gridWithStrings.setSelectionMode(SelectionMode.MULTI);

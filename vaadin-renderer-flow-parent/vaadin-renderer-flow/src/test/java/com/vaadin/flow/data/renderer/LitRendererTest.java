@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.component.trigger.internal.TriggerInputJs;
@@ -33,13 +33,23 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
+import com.vaadin.flow.server.CspMode;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @JsDefinition
+    interface CopyTemplates extends Serializable {
+
+        @JsExpression("return html`<span>${item.email}</span><button @click=${() => functions.copy(item.email)}>Copy</button>`;")
+        CompiledLitTemplate email();
+    }
 
     @Test
     void doNotAllowFunctionNamesWithFunctions() {
@@ -93,8 +103,10 @@ class LitRendererTest {
         TestDiv container = new TestDiv();
         ui.add(container);
 
-        LitRenderer<String> renderer = LitRenderer.<String> of(
-                "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
+        // A declared template, so that client actions work with a strict
+        // Content Security Policy too
+        LitRenderer<String> renderer = LitRenderer
+                .<String> of(JsSnippets.of(CopyTemplates.class).email())
                 .withProperty("email", ValueProvider.identity())
                 .withClientAction("copy", Clipboard.writeText());
 
@@ -102,18 +114,15 @@ class LitRendererTest {
         ui.getUI().getInternals().getStateTree()
                 .runExecutionsBeforeClientResponse();
 
-        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("setLitRenderer"))
-                .findFirst().orElseThrow().getParameters();
+        List<Object> arguments = getRendererArguments(container,
+                "setCompiledLitRenderer");
 
         // The action names the template can call, and the functions behind
         // them: one function for the whole renderer, not one per item.
-        Assertions.assertEquals("[\"copy\"]", parameters.get(6).toString());
-        JsFunction actions = (JsFunction) parameters.get(7);
-        JsFunction copy = (JsFunction) actions.getCaptures().get(0);
-        Assertions.assertEquals(JsFunction.of("return [$0]", copy), actions);
+        Assertions.assertEquals("[\"copy\"]", arguments.get(6).toString());
+        JsFunction[] actions = (JsFunction[]) arguments.get(7);
+        Assertions.assertEquals(1, actions.length);
+        JsFunction copy = actions[0];
 
         // The actions come from JavaScript declared in the bundle, so only
         // their identity and captures are sent.
@@ -140,6 +149,7 @@ class LitRendererTest {
 
     @Test
     void noClientActions_clientStillGetsAnEmptyBundle() {
+        ui.setCspMode(CspMode.OFF);
         TestDiv container = new TestDiv();
         ui.add(container);
 
@@ -148,18 +158,17 @@ class LitRendererTest {
         ui.getUI().getInternals().getStateTree()
                 .runExecutionsBeforeClientResponse();
 
-        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("setLitRenderer"))
-                .findFirst().orElseThrow().getParameters();
+        List<Object> arguments = getRendererArguments(container,
+                "setLitRenderer");
 
-        Assertions.assertEquals("[]", parameters.get(6).toString());
-        Assertions.assertEquals(JsFunction.of("return []"), parameters.get(7));
+        Assertions.assertEquals("[]", arguments.get(6).toString());
+        Assertions.assertArrayEquals(new JsFunction[0],
+                (JsFunction[]) arguments.get(7));
     }
 
     @Test
     void removingTheRenderer_unbindsItsClientActions() {
+        ui.setCspMode(CspMode.OFF);
         TestDiv container = new TestDiv();
         ui.add(container);
         AtomicBoolean unbound = new AtomicBoolean();
@@ -198,5 +207,12 @@ class LitRendererTest {
         Action action = Clipboard.writeText();
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> renderer.withClientAction("copy", action));
+    }
+
+    private List<Object> getRendererArguments(TestDiv container,
+            String methodName) {
+        return ui.dumpJsCalls(container.getElement(), LitRendererJs.class)
+                .stream().filter(call -> methodName.equals(call.methodName()))
+                .findFirst().orElseThrow().arguments();
     }
 }

@@ -67,7 +67,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/tabs", version = "25.4.0-alpha7")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -527,12 +527,10 @@ public class Tabs extends Component
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
-                this,
-                context -> ui.getPage()
-                        .executeJs("$0.addEventListener('items-changed', "
-                                + "function(){ this.$server.updateSelectedTab(true); });",
-                                getElement())));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> ui.getPage().executeJs(TabsJs.class)
+                                .addItemsChangedListener(getElement())));
     }
 
     /**
