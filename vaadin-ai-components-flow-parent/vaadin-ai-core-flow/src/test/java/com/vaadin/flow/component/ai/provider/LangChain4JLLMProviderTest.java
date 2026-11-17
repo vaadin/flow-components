@@ -1676,6 +1676,48 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitToolMalformedSchema_logsWarningNamingTheTool() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        // The substituted schema hides the tool's parameters from the model,
+        // so the developer has to learn which tool's schema was dropped
+        var warnsAboutTool = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getArguments().contains("myTool"));
+        Assertions.assertTrue(warnsAboutTool,
+                "Expected a warning naming the tool whose schema was replaced");
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_logsParseFailureCause() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        // The warning only names the tool; the parser's own diagnostic is
+        // what tells the developer what is wrong with the schema
+        var logsCause = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.DEBUG
+                        && event.getThrowable().isPresent());
+        Assertions.assertTrue(logsCause,
+                "Expected the schema parse failure to be logged with its cause");
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
         var receivedArgs = new ArrayList<JsonNode>();
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
@@ -1942,6 +1984,34 @@ class LangChain4JLLMProviderTest {
                         .map(AiMessage.class::cast)
                         .noneMatch(AiMessage::hasToolExecutionRequests),
                 "Tool calls must not be replayed on a later turn");
+    }
+
+    @Test
+    void stream_toolRoundTrip_sendsToolCallBeforeItsResult() {
+        // LLM APIs reject a tool result whose tool call is not in the
+        // conversation, so the follow-up round trip carries both, in order
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var toolCall = toolResponse.aiMessage();
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, finalResponse);
+
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(3, messages.size(),
+                "Expected user message, tool call, tool result; got: "
+                        + messages);
+        Assertions.assertInstanceOf(UserMessage.class, messages.get(0));
+        Assertions.assertSame(toolCall, messages.get(1));
+        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
+                messages.get(2));
     }
 
     @Test
