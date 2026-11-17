@@ -10,6 +10,8 @@ package com.vaadin.flow.component.crud.tests;
 
 import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
@@ -17,10 +19,19 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/editorbuttons")
 public class EditorButtonsView extends VerticalLayout {
+
+    @JsDefinition
+    interface EditorButtonsViewJs extends Serializable {
+
+        @JsExpression("this.click()")
+        void click();
+    }
 
     final HorizontalLayout buttonsLayout;
 
@@ -83,7 +94,9 @@ public class EditorButtonsView extends VerticalLayout {
                     saveButton.addClickShortcut(Key.ENTER);
                     saveButton.addClickListener(e -> {
                         if (!e.isFromClient()) {
-                            saveButton.getElement().executeJs("this.click()");
+                            saveButton.getElement()
+                                    .executeJs(EditorButtonsViewJs.class)
+                                    .click();
                         }
                     });
                     saveButton.addFocusShortcut(Key.KEY_F, KeyModifier.ALT);
