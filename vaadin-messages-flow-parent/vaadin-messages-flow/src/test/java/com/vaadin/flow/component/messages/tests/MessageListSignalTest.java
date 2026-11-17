@@ -193,8 +193,8 @@ class MessageListSignalTest extends AbstractSignalsTest {
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be setItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItems"));
+        Assertions.assertEquals("setItems",
+                invocation.getInvocation().getJsCall().methodName());
 
         // Expect the parameters to equal the items in the message list
         var parameterItems = (ArrayNode) invocation.getInvocation()

@@ -128,9 +128,8 @@ public class Map extends MapBase {
      * @since 23.2
      */
     public static void setUserProjection(String projection) {
-        UI.getCurrentOrThrow().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
-                projection);
+        UI.getCurrentOrThrow().getPage().executeJs(MapJs.class)
+                .setUserProjection(projection);
     }
 
     /**
@@ -168,9 +167,8 @@ public class Map extends MapBase {
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
-        UI.getCurrentOrThrow().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
-                projectionName, wksDefinition);
+        UI.getCurrentOrThrow().getPage().executeJs(MapJs.class)
+                .defineProjection(projectionName, wksDefinition);
     }
 
     public Map() {

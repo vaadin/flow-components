@@ -90,7 +90,7 @@ public abstract class MapBase extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
+        getElement().executeJs(MapJs.class).initConnector();
         // Ensure the full configuration is synced when (re-)attaching the
         // component
         configuration.deepMarkAsDirty();

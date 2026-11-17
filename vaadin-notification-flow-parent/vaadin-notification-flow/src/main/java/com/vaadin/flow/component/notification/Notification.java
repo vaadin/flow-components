@@ -129,16 +129,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 ? UI.getCurrent().getInternals().getAppId()
                 : "ROOT";
 
-        //@formatter:off
-        getElement().executeJs(
-            "this.renderer = (root) => {" +
-            "  if (this.text) {" +
-            "    root.textContent = this.text;" +
-            "  } else {" +
-            "    Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)" +
-            "  }" +
-            "}", appId);
-        //@formatter:on
+        getElement().executeJs(NotificationJs.class).configureRenderer(appId);
     }
 
     /**
@@ -666,8 +657,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        getElement().executeJs(NotificationJs.class).patchVirtualContainer();
         configureRenderer();
         updateVirtualChildNodeIds();
     }

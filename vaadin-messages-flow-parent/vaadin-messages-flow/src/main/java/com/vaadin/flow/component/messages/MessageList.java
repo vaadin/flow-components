@@ -88,8 +88,6 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
     private List<MessageListUser> typingUsers = Collections.emptyList();
 
-    private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
-
     /**
      * Creates a new message list component. To populate the content of the
      * list, use {@link #setItems(Collection)}.
@@ -287,8 +285,8 @@ public class MessageList extends Component implements HasStyle, HasSize,
         items.forEach(item -> item.clientText = item.getText());
 
         var itemsJson = JacksonUtils.listToJson(items);
-        getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
-                itemsJson, getLocale().toLanguageTag());
+        getElement().executeJs(MessageListJs.class).setItems(itemsJson,
+                getLocale().toLanguageTag());
     }
 
     /**
@@ -306,14 +304,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
                     // Append optimization
                     var diff = item.getText()
                             .substring(item.clientText.length());
-                    getElement().executeJs(
-                            CONNECTOR_OBJECT + ".appendItemText(this, $0, $1)",
-                            diff, items.indexOf(item));
+                    getElement().executeJs(MessageListJs.class)
+                            .appendItemText(diff, items.indexOf(item));
                 } else {
                     // Full text update for this item
-                    getElement().executeJs(
-                            CONNECTOR_OBJECT + ".setItemText(this, $0, $1)",
-                            item.getText(), items.indexOf(item));
+                    getElement().executeJs(MessageListJs.class)
+                            .setItemText(item.getText(), items.indexOf(item));
                 }
                 // Sync clientText *after* sending the update
                 item.clientText = item.getText();
@@ -333,8 +329,8 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
         var newItemsJson = JacksonUtils.listToJson(newItems);
         // Call the connector function to add items
-        getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
-                newItemsJson, getLocale().toLanguageTag());
+        getElement().executeJs(MessageListJs.class).addItems(newItemsJson,
+                getLocale().toLanguageTag());
     }
 
     @Override
