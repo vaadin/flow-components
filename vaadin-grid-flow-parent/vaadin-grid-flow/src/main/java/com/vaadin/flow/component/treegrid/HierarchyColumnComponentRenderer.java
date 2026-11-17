@@ -64,6 +64,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
 
     @Override
     protected CompiledLitTemplate getTemplate() {
-        return JsSnippets.of(TreeGridTemplates.class).hierarchyComponent();
+        return JsSnippets.of(TreeGridTemplates.class)
+                .hierarchyColumnComponentRenderer();
     }
 }

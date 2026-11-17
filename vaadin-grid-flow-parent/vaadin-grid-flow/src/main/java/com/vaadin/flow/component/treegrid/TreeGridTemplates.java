@@ -31,8 +31,13 @@ import com.vaadin.flow.js.JsExpression;
 interface TreeGridTemplates extends Serializable {
 
     /**
-     * The template of {@link TreeGrid#addHierarchyColumn}, which shows the
-     * <code>name</code> property in a tree toggle.
+     * Returns the template of the renderer of
+     * {@link TreeGrid#addHierarchyColumn}. It renders the {@code name} property
+     * of the item in a {@code <vaadin-grid-tree-toggle>}, and a click calls the
+     * {@code onClick} function of the renderer.
+     *
+     * @return the template of the renderer of
+     *         {@link TreeGrid#addHierarchyColumn}
      */
     @JsExpression("""
             return html`<vaadin-grid-tree-toggle
@@ -41,16 +46,15 @@ interface TreeGridTemplates extends Serializable {
                 .expanded=${live(model.expanded)}
                 .level=${model.level}>${item.name}</vaadin-grid-tree-toggle>`;
             """)
-    CompiledLitTemplate hierarchy();
+    CompiledLitTemplate hierarchyColumnRenderer();
 
     /**
-     * The template of {@link HierarchyColumnComponentRenderer}, which shows a
-     * component in a tree toggle.
-     * <p>
-     * The click listener checks whether the event is canceled (by
-     * vaadin-grid-tree-toggle) and only invokes the callback if it is.
-     * vaadin-grid-tree-toggle cancels the event if the user clicks on a
-     * non-focusable element inside the toggle.
+     * Returns the template of {@link HierarchyColumnComponentRenderer}. It
+     * renders the component of the item in a {@code <vaadin-grid-tree-toggle>},
+     * and a click calls the {@code onClick} function of the renderer only when
+     * the toggle canceled the click event.
+     *
+     * @return the template of {@link HierarchyColumnComponentRenderer}
      */
     @JsExpression("""
             return html`<vaadin-grid-tree-toggle
@@ -60,5 +64,5 @@ interface TreeGridTemplates extends Serializable {
                 .expanded=${live(model.expanded)}
                 .level=${model.level}>${Vaadin.FlowComponentHost.getNode(appId, item.nodeid)}</vaadin-grid-tree-toggle>`;
             """)
-    CompiledLitTemplate hierarchyComponent();
+    CompiledLitTemplate hierarchyColumnComponentRenderer();
 }

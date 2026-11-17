@@ -530,7 +530,8 @@ public class TreeGrid<T> extends Grid<T>
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(LitRenderer
-                .<T> of(JsSnippets.of(TreeGridTemplates.class).hierarchy())
+                .<T> of(JsSnippets.of(TreeGridTemplates.class)
+                        .hierarchyColumnRenderer())
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);
