@@ -54,6 +54,16 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Gets the current page, which is the page that takes up most of the
+     * visible area.
+     *
+     * @return the current page, starting from {@code 1}
+     */
+    public int getPage() {
+        return getPropertyInteger("page");
+    }
+
+    /**
      * Gets the number of pages in the loaded document.
      *
      * @return the number of pages, or {@code 0} if no document is loaded

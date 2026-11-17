@@ -251,12 +251,12 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Scrolls to the start of the given page.
+     * Scrolls to the start of the given page. A page below {@code 1} scrolls to
+     * the first page, and a page above the page count scrolls to the last page.
      * <p>
      * While a document is loading, for example right after {@code setSrc}, it
      * scrolls once the document has loaded, and in a hidden viewer, once the
-     * viewer is shown. Does not scroll if the page is not a page of the
-     * document. Does nothing without a document.
+     * viewer is shown. Does nothing without a document.
      *
      * @param page
      *            the page to scroll to, starting from {@code 1}
