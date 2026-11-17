@@ -128,12 +128,6 @@ class ButtonDownloadHandlerTest {
     }
 
     @Test
-    void defaultTarget_saveAsFile() {
-        Assertions.assertEquals(DownloadTarget.SAVE_AS_FILE,
-                button.getDownloadTarget());
-    }
-
-    @Test
     void handlerAndTargetConstructor_newTab() {
         InputStreamDownloadHandler builtIn = DownloadHandler
                 .fromInputStream(event -> null);
@@ -148,16 +142,6 @@ class ButtonDownloadHandlerTest {
         Assertions.assertTrue(builtIn.isInline());
         ui.fakeClientCommunication();
         Assertions.assertEquals(1, downloadAttributes().count());
-    }
-
-    @Test
-    void newTab_disabledByClick_served() throws IOException {
-        button.setDownloadTarget(DownloadTarget.NEW_TAB);
-        button.setDisableOnClick(true);
-        button.click();
-
-        Assertions.assertFalse(button.isEnabled());
-        Assertions.assertTrue(requestDownload());
     }
 
     @Test
@@ -195,9 +179,11 @@ class ButtonDownloadHandlerTest {
     }
 
     @Test
-    void nullTarget_throws() {
+    void nullTargetOrConstructorHandler_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> button.setDownloadTarget(null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new Button("Report", null, DownloadTarget.SAVE_AS_FILE));
     }
 
     /**

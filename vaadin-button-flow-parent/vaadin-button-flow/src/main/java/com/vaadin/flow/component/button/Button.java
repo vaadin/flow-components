@@ -205,8 +205,7 @@ public class Button extends Component
      * @param text
      *            the text inside the button
      * @param downloadHandler
-     *            the handler that produces the content, or {@code null} to not
-     *            deliver any content on click
+     *            the handler that produces the content, not {@code null}
      * @param downloadTarget
      *            where the browser puts the content, not {@code null}
      * @see #setText(String)
@@ -219,7 +218,8 @@ public class Button extends Component
         this();
         setText(text);
         setDownloadTarget(downloadTarget);
-        setDownloadHandler(downloadHandler);
+        setDownloadHandler(Objects.requireNonNull(downloadHandler,
+                "downloadHandler must not be null"));
     }
 
     /**
@@ -423,16 +423,15 @@ public class Button extends Component
      * Sets a handler that produces content to deliver when the button is
      * clicked. By default the content is saved as a file; use
      * {@link #setDownloadTarget(DownloadTarget)} to show it in a new browser
-     * tab instead. The download starts in the browser as part of the click, so
-     * popup blockers let a new tab through, and click listeners still run as
-     * usual. Setting a new handler replaces the previous one, and {@code null}
-     * stops the button from delivering content.
+     * tab instead. The download starts in the browser as part of the click, and
+     * click listeners still run as usual. Setting a new handler replaces the
+     * previous one, and {@code null} stops the button from delivering content.
      * <p>
      * The handler runs only when the browser requests the content, once per
      * click, so you can create the content, file name and response headers at
-     * that point. If the handler fails, the browser reports a failed download,
-     * or shows an error page in the new tab, instead of showing empty content.
-     * Use the transfer callbacks of the handler, for example
+     * that point. If the handler fails, the browser reports a failed download
+     * instead of saving an empty file. Use the transfer callbacks of the
+     * handler, for example
      * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler#whenComplete(com.vaadin.flow.function.SerializableConsumer)
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
@@ -448,11 +447,7 @@ public class Button extends Component
      * explicitly, for example with {@code setEnabled(false)}, or a parent is
      * disabled, the content is no longer served while the button is disabled.
      * To serve the content regardless of the enabled state, pass
-     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}. For
-     * {@link DownloadTarget#NEW_TAB}, call
-     * {@link AbstractDownloadHandler#inline() inline()} on a built-in handler
-     * before {@code allowDisabled()}, for example
-     * {@code DownloadHandler.forFile(file).inline().allowDisabled()}.
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}.
      *
      * <pre>{@code
      * Button export = new Button("Export");
@@ -497,12 +492,11 @@ public class Button extends Component
      * it can, for example a PDF or an image, and saves it as a file otherwise.
      * The built-in handlers, such as
      * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
-     * content inline. This changes the handler instance for good, so it also
-     * serves inline wherever else it is used, and setting the target back to
-     * {@link DownloadTarget#SAVE_AS_FILE} does not undo it. The button still
-     * saves inline content as a file then. A custom handler should call
-     * {@link DownloadEvent#inline(String)} itself, since content served as an
-     * attachment is saved instead of shown.
+     * content inline. This changes the handler instance, so it also serves
+     * inline wherever else it is used. Other handlers, including the one
+     * returned by {@link DownloadHandler#allowDisabled()}, should call
+     * {@link DownloadEvent#inline(String)} themselves, since content served as
+     * an attachment is saved instead of shown.
      *
      * <pre>{@code
      * Button view = new Button("View invoice");
