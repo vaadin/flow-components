@@ -84,8 +84,7 @@ public class ThemeGradientColorBeanSerializer extends BeanSerializerBase {
     @Override
     protected BeanSerializerBase asArraySerializer() {
         // copied from BeanSerializer
-        if ((_objectIdWriter == null) && (_anyGetterWriter == null)
-                && (_propertyFilterId == null)) {
+        if ((_objectIdWriter == null) && (_propertyFilterId == null)) {
             return new BeanAsArraySerializer(this);
         }
         return this;
