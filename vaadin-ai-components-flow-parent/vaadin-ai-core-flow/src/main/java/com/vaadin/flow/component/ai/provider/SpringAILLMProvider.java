@@ -148,14 +148,6 @@ public class SpringAILLMProvider implements LLMProvider {
     private final transient ChatClient chatClient;
     private final transient MessageWindowChatMemory chatMemory;
     private final MessageChatMemoryAdvisor memoryAdvisor;
-    /**
-     * The conversation of the provider's own memory: the client's default
-     * {@link ChatMemory#CONVERSATION_ID} advisor parameter, or
-     * {@link #DEFAULT_CONVERSATION_ID} when the client has none. Put into each
-     * request as it is, so the client's own value reaches its other advisors
-     * and its observations unchanged.
-     */
-    private final Object conversationId;
     private final boolean hasManagedMemory;
     private final boolean isMissingConversationId;
     private boolean isStreaming = true;
@@ -186,8 +178,9 @@ public class SpringAILLMProvider implements LLMProvider {
      * Unless the client has a {@link MemoryAdvisor} of its own, the provider
      * adds its own chat memory to each request, keeping the last 30 messages,
      * and {@link #setHistory(List, Map)} restores a saved conversation into it.
-     * A default {@link ChatMemory#CONVERSATION_ID} advisor parameter on the
-     * client stays in each request and names the conversation in that memory:
+     * A {@link ChatMemory#CONVERSATION_ID} advisor parameter in the requests
+     * the client creates stays in them and names the conversation in that
+     * memory:
      *
      * <pre>
      * var chatClient = ChatClient.builder(chatModel)
@@ -217,18 +210,14 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(chatClient, "ChatClient must not be null");
         this.chatClient = chatClient;
         var requestSpec = inspectableRequestSpec(chatClient);
-        var clientConversationId = requestSpec != null
-                ? requestSpec.getAdvisorParams().get(ChatMemory.CONVERSATION_ID)
-                : null;
         if (requestSpec == null || requestSpec.getAdvisors().stream()
                 .anyMatch(MemoryAdvisor.class::isInstance)) {
             // The application keeps the conversation itself
             chatMemory = null;
             memoryAdvisor = null;
-            conversationId = null;
             hasManagedMemory = false;
-            isMissingConversationId = requestSpec != null
-                    && clientConversationId == null;
+            isMissingConversationId = requestSpec != null && requestSpec
+                    .getAdvisorParams().get(ChatMemory.CONVERSATION_ID) == null;
         } else {
             chatMemory = MessageWindowChatMemory.builder()
                     .maxMessages(MAX_MESSAGES).build();
@@ -236,8 +225,6 @@ public class SpringAILLMProvider implements LLMProvider {
             // that the client given here creates the request of every turn
             memoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory)
                     .build();
-            conversationId = clientConversationId != null ? clientConversationId
-                    : DEFAULT_CONVERSATION_ID;
             hasManagedMemory = true;
             isMissingConversationId = false;
         }
@@ -367,7 +354,7 @@ public class SpringAILLMProvider implements LLMProvider {
             return;
         }
         // The memory advisor reads the conversation by this key
-        var conversationKey = conversationId.toString();
+        var conversationKey = conversationIdOf(chatClient.prompt()).toString();
         chatMemory.clear(conversationKey);
         var messages = history.stream().map(message -> {
             var attachments = message.messageId() != null
@@ -440,6 +427,28 @@ public class SpringAILLMProvider implements LLMProvider {
                 + "application: the configuration of the ChatClient given "
                 + "to it cannot be inspected.");
         return null;
+    }
+
+    /**
+     * Returns the conversation of the provider's own memory for a request: the
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter the client put into
+     * it, or {@link #DEFAULT_CONVERSATION_ID} when there is none. Read from
+     * each request rather than once, since a client may name another
+     * conversation in each request it creates. The client's own value is put
+     * back as it is, so its other advisors and its observations see it
+     * unchanged.
+     *
+     * @param requestSpec
+     *            the request created by the client
+     * @return the conversation id, not {@code null}
+     */
+    private static Object conversationIdOf(
+            ChatClient.ChatClientRequestSpec requestSpec) {
+        var conversationId = requestSpec instanceof DefaultChatClientRequestSpec spec
+                ? spec.getAdvisorParams().get(ChatMemory.CONVERSATION_ID)
+                : null;
+        return conversationId != null ? conversationId
+                : DEFAULT_CONVERSATION_ID;
     }
 
     private static org.springframework.ai.chat.messages.Message toVendorMessage(
@@ -557,6 +566,7 @@ public class SpringAILLMProvider implements LLMProvider {
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
+            var conversationId = conversationIdOf(promptSpec);
             promptSpec = promptSpec.advisors(a -> a.advisors(memoryAdvisor)
                     .param(ChatMemory.CONVERSATION_ID, conversationId));
         }

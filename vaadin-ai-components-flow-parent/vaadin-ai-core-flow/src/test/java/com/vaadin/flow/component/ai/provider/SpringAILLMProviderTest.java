@@ -1215,6 +1215,74 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void chatClientConstructor_clientSettingConversationIdPerRequest_advisorsGetRequestConversationId() {
+        var advisor = Mockito.mock(CallAdvisor.class);
+        Mockito.when(advisor.getName()).thenReturn("Other advisor");
+        Mockito.when(advisor.adviseCall(Mockito.any(), Mockito.any()))
+                .thenAnswer(invocation -> invocation
+                        .<CallAdvisorChain> getArgument(1)
+                        .nextCall(invocation.getArgument(0)));
+        var currentConversationId = new AtomicReference<>("conv-1");
+        var chatClientProvider = new SpringAILLMProvider(
+                clientSettingConversationId(
+                        ChatClient.builder(mockChatModel)
+                                .defaultAdvisors(advisor).build(),
+                        currentConversationId));
+        chatClientProvider.setStreaming(false);
+        mockSimpleChat("Response");
+
+        currentConversationId.set("conv-2");
+        chatClientProvider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var requestCaptor = ArgumentCaptor.forClass(ChatClientRequest.class);
+        Mockito.verify(advisor).adviseCall(requestCaptor.capture(),
+                Mockito.any());
+        Assertions.assertEquals("conv-2", requestCaptor.getValue().context()
+                .get(ChatMemory.CONVERSATION_ID));
+    }
+
+    @Test
+    void setHistory_clientSettingConversationIdPerRequest_restoresIntoRequestConversation() {
+        var currentConversationId = new AtomicReference<>("conv-1");
+        var chatClientProvider = new SpringAILLMProvider(
+                clientSettingConversationId(
+                        ChatClient.builder(mockChatModel).build(),
+                        currentConversationId));
+        chatClientProvider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Old message", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Old answer", null,
+                        null));
+
+        currentConversationId.set("conv-2");
+        chatClientProvider.setHistory(history, Collections.emptyMap());
+        mockSimpleChat("Response");
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var texts = capturePrompt().getInstructions().stream()
+                .map(Message::getText).toList();
+        Assertions.assertEquals(
+                List.of("Old message", "Old answer", "New question"), texts);
+    }
+
+    /**
+     * An application's own ChatClient that names the conversation in each
+     * request it creates, so that switching the conversation needs no new
+     * provider.
+     */
+    private static ChatClient clientSettingConversationId(
+            ChatClient builtClient, AtomicReference<String> conversationId) {
+        var customClient = Mockito.mock(ChatClient.class);
+        Mockito.when(customClient.prompt())
+                .thenAnswer(invocation -> builtClient.prompt()
+                        .advisors(a -> a.param(ChatMemory.CONVERSATION_ID,
+                                conversationId.get())));
+        return customClient;
+    }
+
+    @Test
     void setHistory_chatClientWithConversationIdWithoutMemoryAdvisor_restoresConversation() {
         var chatClient = ChatClient.builder(mockChatModel)
                 .defaultAdvisors(
