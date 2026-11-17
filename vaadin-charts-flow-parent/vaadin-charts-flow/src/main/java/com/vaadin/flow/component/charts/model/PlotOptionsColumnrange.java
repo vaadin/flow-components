@@ -809,6 +809,21 @@ public class PlotOptionsColumnrange extends ColumnOptions {
         return _fn_pointDescriptionFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the
+     * <code>pointDescriptionFormatter</code> option, as the source code of the
+     * function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_pointDescriptionFormatter
+     *            the source code of the JavaScript function
+     */
     public void setPointDescriptionFormatter(
             String _fn_pointDescriptionFormatter) {
         this._fn_pointDescriptionFormatter = _fn_pointDescriptionFormatter;

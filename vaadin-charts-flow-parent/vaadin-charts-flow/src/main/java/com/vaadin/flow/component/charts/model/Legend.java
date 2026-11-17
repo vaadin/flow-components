@@ -355,6 +355,20 @@ public class Legend extends AbstractConfigurationObject {
         return _fn_labelFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>labelFormatter</code> option,
+     * as the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_labelFormatter
+     *            the source code of the JavaScript function
+     */
     public void setLabelFormatter(String _fn_labelFormatter) {
         this._fn_labelFormatter = _fn_labelFormatter;
     }

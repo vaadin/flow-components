@@ -92,6 +92,20 @@ public class Accessibility extends AbstractConfigurationObject {
         return _fn_onTableAnchorClick;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>onTableAnchorClick</code>
+     * option, as the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_onTableAnchorClick
+     *            the source code of the JavaScript function
+     */
     public void setOnTableAnchorClick(String _fn_onTableAnchorClick) {
         this._fn_onTableAnchorClick = _fn_onTableAnchorClick;
     }
@@ -124,6 +138,20 @@ public class Accessibility extends AbstractConfigurationObject {
         return _fn_pointDateFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>pointDateFormatter</code>
+     * option, as the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_pointDateFormatter
+     *            the source code of the JavaScript function
+     */
     public void setPointDateFormatter(String _fn_pointDateFormatter) {
         this._fn_pointDateFormatter = _fn_pointDateFormatter;
     }
@@ -132,6 +160,21 @@ public class Accessibility extends AbstractConfigurationObject {
         return _fn_pointDescriptionFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the
+     * <code>pointDescriptionFormatter</code> option, as the source code of the
+     * function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_pointDescriptionFormatter
+     *            the source code of the JavaScript function
+     */
     public void setPointDescriptionFormatter(
             String _fn_pointDescriptionFormatter) {
         this._fn_pointDescriptionFormatter = _fn_pointDescriptionFormatter;
@@ -141,6 +184,21 @@ public class Accessibility extends AbstractConfigurationObject {
         return _fn_screenReaderSectionFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the
+     * <code>screenReaderSectionFormatter</code> option, as the source code of
+     * the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_screenReaderSectionFormatter
+     *            the source code of the JavaScript function
+     */
     public void setScreenReaderSectionFormatter(
             String _fn_screenReaderSectionFormatter) {
         this._fn_screenReaderSectionFormatter = _fn_screenReaderSectionFormatter;
@@ -150,6 +208,21 @@ public class Accessibility extends AbstractConfigurationObject {
         return _fn_seriesDescriptionFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the
+     * <code>seriesDescriptionFormatter</code> option, as the source code of the
+     * function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where Highcharts
+     * has a format string for the same purpose, such as <code>format</code> or
+     * <code>pointFormat</code>, use it instead.
+     *
+     * @param _fn_seriesDescriptionFormatter
+     *            the source code of the JavaScript function
+     */
     public void setSeriesDescriptionFormatter(
             String _fn_seriesDescriptionFormatter) {
         this._fn_seriesDescriptionFormatter = _fn_seriesDescriptionFormatter;
