@@ -1280,6 +1280,32 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitToolsOfSameName_executesLastTool() {
+        var first = createExplicitTool("myTool", "First tool", null,
+                args -> "first");
+        var second = createExplicitTool("myTool", "Second tool", null,
+                args -> "second");
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(first, second));
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        var result = provider.stream(request).blockFirst();
+
+        Assertions.assertEquals("Done", result);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Second tool"),
+                captor.getAllValues().get(0).toolSpecifications().stream()
+                        .map(ToolSpecification::description).toList());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(List.of("second"), toolResults.stream()
+                .map(ToolExecutionResultMessage::text).toList());
+    }
+
+    @Test
     void stream_withExplicitTool_passesArgumentsToExecutor() {
         var receivedArgs = new ArrayList<JsonNode>();
         var explicitTool = createExplicitTool("myTool", "A test tool",

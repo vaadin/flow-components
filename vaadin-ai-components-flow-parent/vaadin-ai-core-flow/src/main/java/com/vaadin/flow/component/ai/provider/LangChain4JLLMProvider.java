@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -984,7 +985,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * request the turn was started with, read from the invocation parameters.
      * Every executor checks the state of the turn before it runs, so no tool of
      * a round executes once a tool call limit is exceeded or the turn is
-     * cancelled.
+     * cancelled. A tool replaces an earlier one of the same name, as the
+     * orchestrator warns when it finds such tools; LangChain4j would reject the
+     * turn instead.
      */
     private static final class TurnToolProvider implements ToolProvider {
 
@@ -995,6 +998,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             if (turn == null) {
                 return result.build();
             }
+            var toolsByName = new LinkedHashMap<String, Map.Entry<ToolSpecification, ToolExecutor>>();
             var tools = turn.request.tools();
             if (tools != null) {
                 for (var toolObject : tools) {
@@ -1003,17 +1007,23 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     Arrays.stream(toolObject.getClass().getDeclaredMethods())
                             .filter(method -> method
                                     .isAnnotationPresent(Tool.class))
-                            .forEach(method -> result.add(
-                                    ToolSpecifications
-                                            .toolSpecificationFrom(method),
-                                    turn.guard(toAnnotatedToolExecutor(
-                                            toolObject, method))));
+                            .forEach(method -> {
+                                var specification = ToolSpecifications
+                                        .toolSpecificationFrom(method);
+                                toolsByName.put(specification.name(),
+                                        Map.entry(specification, turn
+                                                .guard(toAnnotatedToolExecutor(
+                                                        toolObject, method))));
+                            });
                 }
             }
             for (var tool : turn.request.explicitTools()) {
-                result.add(toToolSpecification(tool),
-                        turn.guard(toExplicitToolExecutor(tool)));
+                var specification = toToolSpecification(tool);
+                toolsByName.put(specification.name(), Map.entry(specification,
+                        turn.guard(toExplicitToolExecutor(tool))));
             }
+            toolsByName.values().forEach(
+                    tool -> result.add(tool.getKey(), tool.getValue()));
             return result.build();
         }
     }
