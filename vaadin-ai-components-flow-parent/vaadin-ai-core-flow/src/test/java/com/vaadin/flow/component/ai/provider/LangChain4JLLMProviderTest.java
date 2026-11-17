@@ -1151,6 +1151,28 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void setHistory_afterTurnWithAttachment_restoresQuestionWithoutThatAttachment() {
+        var response = mockSimpleResponse("A photo");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var image = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        provider.stream(new TestLLMRequest("What is this?", null,
+                List.of(image), new Object[0])).blockFirst();
+
+        // Restored on the thread the turn ran on, with the same text as the
+        // question of that turn but without its attachment
+        provider.setHistory(List.of(new ChatMessage(ChatMessage.Role.USER,
+                "What is this?", null, null)), Map.of());
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of(), getUserMessageContents(
+                captor.getAllValues().get(1), ImageContent.class));
+    }
+
+    @Test
     void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
         var attachment = new AIAttachment("file.txt", "text/plain",
                 "content".getBytes());
@@ -3343,6 +3365,39 @@ class LangChain4JLLMProviderTest {
                 getToolExecutionResults(requests.get(3)).size(),
                 "Both tool rounds of the second turn should be sent: "
                         + requests.get(3).messages());
+    }
+
+    @Test
+    void stream_turnStartedFromToolOfAnotherTurn_keepsOuterTurnToolTraffic() {
+        var innerResults = new ArrayList<String>();
+        var askAgain = createExplicitTool("askAgain", "Asks the model again",
+                null, args -> {
+                    innerResults.addAll(provider
+                            .stream(createSimpleRequest("Inner question"))
+                            .collectList().block(TURN_TIMEOUT));
+                    return "asked";
+                });
+        var toolCall = mockSimpleResponseWithTool("askAgain");
+        var innerAnswer = mockSimpleResponse("Inner answer");
+        var outerAnswer = mockSimpleResponse("Outer answer");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall, innerAnswer, outerAnswer);
+
+        provider.stream(new TestLLMRequestWithExplicitTools("Outer question",
+                null, List.of(), new Object[0], List.of(askAgain)))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Inner answer"), innerResults);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The outer turn continues with its own tool call and its result
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertTrue(
+                messages.get(messages.size() - 2) instanceof AiMessage call
+                        && call.hasToolExecutionRequests(),
+                messages.toString());
+        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
+                messages.getLast());
     }
 
     // --- Tool call limit tests ---
