@@ -12,6 +12,7 @@
     <description>Vaadin Renderer</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.data.renderer</osgi.export.package>
+        <csp.mode>strict</csp.mode>
     </properties>
     <dependencies>
         <dependency>

@@ -147,6 +147,11 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         return "${Vaadin.FlowComponentHost.getNode(appId, item.nodeid)}";
     }
 
+    @Override
+    protected CompiledLitTemplate getTemplate() {
+        return builtInTemplates().componentRenderer();
+    }
+
     Element getOwner() {
         return owner;
     }
@@ -157,8 +162,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this.owner = owner;
         this.container = new Element("div");
         this.container.addAttachListener(event -> {
-            this.container.executeJs(
-                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+            this.container.executeJs(LitRendererJs.class)
+                    .patchVirtualContainer();
         });
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);

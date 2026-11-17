@@ -75,6 +75,11 @@ public abstract class BasicRenderer<SOURCE, TARGET>
         return "${item.label}";
     }
 
+    @Override
+    protected CompiledLitTemplate getTemplate() {
+        return builtInTemplates().basicRenderer();
+    }
+
     protected ValueProvider<SOURCE, TARGET> getValueProvider() {
         return valueProvider;
     }
