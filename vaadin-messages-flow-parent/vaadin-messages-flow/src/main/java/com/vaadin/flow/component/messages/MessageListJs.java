@@ -66,8 +66,7 @@ interface MessageListJs extends Serializable {
     void setItemText(String text, int index);
 
     /**
-     * Appends text to the text of an item, used when the new text starts with
-     * the text that the browser already has.
+     * Appends text to the text of an item.
      *
      * @param text
      *            the text to append
