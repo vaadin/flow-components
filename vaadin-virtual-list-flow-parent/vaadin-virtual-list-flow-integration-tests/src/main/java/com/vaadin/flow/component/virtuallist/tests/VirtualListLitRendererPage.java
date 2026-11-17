@@ -15,18 +15,30 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import java.io.Serializable;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-virtual-list/lit-renderer")
 public class VirtualListLitRendererPage extends Div {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`<div id=\"item-${index}\" @click=\"${functions.clicked}\">Lit: ${item.name}</div>`;")
+        CompiledLitTemplate itemRenderer();
+    }
 
     public VirtualListLitRendererPage() {
         VirtualList<Integer> list = new VirtualList<>();
@@ -49,8 +61,8 @@ public class VirtualListLitRendererPage extends Div {
     }
 
     private void setLitRenderer(VirtualList<Integer> list) {
-        list.setRenderer(LitRenderer.<Integer> of(
-                "<div id=\"item-${index}\" @click=\"${clicked}\">Lit: ${item.name}</div>")
+        list.setRenderer(LitRenderer
+                .<Integer> of(JsSnippets.of(Templates.class).itemRenderer())
                 .withProperty("name", item -> "Item " + item)
                 .withFunction("clicked", item -> {
                     list.getElement().setAttribute("data-clicked-item",

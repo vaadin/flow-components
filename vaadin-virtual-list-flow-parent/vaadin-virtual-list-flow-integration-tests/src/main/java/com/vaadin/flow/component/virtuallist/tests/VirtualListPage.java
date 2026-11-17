@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
@@ -37,6 +39,9 @@ import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -46,6 +51,16 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-virtual-list/virtual-list-test")
 public class VirtualListPage extends Div {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`${item.name} - ${item.age} - ${item.user}`;")
+        CompiledLitTemplate personRenderer();
+
+        @JsExpression("return html`<div @click=${functions.remove} id='template-events-item-${index}'>${item.label}</div>`;")
+        CompiledLitTemplate removableItemRenderer();
+    }
 
     private static final List<String> ITEMS;
     static {
@@ -199,7 +214,7 @@ public class VirtualListPage extends Div {
 
         list.setDataProvider(dataProvider);
         list.setRenderer(LitRenderer
-                .<Person> of("${item.name} - ${item.age} - ${item.user}")
+                .<Person> of(JsSnippets.of(Templates.class).personRenderer())
                 .withProperty("name", Person::getName)
                 .withProperty("age", Person::getAge)
                 .withProperty("user", person -> person.getName().toLowerCase()
@@ -247,8 +262,9 @@ public class VirtualListPage extends Div {
         List<String> items = new ArrayList<>(Arrays.asList("Clickable item 1",
                 "Clickable item 2", "Clickable item 3"));
 
-        list.setRenderer(LitRenderer.<String> of(
-                "<div @click=${remove} id='template-events-item-${index}'>${item.label}</div>")
+        list.setRenderer(LitRenderer
+                .<String> of(
+                        JsSnippets.of(Templates.class).removableItemRenderer())
                 .withProperty("label", ValueProvider.identity())
                 .withFunction("remove", item -> {
                     items.remove(item);
