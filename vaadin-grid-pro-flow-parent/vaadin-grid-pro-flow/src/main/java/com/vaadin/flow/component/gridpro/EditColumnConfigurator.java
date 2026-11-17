@@ -66,9 +66,9 @@ public class EditColumnConfigurator<T> implements Serializable {
 
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> UI.getCurrentOrThrow().getPage().executeJs(
-                                "window.Vaadin.Flow.gridProConnector.patchEditModeRenderer($0)",
-                                column.getElement())));
+                        context -> UI.getCurrentOrThrow().getPage()
+                                .executeJs(GridProJs.class)
+                                .patchEditModeRenderer(column.getElement())));
 
         return getColumn();
     }
@@ -185,9 +185,9 @@ public class EditColumnConfigurator<T> implements Serializable {
     private void updateEditModeRenderer() {
         HasValueAndElement<?, ?> component = pendingEditModeRendererComponent;
         pendingEditModeRendererComponent = null;
-        UI.getCurrentOrThrow().getPage().executeJs(
-                "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
-                column.getElement(), component.getElement());
+        UI.getCurrentOrThrow().getPage().executeJs(GridProJs.class)
+                .setEditModeRenderer(column.getElement(),
+                        component.getElement());
     }
 
     /**

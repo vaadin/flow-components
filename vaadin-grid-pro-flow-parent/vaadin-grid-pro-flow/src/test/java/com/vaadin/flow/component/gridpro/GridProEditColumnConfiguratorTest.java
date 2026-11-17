@@ -21,7 +21,6 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
@@ -165,10 +164,10 @@ class GridProEditColumnConfiguratorTest {
 
     private List<List<Object>> getSetEditModeRendererParameters() {
         return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("gridProConnector.setEditModeRenderer("))
-                .map(invocation -> invocation.getParameters()).toList();
+                .map(invocation -> invocation.getInvocation().getJsCall())
+                .filter(call -> call != null
+                        && "setEditModeRenderer".equals(call.methodName()))
+                .map(call -> call.arguments()).toList();
     }
 
     @Tag("test-editor")
