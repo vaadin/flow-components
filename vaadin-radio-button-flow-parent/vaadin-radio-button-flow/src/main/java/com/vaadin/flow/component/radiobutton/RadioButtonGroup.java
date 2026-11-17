@@ -840,7 +840,8 @@ public class RadioButtonGroup<T>
         // Components that should remain disabled (due to itemEnabledProvider),
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
-        button.getElement().executeJs("this.disabled = $0", disabled);
+        button.getElement().executeJs(RadioButtonGroupJs.class)
+                .setItemDisabled(disabled);
     }
 
     private void identifierProviderChanged(

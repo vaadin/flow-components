@@ -527,12 +527,10 @@ public class Tabs extends Component
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
-                this,
-                context -> ui.getPage()
-                        .executeJs("$0.addEventListener('items-changed', "
-                                + "function(){ this.$server.updateSelectedTab(true); });",
-                                getElement())));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> ui.getPage().executeJs(TabsJs.class)
+                                .addItemsChangedListener(getElement())));
     }
 
     /**
