@@ -165,24 +165,8 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
             ExecutionContext context) {
         String appId = context.getUI().getInternals().getAppId();
 
-        //@formatter:off
-        container.executeJs("const originalRender = this.renderer;" +
-            // Patch the container's renderer function to handle the editor
-            "this.renderer = (root, container, model) => {" +
-                "const editingChanged = root.__editing !== model.item._editing;" +
-                "root.__editing = model.item._editing;" +
-
-                // If the editing state changed, the root needs to be cleared
-                "if (editingChanged) {" +
-                    "delete root._$litPart$; root.innerHTML = ''" +
-                "}" +
-
-                // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
-                "else if (originalRender) { originalRender(root, container, model) }" +
-                "else { this._defaultRenderer(root, container, model) }" +
-            "};");
-        //@formatter:on
+        container.executeJs(EditorJs.class).patchRenderer(appId,
+                columnInternalId);
     }
 
     private void runBeforeClientResponse(Element container,
