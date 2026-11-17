@@ -79,12 +79,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   explicitly so LangChain4j logs no notice) before the customizer runs, and
   adds what must not be replaced afterwards (its tool provider and
   listeners, which add up with the customizer's, and the constructor's
-  model). The checks of a turn (cancellation, tool call limits, the
+  model). The checks of a turn (cancellation, tool call limits, and the
   orchestrator's system prompt, which wins over a customizer's
-  `systemMessage`, and the session context) sit in a proxy around that model
-  instead of in a builder setting the application might also use. The
-  session context is added there, after retrieval and input guardrails, so
-  those see only what the user wrote. The proxy does not pass a cancelled
+  `systemMessage`) sit in a proxy around that model instead of in a builder
+  setting the application might also use. The session context goes into the
+  user text before the service call, as with `SpringAILLMProvider`, so
+  retrieval and input guardrails see it. The proxy does not pass a cancelled
   turn's model response on to the service, which would otherwise run the
   tools it requests, including the customizer's. A model call and a memory
   access do not say which turn they belong to, so the provider binds the

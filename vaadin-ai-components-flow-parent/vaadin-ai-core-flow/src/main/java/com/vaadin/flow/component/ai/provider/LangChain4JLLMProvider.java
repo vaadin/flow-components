@@ -114,18 +114,17 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * The provider keeps doing what the orchestrator needs from it, whatever the
  * customizer configured: it supplies the tools of each turn next to the tools
- * of the customizer, converts the attachments into the user message, adds the
- * session context to the request the model receives, reports the response
- * metadata and enforces the tool call limits. Once a turn is cancelled, the
- * provider calls the model no more and does not pass a model response that
- * arrives later on to the service, so no tool runs for it, whether the provider
- * or the customizer supplied it. Before the customizer runs, the provider sets
- * defaults that the customizer may replace: its own chat memory, no limit on
- * LangChain4j's tool calling round trips (the provider's own tool call limits
- * bound the loop), a result that tells the model when it called a tool that
- * does not exist, and the tool error handling that LangChain4j applies when
- * none is configured. The model is the one given to the constructor, so a model
- * set in the customizer is not used.
+ * of the customizer, adds the session context and the attachments to the user
+ * message, reports the response metadata and enforces the tool call limits.
+ * Once a turn is cancelled, the provider calls the model no more and does not
+ * pass a model response that arrives later on to the service, so no tool runs
+ * for it, whether the provider or the customizer supplied it. Before the
+ * customizer runs, the provider sets defaults that the customizer may replace:
+ * its own chat memory, no limit on LangChain4j's tool calling round trips (the
+ * provider's own tool call limits bound the loop), a result that tells the
+ * model when it called a tool that does not exist, and the tool error handling
+ * that LangChain4j applies when none is configured. The model is the one given
+ * to the constructor, so a model set in the customizer is not used.
  * </p>
  * <p>
  * <b>System prompt:</b> you can set a system prompt in the customizer with
@@ -140,16 +139,14 @@ import tools.jackson.databind.JsonNode;
  * </p>
  * <p>
  * <b>Retrieval augmentation:</b> a content retriever or retrieval augmentor set
- * in the customizer works on the text of the user message. The attachments of
- * the turn are added to the augmented message, and the provider's chat memory
- * keeps them with the user message also when
+ * in the customizer works on the text of the user message, which ends with the
+ * session context of the turn, as do input guardrails. The attachments of the
+ * turn are added to the augmented message, and the provider's chat memory keeps
+ * them with the user message also when
  * {@code storeRetrievedContentInChatMemory(false)} leaves the retrieved content
- * out of it. Retrieval and input guardrails see the message the user wrote: the
- * session context of the turn is added only to the request the model receives,
- * at the end of the user message, and is not stored in the chat memory. Both
- * run on the thread that asks for the response, before the model is called,
- * also with a {@link StreamingChatModel}. When you use retrieval or input
- * guardrails with a streaming model, call
+ * out of it. Retrieval and input guardrails run on the thread that asks for the
+ * response, before the model is called, also with a {@link StreamingChatModel}.
+ * When you use retrieval or input guardrails with a streaming model, call
  * {@link #setBackgroundExecution(boolean) setBackgroundExecution(true)} so that
  * they do not block the UI thread.
  * </p>
@@ -484,7 +481,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private UserMessage withTurnAttachments(UserMessage message) {
         var turn = turnOnThread.get();
         if (turn == null || !message.hasSingleText()
-                || !message.singleText().equals(turn.request.userMessage())) {
+                || !message.singleText().equals(turn.userText)) {
             return message;
         }
         var contents = new ArrayList<>(message.contents());
@@ -683,19 +680,17 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private void startTurn(Turn turn) {
         var request = turn.request;
-        // The session context is added to the model request, see
-        // Turn.beforeModelCall, so that retrieval and input guardrails see
-        // only what the user wrote.
-        var text = request.userMessage();
+        turn.userText = LLMProviderHelpers.withSessionContext(
+                request.userMessage(), request.sessionContext());
         turn.attachments = buildAttachmentContents(request);
         var parameters = InvocationParameters.from(TURN_PARAMETER, turn);
         if (streaming) {
-            service.stream(USER_TEXT_TEMPLATE, text, turn.attachments,
+            service.stream(USER_TEXT_TEMPLATE, turn.userText, turn.attachments,
                     parameters).onPartialResponse(turn::partialResponse)
                     .onCompleteResponse(turn::complete).onError(turn::fail)
                     .start();
         } else {
-            turn.complete(service.call(USER_TEXT_TEMPLATE, text,
+            turn.complete(service.call(USER_TEXT_TEMPLATE, turn.userText,
                     turn.attachments, parameters));
         }
     }
@@ -1255,6 +1250,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
          */
         private final List<dev.langchain4j.data.message.ChatMessage> turnMessages = new ArrayList<>();
         /**
+         * The text of the user message, the session context included, as the
+         * service receives it. Set when the turn starts.
+         */
+        private String userText;
+        /**
          * The attachments of the user message, as the service receives them.
          * Set when the turn starts.
          */
@@ -1309,20 +1309,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
         /**
          * Runs before each model call of the turn: ends the turn instead of
          * calling the model when its subscriber has cancelled or a tool call
-         * exceeded a limit, and puts the system prompt and the session context
-         * of the request on the model request. The limit check also bounds a
-         * loop over tools the provider does not wrap, those configured in the
-         * customizer.
+         * exceeded a limit, and puts the system prompt of the request on the
+         * model request. The limit check also bounds a loop over tools the
+         * provider does not wrap, those configured in the customizer.
          * <p>
          * The system prompt the orchestrator sends takes the place of any
          * system message of the service, such as one set in the customizer. It
          * is sent as it is, not through the service's system message, which
          * LangChain4j renders as a prompt template.
-         * <p>
-         * The session context is added to the text of the last user message of
-         * the request, after retrieval augmentation and the input guardrails
-         * have run on it. Within the tool calling rounds of a turn that is the
-         * message of the turn. It is not stored in the chat memory.
          *
          * @return the request to send to the model
          * @throws TurnCancelledException
@@ -1351,34 +1345,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
                         .forEach(replaced::add);
                 messages = replaced;
             }
-            var sessionContext = request.sessionContext();
-            if (sessionContext != null && !sessionContext.isBlank()) {
-                messages = UserMessage
-                        .replaceLast(messages,
-                                UserMessage.findLast(messages)
-                                        .map(message -> withSessionContext(
-                                                message, sessionContext))
-                                        .orElse(null));
-            }
             return chatRequest.toBuilder().messages(messages).build();
-        }
-
-        /**
-         * Returns the user message with the session context appended to its
-         * first text, which is the text of the user, augmented when retrieval
-         * is configured. The attachments follow it.
-         */
-        private static UserMessage withSessionContext(UserMessage message,
-                String sessionContext) {
-            var contents = new ArrayList<>(message.contents());
-            for (var i = 0; i < contents.size(); i++) {
-                if (contents.get(i) instanceof TextContent text) {
-                    contents.set(i, TextContent.from(LLMProviderHelpers
-                            .withSessionContext(text.text(), sessionContext)));
-                    break;
-                }
-            }
-            return message.toBuilder().contents(contents).build();
         }
 
         /**

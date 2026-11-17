@@ -2472,6 +2472,59 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_retrievedContentNotStoredWithSessionContext_keepsAttachmentInChatMemory() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service
+                        .contentRetriever(query -> List
+                                .of(dev.langchain4j.rag.content.Content
+                                        .from("The codename is Bluefin")))
+                        .storeRetrievedContentInChatMemory(false));
+        var response = mockSimpleResponse("A photo");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var image = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var withImage = new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return "What is this?";
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return List.of(image);
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public String sessionContext() {
+                return "Tenant: acme";
+            }
+        };
+
+        customized.stream(withImage).blockFirst();
+        customized.stream(createSimpleRequest("And the colors?")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var firstQuestion = (UserMessage) captor.getAllValues().get(1)
+                .messages().getFirst();
+        Assertions.assertEquals(1,
+                firstQuestion.contents().stream()
+                        .filter(ImageContent.class::isInstance).count(),
+                "The attachment of the first turn should be replayed");
+    }
+
+    @Test
     void customizer_chatMemoryRewrittenDuringTurn_addsAttachmentsToTheTurnQuestionOnly() {
         // A failure with message removal makes LangChain4j clear the chat
         // memory and add its messages again while the turn runs.
@@ -2529,82 +2582,6 @@ class LangChain4JLLMProviderTest {
                         .collectList().block(TURN_TIMEOUT));
         Mockito.verify(mockChatModel, Mockito.never())
                 .chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void customizer_contentRetriever_queriesWithoutSessionContext() {
-        var queries = new ArrayList<String>();
-        var customized = new LangChain4JLLMProvider(mockChatModel,
-                service -> service.contentRetriever(query -> {
-                    queries.add(query.text());
-                    return List.of(dev.langchain4j.rag.content.Content
-                            .from("The codename is Bluefin"));
-                }));
-        var response = mockSimpleResponse("Bluefin");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        customized.stream(new TestLLMRequestWithSessionContext(
-                "What is the codename?", "Tenant: acme")).blockFirst();
-
-        Assertions.assertEquals(List.of("What is the codename?"), queries);
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel).chat(captor.capture());
-        var userText = ((UserMessage) captor.getValue().messages().getLast())
-                .singleText();
-        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
-                userText);
-        Assertions.assertTrue(
-                userText.endsWith(LLMProviderHelpers.withSessionContext("",
-                        "Tenant: acme")),
-                "The model request should carry the session context: "
-                        + userText);
-    }
-
-    @Test
-    void customizer_inputGuardrail_seesMessageWithoutSessionContext() {
-        var checked = new ArrayList<String>();
-        var customized = new LangChain4JLLMProvider(mockChatModel,
-                service -> service.inputGuardrails(new InputGuardrail() {
-                    @Override
-                    public InputGuardrailResult validate(
-                            UserMessage userMessage) {
-                        checked.add(userMessage.singleText());
-                        return success();
-                    }
-                }));
-        var response = mockSimpleResponse("Hi");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        customized.stream(
-                new TestLLMRequestWithSessionContext("Hello", "Tenant: acme"))
-                .blockFirst();
-
-        Assertions.assertEquals(List.of("Hello"), checked);
-    }
-
-    @Test
-    void stream_sessionContext_isSentWithItsOwnTurnOnly() {
-        var response = mockSimpleResponse("Hi");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        provider.stream(
-                new TestLLMRequestWithSessionContext("Hello", "Turn: 1"))
-                .blockFirst();
-        provider.stream(
-                new TestLLMRequestWithSessionContext("Again", "Turn: 2"))
-                .blockFirst();
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-        var texts = captor.getAllValues().get(1).messages().stream()
-                .filter(UserMessage.class::isInstance)
-                .map(message -> ((UserMessage) message).singleText()).toList();
-        Assertions.assertEquals(List.of("Hello",
-                LLMProviderHelpers.withSessionContext("Again", "Turn: 2")),
-                texts);
     }
 
     @Test
