@@ -32,13 +32,12 @@ import com.vaadin.flow.js.JsExpression;
 interface CheckboxGroupJs extends Serializable {
 
     /**
-     * Sets the disabled state of the checkbox web component, which can
-     * otherwise render as enabled when the group is enabled again.
+     * Sets the {@code disabled} property of an item's checkbox.
      *
      * @param disabled
      *            {@code true} to disable the checkbox, {@code false} to enable
      *            it
      */
     @JsExpression("this.disabled = $0")
-    void setDisabled(boolean disabled);
+    void setItemDisabled(boolean disabled);
 }

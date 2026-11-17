@@ -924,7 +924,7 @@ public class CheckboxGroup<T>
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
         checkbox.getElement().executeJs(CheckboxGroupJs.class)
-                .setDisabled(disabled);
+                .setItemDisabled(disabled);
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,

@@ -32,13 +32,12 @@ import com.vaadin.flow.js.JsExpression;
 interface RadioButtonGroupJs extends Serializable {
 
     /**
-     * Sets the disabled state of the radio button web component, which can
-     * otherwise render as enabled when the group is enabled again.
+     * Sets the {@code disabled} property of an item's radio button.
      *
      * @param disabled
      *            {@code true} to disable the radio button, {@code false} to
      *            enable it
      */
     @JsExpression("this.disabled = $0")
-    void setDisabled(boolean disabled);
+    void setItemDisabled(boolean disabled);
 }
