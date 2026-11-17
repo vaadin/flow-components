@@ -1,0 +1,2 @@
+# Signatures of modules whose csp.mode Maven property is off: none. See
+# csp-strict.txt.

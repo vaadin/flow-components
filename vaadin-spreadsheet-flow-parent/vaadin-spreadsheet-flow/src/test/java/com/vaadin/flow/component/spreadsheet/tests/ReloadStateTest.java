@@ -17,6 +17,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.MockUIExtension;
+import com.vaadin.tests.SuppressForbidden;
 
 class ReloadStateTest {
     @RegisterExtension
@@ -44,7 +45,7 @@ class ReloadStateTest {
     }
 
     @Test
-    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    @SuppressForbidden
     void reloadActiveSheetDataWithoutCurrentUI_rerenderPendingClearedOnNextResponse() {
         // Simulate a reload without a current UI, for example from a
         // background thread or a VaadinSession.access call

@@ -1,28 +1,35 @@
 #!/bin/bash
-# Runs checkstyle on all modules and reports the combined errors as log output.
+# Runs the forbiddenapis checks on all modules and reports the combined errors
+# as log output. Compiles the main and test classes of every module, and checks
+# them against the signatures in forbidden-apis/ (see the forbiddenapis plugin
+# in the root pom.xml).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
 
 cd "$PROJECT_ROOT"
 
-# Install custom checkstyle rules module
-mvn install -pl vaadin-flow-components-shared-parent/vaadin-flow-components-checkstyle-rules -q
+log_file="$(mktemp)"
+trap 'rm -f "$log_file"' EXIT
 
-# Run checkstyle with plain text output
-mvn checkstyle:checkstyle -Dcheckstyle.output.format=plain -Dcheckstyle.output.file=target/checkstyle-result.txt -q
+# A violation is logged instead of failing its module, so that the modules
+# that depend on it are still checked
+mvn -B --fail-at-end test-compile \
+    de.thetaphi:forbiddenapis:check@main \
+    de.thetaphi:forbiddenapis:testCheck@test \
+    -Dforbiddenapis.failOnViolation=false > "$log_file" 2>&1
+build_status=$?
 
-# Find all checkstyle-result.txt files and collect errors
-error_count=0
+# A violation is two lines: the forbidden API and the class that calls it
+awk '/^\[WARNING\] Forbidden / { sub(/^\[WARNING\]/, "[ERROR]"); print; getline; sub(/^\[WARNING\]/, "[ERROR]"); print }' "$log_file"
+error_count=$(grep -c '^\[WARNING\] Forbidden ' "$log_file")
 
-while IFS= read -r result_file; do
-    while IFS= read -r line; do
-        # Make path relative to project root
-        line="${line//$PROJECT_ROOT\//}"
-        echo "$line"
-        ((error_count++))
-    done < <(grep "^\[ERROR\]" "$result_file" 2>/dev/null)
-done < <(find . -path "*/target/checkstyle-result.txt" -type f)
+if [[ $build_status -ne 0 ]]; then
+    # A compilation error, or a signature that no longer matches Flow
+    grep -E '^\[ERROR\] (/|Failed to execute goal)' "$log_file" |
+        awk '!seen[$0]++' | sed "s|$PROJECT_ROOT/||"
+    ((error_count++))
+fi
 
 echo ""
 if [[ $error_count -gt 0 ]]; then

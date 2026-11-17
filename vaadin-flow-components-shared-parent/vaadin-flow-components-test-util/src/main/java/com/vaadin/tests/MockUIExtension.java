@@ -90,7 +90,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * registering the extension is not possible, for example when using
      * {@link org.junit.jupiter.api.DynamicTest}.
      */
-    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    @SuppressForbidden
     public void setUp() {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
@@ -140,7 +140,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * in contexts where registering the extension is not possible, for example
      * when using {@link org.junit.jupiter.api.DynamicTest}.
      */
-    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    @SuppressForbidden
     public void tearDown() {
         removeAll();
         UI.setCurrent(null);
