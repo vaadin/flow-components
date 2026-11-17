@@ -2786,6 +2786,45 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_outputGuardrailReprompt_keepsToolTrafficOfTheTurn() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .outputGuardrails(new OutputGuardrail() {
+                            @Override
+                            public OutputGuardrailResult validate(
+                                    AiMessage responseFromLLM) {
+                                return responseFromLLM.text().contains("22")
+                                        ? success()
+                                        : reprompt("No temperature",
+                                                "Give the temperature");
+                            }
+                        }));
+        var toolCall = mockSimpleResponseWithTool("getTemperature");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall)
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build());
+
+        var results = customized.stream(createSimpleRequest("Weather?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("It is 22°C"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The retry still has the tool result the rejected answer was based
+        // on, ahead of that answer
+        var retry = captor.getAllValues().get(2).messages();
+        var toolResult = retry.stream()
+                .filter(ToolExecutionResultMessage.class::isInstance)
+                .findFirst().map(retry::indexOf).orElse(-1);
+        var rejected = retry.indexOf(AiMessage.from("It is warm"));
+        Assertions.assertTrue(toolResult >= 0 && toolResult < rejected,
+                retry.toString());
+    }
+
+    @Test
     void constructor_withoutCustomizer_logsNoToolErrorHandlingNotice()
             throws ReflectiveOperationException {
         // LangChain4j logs the notice once per JVM, for the first service

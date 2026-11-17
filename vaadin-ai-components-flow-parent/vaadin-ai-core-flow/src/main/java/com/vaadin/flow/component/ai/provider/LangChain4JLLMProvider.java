@@ -1236,9 +1236,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final ToolCallLimits toolCallLimits;
         private final AtomicBoolean ended = new AtomicBoolean(false);
         /**
-         * Tool calls and tool results of this turn, in order. The provider's
-         * chat memory returns them after the conversation while the turn runs,
-         * and they are discarded with the turn.
+         * Tool calls, tool results and answers of this turn, in order. The
+         * provider's chat memory returns them after the conversation while the
+         * turn runs, and they are discarded with the turn.
          */
         private final List<dev.langchain4j.data.message.ChatMessage> turnMessages = new ArrayList<>();
         /**

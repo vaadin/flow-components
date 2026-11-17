@@ -110,7 +110,10 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   instruction tools already tell the model to read the state again each
   turn. LangChain4j's loop writes every tool message into the chat memory,
   so `LangChain4JLLMProvider`'s own memory (`TurnScopedChatMemory`) keeps
-  them in a list of the running turn instead. With
+  them in a list of the running turn instead. The turn's answers go to that
+  list too, after its tool messages, because an output guardrail that
+  reprompts sends the memory again and the model still needs the tool
+  results. With
   `storeRetrievedContentInChatMemory(false)`, LangChain4j stores the user
   message as the template rendered it, without the attachments the provider
   passes separately, so the provider's memory adds them back. A memory set in

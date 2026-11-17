@@ -35,8 +35,14 @@ import dev.langchain4j.memory.ChatMemory;
  * keeps the system message, the user messages and the final answers in the
  * wrapped memory, which windows them, and the tool requests and results in a
  * list that belongs to the turn. {@link #messages()} returns both, so the loop
- * sees its own traffic, and the traffic is gone with the turn: when its final
- * answer arrives, or when the turn fails and its list is discarded.
+ * sees its own traffic, and the traffic is gone with the turn, whose list is
+ * discarded when it ends.
+ * <p>
+ * A final answer also goes to the list of its turn, and while the turn runs,
+ * {@link #messages()} returns it there, after the tool traffic it is based on,
+ * instead of from the wrapped memory. An output guardrail that reprompts the
+ * model sends these messages again, so the model still has the tool results of
+ * the turn.
  * <p>
  * The list is the one of the turn that runs on the calling thread, so a turn
  * that is still running after it was cancelled never sees, or drops, the tool
@@ -63,9 +69,9 @@ final class TurnScopedChatMemory implements ChatMemory {
      * @param durable
      *            the memory that keeps the conversation across turns
      * @param turnMessages
-     *            supplies the list that holds the tool traffic of the turn
-     *            running on the calling thread, or {@code null} when no turn
-     *            runs on it
+     *            supplies the list that holds the tool traffic and the answers
+     *            of the turn running on the calling thread, or {@code null}
+     *            when no turn runs on it
      * @param userMessages
      *            returns the user message to store in place of the given one
      */
@@ -103,13 +109,12 @@ final class TurnScopedChatMemory implements ChatMemory {
             return;
         }
         if (message instanceof AiMessage aiMessage) {
-            // The final answer ends the tool traffic of the turn.
-            if (turn != null) {
-                turn.clear();
-            }
             var text = aiMessage.text();
             if (text == null || text.isEmpty()) {
                 return;
+            }
+            if (turn != null) {
+                turn.add(message);
             }
         }
         durable.add(message);
@@ -117,11 +122,18 @@ final class TurnScopedChatMemory implements ChatMemory {
 
     @Override
     public List<ChatMessage> messages() {
-        var messages = new ArrayList<>(durable.messages());
         var turn = turnMessages.get();
-        if (turn != null) {
-            messages.addAll(turn);
+        if (turn == null) {
+            return new ArrayList<>(durable.messages());
         }
+        var messages = new ArrayList<ChatMessage>();
+        for (var message : durable.messages()) {
+            // An answer of the running turn is returned from its list
+            if (turn.stream().noneMatch(inTurn -> inTurn == message)) {
+                messages.add(message);
+            }
+        }
+        messages.addAll(turn);
         return messages;
     }
 

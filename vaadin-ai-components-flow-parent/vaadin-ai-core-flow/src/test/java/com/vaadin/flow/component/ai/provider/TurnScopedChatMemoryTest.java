@@ -81,14 +81,16 @@ class TurnScopedChatMemoryTest {
     }
 
     @Test
-    void finalAnswer_endsToolTrafficOfTurn() {
+    void finalAnswer_followsToolTrafficOfTurnAndIsKeptWithoutIt() {
         memory.add(UserMessage.from("Question"));
         memory.add(toolCall);
         memory.add(toolResult);
 
         memory.add(AiMessage.from("Answer"));
 
-        Assertions.assertTrue(turn.isEmpty());
+        Assertions.assertEquals(List.of(UserMessage.from("Question"), toolCall,
+                toolResult, AiMessage.from("Answer")), memory.messages());
+        turnRunning = false;
         Assertions.assertEquals(
                 List.of(UserMessage.from("Question"), AiMessage.from("Answer")),
                 memory.messages());
