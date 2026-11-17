@@ -317,6 +317,10 @@
                     <configuration>
                         <quiet>true</quiet>
                         <doclint>none</doclint>
+                        <!-- Generate on the class path even for jars that declare an
+                             Automatic-Module-Name; on the module path, a jar that has a
+                             package of a dependency (Spreadsheet and POI) fails -->
+                        <legacyMode>true</legacyMode>
                     </configuration>
                     <executions>
                         <execution>
