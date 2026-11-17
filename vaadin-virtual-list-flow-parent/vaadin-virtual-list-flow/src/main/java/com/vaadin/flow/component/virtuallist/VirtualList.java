@@ -46,6 +46,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -147,9 +148,8 @@ public class VirtualList<T> extends Component
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUIOrThrow().getPage().executeJs(
-                "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
-                getElement());
+        getUIOrThrow().getPage().executeJs(VirtualListJs.class)
+                .initConnector(getElement());
     }
 
     private void generateItemAccessibleName(T item, ObjectNode jsonObject) {
@@ -195,8 +195,11 @@ public class VirtualList<T> extends Component
     public void setRenderer(ValueProvider<T, String> valueProvider) {
         Objects.requireNonNull(valueProvider,
                 "The valueProvider must not be null");
-        this.setRenderer(LitRenderer.<T> of("${item.label}")
-                .withProperty("label", valueProvider));
+        this.setRenderer(
+                LitRenderer
+                        .<T> of(JsSnippets.of(VirtualListTemplates.class)
+                                .labelRenderer())
+                        .withProperty("label", valueProvider));
     }
 
     /**

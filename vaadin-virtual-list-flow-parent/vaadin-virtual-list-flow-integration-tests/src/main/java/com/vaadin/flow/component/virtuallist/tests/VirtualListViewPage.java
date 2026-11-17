@@ -36,13 +36,57 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-virtual-list/virtual-list-view")
 public class VirtualListViewPage extends Div {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("""
+                return html`<div style='font-size:20px; margin:10px; padding:10px; \
+                border:1px solid lightgray; border-radius:5px;'>\
+                #${index}. ${item.fact}</div>`;
+                """)
+        CompiledLitTemplate factRenderer();
+
+        @JsExpression("""
+                return html`<div style='padding:10px; display:flex; min-width:250px'>\
+                <div style='margin-right:10px; width:40px; height:40px'>\
+                <img src='${item.picture}' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>\
+                </div><div>\
+                ${item.firstName} ${item.lastName}\
+                <br><small>${item.email}</small></div>\
+                </div>`;
+                """)
+        CompiledLitTemplate personRenderer();
+
+        @JsExpression("""
+                return html`<div style='display:flex; justify-content:space-between; padding:10px;'>\
+                <div style='flex-grow:1'>#${item.rank}: ${item.name}</div>\
+                <div><button @click=${functions.up} hidden='${item.upHidden}'>&uarr;</button>\
+                <button @click=${functions.down} hidden='${item.downHidden}'>&darr;</button>\
+                <button @click=${functions.remove} style='color:red'>X</button></div>\
+                <div>`;
+                """)
+        CompiledLitTemplate rankedCharacterRenderer();
+
+        @JsExpression("""
+                return html`<div style='display:flex; justify-content:space-between; padding:10px;'>\
+                <div style='flex-grow:1'>${item.name}</div>\
+                <div><button @click=${functions.removeItem} style='color:red'>X</button></div>\
+                <div>`;
+                """)
+        CompiledLitTemplate removableNameRenderer();
+    }
 
     private static final List<String> LIST_OF_BOOKS;
     static {
@@ -185,10 +229,8 @@ public class VirtualListViewPage extends Div {
                         .limit(query.getLimit()), query -> totalCount);
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(LitRenderer.<String> of(
-                "<div style='font-size:20px; margin:10px; padding:10px; "
-                        + "border:1px solid lightgray; border-radius:5px;'>"
-                        + "#${index}. ${item.fact}</div>")
+        list.setRenderer(LitRenderer
+                .<String> of(JsSnippets.of(Templates.class).factRenderer())
                 .withProperty("fact", ValueProvider.identity()));
 
         list.setId("chuck-norris-facts");
@@ -204,14 +246,8 @@ public class VirtualListViewPage extends Div {
                 .ofCollection(createListOfPeople());
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(LitRenderer.<Person> of(
-                "<div style='padding:10px; display:flex; min-width:250px'>"
-                        + "<div style='margin-right:10px; width:40px; height:40px'>"
-                        + "<img src='${item.picture}' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
-                        + "</div>" + "<div>"
-                        + "${item.firstName} ${item.lastName}"
-                        + "<br><small>${item.email}</small>" + "</div>"
-                        + "</div>")
+        list.setRenderer(LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).personRenderer())
                 .withProperty("firstName", Person::getFirstName)
                 .withProperty("lastName", Person::getLastName)
                 .withProperty("email", Person::getEmail)
@@ -239,13 +275,9 @@ public class VirtualListViewPage extends Div {
          * The name of the event handlers defined at '@click' are used inside
          * the 'withFunction' calls.
          */
-        list.setRenderer(LitRenderer.<String> of(
-                "<div style='display:flex; justify-content:space-between; padding:10px;'>"
-                        + "<div style='flex-grow:1'>#${item.rank}: ${item.name}</div>"
-                        + "<div><button @click=${up} hidden='${item.upHidden}'>&uarr;</button>"
-                        + "<button @click=${down} hidden='${item.downHidden}'>&darr;</button>"
-                        + "<button @click=${remove} style='color:red'>X</button></div>"
-                        + "<div>")
+        list.setRenderer(LitRenderer
+                .<String> of(JsSnippets.of(Templates.class)
+                        .rankedCharacterRenderer())
                 .withProperty("name", ValueProvider.identity())
                 .withProperty("rank", item -> items.indexOf(item) + 1)
                 .withProperty("upHidden", item -> items.indexOf(item) == 0)
@@ -304,11 +336,9 @@ public class VirtualListViewPage extends Div {
          * The name of the event handlers defined at '@click' are used inside
          * the 'withFunction' calls.
          */
-        list.setRenderer(LitRenderer.<String> of(
-                "<div style='display:flex; justify-content:space-between; padding:10px;'>"
-                        + "<div style='flex-grow:1'>${item.name}</div>"
-                        + "<div><button @click=${removeItem} style='color:red'>X</button></div>"
-                        + "<div>")
+        list.setRenderer(LitRenderer
+                .<String> of(
+                        JsSnippets.of(Templates.class).removableNameRenderer())
                 .withProperty("name", ValueProvider.identity())
                 .withFunction("removeItem", item -> {
                     removalResult.setText(item);

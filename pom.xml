@@ -75,7 +75,7 @@
     </scm>
     <properties>
         <flow.version>25.4.client-actions-for-client-rendered-templates-SNAPSHOT</flow.version>
-        <testbench.version>25.4.0-alpha2</testbench.version>
+        <testbench.version>25.4.0-beta1</testbench.version>
         <license-checker.version>3.1.4</license-checker.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -88,8 +88,8 @@
         <maven.surefire.plugin.version>3.6.1</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <exec.maven.plugin.version>3.6.4</exec.maven.plugin.version>
-        <jandex.plugin.version>3.6.0</jandex.plugin.version>
+        <exec.maven.plugin.version>3.7.0</exec.maven.plugin.version>
+        <jandex.plugin.version>3.6.1</jandex.plugin.version>
         <!-- Owned by Flow: keep jandex.format.version equal to the value in the
             Flow root POM for the flow.version in use, so that the component
             indexes use the same index format as the Flow ones. Do not change
