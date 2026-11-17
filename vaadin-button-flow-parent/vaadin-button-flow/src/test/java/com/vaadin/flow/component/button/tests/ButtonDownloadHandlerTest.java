@@ -172,12 +172,18 @@ class ButtonDownloadHandlerTest {
     }
 
     @Test
-    void targetChanged_handlerKeptAndRegisteredOnce() {
+    void targetChanged_handlerKeptAndRegisteredAgain() {
+        ui.fakeClientCommunication();
+        String saveAsFileAttribute = downloadAttributes().findFirst()
+                .orElseThrow();
+
         button.setDownloadTarget(DownloadTarget.NEW_TAB);
 
         Assertions.assertSame(handler, button.getDownloadHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(1, downloadAttributes().count());
+        Assertions.assertNotEquals(saveAsFileAttribute,
+                downloadAttributes().findFirst().orElseThrow());
 
         button.setDownloadHandler(null);
         button.setDownloadHandler(handler);

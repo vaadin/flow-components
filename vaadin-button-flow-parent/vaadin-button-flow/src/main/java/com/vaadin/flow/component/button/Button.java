@@ -430,9 +430,9 @@ public class Button extends Component
      * <p>
      * The handler runs only when the browser requests the content, once per
      * click, so you can create the content, file name and response headers at
-     * that point. If the handler fails, the browser reports a failed download
-     * instead of saving an empty file. Use the transfer callbacks of the
-     * handler, for example
+     * that point. If the handler fails, the browser reports a failed download,
+     * or shows an error page in the new tab, instead of showing empty content.
+     * Use the transfer callbacks of the handler, for example
      * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler#whenComplete(com.vaadin.flow.function.SerializableConsumer)
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
@@ -498,7 +498,9 @@ public class Button extends Component
      * The built-in handlers, such as
      * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
      * content inline. This changes the handler instance for good, so it also
-     * serves inline wherever else it is used. A custom handler should call
+     * serves inline wherever else it is used, and setting the target back to
+     * {@link DownloadTarget#SAVE_AS_FILE} does not undo it. The button still
+     * saves inline content as a file then. A custom handler should call
      * {@link DownloadEvent#inline(String)} itself, since content served as an
      * attachment is saved instead of shown.
      *

@@ -39,12 +39,17 @@ public class DownloadHandlerButtonPage extends Div {
         disableOnClick.setDisableOnClick(true);
         disableOnClick.setDownloadHandler(createDownloadHandler());
 
-        Button newTab = new Button("View, disable on click",
-                createDownloadHandler(), DownloadTarget.NEW_TAB);
-        newTab.setId("new-tab-disable-on-click-button");
-        newTab.setDisableOnClick(true);
+        Button newTab = new Button("View", createDownloadHandler(),
+                DownloadTarget.NEW_TAB);
+        newTab.setId("new-tab-button");
 
-        add(button, disableOnClick, newTab);
+        Button newTabDisableOnClick = new Button("View, disable on click");
+        newTabDisableOnClick.setId("new-tab-disable-on-click-button");
+        newTabDisableOnClick.setDisableOnClick(true);
+        newTabDisableOnClick.setDownloadHandler(createDownloadHandler());
+        newTabDisableOnClick.setDownloadTarget(DownloadTarget.NEW_TAB);
+
+        add(button, disableOnClick, newTab, newTabDisableOnClick);
     }
 
     private static DownloadHandler createDownloadHandler() {
