@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.download.DownloadTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
@@ -38,7 +39,12 @@ public class DownloadHandlerButtonPage extends Div {
         disableOnClick.setDisableOnClick(true);
         disableOnClick.setDownloadHandler(createDownloadHandler());
 
-        add(button, disableOnClick);
+        Button newTab = new Button("View, disable on click",
+                createDownloadHandler(), DownloadTarget.NEW_TAB);
+        newTab.setId("new-tab-disable-on-click-button");
+        newTab.setDisableOnClick(true);
+
+        add(button, disableOnClick, newTab);
     }
 
     private static DownloadHandler createDownloadHandler() {

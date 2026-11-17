@@ -29,12 +29,16 @@ public class DownloadHandlerButtonIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        // Replace the client-side download helper with a shim that only
-        // records the URL, so no save dialog opens
+        // Replace the client-side download helper and window.open with shims
+        // that only record the URL, so no save dialog or new tab opens
         executeScript("""
                 window.__downloadUrl = null;
                 window.Vaadin.Flow.download.start = url => {
                   window.__downloadUrl = url;
+                };
+                window.open = url => {
+                  window.__downloadUrl = url;
+                  return {};
                 };
                 """);
     }
@@ -53,9 +57,19 @@ public class DownloadHandlerButtonIT extends AbstractComponentIT {
                 .id("download-disable-on-click-button").isEnabled());
     }
 
+    @Test
+    public void clickNewTabButtonDisabledOnClick_opensInlineContentWhileDisabled() {
+        Assert.assertEquals(
+                "200|inline|" + DownloadHandlerButtonPage.DOWNLOAD_BODY,
+                clickAndDownload("new-tab-disable-on-click-button"));
+        Assert.assertFalse($(ButtonElement.class)
+                .id("new-tab-disable-on-click-button").isEnabled());
+    }
+
     /**
      * Clicks the button and fetches the URL that the click starts a download
-     * from, returning the response status and body separated by {@code |}.
+     * from, returning the response status, the {@code inline} disposition if
+     * the content is served inline, and the body, separated by {@code |}.
      */
     private String clickAndDownload(String buttonId) {
         $(ButtonElement.class).id(buttonId).click();
@@ -69,7 +83,10 @@ public class DownloadHandlerButtonIT extends AbstractComponentIT {
         executeScript("""
                 window.__download = null;
                 fetch(window.__downloadUrl).then(r => r.text().then(t => {
-                  window.__download = r.status + '|' + t;
+                  const disposition = r.headers.get('Content-Disposition');
+                  window.__download = r.status + '|'
+                      + (disposition.startsWith('inline') ? 'inline|' : '')
+                      + t;
                 }));
                 """);
         return (String) waitUntil(
