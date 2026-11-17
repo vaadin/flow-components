@@ -41,8 +41,7 @@ interface ComboBoxJs extends Serializable {
     /**
      * Resets the data of the combo box connector, if it is initialized. Called
      * on the page rather than on the combo box element, with
-     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}. On the
-     * first attach, it runs before the connector is installed.
+     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}.
      *
      * @param comboBox
      *            the combo box element
@@ -51,8 +50,7 @@ interface ComboBoxJs extends Serializable {
     void resetConnector(Element comboBox);
 
     /**
-     * Sets the value of the input element, even if the value of the combo box
-     * has not changed.
+     * Sets the value of the input element.
      *
      * @param inputElementValue
      *            the text to show in the input element
