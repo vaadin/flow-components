@@ -14,6 +14,9 @@
         <module>vaadin-tabs-flow</module>
         <module>vaadin-tabs-testbench</module>
     </modules>
+    <properties>
+        <csp.mode>strict</csp.mode>
+    </properties>
     <dependencies/>
     <profiles>
         <profile>

@@ -91,9 +91,10 @@ interface HasUploadManager extends Serializable {
             UploadManager manager) {
         component.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(component,
-                        context -> component.getElement().executeJs(
-                                "this.manager = $0 ? $0.manager : null",
-                                manager != null ? manager.getConnector()
+                        context -> component.getElement()
+                                .executeJs(HasUploadManagerJs.class)
+                                .setManager(manager != null
+                                        ? manager.getConnector().getElement()
                                         : null)));
     }
 }

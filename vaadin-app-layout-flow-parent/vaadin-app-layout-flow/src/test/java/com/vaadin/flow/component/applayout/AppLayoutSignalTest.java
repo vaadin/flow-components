@@ -15,96 +15,19 @@
  */
 package com.vaadin.flow.component.applayout;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ValueSignal;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
 import com.vaadin.tests.AbstractSignalsTest;
 
 class AppLayoutSignalTest extends AbstractSignalsTest {
 
-    private AppLayout appLayout;
-    private ValueSignal<Boolean> signal;
-
-    @BeforeEach
-    void setup() {
-        appLayout = new AppLayout();
-        signal = new ValueSignal<>(true);
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (appLayout != null && appLayout.isAttached()) {
-            appLayout.removeFromParent();
-        }
-    }
-
-    @Test
-    void bindDrawerOpened_signalBound_propertySync() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-        UI.getCurrent().add(appLayout);
-
-        Assertions.assertTrue(appLayout.isDrawerOpened());
-
-        signal.set(false);
-        Assertions.assertFalse(appLayout.isDrawerOpened());
-
-        signal.set(true);
-        Assertions.assertTrue(appLayout.isDrawerOpened());
-    }
-
-    @Test
-    void bindDrawerOpened_notAttached_noEffect() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-
-        boolean initial = appLayout.getElement().getProperty("drawerOpened",
-                true);
-        signal.set(false);
-        Assertions.assertEquals(initial,
-                appLayout.getElement().getProperty("drawerOpened", true));
-    }
-
-    @Test
-    void bindDrawerOpened_detachAndReattach() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-        UI.getCurrent().add(appLayout);
-
-        signal.set(false);
-        Assertions.assertFalse(appLayout.isDrawerOpened());
-
-        appLayout.removeFromParent();
-        signal.set(true);
-        Assertions.assertFalse(appLayout.isDrawerOpened());
-
-        UI.getCurrent().add(appLayout);
-        Assertions.assertTrue(appLayout.isDrawerOpened());
-    }
-
-    void bindDrawerOpened_setWhileBound_syncsToSignal() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-        UI.getCurrent().add(appLayout);
-
-        appLayout.setDrawerOpened(false);
-
-        Assertions.assertFalse(signal.peek());
-    }
-
-    @Test
-    void bindDrawerOpened_doubleBind_throws() {
-        appLayout.bindDrawerOpened(signal, signal::set);
-        var other = new ValueSignal<>(false);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> appLayout.bindDrawerOpened(other, other::set));
-    }
-
-    @Test
-    void bindDrawerOpened_nullSignal_throwsNPE() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> appLayout.bindDrawerOpened(null, null));
+    @TestFactory
+    Stream<DynamicTest> bindDrawerOpened() {
+        return generateTwoWayBindingTests(AppLayout::new,
+                AppLayout::bindDrawerOpened, AppLayout::isDrawerOpened,
+                AppLayout::setDrawerOpened, "drawerOpened", false, true);
     }
 }

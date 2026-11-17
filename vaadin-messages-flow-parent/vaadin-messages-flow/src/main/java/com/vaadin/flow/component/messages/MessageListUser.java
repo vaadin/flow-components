@@ -365,6 +365,6 @@ public class MessageListUser implements Serializable {
     private VaadinSession getHostSession() {
         var owner = host.getElement().getNode().getOwner();
         assert owner instanceof StateTree;
-        return ((StateTree) owner).getUI().getSession();
+        return ((StateTree) owner).getUI().getSessionOrThrow();
     }
 }

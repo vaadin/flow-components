@@ -174,11 +174,6 @@ class UploadHandlerTest {
             }
 
             @Override
-            public boolean isAllowInert() {
-                return true;
-            }
-
-            @Override
             public DisabledUpdateMode getDisabledUpdateMode() {
                 return DisabledUpdateMode.ALWAYS;
             }
@@ -200,7 +195,6 @@ class UploadHandlerTest {
         Assertions.assertEquals(333L, customHandler.getFileCountMax());
         Assertions.assertEquals("custom-postfix",
                 customHandler.getUrlPostfix());
-        Assertions.assertTrue(customHandler.isAllowInert());
         Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
                 customHandler.getDisabledUpdateMode());
     }
@@ -229,6 +223,24 @@ class UploadHandlerTest {
         upload.setUploadHandler(event -> {
         });
         Assertions.assertNull(upload.getElement().getProperty("maxFiles"));
+    }
+
+    @Test
+    void setUploadHandler_handlerDisallowsInert_allowsInert()
+            throws URISyntaxException {
+        upload.setUploadHandler(new UploadHandler() {
+            @Override
+            public void handleUploadRequest(UploadEvent event) {
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return false;
+            }
+        });
+        ui.fakeClientCommunication();
+
+        Assertions.assertTrue(getUploadHandler().isAllowInert());
     }
 
     private void simulateUpload() throws IOException, URISyntaxException {

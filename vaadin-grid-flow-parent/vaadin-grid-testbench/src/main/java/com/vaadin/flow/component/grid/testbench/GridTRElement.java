@@ -112,10 +112,8 @@ public class GridTRElement extends TestBenchElement {
      * @return the element containing the details, if any
      */
     public GridTHTDElement getDetailsRow() {
-        return ((TestBenchElement) executeScript("const tr = arguments[0];"
-                + "const grid = tr.getRootNode().host;" //
-                + "return grid._detailsCells" //
-                + ".filter(function(cell) {return cell.parentElement.rowIndex && cell.parentElement.rowIndex == tr.rowIndex;})[0]"
-                + ";", this)).wrap(GridTHTDElement.class);
+        return ((TestBenchElement) executeScript(
+                "return arguments[0].querySelector('.details-cell');", this))
+                .wrap(GridTHTDElement.class);
     }
 }

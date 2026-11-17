@@ -274,11 +274,16 @@ public class UploadHelper implements Serializable {
      * handler checks each upload against the current MIME types and file
      * extensions (using AND logic when both are set) and rejects non-matching
      * files via {@link UploadEvent#reject(String)}. All other
-     * {@link UploadHandler} methods are delegated to the original handler.
+     * {@link UploadHandler} methods except {@link UploadHandler#isAllowInert()}
+     * are delegated to the original handler.
      * <p>
      * The MIME type and extension lists are retrieved at request time via the
      * provided suppliers, so changes made after wrapping are reflected
      * immediately.
+     * <p>
+     * Upload requests are received also when the owner is inert, so that a
+     * modal component opened before or during an upload does not reject files
+     * the user selected. To block uploads, disable the owner component instead.
      * <p>
      * NOTE: If new methods are added to {@link UploadHandler} or
      * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
@@ -344,7 +349,7 @@ public class UploadHelper implements Serializable {
 
             @Override
             public boolean isAllowInert() {
-                return delegate.isAllowInert();
+                return true;
             }
 
             @Override

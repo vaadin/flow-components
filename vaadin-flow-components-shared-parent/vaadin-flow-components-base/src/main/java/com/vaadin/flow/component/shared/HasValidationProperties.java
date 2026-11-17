@@ -68,7 +68,7 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     @Override
     default void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
-        getElement().executeJs("this.invalid = $0", invalid);
+        getElement().executeJs(ValidationJs.class).setInvalid(invalid);
     }
 
     /**

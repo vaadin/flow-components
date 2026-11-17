@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.grid.testbench;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -602,6 +604,194 @@ public class GridElement extends TestBenchElement {
     public List<GridTHTDElement> getCells(int rowIndex) {
         return getCells(rowIndex,
                 getAllColumns().toArray(new GridColumnElement[0]));
+    }
+
+    /**
+     * JavaScript arrow function that, given a grid row (a {@code tr} element),
+     * returns the text content of the cells of its non-hidden columns in column
+     * order. The text extraction matches {@link GridTHTDElement#getText()}: the
+     * {@code textContent} of the nodes assigned to the cell's slot are joined,
+     * and a value that is only whitespace is returned as an empty string.
+     */
+    private static final String ROW_CELL_CONTENTS_FUNCTION = """
+            (row) => Array.from(row.children)
+                .filter((cell) => cell._column && !cell._column.hidden)
+                .sort((a, b) => a._column._order - b._column._order)
+                .map((cell) => {
+                    const slot = cell.firstElementChild;
+                    if (!slot || !slot.assignedNodes) {
+                        return '';
+                    }
+                    const text = Array.from(slot.assignedNodes())
+                        .map((node) => node.textContent).join('');
+                    return text.trim() === '' ? '' : text;
+                })
+            """;
+
+    /**
+     * Gets the text content of the rows that are currently in the viewport as a
+     * 2D list, ordered by row index. Only the rows are limited to the viewport,
+     * not the columns. This is a fast operation requiring only a single browser
+     * round-trip.
+     * <p>
+     * Rows that are rendered but scrolled out of view are not included; use
+     * {@link #getAllCellContents()} or {@link #getCellContents(int, int)} to
+     * include rows outside the viewport.
+     * <p>
+     * Each row holds one entry for each column in {@link #getVisibleColumns()},
+     * in the same order. This includes columns that are scrolled out of view
+     * horizontally or not rendered because of lazy column rendering. Hidden
+     * columns are not included. The text of each cell matches
+     * {@link GridTHTDElement#getText()}.
+     *
+     * @return a list of rows, each holding the cell text for every column in
+     *         {@link #getVisibleColumns()}
+     */
+    public List<List<String>> getVisibleCellContents() {
+        waitUntilLoadingFinished();
+        // The grid renders a buffer of rows outside the viewport, so filter the
+        // rendered rows down to the ones that are at least partially visible.
+        // With lazy column rendering, the cells of columns outside the
+        // horizontal viewport are detached and not rendered. Switching to
+        // eager rendering attaches and renders them synchronously, so switch
+        // temporarily and restore the original mode before the browser paints.
+        String script = """
+                const [grid] = arguments;
+                const rowCellContents = %s;
+                const columnRendering = grid.columnRendering;
+                grid.columnRendering = 'eager';
+                try {
+                    const first = grid._firstVisibleIndex;
+                    const last = grid._lastVisibleIndex;
+                    return Array.from(grid._getRenderedRows())
+                        .filter((row) => row.index >= first && row.index <= last)
+                        .sort((a, b) => a.index - b.index)
+                        .map(rowCellContents);
+                } finally {
+                    grid.columnRendering = columnRendering;
+                }
+                """
+                .formatted(ROW_CELL_CONTENTS_FUNCTION);
+        @SuppressWarnings("unchecked")
+        List<List<String>> result = (List<List<String>>) executeScript(script,
+                this);
+        return result != null ? result : new ArrayList<>();
+    }
+
+    /**
+     * Gets the text content of the given row range as a 2D list, ordered by row
+     * index. The grid is scrolled as needed to load the requested rows.
+     * <p>
+     * Each row holds one entry for each column in {@link #getVisibleColumns()},
+     * in the same order. This includes columns that are scrolled out of view
+     * horizontally or not rendered because of lazy column rendering. Hidden
+     * columns are not included. The text of each cell matches
+     * {@link GridTHTDElement#getText()}.
+     *
+     * @param fromRow
+     *            starting row index (inclusive)
+     * @param toRow
+     *            ending row index (inclusive)
+     * @return a list of rows, each holding the cell text for every column in
+     *         {@link #getVisibleColumns()}
+     * @throws IndexOutOfBoundsException
+     *             if the grid is empty, if the row indexes are out of bounds,
+     *             or if {@code fromRow} is greater than {@code toRow}
+     */
+    public List<List<String>> getCellContents(int fromRow, int toRow)
+            throws IndexOutOfBoundsException {
+        int rowCount = getRowCount();
+        if (rowCount == 0) {
+            throw new IndexOutOfBoundsException(
+                    "Cannot get cell contents: the grid is empty");
+        }
+        if (fromRow < 0 || toRow < 0 || fromRow >= rowCount || toRow >= rowCount
+                || fromRow > toRow) {
+            throw new IndexOutOfBoundsException(
+                    "fromRow and toRow: expected to be 0.." + (rowCount - 1)
+                            + " with fromRow <= toRow, but were " + fromRow
+                            + " and " + toRow);
+        }
+        return collectCellContents(fromRow, toRow);
+    }
+
+    /**
+     * Scrolls through the given row range and collects the text content of each
+     * row. The caller is responsible for validating the range against the row
+     * count.
+     */
+    private List<List<String>> collectCellContents(int fromRow, int toRow) {
+        // Only a window of rows is rendered at a time, so scroll through the
+        // range and collect each rendered row by its index to avoid duplicates.
+        // With lazy column rendering, the cells of columns outside the
+        // horizontal viewport are detached and not rendered. Switching to
+        // eager rendering attaches and renders them synchronously, so switch
+        // temporarily and restore the original mode before the browser paints.
+        String script = """
+                const [grid, fromRow, toRow] = arguments;
+                const rowCellContents = %s;
+                const columnRendering = grid.columnRendering;
+                grid.columnRendering = 'eager';
+                try {
+                    return Array.from(grid._getRenderedRows())
+                        .filter((row) => row.index >= fromRow && row.index <= toRow)
+                        .map((row) => [row.index, rowCellContents(row)]);
+                } finally {
+                    grid.columnRendering = columnRendering;
+                }
+                """
+                .formatted(ROW_CELL_CONTENTS_FUNCTION);
+
+        Map<Integer, List<String>> cellsByRow = new HashMap<>();
+        int scrollRow = fromRow;
+        while (scrollRow <= toRow) {
+            scrollToRowByFlatIndex(scrollRow);
+
+            @SuppressWarnings("unchecked")
+            List<List<Object>> chunk = (List<List<Object>>) executeScript(
+                    script, this, fromRow, toRow);
+
+            int maxIndex = scrollRow;
+            for (List<Object> row : chunk) {
+                int index = ((Number) row.get(0)).intValue();
+                @SuppressWarnings("unchecked")
+                List<String> contents = (List<String>) row.get(1);
+                cellsByRow.putIfAbsent(index, contents);
+                maxIndex = Math.max(maxIndex, index);
+            }
+            // Advance past the rows just collected. The scroll target is always
+            // rendered, so maxIndex >= scrollRow and the loop makes progress.
+            scrollRow = maxIndex + 1;
+        }
+
+        List<List<String>> result = new ArrayList<>();
+        for (int i = fromRow; i <= toRow; i++) {
+            result.add(cellsByRow.get(i));
+        }
+        return result;
+    }
+
+    /**
+     * Gets the text content of all rows in the grid as a 2D list, ordered by
+     * row index. The grid is scrolled through all pages, so this may take a few
+     * seconds for large grids, but is much faster than calling
+     * {@link GridTHTDElement#getText()} on individual cells.
+     * <p>
+     * Each row holds one entry for each column in {@link #getVisibleColumns()},
+     * in the same order. This includes columns that are scrolled out of view
+     * horizontally or not rendered because of lazy column rendering. Hidden
+     * columns are not included. The text of each cell matches
+     * {@link GridTHTDElement#getText()}.
+     *
+     * @return a list of rows, each holding the cell text for every column in
+     *         {@link #getVisibleColumns()}
+     */
+    public List<List<String>> getAllCellContents() {
+        int rowCount = getRowCount();
+        if (rowCount == 0) {
+            return new ArrayList<>();
+        }
+        return collectCellContents(0, rowCount - 1);
     }
 
     /**

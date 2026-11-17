@@ -121,13 +121,13 @@ window.Vaadin.Flow.gridProConnector = {
     });
 
     // Override the method to add the updating-cell part to the cell when it's being updated.
-    const generateCellPartNames = grid._generateCellPartNames;
-    grid._generateCellPartNames = function (row, model) {
-      generateCellPartNames.apply(this, arguments);
+    const renderBodyRow = grid.__renderBodyRow;
+    grid.__renderBodyRow = function (row) {
+      renderBodyRow.apply(this, arguments);
 
+      const item = grid.__getRowItem(row);
       iterateRowCells(row, (cell) => {
-        const isUpdating =
-          model && cell._column && grid.__pendingCellUpdate === `${model.item.key}:${cell._column.path}`;
+        const isUpdating = !!item && !!cell._column && grid.__pendingCellUpdate === `${item.key}:${cell._column.path}`;
         const target = cell._focusButton || cell;
         updatePart(target, 'updating-cell', isUpdating);
       });

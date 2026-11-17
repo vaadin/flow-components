@@ -65,4 +65,23 @@ class IconTest {
         icon.setIcon(VaadinIcon.ABSOLUTE_POSITION);
         Assertions.assertEquals("vaadin:absolute-position", icon.getIcon());
     }
+
+    @Test
+    void setColor_hasColor() {
+        Icon icon = new Icon();
+        icon.setColor("red");
+        Assertions.assertEquals("red", icon.getColor());
+        Assertions.assertEquals("red", icon.getStyle().get("fill"));
+        Assertions.assertEquals("red", icon.getStyle().get("color"));
+    }
+
+    @Test
+    void removeColor_hasNoColor() {
+        Icon icon = new Icon();
+        icon.setColor("red");
+        icon.setColor(null);
+        Assertions.assertNull(icon.getColor());
+        Assertions.assertNull(icon.getStyle().get("fill"));
+        Assertions.assertNull(icon.getStyle().get("color"));
+    }
 }

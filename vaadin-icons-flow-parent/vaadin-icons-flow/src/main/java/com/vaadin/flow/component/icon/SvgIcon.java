@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -359,9 +360,22 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
         return getElement().bindProperty("symbol", signal, null);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Sets both the {@code fill} and {@code color} CSS properties so that the
+     * color applies to SVG icons that use filled paths as well as icons that
+     * use stroked paths (which rely on {@code currentColor}).
+     */
     @Override
     public void setColor(String color) {
-        getStyle().set(STYLE_FILL, color);
+        if (color == null) {
+            getStyle().remove(STYLE_FILL);
+            getStyle().remove(ElementConstants.STYLE_COLOR);
+        } else {
+            getStyle().set(STYLE_FILL, color);
+            getStyle().set(ElementConstants.STYLE_COLOR, color);
+        }
     }
 
     @Override

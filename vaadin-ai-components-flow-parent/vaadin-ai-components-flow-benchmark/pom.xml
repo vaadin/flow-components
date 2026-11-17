@@ -19,8 +19,8 @@
         <skipPublishing>true</skipPublishing>
         <maven.deploy.skip>true</maven.deploy.skip>
         <benchmark.h2.version>2.5.252</benchmark.h2.version>
-        <benchmark.jackson2.version>2.22.3</benchmark.jackson2.version>
-        <benchmark.jackson2.annotations.version>2.22</benchmark.jackson2.annotations.version>
+        <benchmark.jackson2.version>2.23.0</benchmark.jackson2.version>
+        <benchmark.jackson2.annotations.version>2.23</benchmark.jackson2.annotations.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -169,6 +169,14 @@
                     <includes>
                         <include>**/*Benchmark.java</include>
                     </includes>
+                    <!-- The unit test timeouts of the root pom do not fit a
+                         benchmark: a scenario waits for several LLM turns
+                         per attempt, and a run takes far longer than ten
+                         minutes. The harness limits each turn itself. -->
+                    <properties>
+                        <configurationParameters>junit.jupiter.execution.timeout.mode = disabled</configurationParameters>
+                    </properties>
+                    <forkedProcessTimeoutInSeconds>0</forkedProcessTimeoutInSeconds>
                 </configuration>
             </plugin>
             <plugin>

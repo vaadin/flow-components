@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 
 /**
  * Interface for file upload components that are used in an AI conversation.
@@ -38,4 +39,18 @@ public interface AIFileReceiver extends Serializable {
      *         pending
      */
     List<AIAttachment> takeAttachments();
+
+    /**
+     * Returns whether a file is still being uploaded to this receiver. While
+     * this returns {@code true}, the {@link AIOrchestrator} ignores prompts
+     * that would take the attachments from this receiver, so that the file is
+     * not left out of the prompt. The default implementation returns
+     * {@code false}.
+     *
+     * @return {@code true} if a file is being uploaded, {@code false} otherwise
+     * @since 25.3
+     */
+    default boolean isUploading() {
+        return false;
+    }
 }

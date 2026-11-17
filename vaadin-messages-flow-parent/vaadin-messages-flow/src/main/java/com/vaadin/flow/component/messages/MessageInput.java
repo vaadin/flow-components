@@ -49,7 +49,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/message-input", version = "25.4.0-alpha7")
 public class MessageInput extends Component
         implements Focusable<MessageInput>, HasSize, HasStyle, HasEnabled,
         HasTooltip, HasThemeVariant<MessageInputVariant> {
@@ -123,6 +123,34 @@ public class MessageInput extends Component
     public Registration addSubmitListener(
             ComponentEventListener<SubmitEvent> listener) {
         return addListener(SubmitEvent.class, listener);
+    }
+
+    /**
+     * Gets whether submitting a message is disabled.
+     *
+     * @return {@code true} if submitting is disabled, {@code false} otherwise
+     * @see #setSubmitDisabled(boolean)
+     * @since 25.4
+     */
+    public boolean isSubmitDisabled() {
+        return getElement().getProperty("submitDisabled", false);
+    }
+
+    /**
+     * Sets whether submitting a message is disabled. When disabled, the Send
+     * button is disabled and pressing the Enter key does not submit the
+     * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
+     * input field, and the typed text is kept. Use this, for example, to
+     * prevent sending a message while a file is still uploading.
+     * <p>
+     * The default value is {@code false}.
+     *
+     * @param submitDisabled
+     *            {@code true} to disable submitting, {@code false} to enable it
+     * @since 25.4
+     */
+    public void setSubmitDisabled(boolean submitDisabled) {
+        getElement().setProperty("submitDisabled", submitDisabled);
     }
 
     /**

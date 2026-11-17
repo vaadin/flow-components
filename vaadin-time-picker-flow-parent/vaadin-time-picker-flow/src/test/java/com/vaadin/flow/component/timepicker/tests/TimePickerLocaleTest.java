@@ -15,16 +15,13 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -88,12 +85,10 @@ class TimePickerLocaleTest {
         timePicker.setLocale(locale);
         ui.fakeClientCommunication();
 
-        List<Object> arguments = ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> "$connector.setLocale"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
-                .map(JsFunctionCallUtil::getArguments).reduce((a, b) -> b)
-                .orElseThrow();
-        Assertions.assertEquals(List.of(expectedTag), arguments);
+        var calls = ui.dumpJsCalls(timePicker.getElement(),
+                "$connector.setLocale");
+        // The function name is followed by the language tag
+        Assertions.assertEquals(expectedTag,
+                calls.getLast().flattenArguments().get(1));
     }
 }

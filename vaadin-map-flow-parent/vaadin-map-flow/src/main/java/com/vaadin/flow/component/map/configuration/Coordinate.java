@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.map.configuration;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.vaadin.flow.component.map.Map;
 
@@ -53,6 +54,24 @@ public class Coordinate implements Serializable {
 
     public double getY() {
         return y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Coordinate other = (Coordinate) obj;
+        return Double.compare(x, other.x) == 0
+                && Double.compare(y, other.y) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 
     @Override

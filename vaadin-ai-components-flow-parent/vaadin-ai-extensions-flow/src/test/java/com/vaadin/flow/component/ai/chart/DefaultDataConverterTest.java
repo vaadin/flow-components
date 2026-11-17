@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -1090,12 +1091,30 @@ class DefaultDataConverterTest {
         @Test
         void sqlTimestampXValue_convertedToHighchartsTimestamp() {
             var ts = java.sql.Timestamp.valueOf("2024-01-15 12:00:00");
-            var expectedMillis = ts.toInstant().getEpochSecond() * 1000;
+            var expectedMillis = LocalDate.of(2024, 1, 15).atTime(12, 0)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli();
             var data = List
                     .of(row(X, ts, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
+        }
+
+        @Test
+        void sqlTimestampXValue_outsideUtc_placedLikeLocalDateTime() {
+            var defaultZone = TimeZone.getDefault();
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Helsinki"));
+            try {
+                var dateTime = LocalDateTime.of(2024, 1, 15, 0, 0);
+                var data = List.of(
+                        row(X, java.sql.Timestamp.valueOf(dateTime), Y, 10));
+                var result = (DataSeries) convertSingle(data);
+                Assertions.assertEquals(
+                        dateTime.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                        result.getData().getFirst().getX().longValue());
+            } finally {
+                TimeZone.setDefault(defaultZone);
+            }
         }
 
         @Test
@@ -1136,6 +1155,28 @@ class DefaultDataConverterTest {
                     LocalDate.of(2024, 1, 1), END, LocalDate.of(2024, 2, 1)));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertEquals(1, gs.size());
+        }
+
+        @Test
+        void ganttWithSqlTimestampStartEnd_outsideUtc_placedLikeLocalDateTime() {
+            var defaultZone = TimeZone.getDefault();
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Helsinki"));
+            try {
+                var start = LocalDateTime.of(2024, 1, 15, 9, 0);
+                var end = LocalDateTime.of(2024, 1, 15, 17, 0);
+                var data = List.of(row(NAME, "Task", START,
+                        java.sql.Timestamp.valueOf(start), END,
+                        java.sql.Timestamp.valueOf(end)));
+                var gs = (GanttSeries) convertSingle(data);
+                Assertions.assertEquals(
+                        start.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                        gs.get(0).getStart().longValue());
+                Assertions.assertEquals(
+                        end.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                        gs.get(0).getEnd().longValue());
+            } finally {
+                TimeZone.setDefault(defaultZone);
+            }
         }
 
         @Test

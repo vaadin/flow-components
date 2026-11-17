@@ -4046,6 +4046,7 @@ class AIOrchestratorTest {
     void prompt_providerSchedulesItself_completedTurnAllowsNextPrompt()
             throws Exception {
         var firstDone = new CountDownLatch(1);
+        var secondDone = new CountDownLatch(1);
         var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
         var streamCalls = new AtomicInteger();
         Mockito.when(
@@ -4058,8 +4059,11 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withResponseListener(event -> {
-                    firstEvent.compareAndSet(null, event);
-                    firstDone.countDown();
+                    if (firstEvent.compareAndSet(null, event)) {
+                        firstDone.countDown();
+                    } else {
+                        secondDone.countDown();
+                    }
                 }).build();
         orchestrator.prompt("First");
         Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
@@ -4083,12 +4087,21 @@ class AIOrchestratorTest {
         Assertions.assertTrue(accepted,
                 "A completed self-scheduled turn must release the busy flag "
                         + "so the next prompt is processed");
+
+        // The accepted turn ends with a ui.access() on the background thread,
+        // which waits for the session lock the test thread holds. Without
+        // waiting for it here, that thread stays blocked after the test and
+        // takes a Reactor boundedElastic worker out of service for the rest
+        // of the test run.
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, secondDone),
+                "Second turn never ended");
     }
 
     @Test
     void prompt_providerSchedulesItself_streamErrorAllowsNextPrompt()
             throws Exception {
         var firstDone = new CountDownLatch(1);
+        var secondDone = new CountDownLatch(1);
         var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
         var streamCalls = new AtomicInteger();
         Mockito.when(
@@ -4102,8 +4115,11 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withResponseListener(event -> {
-                    firstEvent.compareAndSet(null, event);
-                    firstDone.countDown();
+                    if (firstEvent.compareAndSet(null, event)) {
+                        firstDone.countDown();
+                    } else {
+                        secondDone.countDown();
+                    }
                 }).build();
         orchestrator.prompt("First");
         Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
@@ -4125,6 +4141,10 @@ class AIOrchestratorTest {
         Assertions.assertTrue(accepted,
                 "A failed self-scheduled turn must release the busy flag so "
                         + "the next prompt is processed");
+
+        // Same blocked background thread as on the success path
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, secondDone),
+                "Second turn never ended");
     }
 
     @Test

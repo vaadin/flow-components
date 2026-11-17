@@ -43,12 +43,8 @@ public interface HasAutocomplete extends HasElement {
      *            the {@code autocomplete} value, or {@code null} to unset
      */
     default void setAutocomplete(Autocomplete autocomplete) {
-        if (autocomplete == null) {
-            getElement().removeAttribute(AUTOCOMPLETE_ATTRIBUTE);
-        } else {
-            getElement().setAttribute(AUTOCOMPLETE_ATTRIBUTE,
-                    autocomplete.value);
-        }
+        getElement().setAttribute(AUTOCOMPLETE_ATTRIBUTE,
+                autocomplete == null ? null : autocomplete.value);
     }
 
     /**

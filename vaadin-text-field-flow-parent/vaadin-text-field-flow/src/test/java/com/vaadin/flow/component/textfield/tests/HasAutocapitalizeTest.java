@@ -47,6 +47,15 @@ class HasAutocapitalizeTest {
     }
 
     @Test
+    void setNull_attributeRemoved() {
+        HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
+        c.setAutocapitalize(Autocapitalize.WORDS);
+        c.setAutocapitalize(null);
+        Assertions.assertFalse(c.getElement().hasAttribute("autocapitalize"));
+        Assertions.assertNull(c.getAutocapitalize());
+    }
+
+    @Test
     void noCapitalization() {
         HasAutocapitalizeComponent c = new HasAutocapitalizeComponent();
         c.setAutocapitalize(Autocapitalize.NONE);

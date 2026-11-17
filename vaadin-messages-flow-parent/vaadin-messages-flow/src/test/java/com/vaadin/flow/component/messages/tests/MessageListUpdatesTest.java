@@ -208,8 +208,8 @@ class MessageListUpdatesTest {
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be setItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItems"));
+        Assertions.assertEquals("setItems",
+                invocation.getInvocation().getJsCall().methodName());
 
         // Expect the parameters to equal the items in the message list
         var parameterItems = (ArrayNode) invocation.getInvocation()
@@ -226,8 +226,8 @@ class MessageListUpdatesTest {
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be addItems
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("addItems"));
+        Assertions.assertEquals("addItems",
+                invocation.getInvocation().getJsCall().methodName());
 
         // Expect the parameters to equal the provided items as JSON
         var parameterItems = (ArrayNode) invocation.getInvocation()
@@ -244,8 +244,8 @@ class MessageListUpdatesTest {
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be setItemText
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("setItemText"));
+        Assertions.assertEquals("setItemText",
+                invocation.getInvocation().getJsCall().methodName());
 
         // Expect the parameters to match the text and item index
         var parameters = invocation.getInvocation().getParameters();
@@ -263,8 +263,8 @@ class MessageListUpdatesTest {
 
         var invocation = pendingInvocations.getFirst();
         // Expect the only invocation to be appendItemText
-        Assertions.assertTrue(invocation.getInvocation().getExpression()
-                .contains("appendItemText"));
+        Assertions.assertEquals("appendItemText",
+                invocation.getInvocation().getJsCall().methodName());
 
         // Expect the parameters to match the text and item index
         var parameters = invocation.getInvocation().getParameters();

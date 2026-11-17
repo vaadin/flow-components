@@ -51,7 +51,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/app-layout", version = "25.4.0-alpha7")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -163,8 +163,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @param signal
      *            the signal to bind, not {@code null}
      * @param writeCallback
-     *            the callback to propagate value changes back, or {@code null}
-     *            for one-way binding
+     *            the callback to propagate value changes back, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
@@ -173,6 +172,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     public SignalBinding<Boolean> bindDrawerOpened(Signal<Boolean> signal,
             SerializableConsumer<Boolean> writeCallback) {
         Objects.requireNonNull(signal, "Signal cannot be null");
+        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
         return getElement().bindProperty("drawerOpened",
                 signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }

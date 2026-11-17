@@ -257,8 +257,8 @@ public class GridListDataViewIT extends AbstractComponentIT {
     }
 
     private void applyClientSortByFirstName() {
-        firstGrid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
-        firstGrid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
+        firstGrid.getHeaderCell(0).getSorter().click();
+        firstGrid.getHeaderCell(0).getSorter().click();
     }
 
     private String getFirstNameByRow(GridElement grid, int row) {

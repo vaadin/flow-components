@@ -68,6 +68,33 @@ class ConfirmDialogTest {
         Assertions.assertNull(confirmDialog.getElement().getProperty("height"));
     }
 
+    @Test
+    void getHeadingLevel_nullByDefault() {
+        var confirmDialog = new ConfirmDialog();
+        Assertions.assertNull(confirmDialog.getHeadingLevel());
+        Assertions.assertNull(
+                confirmDialog.getElement().getPropertyRaw("headingLevel"));
+    }
+
+    @Test
+    void setHeadingLevel_getHeadingLevel() {
+        var confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeadingLevel(2);
+        Assertions.assertEquals(2, confirmDialog.getHeadingLevel());
+        Assertions.assertEquals(2,
+                confirmDialog.getElement().getProperty("headingLevel", 0));
+    }
+
+    @Test
+    void setHeadingLevel_setNull_propertyRemoved() {
+        var confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeadingLevel(2);
+        confirmDialog.setHeadingLevel(null);
+        Assertions.assertNull(confirmDialog.getHeadingLevel());
+        Assertions.assertNull(
+                confirmDialog.getElement().getPropertyRaw("headingLevel"));
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void addClosedListener_listenerInvokedOnClose() {

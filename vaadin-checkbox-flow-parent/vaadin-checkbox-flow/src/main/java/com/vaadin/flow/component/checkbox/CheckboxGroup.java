@@ -112,7 +112,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.4.0-alpha7")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -923,7 +923,8 @@ public class CheckboxGroup<T>
         // Components that should remain disabled (due to itemEnabledProvider),
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
-        checkbox.getElement().executeJs("this.disabled = $0", disabled);
+        checkbox.getElement().executeJs(CheckboxGroupJs.class)
+                .setItemDisabled(disabled);
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,

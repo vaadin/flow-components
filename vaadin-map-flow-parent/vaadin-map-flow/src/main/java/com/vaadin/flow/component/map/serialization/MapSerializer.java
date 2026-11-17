@@ -103,7 +103,7 @@ public class MapSerializer {
                     .get(resource);
             if (registration == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrentOrThrow()
-                        .getSession().getResourceRegistry();
+                        .getSessionOrThrow().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource);
                 streamRegistrationCache.put(resource, registration);
             }
@@ -144,7 +144,7 @@ public class MapSerializer {
                     .get(resource);
             if (registration == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrentOrThrow()
-                        .getSession().getResourceRegistry();
+                        .getSessionOrThrow().getResourceRegistry();
                 registration = resourceRegistry.registerResource(resource,
                         map.getElement());
                 streamRegistrationCache.put(resource, registration);

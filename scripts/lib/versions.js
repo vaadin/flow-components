@@ -107,27 +107,40 @@ async function getAnnotations(){
   });
 }
 
-async function getLatestNpmVersion(package, version, major, minor) {
-  if (!cachedNpmVersions[package]) {
-    cmd = `npm view ${package} versions --json`;
-    const json = await JSON.parse(await run(cmd))
+/**
+ * Sorts versions in ascending order, putting pre-releases (alpha, beta, rc)
+ * before the final release of the same version.
+ */
+function sortVersions(versions) {
+  return versions
+    .map(a => a.replace(/\d+$/, n => +n+900000))
+    .sort()
+    .map(a => a.replace(/\d+$/, n => +n-900000));
+}
 
-    try {
-      const versions = json
-       .filter(version => version.startsWith(`${major}.${minor}`) && !version.includes('-dev'))
-       .map(a => a.replace(/\d+$/, n => +n+900000))
-       .sort()
-       .map(a => a.replace(/\d+$/, n => +n-900000));
-      next =  versions.pop();
-      console.log(`Checking next Npm version for ${package} ${version} ${next}`);
-    } catch (e){
-      // when the package has only one version available, we just use the available one
-      // mainly for new added WC has only one alpha1 release
-      next = json
-    }
-    cachedNpmVersions[package] = next;
+/**
+ * Returns the versions of a package published in npm for the given major and
+ * minor, excluding the `-dev` ones, sorted in ascending order.
+ */
+async function getNpmVersions(package, major, minor) {
+  if (!cachedNpmVersions[package]) {
+    // prefer-online, so that a version published moments ago is not hidden
+    // by metadata npm has cached locally
+    const cmd = `npm view ${package} versions --json --prefer-online`;
+    const json = JSON.parse(await run(cmd));
+    // npm prints a plain string when the package has a single version
+    const versions = Array.isArray(json) ? json : [json];
+    cachedNpmVersions[package] = sortVersions(versions
+      .filter(version => version.startsWith(`${major}.${minor}.`) && !version.includes('-dev')));
   }
   return cachedNpmVersions[package];
+}
+
+async function getLatestNpmVersion(package, version, major, minor) {
+  const versions = await getNpmVersions(package, major, minor);
+  const next = versions[versions.length - 1];
+  console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+  return next;
 }
 
 async function getLatestBowerVersion(package, version, major, minor) {
@@ -152,6 +165,8 @@ module.exports = {
   getVersionsJson,
   computeVersionToUpdate,
   getLatestNpmVersion,
+  getNpmVersions,
+  sortVersions,
   getAnnotations,
   checkoutPlatorm,
   currentBranch,

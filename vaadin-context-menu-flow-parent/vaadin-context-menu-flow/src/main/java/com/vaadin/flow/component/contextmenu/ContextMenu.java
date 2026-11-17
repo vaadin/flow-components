@@ -54,6 +54,12 @@ import com.vaadin.flow.function.SerializableRunnable;
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
         implements HasMenuItems {
 
+    // Make the target own the download registrations. Context menus by default
+    // automatically remove themselves from the UI when closing, which can
+    // happen before the browser requests the file after clicking a menu item.
+    private final MenuDownloadManager downloadManager = new MenuDownloadManager(
+            this, this::getItems, item -> getTarget());
+
     /**
      * Creates an empty context menu.
      */
@@ -141,8 +147,23 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     @Override
     protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager(
             SerializableRunnable contentReset) {
-        return new MenuManager<>(this, contentReset, MenuItem::new,
+        // Runs for changes to the items of the menu and of all sub menus
+        SerializableRunnable resetContentAndDownloads = () -> {
+            contentReset.run();
+            downloadManager.update();
+        };
+        return new MenuManager<>(this, resetContentAndDownloads, MenuItem::new,
                 MenuItem.class, null);
+    }
+
+    @Override
+    public void setTarget(Component target) {
+        super.setTarget(target);
+        downloadManager.update();
+    }
+
+    MenuDownloadManager getDownloadManager() {
+        return downloadManager;
     }
 
 }

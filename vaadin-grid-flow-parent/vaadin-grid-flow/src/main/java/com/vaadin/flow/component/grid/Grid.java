@@ -98,6 +98,8 @@ import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -216,8 +218,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1851,6 +1853,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(defaultMultiSortPriority);
 
         initSelectionPreservationHandler();
+
+        // Update the IDs of the selected items when the identifier provider
+        // is changed through a data view
+        ComponentEventListener<IdentifierProviderChangeEvent<T, ?>> identifierProviderChangeListener = event -> {
+            if (getSelectionModel() instanceof AbstractGridMultiSelectionModel<T> model) {
+                model.refreshSelectedItemIds();
+            }
+        };
+        addListener(IdentifierProviderChangeEvent.class,
+                (ComponentEventListener) identifierProviderChangeListener);
     }
 
     private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
@@ -1871,8 +1883,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
-                        .stream().collect(Collectors
-                                .toMap(getDataProvider()::getId, item -> item));
+                        .stream().collect(Collectors.toMap(Grid.this::getItemId,
+                                item -> item));
                 if (deselectionCandidateIdsToItems.isEmpty()) {
                     return;
                 }
@@ -1880,7 +1892,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 Stream<T> itemsStream = getDataProvider().fetch(
                         getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
                 Set<Object> existingItemIds = itemsStream
-                        .map(getDataProvider()::getId)
+                        .map(Grid.this::getItemId)
                         .filter(deselectionCandidateIdsToItems::containsKey)
                         .limit(deselectionCandidateIdsToItems.size())
                         .collect(Collectors.toSet());
@@ -1912,11 +1924,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
-                        getElement());
+        getUIOrThrow().getPage().executeJs(GridJs.class)
+                .initConnector(getElement());
     }
 
     /**
@@ -2216,9 +2225,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 if (!column.isVisible() && column.getUI().isPresent()) {
                     int nodeId = column.getElement().getNode().getId();
                     String appId = e.getUI().getInternals().getAppId();
-                    this.getElement().executeJs(
-                            "Vaadin.Flow.clients[$0].getByNodeId($1)._flowId = $2",
-                            appId, nodeId, columnId);
+                    getElement().executeJs(GridJs.class).setColumnFlowId(appId,
+                            nodeId, columnId);
                 }
             });
         });
@@ -3199,6 +3207,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Gets the identifier of the given item, used to compare items for
+     * selection. Uses the identifier provider set through a data view, if any,
+     * otherwise the identifier from the data provider.
+     *
+     * @param item
+     *            the item to get the identifier for
+     * @return the identifier of the item
+     */
+    @SuppressWarnings("unchecked")
+    Object getItemId(T item) {
+        IdentifierProvider<T> identifierProvider = (IdentifierProvider<T>) ComponentUtil
+                .getData(this, IdentifierProvider.class);
+        if (identifierProvider != null) {
+            return identifierProvider.apply(item);
+        }
+        return getDataCommunicator().getDataProvider().getId(item);
+    }
+
+    /**
      * Gets the current page size, which is the number of items fetched at a
      * time from the dataprovider.
      *
@@ -3235,7 +3262,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().executeJs("this.$connector?.reset()");
+        getElement().executeJs(GridJs.class).resetConnector();
         getDataCommunicator().setPageSize(pageSize);
         setViewportRange(0, pageSize);
         getDataCommunicator().reset();
@@ -3295,8 +3322,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void updateClientSelectionMode() {
-        getElement().executeJs("this.$connector?.setSelectionMode($0)",
-                selectionMode.name());
+        getElement().executeJs(GridJs.class)
+                .setSelectionMode(selectionMode.name());
     }
 
     /**
@@ -3365,7 +3392,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    boolean isItemSelectable(T item) {
+    /**
+     * Checks whether the given item passes the predicate set with
+     * {@link #setItemSelectableProvider(SerializablePredicate)}. Returns
+     * {@code true} for all items when no predicate is set.
+     * <p>
+     * The selection model can apply further rules to user selection, for
+     * example whether deselection is allowed in single-selection mode.
+     *
+     * @param item
+     *            the item to check
+     * @return {@code true} if the predicate allows the user to change the
+     *         selection state of the item, {@code false} otherwise
+     * @see #setItemSelectableProvider(SerializablePredicate)
+     * @since 25.4
+     */
+    public final boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
     }
 
@@ -4327,8 +4369,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            this.pendingSorterUpdate = getElement().executeJs(
-                    "this.$connector?.setSorterDirections($0)", directions);
+            this.pendingSorterUpdate = getElement().executeJs(GridJs.class)
+                    .setSorterDirections(directions);
         }
     }
 
@@ -5202,15 +5244,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         tooltipElement.addAttachListener(e -> {
             // Assigns a generator that returns a column-specific
             // tooltip text from the item
-            tooltipElement.executeJs(
-                    """
-                            this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item ?? {};
-                                if (gridtooltips) {
-                                    return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
-                                }
-                            }
-                            """);
+            tooltipElement.executeJs(GridJs.class).initTooltipGenerator();
         });
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
     }
@@ -5431,8 +5465,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 4.1
      */
     public void scrollToEnd() {
-        scheduleScrollExecution(() -> getElement()
-                .executeJs("this.scrollToIndex(this._flatSize)"));
+        scheduleScrollExecution(
+                () -> getElement().executeJs(GridJs.class).scrollToEnd());
     }
 
     /**

@@ -22,7 +22,8 @@ client-side state, split coverage by what varies:
   to cover the full scenario matrix — whether an invocation happens at all,
   and with which arguments. A call scheduled with `Element.callJsFunction` does
   not name the function in the invocation expression, so match it by the called
-  function instead, with `JsFunctionCallUtil`.
+  function instead, with `MockUIExtension.dumpJsCalls`: pass the function name,
+  or `Element.CallFunctionJs.class` to get the calls of all functions.
 - Keep a single integration test as a smoke test per distinct client
   operation, to prove the JS reaches the client and produces a real effect.
 
@@ -116,8 +117,9 @@ reducing Selenium / WebDriver roundtrips.
 ## Integration tests
 
 JUnit 4 + TestBench, served by Jetty, extending `AbstractComponentIT`. A test
-view (`{Component}Page` under `src/main/.../tests`) with `@Route` exposes
-elements by `id`; the IT (`{Component}IT` under `src/test/.../tests`) with a
+view (`{Component}Page` under `src/main/.../tests`) with `@Route` contains one
+instance of the tested component and exposes buttons and other controls by
+`id`; the IT (`{Component}IT` under `src/test/.../tests`) with a
 matching `@TestPath` drives a real browser. The module includes a
 `TestAppShell` (`AppShellConfigurator`) applying the Lumo theme, so ITs run
 against Lumo-styled components.
@@ -133,7 +135,7 @@ public class ExampleIT extends AbstractComponentIT {
 
     @Test
     public void defaultValue_isEmpty() {
-        Assert.assertEquals("", $(ExampleElement.class).id("default-example").getValue());
+        Assert.assertEquals("", $(ExampleElement.class).single().getValue());
     }
 }
 ```

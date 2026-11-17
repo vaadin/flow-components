@@ -19,7 +19,7 @@ gh issue view <n> --repo vaadin/<repo> --json number,title,state,body,labels,com
 
 Note the affected version if stated. Check the current line (`<flow.version>` / `<vaadin.version>` in the repo `pom.xml`). If the bug is reportedly fixed in a newer line or the range is below the checkout, switch to the matching maintenance branch — see [reproduce.md](reproduce.md).
 
-**Classify the regression:** `worked in <ver> / broke in <ver>` when there is evidence of both ends; `not a regression` when broken since the feature shipped; `unknown` otherwise. Recorded in the report for the team — informational only.
+**Classify the regression:** `worked in <ver> / broke in <ver>` when there is evidence of both ends; `not a regression` when broken since the feature shipped; `unknown` otherwise. The summary states the classification, and it does not change the verdict. For a regression, Phase 4 also names the introducing PR (see [share.md](share.md) §5).
 
 ## 3. Resolve every named component to its real source — never assume API from memory
 
@@ -30,8 +30,8 @@ Tags, attributes, and APIs drift across versions; a wrong guess sends the reprod
 Old issues are often already fixed, the fix never linked back. Before scaffolding:
 
 1. Grep the component's IT module for an existing regression view/test matching the symptom.
-2. `git log --oneline -S "<distinctive symbol or error string>" -- <suspect paths>` to find the fixing commit/PR; record `fixing PR: <#N | none found>` for the summary. Many fixes are broad reworks with no single greppable PR — "none found" is a normal answer.
-3. When a fixing PR is found, **resolve the issue it closed** — `gh pr view <n> --repo vaadin/<repo> --json closingIssuesReferences,body`. That issue is usually the duplicate that got fixed while the triaged report stayed open (common when they live in different trackers); record it in the summary's `Duplicate of:` field.
+2. `git log --oneline -S "<distinctive symbol or error string>" -- <suspect paths>` to find the fixing commit/PR. Record a found PR for the summary. Many fixes are broad reworks with no single greppable PR, so finding none is a normal answer.
+3. When a fixing PR is found, **resolve the issue it closed** — `gh pr view <n> --repo vaadin/<repo> --json closingIssuesReferences,body`. That issue is usually the duplicate that got fixed while the triaged report stayed open (common when they live in different trackers). Record it for the summary's duplicate line.
 4. Check the reported API still exists (e.g. `TemplateRenderer` was removed) — a removed API trends the verdict toward "obsolete".
 5. Before citing a candidate fixing PR, confirm it touched the relevant module — `git show <sha> --stat`. A matching title can mislead.
 

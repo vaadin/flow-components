@@ -32,9 +32,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.AllowInert;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -514,8 +513,8 @@ class DatePickerDateMetadataTest {
     }
 
     private List<String> dumpCalledFunctions() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JsFunctionCallUtil::getFunctionName).toList();
+        return ui.dumpJsCalls(picker.getElement(), Element.CallFunctionJs.class)
+                .stream().map(call -> (String) call.arguments().get(0))
+                .toList();
     }
 }

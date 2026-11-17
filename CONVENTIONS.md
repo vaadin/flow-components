@@ -32,6 +32,8 @@ When a Flow component calls client-side JavaScript, always call through the comp
 
 When a Flow component only calls a named method on a web component, prefer `callJsFunction` over `executeJs`.
 
+Other JavaScript that a component runs is declared in a package-private `@JsDefinition` interface and called through `executeJs(Class)`, not sent as a string with `executeJs(String, ...)`. The interface is a top-level type named after the component, such as `MarkdownJs`, and is nested in a class only when its JavaScript needs a private constant of that class. In an integration test view, the interface is nested in the view that uses it, or is a top-level type in the test package when several views share it. A string is compiled by the browser, which a Content Security Policy without `unsafe-eval` blocks. A module that sends no JavaScript as a string sets the `csp.mode` Maven property to `strict`, which turns on the `forbidden-apis/csp-strict.txt` signatures for its main classes, the strict mode in unit tests that use `MockUIExtension`, and the strict mode of the integration test server. Event data is added with `addEventDataPath` or a declared `DomEventData`, not with the deprecated `addEventData(String)`, and an event filter is a declared `DomEventFilter` set with `setFilterExpression`, not a string given to `setFilter`. The signatures report both.
+
 When server-side code initializes persistent client-side JavaScript via `Element.executeJs()` (e.g. initializing a connector, adding a listener) it must happen in the component's attach hook (`onAttach` override or attach listener). Flow recreates client elements on detach/re-attach and the attach handler guarantees the script is re-applied for every new element. The exceptions are one-time state sync fixes (e.g. force client property to a value when Flow's property tracking would not sync otherwise).
 
 When code clears an element property, prefer `getElement().removeProperty(name)` over `getElement().setProperty(name, null)`.
@@ -94,7 +96,7 @@ Name tests by scenario and observable outcome. Simple tests covering a feature o
 
 When adding a new component module, add a serializable test that extends from `com.vaadin.flow.testutil.ClassesSerializableTest`.
 
-Component getters and setters should be covered by unit tests. When those delegate to Element APIs, tests should verify via the Element API that a value was properly applied. Simple properties can be covered with a single unit test instead of splitting up testing over multiple tests.
+Component getters and setters should be covered by unit tests. When those delegate to Element APIs, tests should verify via the Element API that a value was properly applied. Cover simple properties with a single unit test named after the property (e.g. `setSrc_getSrc`) that checks the default value, setting a value, and resetting it (e.g. to `null`), asserting both the getter and the Element state at each step.
 
 When a component mutates a child's slot attribute, unit tests must verify that the slot attribute is added when the child is added, and removed when the child is removed from the component.
 
@@ -104,13 +106,15 @@ Use unit tests to cover the component reacting to client-side events fired by th
 
 When a component invokes custom JavaScript from the server to modify client-side state, split test coverage by what varies: use unit tests that dump and assert pending JavaScript invocations from the UI to cover the full scenario matrix (e.g. whether invocation happens or not, different arguments to the invocation). Use a single integration test as smoke test per distinct client operation to prove the JS reaches the client and produces a real effect.
 
-Use `JsFunctionCallUtil` to assert on invocations that a component schedules with `Element.callJsFunction`. Such an invocation does not name the called function in its expression, so matching it by expression text never finds it.
+To assert on JavaScript calls in a unit test, use `MockUIExtension.dumpJsCalls` with the element that the call was made on. For calls made with `Element.callJsFunction`, pass the function name. For calls made through a component's own `@JsDefinition` interface, pass that interface. Do not look for a `callJsFunction` call in the expression text of the pending invocations: the expression does not contain the function name.
 
 For coverage of JavaScript connectors, prefer web-test-runner tests under `vaadin-{component}-flow-integration-tests/test/*.test.ts` to cover the full scenario matrix. As above, integration tests should exist for the general case to verify integration of server component, web component and connector.
 
 Do not add tests that cover behavior of mixin interfaces in each component that use them. Keep only a test to verify the mixin interface is implemented. The exception is when methods are overridden to add custom logic.
 
 `@Route` and `@TestPath` annotations on integration tests views should use routes prefixed with the component element name, e.g. "vaadin-markdown/sub-route".
+
+An integration test view contains one instance of the tested component. Add more instances only when the test checks how they interact. Create a new view for testing an unrelated feature instead of adding an instance to an existing generic view.
 
 In TestBench element classes, methods that query for an element should return null for absent elements instead of throwing an exception.
 

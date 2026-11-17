@@ -18,11 +18,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsCall;
+import com.vaadin.tests.MockUIExtension;
 
 class ColumnFiltersTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     final String TABLE1_RANGE = "B2:B4";
     final String TABLE2_RANGE = "B6:B8";
@@ -103,6 +112,121 @@ class ColumnFiltersTest {
 
         Assertions.assertTrue(table.getPopupButton(1).isActive());
         Assertions.assertFalse(table.getPopupButton(2).isActive());
+    }
+
+    @Test
+    void markActive_registeredPopup_sendsUpdatedSharedState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.markActive(true);
+        assertPopupActiveStateSent(true);
+
+        popupButton.markActive(false);
+        assertPopupActiveStateSent(false);
+    }
+
+    @Test
+    void popupSetters_registeredPopup_sendsUpdatedSharedState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.setHeaderHidden(true);
+        assertPopupStateSent(false, true, null, null);
+
+        popupButton.setPopupWidth("100px");
+        assertPopupStateSent(false, true, "100px", null);
+
+        popupButton.setPopupHeight("200px");
+        assertPopupStateSent(false, true, "100px", "200px");
+
+        popupButton.setHeaderHidden(false);
+        assertPopupStateSent(false, false, "100px", "200px");
+
+        popupButton.setPopupWidth(null);
+        assertPopupStateSent(false, false, null, "200px");
+
+        popupButton.setPopupHeight(null);
+        assertPopupStateSent(false, false, null, null);
+    }
+
+    @Test
+    void updateState_multipleSettersInOneRoundtrip_sendsOnlyFinalState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.markActive(true);
+        popupButton.setPopupWidth("100px");
+        popupButton.setPopupHeight("200px");
+        popupButton.setHeaderHidden(true);
+        popupButton.setPopupWidth("300px");
+        popupButton.markActive(false);
+
+        assertPopupStateSent(false, true, "300px", "200px");
+    }
+
+    @Test
+    void markActive_unregisteredPopup_doesNotSendSharedState() {
+        ui.add(spreadsheet);
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        Assertions.assertTrue(popupButton.getParent().isEmpty());
+
+        for (boolean active : new boolean[] { true, false }) {
+            popupButton.markActive(active);
+
+            Assertions.assertEquals(active, popupButton.isActive());
+            Assertions.assertTrue(ui.dumpJsCalls(spreadsheet.getElement(),
+                    "setPopupButtonState").isEmpty());
+        }
+    }
+
+    private void assertPopupActiveStateSent(boolean active) {
+        assertPopupStateSent(active, false, null, null);
+    }
+
+    private void assertPopupStateSent(boolean active, boolean headerHidden,
+            String popupWidth, String popupHeight) {
+        // Each call is the function name followed by its arguments
+        var calls = ui
+                .dumpJsCalls(spreadsheet.getElement(),
+                        Element.CallFunctionJs.class)
+                .stream().map(JsCall::flattenArguments).toList();
+        Assertions.assertTrue(calls.stream()
+                .noneMatch(call -> "addPopupButton".equals(call.get(0))));
+        var stateCalls = calls.stream()
+                .filter(call -> "setPopupButtonState".equals(call.get(0)))
+                .toList();
+        Assertions.assertEquals(1, stateCalls.size());
+        var state = JacksonUtils.getMapper()
+                .readTree((String) stateCalls.get(0).get(1));
+        Assertions.assertEquals(active, state.path("active").asBoolean(false));
+        Assertions.assertEquals(headerHidden,
+                state.path("headerHidden").asBoolean(false));
+        Assertions.assertEquals(popupWidth,
+                state.path("popupWidth").asString(null));
+        Assertions.assertEquals(popupHeight,
+                state.path("popupHeight").asString(null));
+        Assertions.assertEquals(2, state.get("row").asInt());
+        Assertions.assertEquals(2, state.get("col").asInt());
+        Assertions.assertEquals(workbook.getSheetName(0),
+                state.get("sheet").asString());
     }
 
     @Test

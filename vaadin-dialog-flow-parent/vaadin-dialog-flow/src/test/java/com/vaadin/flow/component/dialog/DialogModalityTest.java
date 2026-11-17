@@ -199,17 +199,17 @@ class DialogModalityTest {
     }
 
     @Test
-    void visualModal_openSecondDialog_addedToUI() {
+    void visualModal_openSecondDialog_addedToFirstDialog() {
         dialog.setModality(ModalityMode.VISUAL);
         ui.add(dialog);
         dialog.open();
 
+        // Auto-added dialog should be added to current visual modal
         Dialog secondDialog = new Dialog();
         secondDialog.open();
         ui.fakeClientCommunication();
 
-        Assertions.assertEquals(ui.getUI(),
-                secondDialog.getParent().orElse(null));
+        Assertions.assertEquals(dialog, secondDialog.getParent().orElse(null));
     }
 
     @Test

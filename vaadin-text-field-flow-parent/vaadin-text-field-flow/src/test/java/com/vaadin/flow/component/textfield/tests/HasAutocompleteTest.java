@@ -45,6 +45,15 @@ class HasAutocompleteTest {
     }
 
     @Test
+    void setNull_attributeRemoved() {
+        HasAutocompleteComponent c = new HasAutocompleteComponent();
+        c.setAutocomplete(Autocomplete.NAME);
+        c.setAutocomplete(null);
+        Assertions.assertFalse(c.getElement().hasAttribute("autocomplete"));
+        Assertions.assertNull(c.getAutocomplete());
+    }
+
+    @Test
     void noAutocomplete() {
         HasAutocompleteComponent c = new HasAutocompleteComponent();
         c.setAutocomplete(Autocomplete.OFF);

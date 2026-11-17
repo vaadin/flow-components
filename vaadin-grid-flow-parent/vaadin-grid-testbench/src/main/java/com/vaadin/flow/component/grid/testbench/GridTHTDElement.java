@@ -118,6 +118,17 @@ public class GridTHTDElement extends TestBenchElement {
         return getPropertyElement("parentElement").wrap(GridTRElement.class);
     }
 
+    /**
+     * Gets the sorter of this header cell.
+     *
+     * @return the sorter element, or {@code null} if the cell does not contain
+     *         a sorter
+     */
+    public GridSorterElement getSorter() {
+        List<GridSorterElement> sorters = $(GridSorterElement.class).all();
+        return sorters.isEmpty() ? null : sorters.get(0);
+    }
+
     @Override
     public SearchContext getContext() {
         return (SearchContext) executeScript(

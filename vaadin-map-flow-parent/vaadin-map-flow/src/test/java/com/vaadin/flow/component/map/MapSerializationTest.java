@@ -144,6 +144,21 @@ class MapSerializationTest {
     }
 
     @Test
+    void serializeIcon_imgSizeNotSerialized() {
+        // The built-in pin icon has an image size set
+        MarkerFeature marker = new MarkerFeature();
+        map.getFeatureLayer().addFeature(marker);
+        Assertions.assertNotNull(marker.getIcon().getImgSize());
+
+        ui.fakeClientCommunication();
+        ObjectNode iconNode = findSyncedItem(getSynchronizedItems(),
+                marker.getIcon().getId());
+
+        Assertions.assertTrue(iconNode.has("scale"));
+        Assertions.assertFalse(iconNode.has("imgSize"));
+    }
+
+    @Test
     void detachMap_unregisterStreamResources() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
@@ -184,14 +199,11 @@ class MapSerializationTest {
     }
 
     private ArrayNode getSynchronizedItems() {
-        var syncInvocation = ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getInvocation().getExpression()
-                        .contains("$connector.synchronize"))
-                .findFirst().orElseThrow(() -> new AssertionError(
-                        "No synchronize invocation found"));
+        var calls = ui.dumpJsCalls(map.getElement(), "$connector.synchronize");
+        Assertions.assertFalse(calls.isEmpty(), "No synchronize call found");
 
-        return (ArrayNode) syncInvocation.getInvocation().getParameters()
-                .get(0);
+        // The function name is followed by the synchronized items
+        return (ArrayNode) calls.get(0).flattenArguments().get(1);
     }
 
     private ObjectNode findSyncedItem(ArrayNode syncedItems, String id) {

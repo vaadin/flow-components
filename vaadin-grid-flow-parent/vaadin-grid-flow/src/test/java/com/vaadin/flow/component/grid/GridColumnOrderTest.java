@@ -20,7 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -29,9 +33,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ArrayNode;
 
 class GridColumnOrderTest {
     private Grid<String> grid;
@@ -207,6 +215,42 @@ class GridColumnOrderTest {
     }
 
     @Test
+    void clientColumnReorderEvent_columnsInClientOrder() {
+        secondColumn.setVisible(false);
+        final AtomicReference<ColumnReorderEvent<String>> event = new AtomicReference<>();
+        grid.addColumnReorderListener(event::set);
+
+        fireClientColumnReorderEvent(fourthColumn, secondColumn, firstColumn,
+                thirdColumn);
+
+        assertArrayEquals(new Object[] { fourthColumn, secondColumn,
+                firstColumn, thirdColumn }, event.get().getColumns().toArray());
+        assertTrue(event.get().isFromClient());
+    }
+
+    @Test
+    void clientColumnReorderListener_setColumnOrder_newOrderApplied() {
+        final List<List<Grid.Column<String>>> orders = new ArrayList<>();
+        grid.addColumnReorderListener(event -> orders.add(event.getColumns()));
+        grid.addColumnReorderListener(event -> {
+            if (event.isFromClient()) {
+                List<Grid.Column<String>> columns = new ArrayList<>(
+                        event.getColumns());
+                Collections.swap(columns, 1, 2);
+                grid.setColumnOrder(columns);
+            }
+        });
+
+        fireClientColumnReorderEvent(firstColumn, secondColumn, thirdColumn,
+                fourthColumn);
+
+        List<Grid.Column<String>> expected = List.of(firstColumn, thirdColumn,
+                secondColumn, fourthColumn);
+        assertEquals(expected, grid.getColumns());
+        assertEquals(expected, orders.get(orders.size() - 1));
+    }
+
+    @Test
     void joiningHeadersWorkAfterReordering1() {
         grid.appendHeaderRow();
         final HeaderRow header = grid.prependHeaderRow();
@@ -329,6 +373,16 @@ class GridColumnOrderTest {
                 firstColumn);
         assertArrayEquals(new Object[] { fourthColumn, thirdColumn,
                 secondColumn, firstColumn }, grid.getColumns().toArray());
+    }
+
+    @SafeVarargs
+    private void fireClientColumnReorderEvent(Grid.Column<String>... columns) {
+        ArrayNode columnIds = JacksonUtils.createArrayNode();
+        for (Grid.Column<String> column : columns) {
+            columnIds.add(column.getInternalId());
+        }
+        ComponentUtil.fireEvent(grid,
+                new ColumnReorderEvent<>(grid, true, columnIds));
     }
 
     private String dumpColumnHierarchyFromDOM() {

@@ -288,18 +288,15 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     @Test
     public void customEditorVisible_pressCharKey_editorIsFocused() {
         clickToggleCellVisibleButton();
-        selectCell("A2");
 
-        for (String cellAddress : editorCellAddresses) {
-            // Skip the C2 cell, as it contains a checkbox editor
-            if (cellAddress.equals("C2")) {
-                getActiveElement().sendKeys(Keys.TAB);
-                continue;
-            }
-            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
-                    cellAddress, "a");
+        // Skip the C2 cell, as it contains a checkbox editor
+        for (String cellAddress : List.of("B2", "D2", "E2", "F2")) {
+            selectCell(cellAddress);
+            getSpreadsheet().sendKeys("a");
+            assertEditorInCellIsFocused(cellAddress);
             var value = getActiveElement().getDomProperty("value");
             Assert.assertEquals("a", value);
+            getActiveElement().sendKeys(Keys.ESCAPE);
         }
     }
 

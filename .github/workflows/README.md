@@ -72,12 +72,9 @@ requests picked that way say so in their description and are labeled
 `ai-resolved-conflict`; review them with that in mind. A pick that cannot be
 completed is labeled `need to pick manually <branch>` and is left to a human.
 
-The workflow is currently in dry-run mode: it only logs what it would pick,
-while the existing cherry-pick job keeps doing the picking.
-
 Configuration:
 
 | Name | Kind | Purpose |
 |---|---|---|
 | `CHERRY_PICK_TOKEN` | organization secret | Token used to read the cherry-pick script from vaadin/platform-build-script, push the pick branches, open the pull requests and label them. The workflow token is not enough: pull requests it opens do not trigger the validation workflow. |
-| `ANTHROPIC_API_KEY` | secret | Used by Claude Code to resolve conflicts, shared with `claude.yml`. |
+| `ANTHROPIC_API_KEY` | secret | Used by Claude Code to resolve conflicts. |

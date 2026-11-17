@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.HasTextSelection.TextSelectionJs;
-import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
@@ -82,7 +80,8 @@ class HasTextSelectionTest {
         component.setSelectionRange(2, 7);
         component.setCursorPosition(4);
 
-        List<JsCall> calls = dumpTextSelectionCalls();
+        List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
+                TextSelectionJs.class);
         Assertions.assertEquals(2, calls.size());
         Assertions.assertEquals(List.of(2, 7), calls.get(0).arguments());
         Assertions.assertEquals(List.of(4, 4), calls.get(1).arguments());
@@ -90,21 +89,12 @@ class HasTextSelectionTest {
 
     private void assertSelectionRangeCall(int selectionStart,
             int selectionEnd) {
-        List<JsCall> calls = dumpTextSelectionCalls();
+        List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
+                TextSelectionJs.class);
         Assertions.assertEquals(1, calls.size());
         JsCall call = calls.get(0);
         Assertions.assertEquals("setSelectionRange", call.methodName());
         Assertions.assertEquals(List.of(selectionStart, selectionEnd),
                 call.arguments());
-    }
-
-    private List<JsCall> dumpTextSelectionCalls() {
-        StateNode node = component.getElement().getNode();
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == node)
-                .map(pending -> pending.getInvocation().getJsCall())
-                .filter(Objects::nonNull)
-                .filter(call -> call.definitionType() == TextSelectionJs.class)
-                .toList();
     }
 }

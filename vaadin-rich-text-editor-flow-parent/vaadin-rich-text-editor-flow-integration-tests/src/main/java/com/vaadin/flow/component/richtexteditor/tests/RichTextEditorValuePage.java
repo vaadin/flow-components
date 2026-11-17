@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.richtexteditor.RichTextEditor;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-rich-text-editor/value")
@@ -70,9 +71,18 @@ public class RichTextEditorValuePage extends Div {
         setupEditorWithInitialDeltaValue
                 .setId("setup-editor-with-initial-delta-value");
 
+        NativeButton setEagerMode = new NativeButton("Set EAGER mode",
+                e -> editor.setValueChangeMode(ValueChangeMode.EAGER));
+        setEagerMode.setId("set-eager-mode");
+
+        NativeButton setOnBlurMode = new NativeButton("Set ON_BLUR mode",
+                e -> editor.setValueChangeMode(ValueChangeMode.ON_BLUR));
+        setOnBlurMode.setId("set-on-blur-mode");
+
         add(editor);
         add(new Div(setValue, setAsHtmlValue, setAsDeltaValue,
                 setupEditorWithInitialDeltaValue));
+        add(new Div(setEagerMode, setOnBlurMode));
         add(new Div(new Span("Value Change Event: "), valueOutput));
         add(new Div(new Span("AsHtml Value Change Event: "),
                 asHtmlValueOutput));

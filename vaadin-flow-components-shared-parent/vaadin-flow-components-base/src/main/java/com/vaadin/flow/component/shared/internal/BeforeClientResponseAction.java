@@ -100,8 +100,7 @@ public class BeforeClientResponseAction implements Serializable {
     /**
      * One scheduling of the action. Flow can still run an entry that it
      * collected before an earlier callback in the same flush cancelled the
-     * action or detached the component, so the entry checks both before it runs
-     * the action.
+     * action, so the entry checks that before it runs the action.
      * <p>
      * Always read the action from the {@code action} field when it runs. Do not
      * copy it to a local variable, and do not pass it to a lambda or to another
@@ -121,9 +120,7 @@ public class BeforeClientResponseAction implements Serializable {
 
         @Override
         public void accept(ExecutionContext context) {
-            if (cancelled || !component.isAttached()) {
-                // When detached, whenAttached registers this run again on the
-                // next attach
+            if (cancelled) {
                 return;
             }
             BeforeClientResponseAction.this.cancel();

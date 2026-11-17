@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +60,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha7")
 public class MessageList extends Component implements HasStyle, HasSize,
         LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 
@@ -86,8 +87,6 @@ public class MessageList extends Component implements HasStyle, HasSize,
             .create(this, this::updateTypingUsers);
 
     private List<MessageListUser> typingUsers = Collections.emptyList();
-
-    private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -157,7 +156,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     private void updateItems(Collection<MessageListItem> items) {
-        this.items.forEach(item -> item.setHost(null));
+        var newItems = new HashSet<>(items);
+        // Only release the items that were removed, and only when this list
+        // still hosts them, so that the others keep their image resource
+        this.items.stream().filter(
+                item -> !newItems.contains(item) && item.getHost() == this)
+                .forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
         scheduleItemsUpdate();
@@ -281,8 +285,8 @@ public class MessageList extends Component implements HasStyle, HasSize,
         items.forEach(item -> item.clientText = item.getText());
 
         var itemsJson = JacksonUtils.listToJson(items);
-        getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
-                itemsJson, getLocale().toLanguageTag());
+        getElement().executeJs(MessageListJs.class).setItems(itemsJson,
+                getLocale().toLanguageTag());
     }
 
     /**
@@ -300,14 +304,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
                     // Append optimization
                     var diff = item.getText()
                             .substring(item.clientText.length());
-                    getElement().executeJs(
-                            CONNECTOR_OBJECT + ".appendItemText(this, $0, $1)",
-                            diff, items.indexOf(item));
+                    getElement().executeJs(MessageListJs.class)
+                            .appendItemText(diff, items.indexOf(item));
                 } else {
                     // Full text update for this item
-                    getElement().executeJs(
-                            CONNECTOR_OBJECT + ".setItemText(this, $0, $1)",
-                            item.getText(), items.indexOf(item));
+                    getElement().executeJs(MessageListJs.class)
+                            .setItemText(item.getText(), items.indexOf(item));
                 }
                 // Sync clientText *after* sending the update
                 item.clientText = item.getText();
@@ -327,8 +329,8 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
         var newItemsJson = JacksonUtils.listToJson(newItems);
         // Call the connector function to add items
-        getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
-                newItemsJson, getLocale().toLanguageTag());
+        getElement().executeJs(MessageListJs.class).addItems(newItemsJson,
+                getLocale().toLanguageTag());
     }
 
     @Override
@@ -629,7 +631,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     private void checkTypingIndicatorFeatureFlag(UI ui) {
         var featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(
                 MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
                 && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {

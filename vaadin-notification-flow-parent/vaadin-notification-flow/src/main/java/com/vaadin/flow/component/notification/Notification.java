@@ -56,7 +56,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/notification", version = "25.4.0-alpha7")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -129,16 +129,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 ? UI.getCurrent().getInternals().getAppId()
                 : "ROOT";
 
-        //@formatter:off
-        getElement().executeJs(
-            "this.renderer = (root) => {" +
-            "  if (this.text) {" +
-            "    root.textContent = this.text;" +
-            "  } else {" +
-            "    Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)" +
-            "  }" +
-            "}", appId);
-        //@formatter:on
+        getElement().executeJs(NotificationJs.class).configureRenderer(appId);
     }
 
     /**
@@ -666,8 +657,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        getElement().executeJs(NotificationJs.class).patchVirtualContainer();
         configureRenderer();
         updateVirtualChildNodeIds();
     }
@@ -680,7 +670,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
         // the auto-closing logic to before client response, which is not called
         // when reloading the page. This also prevents an exception when trying
         // to remove an auto-added notification from its parent.
-        detachEvent.getUI().beforeClientResponse(this, executionContext -> {
+        // The task is registered for the UI, as a task registered for the
+        // detached notification would only run once it gets attached again.
+        UI ui = detachEvent.getUI();
+        ui.beforeClientResponse(ui, executionContext -> {
             // Close the notification, and remove it from its parent if it was
             // auto-added. This ensures that the notification doesn't re-open
             // itself when its parent, for example a dialog, gets attached

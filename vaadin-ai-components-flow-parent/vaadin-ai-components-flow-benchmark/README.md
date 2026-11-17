@@ -98,6 +98,11 @@ effect of prompt changes. For a scheduled build, set
 the signal, and raise `AI_BENCHMARK_RUNS` to five or more so the rate moves in
 smaller steps.
 
+The module switches off the unit test timeouts of the root `pom.xml`, the
+JUnit default timeout and the Surefire fork timeout, because a run takes
+longer than they allow. Set an execution timeout in the build
+configuration, so that a run that hangs is still stopped.
+
 ## Writing a scenario
 
 A scenario is a plain `@Test` whose body is one attempt: `AIBenchmark`

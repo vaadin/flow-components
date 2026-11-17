@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 class TooltipTest {
@@ -279,6 +281,19 @@ class TooltipTest {
                 getTooltipElement().get().getProperty("text"));
         Assertions.assertTrue(
                 getTooltipElement().get().getProperty("markdown", false));
+    }
+
+    @Test
+    void createTooltip_addComponent_setsTarget() {
+        Tooltip.forComponent(component);
+        ui.add(component);
+
+        List<JsCall> calls = ui.dumpJsCalls(getTooltipElement().get(),
+                TooltipJs.class);
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals("setTarget", calls.get(0).methodName());
+        Assertions.assertEquals(List.of(component.getElement()),
+                calls.get(0).arguments());
     }
 
     private Optional<Element> getTooltipElement() {

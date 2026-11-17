@@ -60,7 +60,7 @@ This pom edit is part of the scaffold. When the bug reproduces it is **committed
 
 ## 5. Porting an old reporter example
 
-- **A compile failure on a faithful port is weak, obsolete evidence** (removed APIs, e.g. `PolymerTemplate` → `LitTemplate`) — note it in the summary, then reproduce the behavior with the modern API as resolved in Phase 1 (issue-analysis.md §3–4).
+- **A compile failure on a faithful port is weak, obsolete evidence** (removed APIs, e.g. `PolymerTemplate` → `LitTemplate`) — note it in chat, then reproduce the behavior with the modern API as resolved in Phase 1 (issue-analysis.md §3–4).
 
 ## 6. Run the server
 

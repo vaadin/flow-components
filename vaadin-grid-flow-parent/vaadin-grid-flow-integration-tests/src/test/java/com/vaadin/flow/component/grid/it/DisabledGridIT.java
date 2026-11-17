@@ -131,6 +131,19 @@ public class DisabledGridIT extends AbstractComponentIT {
         assertEmptyMessage(message);
     }
 
+    @Test
+    public void gridIsDisabled_scrollToEnd_renderedButtonsAreDisabled() {
+        open();
+        GridElement grid = $(GridElement.class).id("grid");
+        disableGrid();
+
+        grid.scrollToRow(99);
+        waitUntil(driver -> grid.getLastVisibleRowIndex() == 99);
+
+        Assert.assertFalse("The rendered button should be disabled",
+                grid.getCell(99, 1).$("button").first().isEnabled());
+    }
+
     private void disableGrid() {
         findElement(By.id("toggleEnabled")).click();
     }

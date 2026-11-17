@@ -94,6 +94,13 @@ class GridHiddenColumnRenderingTest {
     }
 
     @Test
+    void removeColumnBeforeRender_columnDataNotGenerated() {
+        grid.removeColumn(column);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
+    }
+
+    @Test
     void bindVisible_initiallyVisibleColumn_columnDataNotGeneratedOnceHidden() {
         ValueSignal<Boolean> visibleSignal = new ValueSignal<>(true);
         column.bindVisible(visibleSignal);
@@ -148,6 +155,14 @@ class GridHiddenColumnRenderingTest {
         @Test
         void hideColumn_columnDataNotGenerated() {
             column.setVisible(false);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+
+        @Test
+        void removeColumn_resetDataCommunicator_columnDataNotGenerated() {
+            grid.removeColumn(column);
+            grid.getDataCommunicator().reset();
             ui.fakeClientCommunication();
             assertColumnDataNotGenerated();
         }

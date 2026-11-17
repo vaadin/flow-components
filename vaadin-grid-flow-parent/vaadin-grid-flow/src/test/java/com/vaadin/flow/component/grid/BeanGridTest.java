@@ -62,6 +62,22 @@ class BeanGridTest {
                 "Column for sub-property not found by key");
     }
 
+    public static class Contact {
+        public String getFirstName() {
+            return null;
+        }
+
+        public ContactAddress getHomeAddress() {
+            return null;
+        }
+    }
+
+    public static class ContactAddress {
+        public String getPostalCode() {
+            return null;
+        }
+    }
+
     private static class ExtendedColumn<T> extends Column<T> {
         ExtendedColumn(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid, columnId, renderer);
@@ -148,6 +164,29 @@ class BeanGridTest {
                 .toArray();
         Assertions.assertArrayEquals(properties, columnKeys,
                 "Unexpected columns or column-keys");
+    }
+
+    @Test
+    void beanGrid_columnsForPropertiesAddedWithHumanFriendlyHeaders() {
+        Grid<Contact> contactGrid = new Grid<>(Contact.class);
+        contactGrid.addColumn("homeAddress.postalCode");
+
+        Object[] headers = contactGrid.getColumns().stream()
+                .map(Column::getHeaderText).toArray();
+        Assertions.assertArrayEquals(
+                new String[] { "First Name", "Home Address", "Postal Code" },
+                headers);
+    }
+
+    @Test
+    void setColumns_columnsAddedWithHumanFriendlyHeaders() {
+        Grid<Contact> contactGrid = new Grid<>(Contact.class);
+        contactGrid.setColumns("homeAddress.postalCode", "firstName");
+
+        Object[] headers = contactGrid.getColumns().stream()
+                .map(Column::getHeaderText).toArray();
+        Assertions.assertArrayEquals(
+                new String[] { "Postal Code", "First Name" }, headers);
     }
 
     @Test

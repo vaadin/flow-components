@@ -38,7 +38,6 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
@@ -48,7 +47,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class SelectTest {
@@ -1045,11 +1043,8 @@ class SelectTest {
     }
 
     private long countContentUpdateRequests() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> "requestContentUpdate"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
-                .count();
+        return ui.dumpJsCalls(select.getElement(), "requestContentUpdate")
+                .size();
     }
 
     private Element getListBoxChild(int index) {

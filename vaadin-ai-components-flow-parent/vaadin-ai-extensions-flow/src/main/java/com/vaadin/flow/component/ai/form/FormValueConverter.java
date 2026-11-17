@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.form;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -166,6 +167,10 @@ final class FormValueConverter {
         RejectedValueException(String message) {
             super(message);
         }
+
+        RejectedValueException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**
@@ -183,11 +188,19 @@ final class FormValueConverter {
      * naming the missing registration. Multi-select fields expect a JSON array
      * of labels; single-select and other label-routed fields expect a single
      * string.
+     * <p>
+     * The converted value is then checked against the field's
+     * {@code HasValue<?, V>} value type, see {@link #checkValueType}.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
             return field.field().getEmptyValue();
         }
+        return checkValueType(field, convertByType(field, value));
+    }
+
+    private static Object convertByType(FormFieldDescriptor field,
+            JsonNode value) {
         // Multi-select takes an array of labels; handled before the
         // fieldValueOptions check so the array shape is enforced even on
         // fields whose value type is itself a String set.
@@ -205,8 +218,10 @@ final class FormValueConverter {
         return switch (field.type()) {
         case STRING, EMAIL -> convertString(value);
         case BIG_DECIMAL -> convertBigDecimal(value);
-        case NUMBER -> convertNumber(value);
-        case INTEGER -> convertInteger(value);
+        case NUMBER ->
+            convertNumber(value, FormFieldType.valueType(field.field()));
+        case INTEGER ->
+            convertInteger(value, FormFieldType.valueType(field.field()));
         case BOOLEAN -> convertBoolean(value);
         case DATE -> convertDate(value);
         case DATE_TIME -> convertDateTime(value);
@@ -215,6 +230,31 @@ final class FormValueConverter {
         default -> throw new RejectedValueException(
                 "Unsupported field type: " + field.type());
         };
+    }
+
+    /**
+     * Rejects a converted value that is not an instance of the field's value
+     * type, instead of writing it. For example, a field whose value type has no
+     * type mapping (such as {@code UUID}) is classified as
+     * {@link FormFieldType#STRING} and would otherwise get a {@link String}.
+     * Fields whose value type cannot be resolved (for example a generic
+     * {@code ComboBox<T>}) are not checked.
+     */
+    private static Object checkValueType(FormFieldDescriptor field,
+            Object converted) {
+        var valueType = FormFieldType.valueType(field.field());
+        if (converted == null || valueType == null
+                || valueType.isInstance(converted)) {
+            return converted;
+        }
+        // The reason goes to the LLM, so the type names are only logged.
+        LOGGER.debug(
+                "Converted value of type {} does not match value type {}"
+                        + " of field {}",
+                converted.getClass().getName(), valueType.getName(),
+                field.id());
+        throw new RejectedValueException(
+                "Field cannot be filled: its value type is not supported.");
     }
 
     /**
@@ -381,25 +421,60 @@ final class FormValueConverter {
         }
     }
 
-    private static Double convertNumber(JsonNode value) {
+    /**
+     * Converts a JSON number to the field's value type: {@link Float} for
+     * {@code Float} fields, {@link Double} otherwise.
+     */
+    private static Number convertNumber(JsonNode value, Class<?> valueType) {
         if (!value.isNumber()) {
             throw new RejectedValueException("Expected number, got " + value);
         }
-        return value.asDouble();
+        var d = value.asDouble();
+        if (valueType == Float.class) {
+            var f = (float) d;
+            if (Float.isInfinite(f)) {
+                throw new RejectedValueException(
+                        "Number out of range: " + value);
+            }
+            return f;
+        }
+        return d;
     }
 
-    private static Integer convertInteger(JsonNode value) {
+    /**
+     * Converts a JSON number to the field's integral value type ({@link Long},
+     * {@link Short}, {@link Byte} or {@link BigInteger}), or {@link Integer}
+     * when the field's value type is not one of those. Values outside the range
+     * of the target type are rejected.
+     */
+    private static Number convertInteger(JsonNode value, Class<?> valueType) {
+        var integer = toBigInteger(value);
+        try {
+            if (valueType == BigInteger.class) {
+                return integer;
+            }
+            if (valueType == Long.class) {
+                return integer.longValueExact();
+            }
+            if (valueType == Short.class) {
+                return integer.shortValueExact();
+            }
+            if (valueType == Byte.class) {
+                return integer.byteValueExact();
+            }
+            return integer.intValueExact();
+        } catch (ArithmeticException ex) {
+            throw new RejectedValueException("Integer out of range: " + value,
+                    ex);
+        }
+    }
+
+    private static BigInteger toBigInteger(JsonNode value) {
         // Accept JSON integers and whole-number floating-point values (e.g.
         // 3.0) — LLMs sometimes emit the latter for integer fields.
-        // Fractional values are rejected.
-        if (value.isIntegralNumber()) {
-            return value.asInt();
-        }
-        if (value.isFloatingPointNumber()) {
-            var d = value.asDouble();
-            if (d == Math.floor(d) && !Double.isInfinite(d)) {
-                return (int) d;
-            }
+        // Fractional and infinite values are rejected.
+        if (value.canConvertToExactIntegral()) {
+            return value.bigIntegerValue();
         }
         throw new RejectedValueException("Expected integer, got " + value);
     }

@@ -83,7 +83,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 23.0
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/map", version = "25.4.0-alpha7")
 // ol is also a transitive dep of @vaadin/map, but mapConnector.ts imports
 // from `ol/*` directly, which only resolves when ol is a top-level
 // node_modules entry. Keep version in sync with the one in @vaadin/map.
@@ -128,9 +128,8 @@ public class Map extends MapBase {
      * @since 23.2
      */
     public static void setUserProjection(String projection) {
-        UI.getCurrentOrThrow().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
-                projection);
+        UI.getCurrentOrThrow().getPage().executeJs(MapJs.class)
+                .setUserProjection(projection);
     }
 
     /**
@@ -168,9 +167,8 @@ public class Map extends MapBase {
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
-        UI.getCurrentOrThrow().getPage().executeJs(
-                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
-                projectionName, wksDefinition);
+        UI.getCurrentOrThrow().getPage().executeJs(MapJs.class)
+                .defineProjection(projectionName, wksDefinition);
     }
 
     public Map() {
@@ -373,10 +371,11 @@ public class Map extends MapBase {
         // with beforeClientResponse to ensure that the client-side connector
         // has been initialized beforehand.
         getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> getElement().executeJs(
-                                "this.$connector.zoomToFit($0, $1)", featureIds,
-                                options)));
+                .runWhenAttached(
+                        ui -> ui.beforeClientResponse(this,
+                                context -> getElement().callJsFunction(
+                                        "$connector.zoomToFit", featureIds,
+                                        options)));
     }
 
     /**

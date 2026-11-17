@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.menubar;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.contextmenu.MenuDownloadManager;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -64,6 +65,11 @@ class MenuBarItem extends MenuItem {
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
+    }
+
+    @Override
+    protected MenuDownloadManager getMenuDownloadManager() {
+        return menuBar.getDownloadManager();
     }
 
 }

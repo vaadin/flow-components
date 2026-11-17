@@ -158,7 +158,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     public void multipleExpanded_dynamicallySorted_shouldHaveItemRecursivelyExpanded() {
         open(Arrays.asList(0, 2), SortDirection.ASCENDING, null, null, null);
 
-        getTreeGrid().$("vaadin-grid-sorter").first().click();
+        getTreeGrid().getHeaderCell(0).getSorter().click();
         verifyRow(4, "/0/2/1/2/2/2/3/2/4/2");
     }
 
@@ -167,7 +167,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         open(Arrays.asList(0, 2), SortDirection.ASCENDING, null, null, null);
         requestCountReset.click();
 
-        getTreeGrid().$("vaadin-grid-sorter").first().click();
+        getTreeGrid().getHeaderCell(0).getSorter().click();
         Assert.assertTrue(Integer.parseInt(requestCount.getValue()) < 3);
     }
 

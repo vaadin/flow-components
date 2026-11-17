@@ -46,8 +46,6 @@ public class SpreadsheetJsApi {
     protected SpreadsheetConnector spreadsheetConnector;
 
     private Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
-    private Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
-    private Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
 
     /**
      * receives the host element, the render root where the widget must be
@@ -500,26 +498,44 @@ public class SpreadsheetJsApi {
         PopupButtonWidget widget;
 
         if (!popupButtonWidgets.containsKey(key)) {
-            PopupButtonConnector connector;
-            popupButtonConnectors.put(key,
-                    connector = new PopupButtonConnector());
-            popupButtonWidgets.put(key, widget = connector.getWidget());
+            PopupButtonConnector connector = new PopupButtonConnector();
 
-            popupButtonStates.put(key, state);
+            widget = connector.getWidget();
+            popupButtonWidgets.put(key, widget);
+
             connector.setPopupButtonServerRpc(getServerRpcInstance());
             connector.init();
             widget.setCol(state.col);
             widget.setRow(state.row);
-            widget.setPopupHeaderHidden(state.headerHidden);
             widget.setSheetWidget(spreadsheetWidget.getSheetWidget(), DivElement
                     .as(spreadsheetWidget.getSheetWidget().getElement()));
-            widget.setPopupWidth(state.popupWidth);
-            widget.setPopupHeight(state.popupHeight);
         } else {
             widget = popupButtonWidgets.get(key);
         }
-        widget.markActive(state.active);
+        applyPopupButtonState(widget, state);
         spreadsheetWidget.addPopupButton(widget);
+    }
+
+    public void setPopupButtonState(String rawState) {
+        PopupButtonState state = Parser.parsePopupButtonState(rawState);
+        if (state == null) {
+            return;
+        }
+
+        String key = getPopupKey(state.sheet, state.row, state.col);
+        PopupButtonWidget widget = popupButtonWidgets.get(key);
+
+        if (widget != null) {
+            applyPopupButtonState(widget, state);
+        }
+    }
+
+    private void applyPopupButtonState(PopupButtonWidget widget,
+            PopupButtonState state) {
+        widget.markActive(state.active);
+        widget.setPopupHeaderHidden(state.headerHidden);
+        widget.setPopupWidth(state.popupWidth);
+        widget.setPopupHeight(state.popupHeight);
     }
 
     public void removePopupButton(String rawState) {
@@ -530,8 +546,6 @@ public class SpreadsheetJsApi {
         if (popupButton != null) {
             spreadsheetWidget.removePopupButton(popupButton);
             popupButtonWidgets.remove(key);
-            popupButtonConnectors.remove(key);
-            popupButtonStates.remove(key);
         }
     }
 

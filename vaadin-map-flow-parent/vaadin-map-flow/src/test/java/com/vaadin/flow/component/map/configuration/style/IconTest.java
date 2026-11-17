@@ -34,6 +34,8 @@ class IconTest {
         Assertions.assertNull(icon.getImg());
         Assertions.assertNull(icon.getImgHandler());
         Assertions.assertNull(icon.getImgSize());
+        Assertions.assertNull(icon.getWidth());
+        Assertions.assertNull(icon.getHeight());
     }
 
     @Test
@@ -43,6 +45,7 @@ class IconTest {
         Icon.AnchorOrigin anchorOrigin = Icon.AnchorOrigin.TOP_RIGHT;
         String color = "cornflowerblue";
         String crossOrigin = "customCrossOrigin";
+        Icon.ImageSize imgSize = new Icon.ImageSize(40, 30);
 
         Icon.Options options = new Icon.Options();
         options.setOpacity(0.8f);
@@ -52,6 +55,7 @@ class IconTest {
         options.setAnchorOrigin(anchorOrigin);
         options.setColor(color);
         options.setCrossOrigin(crossOrigin);
+        options.setImgSize(imgSize);
         Icon icon = new Icon(options);
 
         Assertions.assertEquals(0.8, icon.getOpacity(), 0.001);
@@ -63,6 +67,20 @@ class IconTest {
         Assertions.assertEquals(anchorOrigin, icon.getAnchorOrigin());
         Assertions.assertEquals(color, icon.getColor());
         Assertions.assertEquals(crossOrigin, icon.getCrossOrigin());
+        Assertions.assertSame(imgSize, icon.getImgSize());
+    }
+
+    @Test
+    void withSize() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setWidth(40);
+        options.setHeight(30);
+        Icon icon = new Icon(options);
+
+        Assertions.assertEquals(40, icon.getWidth());
+        Assertions.assertEquals(30, icon.getHeight());
+        Assertions.assertEquals(1, icon.getScale(), 0);
     }
 
     @Test
@@ -79,5 +97,28 @@ class IconTest {
             options.setImg(Assets.PIN.getHandler());
             new Icon(options);
         });
+    }
+
+    @Test
+    void failsWithBothSizeAndScale() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setWidth(40);
+        options.setScale(2);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> new Icon(options));
+    }
+
+    @Test
+    void withSize_setScale_throws() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setHeight(40);
+        Icon icon = new Icon(options);
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> icon.setScale(1));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> icon.setScale(2));
     }
 }

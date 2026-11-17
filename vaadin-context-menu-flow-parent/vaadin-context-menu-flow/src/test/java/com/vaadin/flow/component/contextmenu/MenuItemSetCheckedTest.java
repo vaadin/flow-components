@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class MenuItemSetCheckedTest {
@@ -48,10 +47,11 @@ class MenuItemSetCheckedTest {
 
         var invocations = ui.dumpPendingJavaScriptInvocations();
         Assertions.assertEquals(1, countSetCheckedInvocations(invocations));
-        var parameters = getSetCheckedInvocation(invocations).getInvocation()
-                .getParameters();
-        Assertions.assertEquals(item.getElement(), parameters.get(0));
-        Assertions.assertEquals(true, parameters.get(1));
+        var invocation = getSetCheckedInvocation(invocations);
+        Assertions.assertEquals(item.getElement().getNode(),
+                invocation.getOwner());
+        Assertions.assertEquals(true,
+                invocation.getInvocation().getParameters().get(0));
     }
 
     @Test
@@ -93,9 +93,8 @@ class MenuItemSetCheckedTest {
 
         var invocations = ui.dumpPendingJavaScriptInvocations();
         Assertions.assertEquals(1, countSetCheckedInvocations(invocations));
-        Assertions.assertEquals(newItem.getElement(),
-                getSetCheckedInvocation(invocations).getInvocation()
-                        .getParameters().get(0));
+        Assertions.assertEquals(newItem.getElement().getNode(),
+                getSetCheckedInvocation(invocations).getOwner());
     }
 
     private static long countSetCheckedInvocations(
@@ -114,10 +113,15 @@ class MenuItemSetCheckedTest {
     private static PendingJavaScriptInvocation getGenerateItemsInvocation(
             List<PendingJavaScriptInvocation> invocations) {
         return invocations.stream()
-                .filter(invocation -> "$connector.generateItems"
-                        .equals(JsFunctionCallUtil
-                                .getFunctionName(invocation.getInvocation())))
+                .filter(MenuItemSetCheckedTest::isGenerateItemsInvocation)
                 .findFirst().orElseThrow();
+    }
+
+    private static boolean isGenerateItemsInvocation(
+            PendingJavaScriptInvocation invocation) {
+        var call = invocation.getInvocation().getJsCall();
+        return call != null
+                && call.arguments().contains("$connector.generateItems");
     }
 
     private static boolean isSetCheckedInvocation(

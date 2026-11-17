@@ -13,6 +13,9 @@
     <modules>
         <module>vaadin-field-highlighter-flow</module>
     </modules>
+    <properties>
+        <csp.mode>strict</csp.mode>
+    </properties>
     <dependencies/>
     <profiles>
         <profile>

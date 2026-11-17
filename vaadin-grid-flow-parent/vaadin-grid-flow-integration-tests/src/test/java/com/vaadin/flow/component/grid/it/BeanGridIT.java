@@ -53,6 +53,28 @@ public class BeanGridIT extends AbstractComponentIT {
         assertRowSelectionStatus(grid, 0, false);
     }
 
+    @Test
+    public void setColumns_columnsAndCellsUpdated() {
+        open();
+        GridElement grid = $(GridElement.class).id("set-columns-grid");
+
+        $("button").id("show-address-columns").click();
+        Assert.assertEquals(3, grid.getAllColumns().size());
+        Assert.assertEquals("Street", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Number", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Postal Code", grid.getHeaderCell(2).getText());
+        Assert.assertEquals("Main Street", grid.getCell(0, 0).getText());
+        Assert.assertEquals("5", grid.getCell(0, 1).getText());
+        Assert.assertEquals("12345", grid.getCell(0, 2).getText());
+
+        $("button").id("show-basic-columns").click();
+        Assert.assertEquals(2, grid.getAllColumns().size());
+        Assert.assertEquals("First Name", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Age", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Anna", grid.getCell(0, 0).getText());
+        Assert.assertEquals("25", grid.getCell(0, 1).getText());
+    }
+
     private void assertRowSelectionStatus(GridElement grid, int rowIndex,
             boolean expectedStatus) {
         Assert.assertEquals("Unexpected selection status for row " + rowIndex,

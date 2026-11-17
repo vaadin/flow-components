@@ -104,7 +104,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.4.0-alpha7")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -840,7 +840,8 @@ public class RadioButtonGroup<T>
         // Components that should remain disabled (due to itemEnabledProvider),
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
-        button.getElement().executeJs("this.disabled = $0", disabled);
+        button.getElement().executeJs(RadioButtonGroupJs.class)
+                .setItemDisabled(disabled);
     }
 
     private void identifierProviderChanged(

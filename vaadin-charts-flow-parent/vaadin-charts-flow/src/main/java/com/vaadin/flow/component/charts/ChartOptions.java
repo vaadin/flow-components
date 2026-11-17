@@ -48,9 +48,8 @@ public class ChartOptions extends AbstractConfigurationObject {
 
         final ObjectNode configurationNode = JacksonUtils
                 .readTree(ChartSerialization.toJSON(this));
-        ui.getElement().executeJs(
-                "customElements.get('vaadin-chart').__callHighchartsFunction('setOptions',$0,$1)",
-                true, configurationNode);
+        ui.getElement().executeJs(ChartJs.class)
+                .setHighchartsOptions(configurationNode);
     }
 
     /**

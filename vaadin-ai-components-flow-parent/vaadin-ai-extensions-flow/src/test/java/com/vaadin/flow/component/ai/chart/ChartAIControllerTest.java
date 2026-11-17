@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +33,8 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
@@ -251,6 +254,112 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateData_heatmapRowsWithTextCoordinates_rejected() {
+            databaseProvider.results = List.of(
+                    Map.of("_x", "Monday", "_y", 9, "_value", 120),
+                    Map.of("_x", "Tuesday", "_y", 9, "_value", 80));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+            Assertions.assertFalse(result.contains("Monday"),
+                    "Row values must not reach the LLM: " + result);
+            controller.onResponse(AITurnEvents.success());
+            Assertions.assertNull(controller.getState(),
+                    "The rejected query must not be applied");
+        }
+
+        @Test
+        void updateData_ohlcRowsWithTextPrices_rejected() {
+            databaseProvider.results = List.of(Map.of("_open", "n/a", "_high",
+                    "n/a", "_low", "n/a", "_close", "n/a"));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+            Assertions.assertTrue(result.contains("_open"), result);
+            Assertions.assertFalse(result.contains("_value"),
+                    "Columns the query lacks must not be named: " + result);
+        }
+
+        @Test
+        void updateData_unplottableRowsWithoutAliases_columnNamesNotRelayed() {
+            databaseProvider.results = List.of(Map.of("salary_band", "high"));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertFalse(result.contains("salary_band"),
+                    "Result columns must not reach the LLM: " + result);
+        }
+
+        @Test
+        void updateData_treemapRowsWithoutValues_rejected() {
+            var row = new LinkedHashMap<String, Object>();
+            row.put("_id", null);
+            row.put("_parent", null);
+            row.put("_value", "n/a");
+            databaseProvider.results = List.of(row);
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+        }
+
+        @Test
+        void updateData_emptyGanttSeriesFromCustomConverter_rejected() {
+            databaseProvider.results = List.of(Map.of("_name", "Design"));
+            controller.setDataConverter(data -> List.of(new GanttSeries()));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+        }
+
+        @Test
+        void updateData_heatmapRowsWithNumericCoordinates_rendered() {
+            databaseProvider.results = List.of(
+                    Map.of("_x", 0, "_y", 9, "_value", 120),
+                    Map.of("_x", 1, "_y", 9, "_value", 80));
+
+            completeTurn("{\"chart\": {\"type\": \"heatmap\"}}");
+
+            var heat = (HeatSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, heat.getData().length);
+        }
+
+        @Test
+        void updateData_organizationOfRootsOnly_accepted() {
+            var root = new LinkedHashMap<String, Object>();
+            root.put("_id", 1);
+            root.put("_name", "Ada");
+            root.put("_parent", null);
+            root.put("_title", "CEO");
+            databaseProvider.results = List.of(root);
+
+            var result = updateData();
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+        }
+
+        @Test
+        void updateData_rowsPlottedByCustomConverter_accepted() {
+            databaseProvider.results = List
+                    .of(Map.of("_x", "Monday", "_y", 9, "_value", 120));
+            controller.setDataConverter(data -> List
+                    .of(new HeatSeries("visits", new Number[] { 0, 9, 120 })));
+
+            var result = updateData();
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+        }
+
+        @Test
         void onResponse_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
@@ -438,6 +547,25 @@ class ChartAIControllerTest {
             var state = chartState();
             Assertions.assertTrue(state.contains("Revenue"), state);
             Assertions.assertTrue(state.contains("2025"), state);
+        }
+
+        @Test
+        void plotOptionsUpdateForSameType_keepsEarlierOptionsInState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"plotOptions\": {\"column\": {\"stacking\": \"normal\"}}}");
+            completeTurn("{\"plotOptions\": {\"column\":"
+                    + " {\"dataLabels\": {\"enabled\": true}}}}");
+
+            var column = JacksonUtils.readTree(chartState())
+                    .get("configuration").get("plotOptions").get("column");
+            Assertions.assertEquals("normal",
+                    column.path("stacking").asString(), column.toString());
+            Assertions.assertTrue(
+                    column.path("dataLabels").path("enabled").asBoolean(),
+                    column.toString());
         }
 
         @Test
@@ -1092,6 +1220,11 @@ class ChartAIControllerTest {
         findTool(tools, "update_chart_data_source")
                 .execute(json("{\"queries\": [\"SELECT 1\"]}"));
         controller.onResponse(AITurnEvents.success());
+    }
+
+    private String updateData() {
+        return findTool(controller.getTools(), "update_chart_data_source")
+                .execute(json("{\"queries\": [\"SELECT 1\"]}"));
     }
 
     private String chartState() {

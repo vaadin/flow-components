@@ -64,7 +64,7 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
 
         int containerNodeId = createNewContainer(menu.getChildren());
         // The action only runs while the menu is attached
-        String appId = menu.getUI().orElseThrow().getInternals().getAppId();
+        String appId = menu.getUIOrThrow().getInternals().getAppId();
         getElement().callJsFunction("$connector.generateItems", appId,
                 containerNodeId);
     }

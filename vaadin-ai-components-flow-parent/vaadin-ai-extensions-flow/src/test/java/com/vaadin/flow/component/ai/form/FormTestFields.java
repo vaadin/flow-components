@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
@@ -180,6 +181,18 @@ final class FormTestFields {
     @Tag("float-field")
     static class FloatField extends StubField<FloatField, Float> {
         FloatField() {
+            super(null);
+        }
+    }
+
+    /**
+     * Field whose value type has no {@link FormFieldType} mapping, so it is
+     * classified as {@link FormFieldType#STRING} even though it cannot hold a
+     * {@link String}.
+     */
+    @Tag("uuid-field")
+    static class UuidField extends StubField<UuidField, UUID> {
+        UuidField() {
             super(null);
         }
     }

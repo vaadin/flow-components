@@ -211,7 +211,13 @@ public class AIOrchestrator implements Serializable {
      * deserialization. When adding a new path out of a prompt, decide which of
      * these owns the release; a missed release blocks all later prompts.
      */
-    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
+    private final ProcessingFlag isProcessing = new ProcessingFlag();
+    /**
+     * Disables submitting on the input while busy, or {@code null} if there is
+     * no input. Notified when {@link #isProcessing} is released, so the release
+     * paths do not call it.
+     */
+    private SubmitDisabler submitDisabler;
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
     /**
@@ -260,7 +266,10 @@ public class AIOrchestrator implements Serializable {
      * </p>
      * <p>
      * If a request is already being processed, this method logs a warning and
-     * returns without processing the new prompt.
+     * returns without processing the new prompt. The same applies while a file
+     * is still being uploaded to the file receiver (see
+     * {@link AIFileReceiver#isUploading()}), so that the file is not left out
+     * of the prompt.
      * </p>
      * <p>
      * An interceptor configured via
@@ -301,7 +310,10 @@ public class AIOrchestrator implements Serializable {
      * </p>
      * <p>
      * If a request is already being processed, this method logs a warning and
-     * returns without processing the new prompt.
+     * returns without processing the new prompt. Unlike
+     * {@link #prompt(String)}, it is not ignored while a file is still being
+     * uploaded to the file receiver, since it does not take attachments from
+     * the receiver.
      * </p>
      * <p>
      * An interceptor configured via
@@ -346,7 +358,10 @@ public class AIOrchestrator implements Serializable {
      * history onto the new provider so it has full context for subsequent
      * prompts, unless the provider manages its conversation memory outside the
      * orchestrator. The UI is not modified -- message list, input, and file
-     * receiver components retain their state across serialization.
+     * receiver components retain their state across serialization. The
+     * exception is that submitting is enabled again on the input if the
+     * orchestrator disabled it, so call {@code apply()} while the session is
+     * locked.
      * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
@@ -523,6 +538,10 @@ public class AIOrchestrator implements Serializable {
                     "AIOrchestrator needs to be reconnected after "
                             + "deserialization. Call reconnect(provider) first.");
         }
+        if (explicitAttachments == null && isFileReceiverUploading()) {
+            LOGGER.warn("Ignoring prompt: a file is still being uploaded");
+            return;
+        }
         if (!isProcessing.compareAndSet(false, true)) {
             LOGGER.warn(
                     "Ignoring prompt: another request is already in progress");
@@ -546,6 +565,11 @@ public class AIOrchestrator implements Serializable {
                 fireResponseListener("", t, currentUi);
             }
             throw t;
+        }
+        // Here rather than when the flag is claimed, so that submitting which
+        // the interceptor or a request hook disabled is left as it is
+        if (submitDisabler != null) {
+            submitDisabler.update();
         }
     }
 
@@ -764,6 +788,15 @@ public class AIOrchestrator implements Serializable {
             LOGGER.warn("Postponed prompt abandoned: its UI was detached "
                     + "before interception completed");
         }).run();
+    }
+
+    /**
+     * Sending while a file is still uploading would leave the file out of the
+     * prompt and clear it from the file list, while the upload goes on and the
+     * file would then be sent with a later prompt.
+     */
+    private boolean isFileReceiverUploading() {
+        return fileReceiver != null && fileReceiver.isUploading();
     }
 
     private List<AIAttachment> getAttachmentsToProcess(
@@ -1000,7 +1033,7 @@ public class AIOrchestrator implements Serializable {
             return;
         }
         FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
             throw new AIComponentsExperimentalFeatureException(
                     "AIOrchestrator");
@@ -1107,10 +1140,15 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
-         * automatically.
+         * automatically. The exception is that submitting is enabled again on
+         * the input if the orchestrator disabled it, so call this method while
+         * the session is locked.
          */
         public void apply() {
             orchestrator.isProcessing.set(false);
+            if (orchestrator.submitDisabler != null) {
+                orchestrator.submitDisabler.update();
+            }
             orchestrator.provider = provider;
             orchestrator.tools = tools;
             orchestrator.controller = controller;
@@ -1266,6 +1304,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component.
+         * <p>
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param input
          *            the input component
@@ -1279,6 +1321,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component using a Flow MessageInput component.
+         * <p>
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param messageInput
          *            the Flow MessageInput component
@@ -1292,6 +1338,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the file receiver component for file uploads.
+         * <p>
+         * While {@link AIFileReceiver#isUploading()} returns {@code true},
+         * prompts from the input and from {@link AIOrchestrator#prompt(String)}
+         * are ignored, so that the file is not left out of the prompt.
          *
          * @param fileReceiver
          *            the file receiver
@@ -1306,6 +1356,10 @@ public class AIOrchestrator implements Serializable {
         /**
          * Sets the file receiver component using a Flow UploadManager. The
          * provided manager should not have an UploadHandler set beforehand.
+         * <p>
+         * While a file is being uploaded, prompts from the input and from
+         * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
+         * is not left out of the prompt.
          *
          * @param uploadManager
          *            the Flow UploadManager
@@ -1329,6 +1383,10 @@ public class AIOrchestrator implements Serializable {
          * Sets the file receiver component using a Flow Upload component. The
          * provided upload should not have an UploadHandler or a Receiver set
          * beforehand.
+         * <p>
+         * While a file is being uploaded, prompts from the input and from
+         * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
+         * is not left out of the prompt.
          *
          * @param upload
          *            the Flow Upload component
@@ -1654,6 +1712,8 @@ public class AIOrchestrator implements Serializable {
                 if (input != null) {
                     input.addSubmitListener(
                             msg -> orchestrator.doPrompt(msg, null));
+                    orchestrator.submitDisabler = new SubmitDisabler(
+                            orchestrator.isProcessing, input, fileReceiver);
                 }
 
                 if (attachmentClickListener != null && messageList != null) {

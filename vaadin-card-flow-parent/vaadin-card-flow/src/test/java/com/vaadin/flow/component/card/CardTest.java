@@ -88,23 +88,46 @@ class CardTest {
     }
 
     @Test
-    void setTitleHeadingLevel_elementPropertyIsUpdated() {
-        var titleHeadingLevel = 1;
-        card.setTitleHeadingLevel(titleHeadingLevel);
-        Assertions.assertEquals(titleHeadingLevel,
-                card.getElement().getProperty("titleHeadingLevel", -1));
-        titleHeadingLevel = 7;
-        card.setTitleHeadingLevel(titleHeadingLevel);
-        Assertions.assertEquals(titleHeadingLevel,
-                card.getElement().getProperty("titleHeadingLevel", -1));
+    void getHeadingLevel_defaultIsNull() {
+        Assertions.assertNull(card.getHeadingLevel());
     }
 
     @Test
-    void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
-        card.setTitleHeadingLevel(1);
-        card.setTitleHeadingLevel(null);
+    void setHeadingLevel_elementPropertyIsUpdated() {
+        card.setHeadingLevel(1);
+        Assertions.assertEquals(1,
+                card.getElement().getProperty("headingLevel", -1));
+        Assertions.assertEquals(1, card.getHeadingLevel());
+        card.setHeadingLevel(7);
+        Assertions.assertEquals(7,
+                card.getElement().getProperty("headingLevel", -1));
+        Assertions.assertEquals(7, card.getHeadingLevel());
+    }
+
+    @Test
+    void setHeadingLevelNull_elementPropertyIsRemoved() {
+        card.setHeadingLevel(1);
+        card.setHeadingLevel(null);
+        Assertions.assertFalse(card.getElement().hasProperty("headingLevel"));
+        Assertions.assertNull(card.getHeadingLevel());
+    }
+
+    @Test
+    void setTitleWithHeadingLevel_headingLevelIsUpdated() {
+        card.setTitle("Some Title", 3);
+        Assertions.assertEquals("Some Title", card.getTitleAsText());
+        Assertions.assertEquals(3, card.getHeadingLevel());
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    void setTitleHeadingLevel_headingLevelIsUpdated() {
+        card.setTitleHeadingLevel(4);
+        Assertions.assertEquals(4, card.getHeadingLevel());
         Assertions.assertFalse(
                 card.getElement().hasProperty("titleHeadingLevel"));
+        card.setTitleHeadingLevel(null);
+        Assertions.assertNull(card.getHeadingLevel());
     }
 
     @Test

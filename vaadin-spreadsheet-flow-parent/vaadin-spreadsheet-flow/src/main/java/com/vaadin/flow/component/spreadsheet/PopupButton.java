@@ -17,6 +17,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
@@ -64,6 +65,8 @@ public class PopupButton extends Component {
 
     private PopupButtonState state = new PopupButtonState();
 
+    private PendingJavaScriptResult pendingStateUpdate;
+
     /**
      * Constructs a new PopupButton.
      */
@@ -100,6 +103,7 @@ public class PopupButton extends Component {
         getState().col = cellReference.getCol() + 1;
         getState().row = cellReference.getRow() + 1;
         getState().sheet = cellReference.getSheetName();
+        updateState();
     }
 
     /**
@@ -161,6 +165,7 @@ public class PopupButton extends Component {
      */
     public void setHeaderHidden(boolean headerHidden) {
         getState().headerHidden = headerHidden;
+        updateState();
     }
 
     /**
@@ -172,6 +177,7 @@ public class PopupButton extends Component {
      */
     public void setPopupWidth(String width) {
         getState().popupWidth = width;
+        updateState();
     }
 
     /**
@@ -192,6 +198,7 @@ public class PopupButton extends Component {
      */
     public void setPopupHeight(String height) {
         getState().popupHeight = height;
+        updateState();
     }
 
     /**
@@ -231,6 +238,21 @@ public class PopupButton extends Component {
      */
     public void markActive(boolean active) {
         getState().active = active;
+        updateState();
+    }
+
+    /**
+     * Update client side state, if applicable.
+     */
+    private void updateState() {
+        getParent().filter(Spreadsheet.class::isInstance).ifPresent(parent -> {
+            if (pendingStateUpdate != null
+                    && !pendingStateUpdate.isSentToBrowser()) {
+                pendingStateUpdate.cancelExecution();
+            }
+            pendingStateUpdate = parent.getElement().callJsFunction(
+                    "setPopupButtonState", Serializer.serialize(getState()));
+        });
     }
 
     public boolean isActive() {

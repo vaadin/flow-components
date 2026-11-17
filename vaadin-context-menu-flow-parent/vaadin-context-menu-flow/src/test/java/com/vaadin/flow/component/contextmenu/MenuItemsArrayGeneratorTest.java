@@ -22,8 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class MenuItemsArrayGeneratorTest {
@@ -45,11 +43,10 @@ class MenuItemsArrayGeneratorTest {
     void attach_generateItemsWithAppIdAndContainerNodeId() {
         ui.add(contextMenu);
 
-        var arguments = getGenerateItemsArguments(
-                ui.dumpPendingJavaScriptInvocations());
-        Assertions.assertEquals(2, arguments.size());
-        Assertions.assertEquals(APP_ID, arguments.get(0));
-        Assertions.assertInstanceOf(Integer.class, arguments.get(1));
+        var call = getGenerateItemsCall();
+        Assertions.assertEquals(3, call.size());
+        Assertions.assertEquals(APP_ID, call.get(1));
+        Assertions.assertInstanceOf(Integer.class, call.get(2));
     }
 
     @Test
@@ -59,17 +56,18 @@ class MenuItemsArrayGeneratorTest {
 
         contextMenu.addItem("Other");
 
-        var arguments = getGenerateItemsArguments(
-                ui.dumpPendingJavaScriptInvocations());
-        Assertions.assertEquals(APP_ID, arguments.get(0));
+        var call = getGenerateItemsCall();
+        Assertions.assertEquals(APP_ID, call.get(1));
     }
 
-    private static List<Object> getGenerateItemsArguments(
-            List<PendingJavaScriptInvocation> invocations) {
-        var invocation = invocations.stream().filter(
-                pending -> "$connector.generateItems".equals(JsFunctionCallUtil
-                        .getFunctionName(pending.getInvocation())))
-                .findFirst().orElseThrow();
-        return JsFunctionCallUtil.getArguments(invocation.getInvocation());
+    /**
+     * Gets the first call that generates the items: the function name, the app
+     * id and the node id of the container.
+     */
+    private List<Object> getGenerateItemsCall() {
+        return ui
+                .dumpJsCalls(contextMenu.getElement(),
+                        "$connector.generateItems")
+                .getFirst().flattenArguments();
     }
 }

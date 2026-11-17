@@ -311,6 +311,11 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.addPopupButton(rawState);
   }
 
+  setPopupButtonState(rawState) {
+    this.performUpdate();
+    this.api.setPopupButtonState(rawState);
+  }
+
   removePopupButton(rawState) {
     this.performUpdate();
     this.api.removePopupButton(rawState);

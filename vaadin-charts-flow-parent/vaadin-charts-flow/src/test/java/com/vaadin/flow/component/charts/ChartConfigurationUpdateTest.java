@@ -16,9 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartConfigurationUpdateTest {
@@ -100,15 +97,8 @@ class ChartConfigurationUpdateTest {
     }
 
     private List<Object> getConfigurationResets() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> "updateConfiguration"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
-                .map(ChartConfigurationUpdateTest::getResetArgument).toList();
-    }
-
-    private static Object getResetArgument(JavaScriptInvocation invocation) {
-        List<Object> arguments = JsFunctionCallUtil.getArguments(invocation);
-        return arguments.get(arguments.size() - 1);
+        return ui.dumpJsCalls(chart.getElement(), "updateConfiguration")
+                .stream().map(call -> call.flattenArguments().getLast())
+                .toList();
     }
 }

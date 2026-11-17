@@ -290,6 +290,86 @@ class GridColumnTest {
     }
 
     @Test
+    void setResizable_resizablePropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isResizable());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("resizable", false));
+
+        firstColumn.setResizable(true);
+        Assertions.assertTrue(firstColumn.isResizable());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("resizable", false));
+
+        firstColumn.setResizable(false);
+        Assertions.assertFalse(firstColumn.isResizable());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("resizable", true));
+    }
+
+    @Test
+    void setFrozen_frozenPropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isFrozen());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozen", false));
+
+        firstColumn.setFrozen(true);
+        Assertions.assertTrue(firstColumn.isFrozen());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("frozen", false));
+
+        firstColumn.setFrozen(false);
+        Assertions.assertFalse(firstColumn.isFrozen());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozen", true));
+    }
+
+    @Test
+    void setFrozenToEnd_frozenToEndPropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isFrozenToEnd());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozenToEnd", false));
+
+        firstColumn.setFrozenToEnd(true);
+        Assertions.assertTrue(firstColumn.isFrozenToEnd());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("frozenToEnd", false));
+
+        firstColumn.setFrozenToEnd(false);
+        Assertions.assertFalse(firstColumn.isFrozenToEnd());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozenToEnd", true));
+    }
+
+    @Test
+    void setWidthAndFlexGrow_propertiesUpdated() {
+        firstColumn.setWidth("75px").setFlexGrow(0);
+
+        Assertions.assertEquals("75px", firstColumn.getWidth());
+        Assertions.assertEquals("75px",
+                firstColumn.getElement().getProperty("width"));
+        Assertions.assertEquals(0, firstColumn.getFlexGrow());
+        Assertions.assertEquals(0,
+                firstColumn.getElement().getProperty("flexGrow", 1));
+    }
+
+    @Test
+    void setColumnReorderingAllowed_columnReorderingAllowedPropertyUpdated() {
+        Assertions.assertFalse(grid.isColumnReorderingAllowed());
+        Assertions.assertFalse(grid.getElement()
+                .getProperty("columnReorderingAllowed", false));
+
+        grid.setColumnReorderingAllowed(true);
+        Assertions.assertTrue(grid.isColumnReorderingAllowed());
+        Assertions.assertTrue(grid.getElement()
+                .getProperty("columnReorderingAllowed", false));
+
+        grid.setColumnReorderingAllowed(false);
+        Assertions.assertFalse(grid.isColumnReorderingAllowed());
+        Assertions.assertFalse(
+                grid.getElement().getProperty("columnReorderingAllowed", true));
+    }
+
+    @Test
     void createColumn_returnsNonNullAndBasicType() {
         Column column = new Grid<Person>().createColumn(LitRenderer.of(""), "");
         assertNotNull(column);

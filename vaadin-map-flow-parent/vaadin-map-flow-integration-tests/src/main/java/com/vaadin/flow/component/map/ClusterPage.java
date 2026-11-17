@@ -100,7 +100,6 @@ public class ClusterPage extends Div {
                 "custom-cluster.png").inline();
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setImg(downloadHandler);
-        iconOptions.setImgSize(new Icon.ImageSize(88, 88));
         iconOptions.setScale(0.5f);
         iconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         iconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
