@@ -54,6 +54,7 @@ import com.vaadin.tests.MockUIExtension;
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
@@ -80,6 +81,8 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.tool.ToolErrorHandlerResult;
+import dev.langchain4j.service.tool.ToolProvider;
+import dev.langchain4j.service.tool.ToolProviderResult;
 import reactor.core.publisher.BaseSubscriber;
 import tools.jackson.databind.JsonNode;
 
@@ -2390,6 +2393,39 @@ class LangChain4JLLMProviderTest {
                 .map(ToolExecutionResultMessage.class::cast).toList();
         Assertions.assertEquals(1, toolResults.size());
         Assertions.assertEquals("22°C", toolResults.getFirst().text());
+    }
+
+    @Test
+    void customizer_toolProvider_isOfferedAndCalledNextToRequestTools() {
+        var lookUps = new AtomicInteger();
+        ToolProvider mcpTools = toolRequest -> ToolProviderResult.builder()
+                .add(ToolSpecification.builder().name("lookUpOrder")
+                        .description("Looks up an order").build(),
+                        (execution, memoryId) -> {
+                            lookUps.incrementAndGet();
+                            return "Order 42 has shipped";
+                        })
+                .build();
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.toolProvider(mcpTools));
+        var toolCall = mockSimpleResponseWithTool("lookUpOrder");
+        var answer = mockSimpleResponse("It has shipped");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized
+                .stream(requestWithCountingTool("myTool", new AtomicInteger()))
+                .collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var offered = captor.getAllValues().get(0).toolSpecifications().stream()
+                .map(ToolSpecification::name).collect(Collectors.toSet());
+        Assertions.assertEquals(Set.of("lookUpOrder", "myTool"), offered);
+        Assertions.assertEquals(1, lookUps.get());
+        Assertions.assertEquals("Order 42 has shipped",
+                getToolExecutionResults(captor.getAllValues().get(1)).getFirst()
+                        .text());
     }
 
     @Test
