@@ -113,6 +113,7 @@
         <vaadin.pnpm.enable>true</vaadin.pnpm.enable>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+        <osgi.export.package.additional/>
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
@@ -322,6 +323,10 @@
                     <configuration>
                         <quiet>true</quiet>
                         <doclint>none</doclint>
+                        <!-- Generate on the class path even for jars that declare an
+                             Automatic-Module-Name; on the module path, a jar that has a
+                             package of a dependency (Spreadsheet and POI) fails -->
+                        <legacyMode>true</legacyMode>
                     </configuration>
                     <executions>
                         <execution>
@@ -357,6 +362,12 @@
 
                           Bundle-Name: ${project.artifactId}
                           Bundle-SymbolicName: ${symbolicName}
+                          // Stable JPMS module name for jars used from the module path
+                          Automatic-Module-Name: ${symbolicName}
+                          // The exported package and the names above come from the same
+                          // value: an export that matches no package of the jar means the
+                          // names are wrong too, so the build fails
+                          -fixupmessages: "Unused Export-Package instructions";is:=error
 
                           Import-Package: *
                           Export-Package: ${join;${exportPackage};${osgi.export.package.additional}}
