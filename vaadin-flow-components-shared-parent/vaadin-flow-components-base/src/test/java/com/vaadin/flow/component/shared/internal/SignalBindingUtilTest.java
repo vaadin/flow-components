@@ -255,6 +255,18 @@ class SignalBindingUtilTest extends AbstractSignalsTest {
     }
 
     @Test
+    void effectBinding_notAttached_runsEffectWithInitialValue() {
+        TestComponent component = new TestComponent();
+
+        ValueSignal<String> signal = new ValueSignal<>("initial");
+        List<String> values = new ArrayList<>();
+
+        SignalBindingUtil.effectBinding(component, "test", signal, values::add);
+
+        Assertions.assertEquals(List.of("initial"), values);
+    }
+
+    @Test
     void effectBinding_runsEffectOnSignalChange() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
