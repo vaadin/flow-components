@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
@@ -43,8 +42,7 @@ interface GridJs extends Serializable {
      * Installs the grid connector, <code>$connector</code>, on the grid
      * element, if the element exists on the client. Called on the page rather
      * than on the grid element, with
-     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}, so that it
-     * runs before the other methods.
+     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}.
      *
      * @param grid
      *            the grid element
@@ -54,7 +52,7 @@ interface GridJs extends Serializable {
 
     /**
      * Sets the internal id of a column on its client-side element, looked up by
-     * its node id so that it also works for a hidden column.
+     * its node id.
      *
      * @param appId
      *            the id of the application the column belongs to
@@ -105,10 +103,7 @@ interface GridJs extends Serializable {
      * @param column
      *            the column element
      * @param content
-     *            the header content: the {@link Element} of the header
-     *            component (see {@link Component#getElement()}), which the
-     *            browser receives as its DOM element, or the header text as a
-     *            {@link String}
+     *            the element of the header component, or the header text
      * @param showSorter
      *            whether to show a sorter in the header
      * @param sorterPath
@@ -124,10 +119,7 @@ interface GridJs extends Serializable {
      * @param column
      *            the column element
      * @param content
-     *            the footer content: the {@link Element} of the footer
-     *            component (see {@link Component#getElement()}), which the
-     *            browser receives as its DOM element, or the footer text as a
-     *            {@link String}
+     *            the element of the footer component, or the footer text
      */
     @JsExpression("this.$connector.setFooterRenderer($0, { content: $1 })")
     void setFooterRenderer(Element column, Serializable content);

@@ -34,8 +34,7 @@ interface TreeGridJs extends Serializable {
      * Installs the tree grid connector, <code>$connector</code>, on the tree
      * grid element, if the element exists on the client. Called on the page
      * rather than on the tree grid element, with
-     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}, so that it
-     * runs before the JavaScript that is called on the tree grid element.
+     * {@link com.vaadin.flow.component.page.Page#executeJs(Class)}.
      *
      * @param treeGrid
      *            the tree grid element
