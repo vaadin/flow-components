@@ -111,6 +111,6 @@ node scripts/wtr.js {component} --files {file-or-glob}
 # Format code, must be run before every commit
 mvn spotless:apply
 
-# Run checkstyle validation
-mvn checkstyle:check
+# Check a component for forbidden API calls (signatures in forbidden-apis/)
+mvn test-compile de.thetaphi:forbiddenapis:check@main de.thetaphi:forbiddenapis:testCheck@test -pl vaadin-{component}-flow-parent/vaadin-{component}-flow
 ```

@@ -96,14 +96,13 @@
             it on its own. -->
         <jandex.format.version>13</jandex.format.version>
         <spotless.plugin.version>3.11.0</spotless.plugin.version>
-        <checkstyle.version>14.4.0</checkstyle.version>
+        <forbiddenapis.version>3.11</forbiddenapis.version>
         <!-- Content Security Policy mode of a module: off or strict. A module
              sets strict once it no longer sends JavaScript as a string. It
-             turns on the StringJavaScriptCheck checkstyle rule, the strict
-             mode in unit tests that use MockUIExtension, and the strict mode
-             of the integration test server. -->
+             turns on the forbidden-apis/csp-strict.txt signatures for the main
+             classes, the strict mode in unit tests that use MockUIExtension,
+             and the strict mode of the integration test server. -->
         <csp.mode>off</csp.mode>
-        <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -117,7 +116,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.1.2</spring-data-commons.version>
+        <spring-data-commons.version>4.2.0-RC1</spring-data-commons.version>
         <reactor-core.version>3.8.8</reactor-core.version>
         <langchain4j.version>1.23.0</langchain4j.version>
         <spring-ai.version>2.0.2</spring-ai.version>
@@ -446,27 +445,44 @@
                         <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
                     </configuration>
                 </plugin>
+                <!-- Reports calls of forbidden APIs in the compiled classes,
+                     run by scripts/checkstyle.sh. The main classes are checked
+                     against the signatures in forbidden-apis/, the test
+                     classes only against ui-set-current.txt. -->
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven.checkstyle.plugin.version}</version>
+                    <groupId>de.thetaphi</groupId>
+                    <artifactId>forbiddenapis</artifactId>
+                    <version>${forbiddenapis.version}</version>
                     <configuration>
-                        <configLocation>checkstyle/checkstyle.xml</configLocation>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <propertyExpansion>cspMode=${csp.mode}</propertyExpansion>
+                        <suppressAnnotations>
+                            <suppressAnnotation>**.SuppressForbidden</suppressAnnotation>
+                        </suppressAnnotations>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${checkstyle.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.vaadin</groupId>
-                            <artifactId>vaadin-flow-components-checkstyle-rules</artifactId>
-                            <version>${project.version}</version>
-                        </dependency>
-                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>main</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <signaturesFiles>
+                                    <signaturesFile>${maven.multiModuleProjectDirectory}/forbidden-apis/ui-set-current.txt</signaturesFile>
+                                    <signaturesFile>${maven.multiModuleProjectDirectory}/forbidden-apis/csp-${csp.mode}.txt</signaturesFile>
+                                </signaturesFiles>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test</id>
+                            <goals>
+                                <goal>testCheck</goal>
+                            </goals>
+                            <configuration>
+                                <signaturesFiles>
+                                    <signaturesFile>${maven.multiModuleProjectDirectory}/forbidden-apis/ui-set-current.txt</signaturesFile>
+                                </signaturesFiles>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
