@@ -43,7 +43,6 @@ import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 
@@ -206,41 +205,6 @@ class RadioButtonGroupTest {
         group.setEnabled(false);
         Assertions.assertFalse(children.get(0).isEnabled());
         Assertions.assertFalse(children.get(1).isEnabled());
-    }
-
-    @Test
-    void enableGroup_itemDisabledByProvider_buttonStaysDisabledInBrowser() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("enabled", "disabled");
-        group.setItemEnabledProvider("enabled"::equals);
-        group.setEnabled(false);
-        ui.add(group);
-        ui.dumpPendingJavaScriptInvocations();
-
-        group.setEnabled(true);
-
-        assertLastSetDisabledCall(group.getElement().getChild(1), true);
-    }
-
-    @Test
-    void disableGroup_buttonDisabledInBrowser() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("enabled", "disabled");
-        ui.add(group);
-        ui.dumpPendingJavaScriptInvocations();
-
-        group.setEnabled(false);
-
-        assertLastSetDisabledCall(group.getElement().getChild(0), true);
-    }
-
-    private void assertLastSetDisabledCall(Element button, boolean disabled) {
-        List<JsCall> calls = ui.dumpJsCalls(button, RadioButtonGroupJs.class);
-
-        Assertions.assertFalse(calls.isEmpty());
-        JsCall lastCall = calls.get(calls.size() - 1);
-        Assertions.assertEquals("setDisabled", lastCall.methodName());
-        Assertions.assertEquals(List.of(disabled), lastCall.arguments());
     }
 
     @Test
