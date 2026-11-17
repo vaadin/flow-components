@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.api.MemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -178,9 +179,13 @@ public class SpringAILLMProvider implements LLMProvider {
      * Unless the client has a {@link MemoryAdvisor} of its own, the provider
      * adds its own chat memory to each request, keeping the last 30 messages,
      * and {@link #setHistory(List, Map)} restores a saved conversation into it.
-     * A {@link ChatMemory#CONVERSATION_ID} advisor parameter in the requests
-     * the client creates stays in them and names the conversation in that
-     * memory:
+     * Its memory advisor has Spring AI's default order for chat memory,
+     * {@link Advisor#DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER}: a client advisor
+     * with a later order sees the earlier messages of the conversation in each
+     * request, while one with an earlier order sees only the new request, and a
+     * request it rejects never reaches the memory. A
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter in the requests the
+     * client creates stays in them and names the conversation in that memory:
      *
      * <pre>
      * var chatClient = ChatClient.builder(chatModel)
