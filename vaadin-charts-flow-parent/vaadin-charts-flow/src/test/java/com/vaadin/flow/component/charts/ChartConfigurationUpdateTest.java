@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartConfigurationUpdateTest {
@@ -94,6 +96,31 @@ class ChartConfigurationUpdateTest {
         ui.dumpPendingJavaScriptInvocations();
 
         Assertions.assertEquals(List.of(), getConfigurationResets());
+    }
+
+    @Test
+    void cspOff_functionInConfiguration_drawChart_updatesConfiguration() {
+        ui.setCspMode(CspMode.OFF);
+        ui.add(chart);
+        ui.dumpPendingJavaScriptInvocations();
+        chart.getConfiguration().getTooltip()
+                .setFormatter("function() { return this.y; }");
+
+        chart.drawChart();
+
+        Assertions.assertEquals(List.of(false), getConfigurationResets());
+    }
+
+    @Test
+    void strictMode_functionInConfiguration_drawChart_throws() {
+        ui.setCspMode(CspMode.STRICT);
+        ui.add(chart);
+        ui.dumpPendingJavaScriptInvocations();
+        chart.getConfiguration().getTooltip()
+                .setFormatter("function() { return this.y; }");
+
+        Assertions.assertThrows(CspViolationException.class,
+                () -> chart.drawChart());
     }
 
     private List<Object> getConfigurationResets() {
