@@ -1386,7 +1386,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * on as partial responses, unless output guardrails checked it.
          */
         void complete(ChatResponse response) {
-            if (!ended.compareAndSet(false, true)) {
+            if (failOnLimitBreach() || !ended.compareAndSet(false, true)) {
                 return;
             }
             warnOnMissingFinishReason();
@@ -1405,7 +1405,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * before the output guardrails could run.
          */
         void complete(Result<String> result) {
-            if (!ended.compareAndSet(false, true)) {
+            if (failOnLimitBreach() || !ended.compareAndSet(false, true)) {
                 return;
             }
             warnOnMissingFinishReason();
@@ -1416,6 +1416,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
             emit(result.content());
             sink.complete();
+        }
+
+        /**
+         * Fails the turn when a tool call of its last round exceeded a limit,
+         * and returns whether it did. A turn with such a round otherwise fails
+         * before its next model call, but a tool of the customizer that returns
+         * immediately ends the turn without one.
+         */
+        private boolean failOnLimitBreach() {
+            if (limitBreach == null) {
+                return false;
+            }
+            fail(limitBreach);
+            return true;
         }
 
         private void emit(String text) {

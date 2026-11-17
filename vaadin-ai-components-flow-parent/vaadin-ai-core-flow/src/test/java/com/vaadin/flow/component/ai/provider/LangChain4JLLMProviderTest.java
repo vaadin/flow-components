@@ -3053,6 +3053,45 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_immediateToolPastMaxTotalToolCalls_failsTurn() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass(),
+                        new ImmediateToolClass()));
+        customized.setMaxTotalToolCalls(1);
+        var temperature = mockSimpleResponseWithTool("getTemperature");
+        var finish = mockSimpleResponseWithTool("finish");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(temperature, finish);
+
+        // The immediate tool ends the turn without another model call,
+        // before which a limit is otherwise reported
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Finish"))
+                        .collectList().block(TURN_TIMEOUT));
+    }
+
+    @Test
+    void customizer_streamingImmediateToolPastMaxTotalToolCalls_failsTurn() {
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass(),
+                        new ImmediateToolClass()));
+        customized.setMaxTotalToolCalls(1);
+        var rounds = new AtomicInteger();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool(
+                    rounds.getAndIncrement() == 0 ? "getTemperature"
+                            : "finish"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Finish"))
+                        .collectList().block(TURN_TIMEOUT));
+    }
+
+    @Test
     void customizer_chatModel_constructorModelIsUsed() {
         var otherModel = Mockito.mock(ChatModel.class);
         var customized = new LangChain4JLLMProvider(mockChatModel,

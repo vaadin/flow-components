@@ -217,7 +217,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   supplies unexecuted and fails the turn before the next model call. Tools an
   application configured in the customizer count against the limits too,
   but the provider cannot hold them back, so those of that last round still
-  run. The tool traffic of the failed turn is discarded with it, so the next
+  run; when they return immediately, LangChain4j makes no next model call
+  and the turn fails as it ends. The tool traffic of the failed turn is
+  discarded with it, so the next
   turn continues from the chat memory as the last completed turn left it; a
   cancelled turn likewise stops calling the model and runs no tool for a
   response that arrives after the cancellation.
