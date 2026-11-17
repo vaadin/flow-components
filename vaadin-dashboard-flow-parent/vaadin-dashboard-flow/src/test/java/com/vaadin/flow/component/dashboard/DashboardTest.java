@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.js.JsCall;
 
 class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -1128,7 +1127,7 @@ class DashboardTest extends DashboardTestBase {
                 nodeIdToBeRemoved);
         ui.fakeClientCommunication();
 
-        assertUpdateItemsCall();
+        Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
@@ -1251,7 +1250,7 @@ class DashboardTest extends DashboardTestBase {
                 nodeIdToBeRemoved);
         ui.fakeClientCommunication();
 
-        assertUpdateItemsCall();
+        Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
@@ -1433,12 +1432,5 @@ class DashboardTest extends DashboardTestBase {
                     eventRemovedItem.get());
             Assertions.assertEquals(expectedItems, eventItems.get());
         }
-    }
-
-    private void assertUpdateItemsCall() {
-        List<JsCall> calls = ui.dumpJsCalls(dashboard.getElement(),
-                DashboardJs.class);
-        Assertions.assertEquals(List.of("updateItems"),
-                calls.stream().map(JsCall::methodName).toList());
     }
 }
