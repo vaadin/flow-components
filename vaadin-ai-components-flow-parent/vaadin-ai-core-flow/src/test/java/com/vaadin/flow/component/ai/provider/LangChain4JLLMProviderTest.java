@@ -328,6 +328,33 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_streamingWithNullAiMessage_failsTurn() {
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            // As LangChain4j's streaming models do, a failure of the
+            // completion handler is reported to the error handler
+            try {
+                handler.onCompleteResponse(response);
+            } catch (RuntimeException e) {
+                handler.onError(e);
+            }
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var error = new AtomicReference<Throwable>();
+
+        // A turn that hangs instead fails the test with a timeout
+        streamingProvider.stream(createSimpleRequest("Hello"))
+                .doOnError(error::set).onErrorComplete().collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertNotNull(error.get(),
+                "A response without an AI message should fail the turn");
+    }
+
+    @Test
     void stream_withNullAiMessage_keepsChatMemoryUsable() {
         var nullAiResponse = mockChatResponse();
         Mockito.when(nullAiResponse.aiMessage()).thenReturn(null);
