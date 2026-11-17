@@ -24,6 +24,7 @@ import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.dom.BindingContext;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -39,6 +40,10 @@ class GridSelectionSignalHelper {
      *
      * @param signalBinding
      *            the signal binding for registering change callbacks
+     * @param writer
+     *            passes a selection change to the write callback, unless it
+     *            comes from the signal, and returns the value the selection
+     *            should have afterwards
      * @param cleanup
      *            a registration to remove the effect and listener when the
      *            selection model is removed
@@ -46,6 +51,7 @@ class GridSelectionSignalHelper {
      *            the value type
      */
     record BindResult<V>(SignalBinding<V> signalBinding,
+            SerializableFunction<V, V> writer,
             Registration cleanup) implements Serializable {
     }
 
@@ -100,17 +106,14 @@ class GridSelectionSignalHelper {
             previousValue[0] = newValue;
         });
 
-        Registration listenerReg = target.addValueChangeListener(event -> {
-            if (!fromSignal[0]) {
-                writeCallback.accept(target.getValue());
+        SerializableFunction<V, V> writer = newValue -> {
+            if (fromSignal[0]) {
+                return newValue;
             }
-        });
-
-        Registration cleanup = () -> {
-            effectReg.remove();
-            listenerReg.remove();
+            writeCallback.accept(newValue);
+            return valueSignal.peek();
         };
 
-        return new BindResult<>(binding, cleanup);
+        return new BindResult<>(binding, writer, effectReg);
     }
 }

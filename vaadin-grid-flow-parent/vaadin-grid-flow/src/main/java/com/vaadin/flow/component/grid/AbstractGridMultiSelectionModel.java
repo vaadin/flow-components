@@ -45,6 +45,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -66,6 +67,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
     private Registration selectionBindingCleanup;
+    private SerializableFunction<Set<T>, Set<T>> selectionBindingWriter;
+    // Set when the bound signal didn't accept a selection change
+    private boolean selectionReverted;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -110,6 +114,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (selectionBindingCleanup != null) {
             selectionBindingCleanup.remove();
             selectionBindingCleanup = null;
+            selectionBindingWriter = null;
         }
         deselectAll();
         if (selectionColumn.getParent().map(getGrid()::equals).orElse(false)) {
@@ -126,6 +131,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         Set<T> oldSelection = getSelectedItems();
         selected.put(getItemId(item), item);
+        if (!writeSelectionToSignal()) {
+            return;
+        }
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
@@ -156,6 +164,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         Set<T> oldSelection = getSelectedItems();
         selected.remove(getItemId(item));
+        if (!writeSelectionToSignal()) {
+            return;
+        }
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
@@ -225,25 +236,34 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (item != null) {
             deselected.add(item);
         }
+        selectionReverted = false;
         doUpdateSelection(Collections.emptySet(), deselected, false);
-        selectionColumn.setSelectAllCheckboxState(false);
+        if (!selectionReverted) {
+            selectionColumn.setSelectAllCheckboxState(false);
+        }
     }
 
     @Override
     public void selectAll() {
+        selectionReverted = false;
         updateSelection(
                 fetchAllItems()
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet());
-        selectionColumn.setSelectAllCheckboxState(true);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        if (!selectionReverted) {
+            selectionColumn.setSelectAllCheckboxState(true);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        }
     }
 
     @Override
     public void deselectAll() {
+        selectionReverted = false;
         updateSelection(Collections.emptySet(), getSelectedItems());
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        if (!selectionReverted) {
+            selectionColumn.setSelectAllCheckboxState(false);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        }
     }
 
     @Override
@@ -313,6 +333,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 var result = GridSelectionSignalHelper.bindValue(getGrid(),
                         this, valueSignal, writeCallback);
                 selectionBindingCleanup = result.cleanup();
+                selectionBindingWriter = result.writer();
                 return result.signalBinding();
             }
         };
@@ -436,12 +457,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
+        selectionReverted = false;
         doUpdateSelection(
                 fetchAllItems()
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet(), true);
-        selectionColumn.setSelectAllCheckboxState(true);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        if (!selectionReverted) {
+            selectionColumn.setSelectAllCheckboxState(true);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        }
     }
 
     protected GridSelectionColumn getSelectionColumn() {
@@ -495,9 +519,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
+        selectionReverted = false;
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        if (!selectionReverted) {
+            selectionColumn.setSelectAllCheckboxState(false);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        }
     }
 
     private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
@@ -522,6 +549,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Set<T> oldSelection = getSelectedItems();
         removedItems.keySet().forEach(selected::remove);
         selected.putAll(addedItems);
+        if (!writeSelectionToSignal()) {
+            return;
+        }
 
         sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
                 getGrid()::doClientSideSelection);
@@ -530,13 +560,48 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
+        updateSelectAllCheckboxState();
+    }
 
+    private void updateSelectAllCheckboxState() {
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(
                 !isHierarchicalDataProvider() && size == selected.size());
         selectionColumn.setSelectAllCheckboxIndeterminateState(
                 isHierarchicalDataProvider() ? selected.size() > 0
                         : selected.size() > 0 && selected.size() < size);
+    }
+
+    /**
+     * Passes the selection to the write callback of the bound signal. If the
+     * callback doesn't accept it, reverts the selection to the signal value
+     * without firing an event.
+     *
+     * @return {@code false} if the selection was reverted
+     */
+    private boolean writeSelectionToSignal() {
+        if (selectionBindingWriter == null) {
+            return true;
+        }
+        Set<T> newSelection = getSelectedItems();
+        Map<Object, T> signalItems = mapItemsById(
+                selectionBindingWriter.apply(newSelection));
+        if (signalItems.keySet().equals(mapItemsById(newSelection).keySet())) {
+            return true;
+        }
+        Map<Object, T> addedItems = new LinkedHashMap<>(signalItems);
+        addedItems.keySet().removeAll(selected.keySet());
+        Map<Object, T> removedItems = new LinkedHashMap<>(selected);
+        removedItems.keySet().removeAll(signalItems.keySet());
+        selected.clear();
+        selected.putAll(signalItems);
+        sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
+                getGrid()::doClientSideSelection);
+        sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
+                getGrid()::doClientSideDeselection);
+        updateSelectAllCheckboxState();
+        selectionReverted = true;
+        return false;
     }
 
     private Map<Object, T> mapItemsById(Set<T> items) {

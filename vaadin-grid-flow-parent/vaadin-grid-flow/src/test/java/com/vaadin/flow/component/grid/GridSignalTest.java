@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -125,6 +127,28 @@ class GridSignalTest extends AbstractSignalsTest {
         Assertions.assertEquals(1, callCount[0]);
     }
 
+    @Test
+    void singleSelect_bindValue_writeCallbackRefuses_selectionRevertedWithoutEvent() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, v -> {
+        });
+        UI.getCurrent().add(grid);
+        List<String> events = new ArrayList<>();
+        grid.asSingleSelect()
+                .addValueChangeListener(e -> events.add(e.getValue()));
+
+        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("bar");
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        grid.select("baz");
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        Assertions.assertEquals("foo", signal.peek());
+        Assertions.assertEquals(List.of(), events);
+    }
+
     // ===== MULTI SELECT BIND VALUE TESTS =====
 
     @Test
@@ -201,6 +225,29 @@ class GridSignalTest extends AbstractSignalsTest {
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectFromClient("baz");
         Assertions.assertEquals(1, callCount[0]);
+    }
+
+    @Test
+    void multiSelect_bindValue_writeCallbackRefuses_selectionRevertedWithoutEvent() {
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new ValueSignal<>(Set.of("foo"));
+        grid.asMultiSelect().bindValue(signal, v -> {
+        });
+        UI.getCurrent().add(grid);
+        List<Set<String>> events = new ArrayList<>();
+        grid.asMultiSelect()
+                .addValueChangeListener(e -> events.add(e.getValue()));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("bar");
+        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
+
+        grid.asMultiSelect().select("baz");
+        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
+
+        Assertions.assertEquals(Set.of("foo"), signal.peek());
+        Assertions.assertEquals(List.of(), events);
     }
 
     // ===== SELECTION MODEL SWITCH CLEANUP TESTS =====
