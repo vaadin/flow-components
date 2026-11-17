@@ -132,7 +132,7 @@ public class UploadManager implements Serializable {
                     .asString();
             ComponentUtil.fireEvent(owner,
                     new FileRemovedEvent(owner, true, fileName));
-        }).addEventData(eventDetailFileName);
+        }).addEventDataPath(eventDetailFileName);
 
         connector.getElement().addEventListener("file-reject", event -> {
             String fileName = event.getEventData().get(eventDetailFileName)
@@ -143,8 +143,8 @@ public class UploadManager implements Serializable {
                     .fromClientCode(errorCode);
             ComponentUtil.fireEvent(owner,
                     new FileRejectedEvent(owner, true, reason, fileName));
-        }).addEventData(eventDetailFileName)
-                .addEventData(eventDetailErrorMessage);
+        }).addEventDataPath(eventDetailFileName)
+                .addEventDataPath(eventDetailErrorMessage);
 
         // Listen for all-finished event from client (triggered when all
         // uploads are complete, including success, error, or abort), also

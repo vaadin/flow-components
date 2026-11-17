@@ -94,10 +94,18 @@ class UploadModalTest {
     private void fireUploadDomEvent(String eventType, boolean filesUploading) {
         Element element = upload.getElement();
         DomEvent event = new DomEvent(element, eventType,
-                JacksonUtils.createObjectNode().put(
-                        "element.files.some(file => file.uploading)",
+                JacksonUtils.createObjectNode().put(getFilesUploadingKey(),
                         filesUploading));
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
+    }
+
+    private String getFilesUploadingKey() {
+        // The upload-success listener has only the filesUploading event data
+        return upload.getElement().getNode()
+                .getFeature(ElementListenerMap.class)
+                .getSnippetEntries("upload-success").stream()
+                .map(ElementListenerMap.SnippetEntry::key).findFirst()
+                .orElseThrow();
     }
 
     @SuppressWarnings("removal")
