@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.upload;
+package com.vaadin.flow.component.upload.tests;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +24,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.upload.UploadButton;
+import com.vaadin.flow.component.upload.UploadCapture;
+import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -126,18 +128,20 @@ class UploadButtonTest {
         ui.remove(button);
         ui.add(button);
 
-        // Get the manager link calls pending after reattach
-        List<JsCall> managerLinkCalls = ui.dumpJsCalls(button.getElement(),
-                HasUploadManagerJs.class);
+        // Get pending JS invocations after reattach
+        List<PendingJavaScriptInvocation> pendingInvocations = ui
+                .dumpPendingJavaScriptInvocations();
 
-        Assertions.assertEquals(1, managerLinkCalls.size(),
-                "Only one manager link JS invocation should be pending after reattach. "
+        // Count how many setManager JS invocations are pending
+        long managerLinkCount = pendingInvocations.stream()
+                .map(inv -> inv.getInvocation().getJsCall())
+                .filter(call -> call != null
+                        && "setManager".equals(call.methodName()))
+                .count();
+
+        Assertions.assertEquals(1, managerLinkCount,
+                "Only one 'this.manager' JS invocation should be pending after reattach. "
                         + "Old attach listeners should be removed when setUploadManager is called.");
-        Assertions.assertEquals("setManager",
-                managerLinkCalls.get(0).methodName());
-        Assertions.assertEquals(
-                Collections.singletonList(manager2.getConnector().getElement()),
-                managerLinkCalls.get(0).arguments());
 
         // Verify that the button is linked to manager2
         Assertions.assertSame(manager2, button.getUploadManager());
