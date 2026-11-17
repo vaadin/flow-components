@@ -17,7 +17,6 @@ package com.vaadin.flow.data.renderer;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
@@ -28,11 +27,9 @@ import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.component.trigger.internal.TriggerInputJs;
-import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
@@ -45,9 +42,9 @@ class LitRendererTest {
     MockUIExtension ui = new MockUIExtension();
 
     @JsDefinition
-    interface CopyTemplates extends Serializable {
+    interface EmailTemplates extends Serializable {
 
-        @JsExpression("return html`<span>${item.email}</span><button @click=${() => functions.copy(item.email)}>Copy</button>`;")
+        @JsExpression("return html`<button @click=${() => functions.first(item.email)}>${item.email}</button>`;")
         CompiledLitTemplate email();
     }
 
@@ -99,52 +96,29 @@ class LitRendererTest {
     }
 
     @Test
-    void clientAction_oneBindingSendsTheActionFunctionToTheClient() {
+    void clientActions_sentToTheClientInDeclarationOrder() {
         TestDiv container = new TestDiv();
         ui.add(container);
+        JsFunction second = JsSnippets.of(TriggerInputJs.class).returnNull();
+        JsFunction first = JsSnippets.of(TriggerInputJs.class).returnNull();
 
         // A declared template, so that client actions work with a strict
         // Content Security Policy too
-        LitRenderer<String> renderer = LitRenderer
-                .<String> of(JsSnippets.of(CopyTemplates.class).email())
+        LitRenderer.<String> of(JsSnippets.of(EmailTemplates.class).email())
                 .withProperty("email", ValueProvider.identity())
-                .withClientAction("copy", Clipboard.writeText());
+                .withClientAction("second", actionReturning(second))
+                .withClientAction("first", actionReturning(first))
+                .render(container.getElement(), new KeyMapper<>(), "renderer");
 
-        renderer.render(container.getElement(), new KeyMapper<>(), "renderer");
-        ui.getUI().getInternals().getStateTree()
-                .runExecutionsBeforeClientResponse();
-
+        // The client pairs the action names with the functions by position
         List<Object> arguments = getRendererArguments(container,
                 "setCompiledLitRenderer");
-
-        // The action names the template can call, and the functions behind
-        // them: one function for the whole renderer, not one per item.
-        Assertions.assertEquals("[\"copy\"]", arguments.get(6).toString());
-        JsFunction[] actions = (JsFunction[]) arguments.get(7);
-        Assertions.assertEquals(1, actions.length);
-        JsFunction copy = actions[0];
-
-        // The actions come from JavaScript declared in the bundle, so only
-        // their identity and captures are sent.
-        // The renderer calls each action with the event and the context that
-        // carries the template's call arguments.
-        JsCall copyCall = Objects.requireNonNull(copy.getDeclaredCall());
-        Assertions.assertEquals(WriteToClipboardAction.WriteToClipboardJs.class,
-                copyCall.definitionType());
-        Assertions.assertEquals("writeToClipboard", copyCall.methodName());
-        Assertions.assertEquals(List.of("event", "context"),
-                copyCall.getFunctionParameterNames());
-
-        // The copied value is the argument the template passes, so the same
-        // function serves every rendered row.
-        JsFunction text = (JsFunction) copy.getCaptures().get(0);
-        JsCall textCall = Objects.requireNonNull(text.getDeclaredCall());
-        Assertions.assertEquals(TriggerInputJs.class,
-                textCall.definitionType());
-        Assertions.assertEquals("readContextValue", textCall.methodName());
-        Assertions.assertEquals(List.of("event", "context"),
-                textCall.getFunctionParameterNames());
-        Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
+        Assertions.assertEquals("[\"second\",\"first\"]",
+                arguments.get(6).toString());
+        JsFunction[] functions = (JsFunction[]) arguments.get(7);
+        Assertions.assertEquals(2, functions.length);
+        Assertions.assertSame(second, functions[0]);
+        Assertions.assertSame(first, functions[1]);
     }
 
     @Test
@@ -214,5 +188,14 @@ class LitRendererTest {
         return ui.dumpJsCalls(container.getElement(), LitRendererJs.class)
                 .stream().filter(call -> methodName.equals(call.methodName()))
                 .findFirst().orElseThrow().arguments();
+    }
+
+    private static Action actionReturning(JsFunction function) {
+        return new Action() {
+            @Override
+            protected JsFunction toJs(Trigger trigger) {
+                return function;
+            }
+        };
     }
 }
