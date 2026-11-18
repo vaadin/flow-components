@@ -46,6 +46,8 @@ interface ComboBoxJs extends Serializable {
      * @param comboBox
      *            the combo box element
      */
+    // Optional chaining is needed because on the first attach this
+    // JavaScript is called before initializing the connector.
     @JsExpression("$0.$connector?.reset()")
     void resetConnector(Element comboBox);
 
