@@ -31,6 +31,7 @@ import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
@@ -275,10 +276,8 @@ class MessageListUserTest {
 
         var resource = (StreamResourceRegistry.ElementStreamResource) resolveImage(
                 alice.getImage()).orElseThrow();
-        Assertions.assertEquals("inline; filename=\"alice.png\"",
-                DownloadHandlerTestUtil.servedContentDisposition(
-                        (DownloadHandler) resource.getElementRequestHandler(),
-                        resource.getOwner()),
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition(),
                 "Expected the image to be served inline");
         Assertions.assertEquals("attachment; filename=\"alice.png\"",
                 DownloadHandlerTestUtil.servedContentDisposition(imageHandler,

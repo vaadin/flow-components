@@ -17,6 +17,7 @@ import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import tools.jackson.core.JsonGenerator;
@@ -148,7 +149,9 @@ public class MapSerializer {
                 // map images, such as icons, are shown in the map, so
                 // they are served inline
                 registration = resourceRegistry.registerResource(
-                        resource.serveInline(), map.getElement());
+                        new StreamResourceRegistry.ElementStreamResource(
+                                resource, map.getElement(),
+                                DownloadDisposition.INLINE));
                 streamRegistrationCache.put(resource, registration);
             }
             return registration.getResourceUri();

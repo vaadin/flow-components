@@ -37,6 +37,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -535,7 +536,7 @@ public class MessageListItem implements Serializable {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      * <p>
      * The handler is registered as a resource of the message list that the item
      * belongs to while the list is attached, and is unregistered when the list
@@ -611,9 +612,10 @@ public class MessageListItem implements Serializable {
             // element is detached, so the resource is created for the current
             // host
             imageResource = new StreamResourceRegistry.ElementStreamResource(
-                    imageHandler.serveInline(),
+                    imageHandler,
                     getHost() != null ? getHost().getElement()
-                            : UI.getCurrentOrThrow().getElement());
+                            : UI.getCurrentOrThrow().getElement(),
+                    DownloadDisposition.INLINE);
         }
         if (imageResource == null) {
             return;

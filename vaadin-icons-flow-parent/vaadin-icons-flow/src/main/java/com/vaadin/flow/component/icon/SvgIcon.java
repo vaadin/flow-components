@@ -21,6 +21,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.Signal;
 
@@ -100,7 +101,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the download handler resource
@@ -116,7 +117,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the download handler resource
@@ -137,7 +138,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      * <p>
      * The symbol is kept synchronized with the signal value while the component
      * is attached. When the component is detached, signal value changes have no
@@ -254,7 +255,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the source value, not null
@@ -262,8 +263,8 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      */
     public void setSrc(DownloadHandler src) {
         getElement().setAttribute("src",
-                new StreamResourceRegistry.ElementStreamResource(
-                        src.serveInline(), getElement()));
+                new StreamResourceRegistry.ElementStreamResource(src,
+                        getElement(), DownloadDisposition.INLINE));
     }
 
     /**
@@ -271,7 +272,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the source of the icon sprite file, not null

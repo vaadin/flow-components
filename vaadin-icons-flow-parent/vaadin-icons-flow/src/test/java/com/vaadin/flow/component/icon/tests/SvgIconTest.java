@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -229,10 +230,8 @@ class SvgIconTest {
         var resource = (ElementStreamResource) ui.getSession()
                 .getResourceRegistry().getResource(URI.create(icon.getSrc()))
                 .orElseThrow();
-        Assertions.assertEquals("inline; filename=\"image.svg\"",
-                DownloadHandlerTestUtil.servedContentDisposition(
-                        resource.getElementRequestHandler(),
-                        resource.getOwner()));
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
         Assertions.assertEquals("attachment; filename=\"image.svg\"",
                 DownloadHandlerTestUtil.servedContentDisposition(handler,
                         resource.getOwner()),

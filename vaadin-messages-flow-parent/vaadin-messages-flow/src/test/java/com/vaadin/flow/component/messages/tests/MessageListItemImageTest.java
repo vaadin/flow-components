@@ -36,6 +36,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.tests.DownloadHandlerTestUtil;
@@ -67,10 +68,8 @@ class MessageListItemImageTest {
 
         var resource = (ElementStreamResource) resolveImage(item.getUserImage())
                 .orElseThrow();
-        Assertions.assertEquals("inline; filename=\"alice.png\"",
-                DownloadHandlerTestUtil.servedContentDisposition(
-                        resource.getElementRequestHandler(),
-                        resource.getOwner()));
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
         Assertions.assertEquals("attachment; filename=\"alice.png\"",
                 DownloadHandlerTestUtil.servedContentDisposition(handler,
                         resource.getOwner()),

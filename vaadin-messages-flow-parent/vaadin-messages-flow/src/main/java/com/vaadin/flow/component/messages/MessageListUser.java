@@ -30,6 +30,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -187,7 +188,7 @@ public class MessageListUser implements Serializable {
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      * <p>
      * This removes an image URL set with {@link #setImage(String)}.
      *
@@ -339,7 +340,7 @@ public class MessageListUser implements Serializable {
             return;
         }
         var resource = new StreamResourceRegistry.ElementStreamResource(
-                imageHandler.serveInline(), host.getElement());
+                imageHandler, host.getElement(), DownloadDisposition.INLINE);
         imageRegistration = getHostSession().getResourceRegistry()
                 .registerResource(resource);
         image = imageRegistration.getResourceUri().toASCIIString();

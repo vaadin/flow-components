@@ -49,6 +49,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -242,7 +243,7 @@ public class AvatarGroup extends Component
          * <p>
          * The content is served with a <code>Content-Disposition: inline</code>
          * header, so that the browser shows it. The given handler is not
-         * changed, see {@link DownloadHandler#serveInline()}.
+         * changed, see {@link DownloadDisposition#INLINE}.
          * <p>
          * The handler is registered as a resource of the avatar group that the
          * item belongs to while the group is attached, and is unregistered when
@@ -322,9 +323,10 @@ public class AvatarGroup extends Component
                 // owner element is detached, so the resource is created for
                 // the current host
                 imageResource = new StreamResourceRegistry.ElementStreamResource(
-                        imageHandler.serveInline(),
+                        imageHandler,
                         getHost() != null ? getHost().getElement()
-                                : UI.getCurrentOrThrow().getElement());
+                                : UI.getCurrentOrThrow().getElement(),
+                        DownloadDisposition.INLINE);
             }
             if (imageResource == null) {
                 return;

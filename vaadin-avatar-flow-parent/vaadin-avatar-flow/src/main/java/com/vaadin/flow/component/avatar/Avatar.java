@@ -29,6 +29,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -263,7 +264,7 @@ public class Avatar extends Component
      * <p>
      * The content is served with a <code>Content-Disposition: inline</code>
      * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadHandler#serveInline()}.
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @see Avatar#setImage(String)
      * @param downloadHandler
@@ -277,7 +278,7 @@ public class Avatar extends Component
             return;
         }
         imageResource = new StreamResourceRegistry.ElementStreamResource(
-                downloadHandler.serveInline(), getElement());
+                downloadHandler, getElement(), DownloadDisposition.INLINE);
 
         getElement().setAttribute("img", imageResource);
     }

@@ -100,6 +100,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.BuildType;
@@ -3684,8 +3685,8 @@ public class Spreadsheet extends Component
             resources.put(key, resource.toString());
             getElement().executeJs("this.resources=$0", resources.keySet());
             getElement().setAttribute("resource-" + key,
-                    new StreamResourceRegistry.ElementStreamResource(
-                            resource.serveInline(), this.getElement()));
+                    new StreamResourceRegistry.ElementStreamResource(resource,
+                            this.getElement(), DownloadDisposition.INLINE));
         }
     }
 
