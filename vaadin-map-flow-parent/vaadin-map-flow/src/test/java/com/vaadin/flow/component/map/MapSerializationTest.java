@@ -11,7 +11,6 @@ package com.vaadin.flow.component.map;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +30,11 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -129,9 +129,14 @@ class MapSerializationTest {
         MarkerFeature marker = setupMarker();
         ui.fakeClientCommunication();
 
+        ArgumentCaptor<ElementRequestHandler> registered = ArgumentCaptor
+                .forClass(ElementRequestHandler.class);
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Mockito.any(ElementRequestHandler.class),
+                .registerResource(registered.capture(),
                         Mockito.eq(map.getElement()));
+        Assertions.assertEquals(Assets.PIN.getHandler().getUrlPostfix(),
+                registered.getValue().getUrlPostfix(),
+                "Expected the pin icon to be registered");
         Mockito.clearInvocations(streamResourceRegistryMock);
 
         // Force another sync of the same icon
@@ -154,7 +159,9 @@ class MapSerializationTest {
     @Test
     void serializeIcon_handlerServedInline() throws Exception {
         Icon.Options options = new Icon.Options();
-        options.setImg(event -> event.setFileName("custom.png"));
+        InputStreamDownloadHandler handler = DownloadHandler.fromInputStream(
+                event -> DownloadResponse.error(500), "custom.png");
+        options.setImg(handler);
         MarkerFeature marker = new MarkerFeature();
         marker.setIcon(new Icon(options));
         map.getFeatureLayer().addFeature(marker);
@@ -166,8 +173,13 @@ class MapSerializationTest {
                 .registerResource(registered.capture(),
                         Mockito.eq(map.getElement()));
         Assertions.assertEquals("inline; filename=\"custom.png\"",
-                servedContentDisposition(registered.getValue()),
+                DownloadHandlerTestUtil.servedContentDisposition(
+                        registered.getValue(), map.getElement()),
                 "Map images should be served inline");
+        Assertions.assertEquals("attachment; filename=\"custom.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        map.getElement()),
+                "The given handler should not be changed");
     }
 
     @Test
@@ -212,20 +224,6 @@ class MapSerializationTest {
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
                 .registerResource(Mockito.any(ElementRequestHandler.class),
                         Mockito.eq(map.getElement()));
-    }
-
-    private String servedContentDisposition(ElementRequestHandler handler)
-            throws Exception {
-        VaadinResponse response = Mockito.mock(VaadinResponse.class);
-        AtomicReference<String> header = new AtomicReference<>();
-        Mockito.doAnswer(invocation -> {
-            header.set(invocation.getArgument(1));
-            return null;
-        }).when(response).setHeader(Mockito.eq("Content-Disposition"),
-                Mockito.any());
-        handler.handleRequest(Mockito.mock(VaadinRequest.class), response,
-                Mockito.mock(VaadinSession.class), map.getElement());
-        return header.get();
     }
 
     private MarkerFeature setupMarker() {

@@ -38,6 +38,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -57,6 +58,23 @@ class MessageListItemImageTest {
         item = new MessageListItem("Hello", null, "Alice");
         messageList.setItems(item);
         ui.add(messageList);
+    }
+
+    @Test
+    void setUserImageHandler_servedInline_handlerNotChanged() throws Exception {
+        var handler = createImageHandler();
+        item.setUserImageHandler(handler);
+
+        var resource = (ElementStreamResource) resolveImage(item.getUserImage())
+                .orElseThrow();
+        Assertions.assertEquals("inline; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(
+                        resource.getElementRequestHandler(),
+                        resource.getOwner()));
+        Assertions.assertEquals("attachment; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        resource.getOwner()),
+                "The given handler should not be changed");
     }
 
     @Test

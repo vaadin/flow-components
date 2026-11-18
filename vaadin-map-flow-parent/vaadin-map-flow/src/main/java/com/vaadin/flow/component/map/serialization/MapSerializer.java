@@ -146,7 +146,7 @@ public class MapSerializer {
                 StreamResourceRegistry resourceRegistry = UI.getCurrentOrThrow()
                         .getSessionOrThrow().getResourceRegistry();
                 // map images, such as icons, are shown in the map, so
-                // they are served inline whatever the handler asks for
+                // they are served inline
                 registration = resourceRegistry.registerResource(
                         resource.serveInline(), map.getElement());
                 streamRegistrationCache.put(resource, registration);

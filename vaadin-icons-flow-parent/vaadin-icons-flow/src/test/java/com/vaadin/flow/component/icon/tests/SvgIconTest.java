@@ -17,6 +17,7 @@ package com.vaadin.flow.component.icon.tests;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Assertions;
@@ -25,8 +26,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class SvgIconTest {
@@ -211,5 +216,26 @@ class SvgIconTest {
                 return "image.svg";
             }
         };
+    }
+
+    @Test
+    void setSrcDownloadHandler_servedInline_handlerNotChanged()
+            throws Exception {
+        InputStreamDownloadHandler handler = DownloadHandler.fromInputStream(
+                event -> DownloadResponse.error(500), "image.svg");
+        var icon = new SvgIcon(handler);
+        ui.add(icon);
+
+        var resource = (ElementStreamResource) ui.getSession()
+                .getResourceRegistry().getResource(URI.create(icon.getSrc()))
+                .orElseThrow();
+        Assertions.assertEquals("inline; filename=\"image.svg\"",
+                DownloadHandlerTestUtil.servedContentDisposition(
+                        resource.getElementRequestHandler(),
+                        resource.getOwner()));
+        Assertions.assertEquals("attachment; filename=\"image.svg\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        resource.getOwner()),
+                "The given handler should not be changed");
     }
 }

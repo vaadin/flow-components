@@ -16,31 +16,25 @@
 package com.vaadin.flow.component.messages.tests;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListTypingIndicatorFeatureFlagProvider;
 import com.vaadin.flow.component.messages.MessageListUser;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -282,29 +276,14 @@ class MessageListUserTest {
         var resource = (StreamResourceRegistry.ElementStreamResource) resolveImage(
                 alice.getImage()).orElseThrow();
         Assertions.assertEquals("inline; filename=\"alice.png\"",
-                servedContentDisposition(
+                DownloadHandlerTestUtil.servedContentDisposition(
                         (DownloadHandler) resource.getElementRequestHandler(),
                         resource.getOwner()),
                 "Expected the image to be served inline");
         Assertions.assertEquals("attachment; filename=\"alice.png\"",
-                servedContentDisposition(imageHandler, resource.getOwner()),
+                DownloadHandlerTestUtil.servedContentDisposition(imageHandler,
+                        resource.getOwner()),
                 "Expected the given handler not to be changed");
-    }
-
-    private static String servedContentDisposition(DownloadHandler handler,
-            Element owner) throws Exception {
-        VaadinResponse response = Mockito.mock(VaadinResponse.class);
-        Mockito.when(response.getOutputStream())
-                .thenReturn(new ByteArrayOutputStream());
-        AtomicReference<String> header = new AtomicReference<>();
-        Mockito.doAnswer(invocation -> {
-            header.set(invocation.getArgument(1));
-            return null;
-        }).when(response).setHeader(Mockito.eq("Content-Disposition"),
-                Mockito.any());
-        handler.handleRequest(Mockito.mock(VaadinRequest.class), response,
-                Mockito.mock(VaadinSession.class), owner);
-        return header.get();
     }
 
     @Test
