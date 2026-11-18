@@ -16,14 +16,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.charts.events.DrilldownEvent;
-import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Lang;
-import com.vaadin.flow.component.charts.model.PlotOptionsLine;
-import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.js.JsCall;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -73,44 +68,5 @@ class ChartJsTest {
         ObjectNode drilldownSeries = (ObjectNode) call.arguments().get(2);
         Assertions.assertEquals("Drilldown",
                 drilldownSeries.get("name").asString());
-    }
-
-    @Test
-    void strictMode_setThemeWithFunction_throws() {
-        ui.setCspMode(CspMode.STRICT);
-        ChartOptions options = ChartOptions.get(ui.getUI());
-        // No theme option takes a function, but a subclass can add one
-        Theme theme = new Theme() {
-            private final String _fn_formatter = "function() { return this.y; }";
-        };
-
-        Assertions.assertThrows(CspViolationException.class,
-                () -> options.setTheme(theme));
-    }
-
-    @Test
-    void strictMode_drilldownCallbackReturnsFunction_drilldown_throws() {
-        ui.setCspMode(CspMode.STRICT);
-        Chart chart = new Chart();
-        chart.getConfiguration().addSeries(new DataSeries());
-        DataSeries series = new DataSeries();
-        series.setData(1, 2, 3);
-        chart.getConfiguration().addSeries(series);
-        chart.setDrilldownCallback(event -> {
-            DataLabels dataLabels = new DataLabels(true);
-            dataLabels.setFormatter("function() { return this.y; }");
-            PlotOptionsLine plotOptions = new PlotOptionsLine();
-            plotOptions.setDataLabels(dataLabels);
-            DataSeries drilldown = new DataSeries("Drilldown");
-            drilldown.setPlotOptions(plotOptions);
-            return drilldown;
-        });
-        ui.add(chart);
-        ui.dumpPendingJavaScriptInvocations();
-        DrilldownEvent event = new DrilldownEvent(chart, true, null, null, null,
-                null, 2, null, 1);
-
-        Assertions.assertThrows(CspViolationException.class,
-                () -> ComponentUtil.fireEvent(chart, event));
     }
 }

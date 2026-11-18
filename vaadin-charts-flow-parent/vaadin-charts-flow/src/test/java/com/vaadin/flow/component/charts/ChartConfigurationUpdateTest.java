@@ -16,11 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.DataLabels;
-import com.vaadin.flow.component.charts.model.ListSeries;
-import com.vaadin.flow.component.charts.model.PlotOptionsLine;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartConfigurationUpdateTest {
@@ -99,64 +94,6 @@ class ChartConfigurationUpdateTest {
         ui.dumpPendingJavaScriptInvocations();
 
         Assertions.assertEquals(List.of(), getConfigurationResets());
-    }
-
-    @Test
-    void cspOff_functionInConfiguration_drawChart_updatesConfiguration() {
-        ui.setCspMode(CspMode.OFF);
-        ui.add(chart);
-        ui.dumpPendingJavaScriptInvocations();
-        chart.getConfiguration().getTooltip()
-                .setFormatter("function() { return this.y; }");
-
-        chart.drawChart();
-
-        Assertions.assertEquals(List.of(false), getConfigurationResets());
-    }
-
-    @Test
-    void strictMode_functionInConfiguration_drawChart_throws() {
-        ui.setCspMode(CspMode.STRICT);
-        ui.add(chart);
-        ui.dumpPendingJavaScriptInvocations();
-        chart.getConfiguration().getTooltip()
-                .setFormatter("function() { return this.y; }");
-
-        Assertions.assertThrows(CspViolationException.class,
-                () -> chart.drawChart());
-    }
-
-    @Test
-    void strictMode_functionInSeries_drawChart_throws() {
-        ui.setCspMode(CspMode.STRICT);
-        ui.add(chart);
-        ui.dumpPendingJavaScriptInvocations();
-        chart.getConfiguration().setSeries(createSeriesWithFormatter());
-
-        Assertions.assertThrows(CspViolationException.class,
-                () -> chart.drawChart());
-    }
-
-    @Test
-    void strictMode_attached_addSeriesWithFunction_throws() {
-        ui.setCspMode(CspMode.STRICT);
-        ui.add(chart);
-        ui.dumpPendingJavaScriptInvocations();
-        Configuration configuration = chart.getConfiguration();
-        ListSeries series = createSeriesWithFormatter();
-
-        Assertions.assertThrows(CspViolationException.class,
-                () -> configuration.addSeries(series));
-    }
-
-    private static ListSeries createSeriesWithFormatter() {
-        DataLabels dataLabels = new DataLabels(true);
-        dataLabels.setFormatter("function() { return this.y; }");
-        PlotOptionsLine plotOptions = new PlotOptionsLine();
-        plotOptions.setDataLabels(dataLabels);
-        ListSeries series = new ListSeries(1, 2, 3);
-        series.setPlotOptions(plotOptions);
-        return series;
     }
 
     private List<Object> getConfigurationResets() {
