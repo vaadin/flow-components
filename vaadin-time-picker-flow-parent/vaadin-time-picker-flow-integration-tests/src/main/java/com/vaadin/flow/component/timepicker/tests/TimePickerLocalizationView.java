@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +29,9 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -36,6 +40,23 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-time-picker/time-picker-localization")
 public class TimePickerLocalizationView extends Div
         implements HasUrlParameter<String> {
+
+    @JsDefinition
+    interface LocalTimeTextBlockJs extends Serializable {
+
+        @JsExpression("$0['innerText'] = new Date($1).toLocaleTimeString($2, {hour: 'numeric', minute: 'numeric'});")
+        void showTime(Element textBlock, String dateTime, String languageTag);
+
+        @JsExpression("$0['innerText'] = new Date($1).toLocaleTimeString($2, {hour: 'numeric', minute: 'numeric', second: 'numeric'});")
+        void showTimeWithSeconds(Element textBlock, String dateTime,
+                String languageTag);
+
+        // no support for milliseconds in the toLocaleTimeString method
+        @JsExpression("$0['innerText'] = new Date($1).toLocaleTimeString($2, {hour: 'numeric', minute: 'numeric', second: 'numeric'})+' "
+                + LocalTimeTextBlock.MILLISECONDS_SPLIT + "'+ $3;")
+        void showTimeWithMilliseconds(Element textBlock, String dateTime,
+                String languageTag, int milliSeconds);
+    }
 
     private final TimePicker timePicker;
     private final LocalTimeTextBlock browserFormattedTime;
@@ -144,19 +165,16 @@ public class TimePickerLocalizationView extends Div
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             String tag = Locale.of(locale.getLanguage(), locale.getCountry())
                     .toLanguageTag();
-            String expression = "$0['innerText'] = new Date('" + format
-                    + "').toLocaleTimeString('" + tag
-                    + "', {hour: 'numeric', minute: 'numeric'"
-                    + (step.getSeconds() < 60 ? ", second: 'numeric'" : "")
-                    + "})";
-            // no support for milliseconds in the toLocaleTimeString method
+            LocalTimeTextBlockJs js = getElement()
+                    .executeJs(LocalTimeTextBlockJs.class);
             if (step.getSeconds() < 1) {
-                expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
                 int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
-                getElement().executeJs(expression, getElement(), milliSeconds);
+                js.showTimeWithMilliseconds(getElement(), format, tag,
+                        milliSeconds);
+            } else if (step.getSeconds() < 60) {
+                js.showTimeWithSeconds(getElement(), format, tag);
             } else {
-                expression += ";";
-                getElement().executeJs(expression, getElement());
+                js.showTime(getElement(), format, tag);
             }
         }
     }
