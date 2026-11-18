@@ -134,17 +134,14 @@ public class DragHandle extends AbstractConfigurationObject {
      * Function to define the SVG path to use for the drag handles. Takes the
      * point as argument. Should return an SVG path in array format. The SVG
      * path is automatically positioned on the point.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}.
      *
      * @param _fn_pathFormatter
-     *            <p>
-     *            The browser compiles the function from this string, which a
-     *            Content Security Policy without <code>unsafe-eval</code>
-     *            blocks: in the strict CSP mode, sending a chart configuration
-     *            that has a function throws a
-     *            {@link com.vaadin.flow.server.CspViolationException}. Where
-     *            Highcharts has a format string for the same purpose, such as
-     *            <code>format</code> or <code>pointFormat</code>, use it
-     *            instead.
+     *            the source code of the JavaScript function
      */
     public void setPathFormatter(String _fn_pathFormatter) {
         this._fn_pathFormatter = _fn_pathFormatter;
