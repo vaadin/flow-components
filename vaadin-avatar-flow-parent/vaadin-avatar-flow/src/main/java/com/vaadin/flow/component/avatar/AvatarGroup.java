@@ -49,7 +49,6 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -241,10 +240,9 @@ public class AvatarGroup extends Component
          * Setting the image as a resource with this method resets the image URL
          * that was set with {@link AvatarGroupItem#setImage(String)}.
          * <p>
-         * Sets the <code>Content-Disposition</code> header to
-         * <code>inline</code> for pre-defined download handlers, created by
-         * factory methods in {@link DownloadHandler}, as well as for other
-         * {@link AbstractDownloadHandler} implementations.
+         * The content is served with a <code>Content-Disposition: inline</code>
+         * header, so that the browser shows it. The given handler is not
+         * changed, see {@link DownloadHandler#serveInline()}.
          * <p>
          * The handler is registered as a resource of the avatar group that the
          * item belongs to while the group is attached, and is unregistered when
@@ -259,11 +257,6 @@ public class AvatarGroup extends Component
          * @since 24.8
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
-            if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
-                // change disposition to inline in pre-defined handlers,
-                // where it is 'attachment' by default
-                handler.inline();
-            }
             setImageSource(downloadHandler, null);
             if (getHost() != null) {
                 getHost().clientItemsUpdate.schedule();
@@ -329,7 +322,8 @@ public class AvatarGroup extends Component
                 // owner element is detached, so the resource is created for
                 // the current host
                 imageResource = new StreamResourceRegistry.ElementStreamResource(
-                        imageHandler, getHost() != null ? getHost().getElement()
+                        imageHandler.serveInline(),
+                        getHost() != null ? getHost().getElement()
                                 : UI.getCurrentOrThrow().getElement());
             }
             if (imageResource == null) {

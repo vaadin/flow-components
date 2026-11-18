@@ -97,7 +97,7 @@ public class ClusterPage extends Div {
 
         DownloadHandler downloadHandler = DownloadHandler.forClassResource(
                 getClass(), "/META-INF/resources/custom-cluster.png",
-                "custom-cluster.png").inline();
+                "custom-cluster.png");
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setImg(downloadHandler);
         iconOptions.setScale(0.5f);

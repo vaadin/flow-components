@@ -11,11 +11,13 @@ package com.vaadin.flow.component.map;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -29,6 +31,9 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
 import com.vaadin.tests.MockUIExtension;
 
@@ -125,7 +130,8 @@ class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(ElementRequestHandler.class),
+                        Mockito.eq(map.getElement()));
         Mockito.clearInvocations(streamResourceRegistryMock);
 
         // Force another sync of the same icon
@@ -133,14 +139,35 @@ class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(ElementRequestHandler.class),
+                        Mockito.eq(map.getElement()));
 
         // Sync a different icon with the same resource
         setupMarker();
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(ElementRequestHandler.class),
+                        Mockito.eq(map.getElement()));
+    }
+
+    @Test
+    void serializeIcon_handlerServedInline() throws Exception {
+        Icon.Options options = new Icon.Options();
+        options.setImg(event -> event.setFileName("custom.png"));
+        MarkerFeature marker = new MarkerFeature();
+        marker.setIcon(new Icon(options));
+        map.getFeatureLayer().addFeature(marker);
+        ui.fakeClientCommunication();
+
+        ArgumentCaptor<ElementRequestHandler> registered = ArgumentCaptor
+                .forClass(ElementRequestHandler.class);
+        Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
+                .registerResource(registered.capture(),
+                        Mockito.eq(map.getElement()));
+        Assertions.assertEquals("inline; filename=\"custom.png\"",
+                servedContentDisposition(registered.getValue()),
+                "Map images should be served inline");
     }
 
     @Test
@@ -183,7 +210,22 @@ class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(ElementRequestHandler.class),
+                        Mockito.eq(map.getElement()));
+    }
+
+    private String servedContentDisposition(ElementRequestHandler handler)
+            throws Exception {
+        VaadinResponse response = Mockito.mock(VaadinResponse.class);
+        AtomicReference<String> header = new AtomicReference<>();
+        Mockito.doAnswer(invocation -> {
+            header.set(invocation.getArgument(1));
+            return null;
+        }).when(response).setHeader(Mockito.eq("Content-Disposition"),
+                Mockito.any());
+        handler.handleRequest(Mockito.mock(VaadinRequest.class), response,
+                Mockito.mock(VaadinSession.class), map.getElement());
+        return header.get();
     }
 
     private MarkerFeature setupMarker() {

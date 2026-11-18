@@ -51,13 +51,10 @@ public class SheetImageWrapper extends SheetOverlayWrapper
     @Override
     public DownloadHandler getResourceHandler() {
         if (handler == null) {
-            // change disposition to inline in pre-defined handlers,
-            // where it is 'attachment' by default
             handler = DownloadHandler
                     .fromInputStream(downloadEvent -> new DownloadResponse(
                             new ByteArrayInputStream(data), "download",
-                            MIMEType, data.length))
-                    .inline();
+                            MIMEType, data.length));
         }
 
         return handler;
