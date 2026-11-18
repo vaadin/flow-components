@@ -135,9 +135,9 @@ class MapSerializationTest {
                 .forClass(AbstractStreamResource.class);
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
                 .registerResource(registered.capture());
-        Assertions.assertEquals(Assets.PIN.getHandler().getUrlPostfix(),
+        Assertions.assertSame(Assets.PIN.getHandler(),
                 ((ElementStreamResource) registered.getValue())
-                        .getElementRequestHandler().getUrlPostfix(),
+                        .getElementRequestHandler(),
                 "Expected the pin icon to be registered");
         Mockito.clearInvocations(streamResourceRegistryMock);
 
@@ -220,8 +220,15 @@ class MapSerializationTest {
         ui.add(map);
         ui.fakeClientCommunication();
 
+        ArgumentCaptor<AbstractStreamResource> registered = ArgumentCaptor
+                .forClass(AbstractStreamResource.class);
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Mockito.any(AbstractStreamResource.class));
+                .registerResource(registered.capture());
+        var resource = (ElementStreamResource) registered.getValue();
+        Assertions.assertSame(Assets.PIN.getHandler(),
+                resource.getElementRequestHandler());
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
     }
 
     private MarkerFeature setupMarker() {
