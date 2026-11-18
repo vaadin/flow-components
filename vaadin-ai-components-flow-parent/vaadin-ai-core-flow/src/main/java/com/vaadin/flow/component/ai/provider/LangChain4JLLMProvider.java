@@ -125,7 +125,12 @@ import tools.jackson.databind.JsonNode;
  * to the constructor, so a model set in the customizer is not used. Errors of
  * the tools added in the customizer are handled by LangChain4j, with the tool
  * error handlers set in the customizer or with LangChain4j's defaults; see the
- * LangChain4j documentation on how to handle them safely.
+ * LangChain4j documentation on how to handle them safely. Unless the customizer
+ * sets both handlers, LangChain4j logs a notice that asks for them, once, also
+ * when the customizer adds no tools. The notice does not concern the tools of
+ * the orchestrator, whose errors never reach these handlers. Setting both
+ * handlers in the customizer chooses the behavior for the tools you add, and
+ * LangChain4j then logs no notice.
  * </p>
  * <p>
  * <b>System prompt:</b> you can set a system prompt in the customizer with
@@ -409,7 +414,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
             // never leave their executors, so no tool reaches these handlers.
             // Set explicitly, LangChain4j does not log its notice that asks
             // for them. With a customizer, the tools it adds are handled as
-            // LangChain4j handles them.
+            // LangChain4j handles them, and LangChain4j logs the notice unless
+            // the customizer sets both handlers, also when it adds no tools:
+            // the builder does not tell whether it did. Any handler the
+            // provider set there would decide how the application's tools
+            // fail, which stays with LangChain4j's defaults and the
+            // application.
             builder.toolArgumentsErrorHandler(
                     ToolArgumentsErrorHandler.failInvocation());
             builder.toolExecutionErrorHandler(

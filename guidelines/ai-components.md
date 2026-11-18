@@ -81,7 +81,15 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   customizer keep LangChain4j's tool error handling, like any vendor `@Tool`
   tool (see the error hygiene rule below). Only a provider without a
   customizer sets the error handlers, which none of its own tools reach, so
-  that LangChain4j logs no notice asking for them. The checks of a turn
+  that LangChain4j logs no notice asking for them. With a customizer,
+  LangChain4j logs that notice unless the customizer sets both handlers, also
+  when it adds no tools, since the provider's tool provider counts as tools.
+  The provider does not set handlers of its own choosing there. Any explicit
+  handler decides how the application's tools fail, and that stays with the
+  vendor's defaults and the application, as it does for the tools of a
+  `ChatClient` given to `SpringAILLMProvider`. LangChain4j plans to change
+  these defaults, which is what the notice announces. A different default is
+  a decision for both providers together. The checks of a turn
   (cancellation, tool call limits, and the orchestrator's system prompt, which
   wins over a customizer's `systemMessage`) sit in a proxy around that model
   instead of in a builder setting the application might also use. The session
