@@ -57,6 +57,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
@@ -2341,8 +2342,8 @@ class FormAIControllerTest {
             Assertions.assertEquals(1, scripts.size(),
                     "Turn end must queue exactly one re-assert script on the "
                             + "read-only field; got: " + scripts);
-            Assertions.assertTrue(
-                    scripts.getFirst().contains("readonly = true"),
+            Assertions.assertEquals("forceClientReadOnly",
+                    scripts.getFirst().methodName(),
                     "The script must re-assert the client-side readonly; "
                             + "got: " + scripts.getFirst());
             Assertions.assertEquals(List.of(), scriptsOn(dump, editable),
@@ -2367,8 +2368,8 @@ class FormAIControllerTest {
             Assertions.assertEquals(1, scripts.size(),
                     "Turn end must queue the re-assert even when the AI did "
                             + "not change the field; got: " + scripts);
-            Assertions
-                    .assertTrue(scripts.getFirst().contains("readonly = true"));
+            Assertions.assertEquals("forceClientReadOnly",
+                    scripts.getFirst().methodName());
         }
 
         @Test
@@ -3515,28 +3516,36 @@ class FormAIControllerTest {
             return ui.getInternals().dumpPendingJavaScriptInvocations();
         }
 
-        private static List<String> scriptsOn(
+        /**
+         * @return the declared calls queued with the given component's element
+         *         as {@code this}
+         */
+        private static List<JsCall> scriptsOn(
                 List<PendingJavaScriptInvocation> dump, HasElement target) {
             return dump.stream()
-                    .filter(p -> p.getInvocation().getParameters()
-                            .contains(target.getElement()))
-                    .map(p -> p.getInvocation().getExpression()).toList();
+                    .filter(p -> p.getOwner() == target.getElement().getNode())
+                    .map(p -> p.getInvocation().getJsCall()).toList();
         }
 
-        private static final String CONTENT_ASSIGNMENT = "this.content = $0";
+        /**
+         * @return whether the call assigns the marker's {@code content}
+         *         property
+         */
+        private static boolean isContentAssignment(JsCall call) {
+            return call != null && call
+                    .definitionType() == FormFieldMarker.FormFieldMarkerJs.class
+                    && "setContent".equals(call.methodName());
+        }
 
         /**
-         * @return the content-assignment scripts queued with the given wrapper
+         * @return the content-assignment calls queued with the given wrapper
          *         element as a parameter
          */
-        private static List<String> contentScriptsOn(
+        private static List<JsCall> contentScriptsOn(
                 List<PendingJavaScriptInvocation> dump, Element wrapper) {
-            return dump.stream()
-                    .filter(p -> p.getInvocation().getParameters()
-                            .contains(wrapper))
-                    .map(p -> p.getInvocation().getExpression())
-                    .filter(expression -> expression
-                            .contains(CONTENT_ASSIGNMENT))
+            return dump.stream().map(p -> p.getInvocation().getJsCall())
+                    .filter(FieldMarker::isContentAssignment)
+                    .filter(call -> call.arguments().contains(wrapper))
                     .toList();
         }
 
@@ -3551,19 +3560,17 @@ class FormAIControllerTest {
         }
 
         /**
-         * @return the content-assignment scripts queued with the given marker
+         * @return the content-assignment calls queued with the given marker
          *         element as {@code this}. Unlike {@link #contentScriptsOn},
          *         matches by the invocation's owner, so it also catches an
          *         assignment whose parameter is {@code null} — the
          *         content-clearing form.
          */
-        private static List<String> contentScriptsOwnedBy(
+        private static List<JsCall> contentScriptsOwnedBy(
                 List<PendingJavaScriptInvocation> dump, Element marker) {
             return dump.stream().filter(p -> p.getOwner() == marker.getNode())
-                    .map(p -> p.getInvocation().getExpression())
-                    .filter(expression -> expression
-                            .contains(CONTENT_ASSIGNMENT))
-                    .toList();
+                    .map(p -> p.getInvocation().getJsCall())
+                    .filter(FieldMarker::isContentAssignment).toList();
         }
 
         // Dispatch the marker's revert event server-side so tests can drive

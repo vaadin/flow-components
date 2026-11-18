@@ -101,6 +101,16 @@ public class Breadcrumbs extends AbstractConfigurationObject {
 
     /**
      * Sets a custom JavaScript formatter function for breadcrumb text.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
+     * string is enough, use {@link #setFormat(String)}, which needs no
+     * JavaScript.
+     *
+     * @param formatter
+     *            the source code of the JavaScript function
      */
     public void setFormatter(String formatter) {
         this._fn_formatter = formatter;
