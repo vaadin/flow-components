@@ -469,8 +469,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
+        getElement().executeJs(MenuBarJs.class).initConnector();
     }
 
     /**
