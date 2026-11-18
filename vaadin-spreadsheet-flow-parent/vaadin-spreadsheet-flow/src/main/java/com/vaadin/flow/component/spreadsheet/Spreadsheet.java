@@ -3687,6 +3687,10 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
+            // keySet() is a live view of the map and is not Serializable:
+            // the browser gets the keys as they are when the response is
+            // written, and the pending call cannot be serialized with the
+            // session before that. A copy of the keys would fix both.
             getElement().executeJs(SpreadsheetJs.class)
                     .setResources(resources.keySet());
             getElement().setAttribute("resource-" + key,
