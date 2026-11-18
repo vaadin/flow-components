@@ -509,18 +509,21 @@ class PdfViewerTest {
     @Test
     void setI18n_propertySet() {
         var i18n = new PdfViewerI18n().setPreviousPage("previousPage")
-                .setNextPage("nextPage").setPageError("pageError")
-                .setZoomIn("zoomIn").setZoomOut("zoomOut")
-                .setPageWidth("pageWidth").setPageFit("pageFit")
-                .setDocument("document").setLink("link").setGoToPage("goToPage")
-                .setExternalLink("externalLink").setDownload("download");
+                .setNextPage("nextPage").setPage("page")
+                .setPageError("pageError").setZoomIn("zoomIn")
+                .setZoomOut("zoomOut").setZoom("zoom").setPageWidth("pageWidth")
+                .setPageFit("pageFit").setDocument("document")
+                .setPageLabel("pageLabel").setLoading("loading").setLink("link")
+                .setGoToPage("goToPage").setExternalLink("externalLink")
+                .setDownload("download");
         viewer.setI18n(i18n);
 
         Assertions.assertSame(i18n, viewer.getI18n());
         var json = (ObjectNode) viewer.getElement().getPropertyRaw("i18n");
-        var keys = List.of("previousPage", "nextPage", "pageError", "zoomIn",
-                "zoomOut", "pageWidth", "pageFit", "document", "link",
-                "goToPage", "externalLink", "download");
+        var keys = List.of("previousPage", "nextPage", "page", "pageError",
+                "zoomIn", "zoomOut", "zoom", "pageWidth", "pageFit", "document",
+                "pageLabel", "loading", "link", "goToPage", "externalLink",
+                "download");
         Assertions.assertEquals(keys.size(), json.size());
         keys.forEach(
                 key -> Assertions.assertEquals(key, json.get(key).asString()));
