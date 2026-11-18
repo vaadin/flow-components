@@ -2855,6 +2855,162 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_outputGuardrailRewritesAnswer_chatMemoryKeepsTheRewrittenAnswer() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.outputGuardrails(redactingGuardrail()));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("The code is 1234")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("The code?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of("The code?", "[redacted]", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(1)));
+    }
+
+    @Test
+    void customizer_streamingOutputGuardrailRewritesAnswer_chatMemoryKeepsTheRewrittenAnswer() {
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(redactingGuardrail()));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("The code is 1234");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("The code is 1234")).build());
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("You are welcome");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("You are welcome")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        customized.stream(createSimpleRequest("The code?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
+                captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        Assertions.assertEquals(List.of("The code?", "[redacted]", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(1)));
+    }
+
+    @Test
+    void customizer_outputGuardrailReprompt_chatMemoryKeepsTheAcceptedAnswer() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("warm")
+                                ? reprompt("No temperature",
+                                        "Give the temperature")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("Weather?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Weather?", "It is 22°C", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(2)));
+    }
+
+    @Test
+    void customizer_outputGuardrailFailsWithMessageRemoval_chatMemoryDropsTheRejectedAnswer() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("1234")
+                                ? fatalWithMessageRemoval("Contains the code")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hello")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("The code is 1234")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+        customized.stream(createSimpleRequest("Hi")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var failedTurn = customized.stream(createSimpleRequest("The code?"))
+                .collectList();
+        Assertions.assertThrows(OutputGuardrailException.class,
+                () -> failedTurn.block(TURN_TIMEOUT));
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Hi", "Hello", "The code?", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(2)));
+    }
+
+    @Test
+    void customizer_outputGuardrailKeepsAnswer_chatMemoryKeepsTheModelMessage() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return success();
+                    }
+                }));
+        var answer = AiMessage.builder().text("It is 22°C")
+                .thinking("The sensor says 22").build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder().aiMessage(answer).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("Weather?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(answer,
+                captor.getAllValues().get(1).messages().get(1));
+    }
+
+    private static List<String> getMessageTexts(ChatRequest request) {
+        return request.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+    }
+
+    @Test
     void customizer_outputGuardrail_textAlongsideToolCallIsNotEmitted() {
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service.tools(new SampleToolsClass())

@@ -139,6 +139,101 @@ class TurnScopedChatMemoryTest {
     }
 
     @Test
+    void replaceAnswer_replacesAnswerOfTurnAfterItsToolTraffic() {
+        memory.add(UserMessage.from("Question"));
+        memory.add(toolCall);
+        memory.add(toolResult);
+        memory.add(AiMessage.from("Answer"));
+
+        memory.replaceAnswer(turn, "Checked answer");
+
+        Assertions
+                .assertEquals(
+                        List.of(UserMessage.from("Question"), toolCall,
+                                toolResult, AiMessage.from("Checked answer")),
+                        memory.messages());
+        Assertions.assertEquals(List.of(UserMessage.from("Question"),
+                AiMessage.from("Checked answer")), durable.messages());
+    }
+
+    @Test
+    void replaceAnswer_leavesEqualAnswerOfEarlierTurn() {
+        durable.add(UserMessage.from("Earlier question"));
+        durable.add(AiMessage.from("Answer"));
+        memory.add(UserMessage.from("Question"));
+        memory.add(AiMessage.from("Answer"));
+
+        memory.replaceAnswer(turn, "Checked answer");
+
+        Assertions.assertEquals(List.of(UserMessage.from("Earlier question"),
+                AiMessage.from("Answer"), UserMessage.from("Question"),
+                AiMessage.from("Checked answer")), durable.messages());
+    }
+
+    @Test
+    void replaceAnswer_sameText_keepsStoredMessage() {
+        var answer = AiMessage.builder().text("Answer").thinking("Thought")
+                .build();
+        memory.add(UserMessage.from("Question"));
+        memory.add(answer);
+
+        memory.replaceAnswer(turn, "Answer");
+
+        Assertions.assertEquals(List.of(UserMessage.from("Question"), answer),
+                durable.messages());
+    }
+
+    @Test
+    void replaceAnswer_withoutText_removesAnswer() {
+        memory.add(UserMessage.from("Question"));
+        memory.add(AiMessage.from("Answer"));
+
+        memory.replaceAnswer(turn, null);
+
+        Assertions.assertEquals(List.of(UserMessage.from("Question")),
+                memory.messages());
+        Assertions.assertEquals(List.of(UserMessage.from("Question")),
+                durable.messages());
+    }
+
+    @Test
+    void replaceAnswer_withoutText_answerIsOnlyMessage_emptiesDurableMemory() {
+        memory.add(AiMessage.from("Answer"));
+
+        memory.replaceAnswer(turn, null);
+
+        Assertions.assertTrue(durable.messages().isEmpty());
+    }
+
+    @Test
+    void replaceAnswer_messageAfterAnswer_replacesAnswerAndKeepsMessage() {
+        memory.add(UserMessage.from("Question"));
+        memory.add(AiMessage.from("Answer"));
+        durable.add(UserMessage.from("Next question"));
+
+        memory.replaceAnswer(turn, "Checked answer");
+
+        Assertions.assertEquals(List.of(UserMessage.from("Question"),
+                AiMessage.from("Checked answer"),
+                UserMessage.from("Next question")), durable.messages());
+    }
+
+    @Test
+    void replaceAnswer_turnWithoutAnswer_changesNothing() {
+        durable.add(UserMessage.from("Earlier question"));
+        durable.add(AiMessage.from("Earlier answer"));
+        memory.add(UserMessage.from("Question"));
+        memory.add(toolCall);
+
+        memory.replaceAnswer(turn, "Checked answer");
+
+        Assertions.assertEquals(List.of(UserMessage.from("Earlier question"),
+                AiMessage.from("Earlier answer"), UserMessage.from("Question")),
+                durable.messages());
+        Assertions.assertEquals(List.of(toolCall), turn);
+    }
+
+    @Test
     void nullMessage_isIgnored() {
         memory.add((ChatMessage) null);
 

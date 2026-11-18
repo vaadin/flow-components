@@ -155,7 +155,12 @@ import tools.jackson.databind.JsonNode;
  * <b>Output guardrails:</b> the text of the response is the text the output
  * guardrails set in the customizer returned. LangChain4j runs them on the final
  * answer only, so with output guardrails the text a model sends next to its
- * tool calls is not passed on.
+ * tool calls is not passed on. The provider's chat memory keeps the answer as
+ * the guardrails returned it, so later turns continue from what the user
+ * received. When a guardrail fails the turn, the answer it rejected stays in
+ * the chat memory, unless the guardrail asks LangChain4j to remove it with
+ * {@code fatalWithMessageRemoval(...)} or
+ * {@code failureWithMessageRemoval(...)}.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -202,8 +207,9 @@ import tools.jackson.databind.JsonNode;
  * memory you configure in the customizer replaces the provider's own, and
  * LangChain4j fills it as it does for any AI service: it also receives the tool
  * calls and their results, including those of a turn that failed or was
- * cancelled, and with {@code storeRetrievedContentInChatMemory(false)} a user
- * message without its attachments. History restore with
+ * cancelled, with {@code storeRetrievedContentInChatMemory(false)} a user
+ * message without its attachments, and with output guardrails the answer as the
+ * model gave it, not as the guardrails returned it. History restore with
  * {@link #setHistory(List, Map)} writes to the chat memory the service uses,
  * whichever it is. A {@code chatMemoryProvider} set in the customizer creates
  * that memory on the first turn, so a history restored before it is not written
@@ -294,6 +300,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * model, which is where the follow-up model calls of a turn are made.
      */
     private final transient ThreadLocal<Turn> turnOnThread = new ThreadLocal<>();
+    /**
+     * The provider's own chat memory, which the service uses unless the
+     * customizer sets another one.
+     */
+    private final transient TurnScopedChatMemory chatMemory = createChatMemory();
     private final BackgroundExecution backgroundExecution = new BackgroundExecution(
             LangChain4JLLMProvider.class);
     private int maxCallsPerTool = DEFAULT_MAX_CALLS_PER_TOOL;
@@ -417,6 +428,13 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn.
      */
     private void prepare(AiServices<ChatService> builder) {
+        builder.chatMemory(chatMemory);
+        builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
+        builder.hallucinatedToolNameStrategy(
+                LangChain4JLLMProvider::toolNotFound);
+    }
+
+    private TurnScopedChatMemory createChatMemory() {
         // The service reads the memory before it adds the user message of
         // the turn, so a request carries the window plus that message. The
         // window is sized one short to keep a request within MAX_MESSAGES.
@@ -426,11 +444,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var durable = MessageWindowChatMemory.builder()
                 .maxMessages(MAX_MESSAGES - 1)
                 .alwaysKeepSystemMessageFirst(true).build();
-        builder.chatMemory(new TurnScopedChatMemory(durable,
-                this::getTurnMessages, this::withTurnAttachments));
-        builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
-        builder.hallucinatedToolNameStrategy(
-                LangChain4JLLMProvider::toolNotFound);
+        return new TurnScopedChatMemory(durable, this::getTurnMessages,
+                this::withTurnAttachments);
     }
 
     /**
@@ -665,7 +680,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 return;
             }
             var turn = new Turn(request, sink,
-                    new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
+                    new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls),
+                    chatMemory);
             try {
                 runInTurn(turn, () -> {
                     startTurn(turn);
@@ -1244,6 +1260,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final LLMRequest request;
         private final FluxSink<String> sink;
         private final ToolCallLimits toolCallLimits;
+        /**
+         * The provider's own chat memory, where the turn stores the answer its
+         * output guardrails returned.
+         */
+        private final TurnScopedChatMemory chatMemory;
         private final AtomicBoolean ended = new AtomicBoolean(false);
         /**
          * Tool calls, tool results and answers of this turn, in order. The
@@ -1272,10 +1293,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private boolean outputGuarded;
 
         Turn(LLMRequest request, FluxSink<String> sink,
-                ToolCallLimits toolCallLimits) {
+                ToolCallLimits toolCallLimits,
+                TurnScopedChatMemory chatMemory) {
             this.request = request;
             this.sink = sink;
             this.toolCallLimits = toolCallLimits;
+            this.chatMemory = chatMemory;
         }
 
         boolean isCancelled() {
@@ -1401,7 +1424,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
             warnOnMissingFinishReason();
             if (outputGuarded) {
-                emit(response.aiMessage().text());
+                var answer = response.aiMessage().text();
+                storeGuardedAnswer(answer);
+                emit(answer);
             }
             sink.complete();
         }
@@ -1424,8 +1449,29 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 result.intermediateResponses()
                         .forEach(response -> emit(response.aiMessage().text()));
             }
+            if (outputGuarded) {
+                storeGuardedAnswer(result.content());
+            }
             emit(result.content());
             sink.complete();
+        }
+
+        /**
+         * Stores the answer the output guardrails returned in the provider's
+         * chat memory, in place of the answer of the model they checked.
+         * LangChain4j keeps that one in the memory, also when a guardrail
+         * rewrote it or accepted a later answer after a reprompt, so later
+         * turns would continue from an answer the user never received, and a
+         * history restore would change what the model is shown. A chat memory
+         * set in the customizer is left as LangChain4j filled it: the
+         * provider's memory then holds no answer of the turn to replace. The
+         * answer of a cancelled turn is left alone as well. Nobody received it,
+         * and the next turn may already be using the memory.
+         */
+        private void storeGuardedAnswer(String answer) {
+            if (!isCancelled()) {
+                chatMemory.replaceAnswer(turnMessages, answer);
+            }
         }
 
         /**

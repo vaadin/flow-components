@@ -53,7 +53,9 @@ import dev.langchain4j.memory.ChatMemory;
  * assistant message with neither content nor tool calls is rejected by some LLM
  * APIs. A user message is stored as the function given to the constructor
  * completes it, which lets the owner add what LangChain4j left out, such as the
- * attachments of the turn.
+ * attachments of the turn. The owner also replaces the answer of a turn whose
+ * output guardrails returned another one, see
+ * {@link #replaceAnswer(List, String)}.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -144,6 +146,61 @@ final class TurnScopedChatMemory implements ChatMemory {
             turn.clear();
         }
         durable.clear();
+    }
+
+    /**
+     * Stores the given text as the answer of a turn, in place of the answer the
+     * turn stored last. LangChain4j adds the answer of the model before the
+     * output guardrails run and leaves it as it is, also when a guardrail
+     * rewrites it or accepts a later answer after a reprompt. With the answer
+     * replaced, the conversation continues from what the turn delivered.
+     * <p>
+     * Does nothing when the turn stored no answer, which is the case when the
+     * service uses another chat memory, and when the stored answer already has
+     * the given text. Without a text, the stored answer is removed.
+     *
+     * @param turn
+     *            the list that holds the tool traffic and the answers of the
+     *            turn
+     * @param text
+     *            the text of the answer the turn delivered, or {@code null} if
+     *            it delivered none
+     */
+    void replaceAnswer(List<ChatMessage> turn, String text) {
+        var answer = turn.stream().filter(AiMessage.class::isInstance)
+                .map(AiMessage.class::cast)
+                .filter(message -> !message.hasToolExecutionRequests())
+                .reduce((first, second) -> second).orElse(null);
+        if (answer == null || answer.text().equals(text)) {
+            return;
+        }
+        var replacement = text == null || text.isEmpty() ? null
+                : AiMessage.from(text);
+        replace(turn, answer, replacement);
+        var kept = new ArrayList<>(durable.messages());
+        if (!replace(kept, answer, replacement)) {
+            return;
+        }
+        if (kept.isEmpty()) {
+            durable.clear();
+        } else {
+            durable.set(kept);
+        }
+    }
+
+    private static boolean replace(List<ChatMessage> messages,
+            ChatMessage message, ChatMessage replacement) {
+        for (var i = messages.size() - 1; i >= 0; i--) {
+            if (messages.get(i) == message) {
+                if (replacement == null) {
+                    messages.remove(i);
+                } else {
+                    messages.set(i, replacement);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isToolTraffic(ChatMessage message) {

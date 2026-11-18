@@ -116,8 +116,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   results. With
   `storeRetrievedContentInChatMemory(false)`, LangChain4j stores the user
   message as the template rendered it, without the attachments the provider
-  passes separately, so the provider's memory adds them back. A memory set in
-  the customizer replaces it and gets LangChain4j's behavior.
+  passes separately, so the provider's memory adds them back. With output
+  guardrails, LangChain4j leaves the answer in the memory as the model gave
+  it, also when a guardrail rewrote it or accepted a later one after a
+  reprompt. The provider replaces it with the answer the turn delivered, so
+  that later turns and a history restore show the model the conversation the
+  user saw. `SpringAILLMProvider` gets the same from Spring AI: its memory
+  advisor sees a response after the advisors ordered behind it changed it. A
+  turn that a guardrail fails keeps the rejected answer in the memory unless
+  the guardrail fails it with message removal. That is LangChain4j's default
+  and LangChain4j's option, and both are left as they are. A memory set in
+  the customizer replaces the provider's own and gets LangChain4j's behavior.
   `LangChain4JLLMProvider` also leaves a final answer without text out of the
   memory. A model may answer that way once a tool call has done the work,
   LangChain4j hands the answer over as an `AiMessage` with a `null` text, and
