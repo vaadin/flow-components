@@ -30,7 +30,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
-class HierarchyColumnComponentRendererTest {
+class TreeGridHierarchyColumnTest {
 
     @RegisterExtension
     final MockUIExtension ui = new MockUIExtension();
