@@ -192,8 +192,9 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final ObjectNode configurationNode = JacksonUtils
-                .readTree(ChartSerialization.toJSON(configuration));
+        final ObjectNode configurationNode = StringFunctionReporter
+                .report(JacksonUtils
+                        .readTree(ChartSerialization.toJSON(configuration)));
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
@@ -742,7 +743,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
 
         private ObjectNode toJsonValue(AbstractConfigurationObject series) {
-            return JacksonUtils.readTree((ChartSerialization.toJSON(series)));
+            return StringFunctionReporter.report(
+                    JacksonUtils.readTree(ChartSerialization.toJSON(series)));
         }
 
         private Series resolveSeriesFor(int seriesIndex) {
