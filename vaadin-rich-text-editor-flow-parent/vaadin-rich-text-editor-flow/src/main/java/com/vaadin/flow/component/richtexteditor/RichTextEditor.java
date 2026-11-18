@@ -1194,7 +1194,8 @@ public class RichTextEditor
                 // HTML value, which will eventually trigger a server-side value
                 // change event on the component
                 RichTextEditor.this.getElement()
-                        .executeJs("return this.htmlValue").then(jsonNode -> {
+                        .executeJs(RichTextEditorJs.class).getHtmlValue()
+                        .then(jsonNode -> {
                             isHtmlValueSync = true;
                             RichTextEditor.this.setValue(jsonNode.asString());
                             isHtmlValueSync = false;
