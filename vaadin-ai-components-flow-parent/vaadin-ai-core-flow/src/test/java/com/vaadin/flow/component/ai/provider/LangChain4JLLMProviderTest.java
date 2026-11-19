@@ -322,10 +322,16 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
 
+        var error = new AtomicReference<Throwable>();
+
+        // A turn that hangs instead fails the test with a timeout
+        provider.stream(request).doOnError(error::set).onErrorComplete()
+                .collectList().block(TURN_TIMEOUT);
+
         // The AI service has no answer to record for a response without an
         // AI message, so the turn fails instead of ending empty
-        Assertions.assertThrows(RuntimeException.class,
-                () -> provider.stream(request).collectList().block());
+        Assertions.assertNotNull(error.get(),
+                "A response without an AI message should fail the turn");
     }
 
     @Test
