@@ -114,7 +114,9 @@ public class MessageInput extends Component
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
-     * key.
+     * key. The listener is not called while submitting is disabled with
+     * {@link #setSubmitDisabled(boolean)}. If a listener disables submitting,
+     * the listeners after it are not called for the same submit.
      *
      * @param listener
      *            the listener
@@ -122,7 +124,12 @@ public class MessageInput extends Component
      */
     public Registration addSubmitListener(
             ComponentEventListener<SubmitEvent> listener) {
-        return addListener(SubmitEvent.class, listener);
+        return addListener(SubmitEvent.class, event -> {
+            if (event.isFromClient() && isSubmitDisabled()) {
+                return;
+            }
+            listener.onComponentEvent(event);
+        });
     }
 
     /**
@@ -142,6 +149,10 @@ public class MessageInput extends Component
      * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
      * input field, and the typed text is kept. Use this, for example, to
      * prevent sending a message while a file is still uploading.
+     * <p>
+     * The server also ignores a submit that the browser sends while submitting
+     * is disabled, so listeners added with
+     * {@link #addSubmitListener(ComponentEventListener)} are not called for it.
      * <p>
      * The default value is {@code false}.
      *

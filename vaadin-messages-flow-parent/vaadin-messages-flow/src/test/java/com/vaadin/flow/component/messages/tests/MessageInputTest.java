@@ -90,6 +90,47 @@ class MessageInputTest {
     }
 
     @Test
+    void submitDisabled_submitFromClient_listenerNotCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void submitDisabled_fireServerEvent_listenerCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        var event = new MessageInput.SubmitEvent(messageInput, false, "foo");
+        ComponentUtil.fireEvent(messageInput, event);
+        Assertions.assertSame(event, eventRef.get());
+    }
+
+    @Test
+    void submitReEnabled_submitFromClient_listenerCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+        messageInput.setSubmitDisabled(false);
+
+        submitFromClient("foo");
+        Assertions.assertEquals("foo", eventRef.get().getValue());
+    }
+
+    @Test
+    void removeSubmitListener_submitFromClient_listenerNotCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput.addSubmitListener(eventRef::set).remove();
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
     void implementsHasTooltip() {
         Assertions.assertTrue(messageInput instanceof HasTooltip);
     }
@@ -105,5 +146,10 @@ class MessageInputTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(MessageInput.class));
+    }
+
+    private void submitFromClient(String value) {
+        ComponentUtil.fireEvent(messageInput,
+                new MessageInput.SubmitEvent(messageInput, true, value));
     }
 }
