@@ -26,8 +26,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
@@ -44,20 +46,24 @@ public class GridItemRefreshPage extends Div {
         // be updated in DOM, not in caches
         // updating the previous cell in animation frame so that grid active
         // item handling doesn't reset the changes
+        @JsFunctionParameterNames("e")
         @JsExpression("""
-                return html`<div id=${item.thirdField} @click=${(e) => {
-                    const div = e.currentTarget;
-                    div['innerText'] = 'EDITED';
-                    window.requestAnimationFrame(() => {
-                        div.parentElement.previousElementSibling['textContent'] = 'EDITED';
-                    });
-                }}>${item.thirdField}</div>`;
+                const div = e.currentTarget;
+                div['innerText'] = 'EDITED';
+                window.requestAnimationFrame(() => {
+                    div.parentElement.previousElementSibling['textContent'] = 'EDITED';
+                });
                 """)
-        CompiledLitTemplate editableCell();
+        JsFunction editCellValue();
+
+        @JsExpression("return html`<div id=${item.thirdField} @click=${$0}>${item.thirdField}</div>`;")
+        CompiledLitTemplate editableCell(JsFunction onClick);
     }
 
+    private static final Templates TEMPLATES = JsSnippets.of(Templates.class);
+
     private static final LitRenderer<Bean> UPDATE_RENDERER = LitRenderer
-            .of(JsSnippets.of(Templates.class).editableCell());
+            .of(TEMPLATES.editableCell(TEMPLATES.editCellValue()));
 
     private static class Bean {
         private String firstField;
