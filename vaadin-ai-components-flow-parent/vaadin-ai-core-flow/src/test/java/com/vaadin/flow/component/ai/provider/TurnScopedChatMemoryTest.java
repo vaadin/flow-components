@@ -175,6 +175,18 @@ class TurnScopedChatMemoryTest {
     }
 
     @Test
+    void set_inTurn_onlyToolTraffic_emptiesDurableMemory() {
+        memory.add(UserMessage.from("Question"));
+        memory.add(toolCall);
+
+        memory.set(List.of(toolCall, toolResult));
+
+        Assertions.assertEquals(List.of(toolCall, toolResult),
+                memory.messages());
+        Assertions.assertTrue(durable.messages().isEmpty());
+    }
+
+    @Test
     void set_storesUserMessagesAsGiven() {
         userMessages = message -> UserMessage
                 .from(message.singleText() + " and its attachment");
