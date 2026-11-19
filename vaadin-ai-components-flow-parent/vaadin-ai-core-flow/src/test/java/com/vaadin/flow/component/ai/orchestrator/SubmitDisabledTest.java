@@ -345,6 +345,19 @@ class SubmitDisabledTest {
     }
 
     @Test
+    void inputSubmit_laterSubmitListenerCalled() {
+        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+                .build();
+        var submitted = new AtomicReference<String>();
+        messageInput
+                .addSubmitListener(event -> submitted.set(event.getValue()));
+
+        submitFromClient("Hello");
+
+        Assertions.assertEquals("Hello", submitted.get());
+    }
+
+    @Test
     void uploadManagerReceivingFile_submitDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
