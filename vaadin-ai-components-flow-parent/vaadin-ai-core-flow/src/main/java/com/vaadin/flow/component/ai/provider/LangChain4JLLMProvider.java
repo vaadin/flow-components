@@ -115,22 +115,24 @@ import tools.jackson.databind.JsonNode;
  * customizer configured: it supplies the tools of each turn next to the tools
  * of the customizer, adds the session context and the attachments to the user
  * message, reports the response metadata and enforces the tool call limits.
- * Once a turn is cancelled, the provider calls the model no more and does not
- * pass a model response that arrives later on to the service, so no tool runs
- * for it, whether the provider or the customizer supplied it. Before the
- * customizer runs, the provider sets defaults that the customizer may replace:
- * its own chat memory, no limit on LangChain4j's tool calling round trips (the
- * provider's own tool call limits bound the loop), and a result that tells the
- * model when it called a tool that does not exist. The model is the one given
- * to the constructor, so a model set in the customizer is not used. Errors of
- * the tools added in the customizer are handled by LangChain4j, with the tool
- * error handlers set in the customizer or with LangChain4j's defaults; see the
- * LangChain4j documentation on how to handle them safely. Unless the customizer
- * sets both handlers, LangChain4j logs a notice that asks for them, once, also
- * when the customizer adds no tools. The notice does not concern the tools of
- * the orchestrator, whose errors never reach these handlers. Setting both
- * handlers in the customizer chooses the behavior for the tools you add, and
- * LangChain4j then logs no notice.
+ * Give the tools you add in the customizer names that the tools of the turn do
+ * not use: LangChain4j rejects two tools of the same name, and every turn that
+ * has both then fails. Once a turn is cancelled, the provider calls the model
+ * no more and does not pass a model response that arrives later on to the
+ * service, so no tool runs for it, whether the provider or the customizer
+ * supplied it. Before the customizer runs, the provider sets defaults that the
+ * customizer may replace: its own chat memory, no limit on LangChain4j's tool
+ * calling round trips (the provider's own tool call limits bound the loop), and
+ * a result that tells the model when it called a tool that does not exist. The
+ * model is the one given to the constructor, so a model set in the customizer
+ * is not used. Errors of the tools added in the customizer are handled by
+ * LangChain4j, with the tool error handlers set in the customizer or with
+ * LangChain4j's defaults; see the LangChain4j documentation on how to handle
+ * them safely. Unless the customizer sets both handlers, LangChain4j logs a
+ * notice that asks for them, once, also when the customizer adds no tools. The
+ * notice does not concern the tools of the orchestrator, whose errors never
+ * reach these handlers. Setting both handlers in the customizer chooses the
+ * behavior for the tools you add, and LangChain4j then logs no notice.
  * </p>
  * <p>
  * <b>System prompt:</b> you can set a system prompt in the customizer with
@@ -1011,9 +1013,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * request the turn was started with, read from the invocation parameters.
      * Every executor checks the state of the turn before it runs, so no tool of
      * a round executes once a tool call limit is exceeded or the turn is
-     * cancelled. A tool replaces an earlier one of the same name, as the
-     * orchestrator warns when it finds such tools; LangChain4j would reject the
-     * turn instead.
+     * cancelled. A tool replaces an earlier one of the same name in the
+     * request, as the orchestrator warns when it finds such tools; LangChain4j
+     * would reject the turn instead.
      */
     private static final class TurnToolProvider implements ToolProvider {
 

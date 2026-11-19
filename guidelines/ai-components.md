@@ -77,7 +77,10 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   configured: it sets its replaceable defaults (memory, unbounded round trips,
   the made-up tool result) before the customizer runs, and adds what must not
   be replaced afterwards (its tool provider and listeners, which add up with
-  the customizer's, and the constructor's model). Tools added in the
+  the customizer's, and the constructor's model). The provider cannot see
+  the tools the customizer adds, so it does not resolve a name clash with
+  the tools of the turn: LangChain4j rejects the turn, and the class Javadoc
+  asks for distinct names. Tools added in the
   customizer keep LangChain4j's tool error handling, like any vendor `@Tool`
   tool (see the error hygiene rule below). Only a provider without a
   customizer sets the error handlers, which none of its own tools reach, so
