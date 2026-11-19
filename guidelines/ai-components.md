@@ -124,7 +124,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   results. With
   `storeRetrievedContentInChatMemory(false)`, LangChain4j stores the user
   message as the template rendered it, without the attachments the provider
-  passes separately, so the provider's memory adds them back. With output
+  passes separately, so the provider's memory adds them back. When
+  LangChain4j rolls back tools (`compensateOnToolErrors`), it rewrites the
+  memory with `set()` within the turn. The provider's memory puts each
+  message back where it was and stores it as given, so an earlier answer
+  stays ahead of the turn's question and a stored user message does not get
+  the attachments of the turn. With output
   guardrails, LangChain4j leaves the answer in the memory as the model gave
   it, also when a guardrail rewrote it or accepted a later one after a
   reprompt. The provider replaces it with the answer the turn delivered, so

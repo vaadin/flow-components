@@ -51,6 +51,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.MockUIExtension;
 
+import dev.langchain4j.agent.tool.CompensateFor;
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -3104,6 +3105,41 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_compensatedToolError_keepsOrderOfConversation() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new CompensatedToolClass())
+                        .compensateOnToolErrors(true));
+        var toolCalls = ChatResponse.builder()
+                .aiMessage(AiMessage.from(List.of(
+                        ToolExecutionRequest.builder().id("1").name("book")
+                                .arguments("{}").build(),
+                        ToolExecutionRequest.builder().id("2").name("pay")
+                                .arguments("{}").build())))
+                .build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi")).build())
+                .thenReturn(toolCalls).thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Booking failed")).build());
+
+        customized.stream(createSimpleRequest("Hello")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Book a flight")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The failed payment rolls the booking back, which rewrites the
+        // chat memory. The answer of the first turn stays ahead of the
+        // question of the second.
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertEquals(
+                List.of(UserMessage.from("Hello"), AiMessage.from("Hi"),
+                        UserMessage.from("Book a flight")),
+                messages.subList(0, 3), messages.toString());
+    }
+
+    @Test
     void constructor_withoutCustomizer_logsNoToolErrorHandlingNotice()
             throws ReflectiveOperationException {
         // LangChain4j logs the notice once per JVM, for the first service
@@ -4678,6 +4714,23 @@ class LangChain4JLLMProviderTest {
         @Tool
         public String count() {
             return String.valueOf(calls.incrementAndGet());
+        }
+    }
+
+    private static class CompensatedToolClass {
+        @Tool
+        public String book() {
+            return "Booked";
+        }
+
+        @CompensateFor("book")
+        public void cancelBooking() {
+            // Nothing to undo: the booking above changes no state
+        }
+
+        @Tool
+        public String pay() {
+            throw new IllegalStateException("Payment failed");
         }
     }
 

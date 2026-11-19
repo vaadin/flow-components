@@ -139,6 +139,76 @@ class TurnScopedChatMemoryTest {
     }
 
     @Test
+    void set_inTurn_keepsEarlierAnswerAheadOfTurn() {
+        durable.add(UserMessage.from("Earlier question"));
+        durable.add(AiMessage.from("Earlier answer"));
+        memory.add(UserMessage.from("Question"));
+        memory.add(toolCall);
+        memory.add(toolResult);
+        var rewrittenResult = ToolExecutionResultMessage.from(toolRequest,
+                "rolled back");
+        var messages = new ArrayList<>(memory.messages());
+        messages.set(messages.indexOf(toolResult), rewrittenResult);
+
+        memory.set(messages);
+
+        Assertions.assertEquals(List.of(UserMessage.from("Earlier question"),
+                AiMessage.from("Earlier answer"), UserMessage.from("Question"),
+                toolCall, rewrittenResult), memory.messages());
+        Assertions.assertEquals(List.of(toolCall, rewrittenResult), turn);
+    }
+
+    @Test
+    void set_inTurn_keepsAnswerOfTurnAfterItsToolTraffic() {
+        memory.add(UserMessage.from("Question"));
+        memory.add(toolCall);
+        memory.add(toolResult);
+        memory.add(AiMessage.from("Answer"));
+
+        memory.set(memory.messages());
+
+        Assertions.assertEquals(List.of(UserMessage.from("Question"), toolCall,
+                toolResult, AiMessage.from("Answer")), memory.messages());
+        Assertions.assertEquals(
+                List.of(UserMessage.from("Question"), AiMessage.from("Answer")),
+                durable.messages());
+    }
+
+    @Test
+    void set_storesUserMessagesAsGiven() {
+        userMessages = message -> UserMessage
+                .from(message.singleText() + " and its attachment");
+        memory.add(UserMessage.from("Question"));
+
+        memory.set(memory.messages());
+
+        Assertions.assertEquals(
+                List.of(UserMessage.from("Question and its attachment")),
+                durable.messages());
+    }
+
+    @Test
+    void set_outsideTurn_storesToolTrafficInDurableMemory() {
+        turnRunning = false;
+
+        memory.set(List.of(UserMessage.from("Question"), toolCall, toolResult));
+
+        Assertions.assertEquals(
+                List.of(UserMessage.from("Question"), toolCall, toolResult),
+                durable.messages());
+    }
+
+    @Test
+    void set_noMessages_throws() {
+        memory.add(UserMessage.from("Question"));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> memory.set(List.of()));
+        Assertions.assertEquals(List.of(UserMessage.from("Question")),
+                durable.messages());
+    }
+
+    @Test
     void replaceAnswer_replacesAnswerOfTurnAfterItsToolTraffic() {
         memory.add(UserMessage.from("Question"));
         memory.add(toolCall);

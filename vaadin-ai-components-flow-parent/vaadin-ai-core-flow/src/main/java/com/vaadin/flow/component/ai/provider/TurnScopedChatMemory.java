@@ -53,9 +53,9 @@ import dev.langchain4j.memory.ChatMemory;
  * assistant message with neither content nor tool calls is rejected by some LLM
  * APIs. A user message is stored as the function given to the constructor
  * completes it, which lets the owner add what LangChain4j left out, such as the
- * attachments of the turn. The owner also replaces the answer of a turn whose
- * output guardrails returned another one, see
- * {@link #replaceAnswer(List, String)}.
+ * attachments of the turn. A rewrite with {@link #set(Iterable)} stores the
+ * messages as given. The owner also replaces the answer of a turn whose output
+ * guardrails returned another one, see {@link #replaceAnswer(List, String)}.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -137,6 +137,46 @@ final class TurnScopedChatMemory implements ChatMemory {
         }
         messages.addAll(turn);
         return messages;
+    }
+
+    /**
+     * Replaces the messages, keeping each where it was: the tool traffic and
+     * the answers of the running turn in the list of the turn, and the other
+     * messages in the wrapped memory. LangChain4j rewrites the memory this way
+     * within a turn when it rolls back tools. The messages are stored as given,
+     * so a user message is not completed again.
+     */
+    @Override
+    public void set(Iterable<ChatMessage> messages) {
+        if (messages == null || !messages.iterator().hasNext()) {
+            throw new IllegalArgumentException(
+                    "messages must not be null or empty");
+        }
+        var turn = turnMessages.get();
+        var kept = new ArrayList<ChatMessage>();
+        var inTurn = new ArrayList<ChatMessage>();
+        for (var message : messages) {
+            if (turn == null) {
+                kept.add(message);
+            } else if (isToolTraffic(message)) {
+                inTurn.add(message);
+            } else {
+                // An answer of the running turn is in both, see add()
+                if (turn.stream().anyMatch(answer -> answer == message)) {
+                    inTurn.add(message);
+                }
+                kept.add(message);
+            }
+        }
+        if (turn != null) {
+            turn.clear();
+            turn.addAll(inTurn);
+        }
+        if (kept.isEmpty()) {
+            durable.clear();
+        } else {
+            durable.set(kept);
+        }
     }
 
     @Override
