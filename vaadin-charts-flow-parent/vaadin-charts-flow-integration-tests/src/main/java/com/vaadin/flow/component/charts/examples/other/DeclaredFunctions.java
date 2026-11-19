@@ -41,7 +41,8 @@ public class DeclaredFunctions extends AbstractChartExample {
         Chart chart = new Chart(ChartType.COLUMN);
         Configuration configuration = chart.getConfiguration();
         configuration.setTitle("Declared functions");
-        configuration.getTooltip().setFormatter(FORMATTERS.scaled(1, " units"));
+        configuration.getTooltip()
+                .setFormatterFunction(FORMATTERS.scaled(1, " units"));
         configuration
                 .addSeries(withLabels(new ListSeries("Sales", 2000, 4000, 8000),
                         FORMATTERS.scaled(1000, "k")));
@@ -58,7 +59,7 @@ public class DeclaredFunctions extends AbstractChartExample {
     private static ListSeries withLabels(ListSeries series,
             ChartFunction formatter) {
         DataLabels dataLabels = new DataLabels(true);
-        dataLabels.setFormatter(formatter);
+        dataLabels.setFormatterFunction(formatter);
         PlotOptionsColumn plotOptions = new PlotOptionsColumn();
         plotOptions.setDataLabels(dataLabels);
         series.setPlotOptions(plotOptions);

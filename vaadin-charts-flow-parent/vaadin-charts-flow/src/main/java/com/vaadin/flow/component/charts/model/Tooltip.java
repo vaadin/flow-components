@@ -304,8 +304,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * which need no JavaScript.
      * <p>
      * Setting a function this way clears a function set with
-     * {@link #setFormatter(ChartFunction)}, which works without compiling
-     * JavaScript in the browser.
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_formatter
      *            the source code of the JavaScript function
@@ -316,7 +316,7 @@ public class Tooltip extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setFormatter(ChartFunction)
+     * @see #setFormatterFunction(ChartFunction)
      */
     public ChartFunction getFormatterFunction() {
         return formatter;
@@ -335,7 +335,7 @@ public class Tooltip extends AbstractConfigurationObject {
      *            the function, or <code>null</code> to remove it
      * @since 25.4
      */
-    public void setFormatter(ChartFunction formatter) {
+    public void setFormatterFunction(ChartFunction formatter) {
         this.formatter = formatter;
         this._fn_formatter = null;
     }
@@ -466,8 +466,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * {@link com.vaadin.flow.server.CspViolationException}.
      * <p>
      * Setting a function this way clears a function set with
-     * {@link #setPositioner(ChartFunction)}, which works without compiling
-     * JavaScript in the browser.
+     * {@link #setPositionerFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_positioner
      *            the source code of the JavaScript function
@@ -478,7 +478,7 @@ public class Tooltip extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setPositioner(ChartFunction)
+     * @see #setPositionerFunction(ChartFunction)
      */
     public ChartFunction getPositionerFunction() {
         return positioner;
@@ -499,7 +499,7 @@ public class Tooltip extends AbstractConfigurationObject {
      *            the function, or <code>null</code> to remove it
      * @since 25.4
      */
-    public void setPositioner(ChartFunction positioner) {
+    public void setPositionerFunction(ChartFunction positioner) {
         this.positioner = positioner;
         this._fn_positioner = null;
     }

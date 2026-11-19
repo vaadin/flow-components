@@ -158,13 +158,13 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * JavaScript.
      * <p>
      * Setting a function this way clears a function set with
-     * {@link #setFormatter(ChartFunction)}, which works without compiling
-     * JavaScript in the browser.
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      */
     public abstract void setFormatter(String _fn_formatter);
 
     /**
-     * @see #setFormatter(ChartFunction)
+     * @see #setFormatterFunction(ChartFunction)
      */
     public ChartFunction getFormatterFunction() {
         return formatter;
@@ -185,14 +185,15 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      *            the function, or <code>null</code> to remove it
      * @since 25.4
      */
-    public void setFormatter(ChartFunction formatter) {
-        setFormatter((String) null);
+    public void setFormatterFunction(ChartFunction formatter) {
+        setFormatter(null);
         this.formatter = formatter;
     }
 
     /**
-     * Clears the function set with {@link #setFormatter(ChartFunction)}, for
-     * the subclasses that implement {@link #setFormatter(String)}.
+     * Clears the function set with
+     * {@link #setFormatterFunction(ChartFunction)}, for the subclasses that
+     * implement {@link #setFormatter(String)}.
      */
     void clearFormatterFunction() {
         formatter = null;

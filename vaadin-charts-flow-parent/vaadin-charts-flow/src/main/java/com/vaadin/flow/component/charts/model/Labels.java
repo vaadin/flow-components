@@ -170,8 +170,8 @@ public class Labels extends AbstractConfigurationObject {
      * JavaScript.
      * <p>
      * Setting a function this way clears a function set with
-     * {@link #setFormatter(ChartFunction)}, which works without compiling
-     * JavaScript in the browser.
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_formatter
      *            the source code of the JavaScript function
@@ -182,7 +182,7 @@ public class Labels extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setFormatter(ChartFunction)
+     * @see #setFormatterFunction(ChartFunction)
      */
     public ChartFunction getFormatterFunction() {
         return formatter;
@@ -201,7 +201,7 @@ public class Labels extends AbstractConfigurationObject {
      *            the function, or <code>null</code> to remove it
      * @since 25.4
      */
-    public void setFormatter(ChartFunction formatter) {
+    public void setFormatterFunction(ChartFunction formatter) {
         this.formatter = formatter;
         this._fn_formatter = null;
     }

@@ -72,7 +72,7 @@ class ChartFunctionTest {
         ChartFunction function = FORMATTERS.scaled(1000, "k");
 
         tooltip.setFormatter("function() { return 1; }");
-        tooltip.setFormatter(function);
+        tooltip.setFormatterFunction(function);
         Assertions.assertSame(function, tooltip.getFormatterFunction());
         Assertions.assertNull(tooltip.getFormatter());
 
@@ -88,7 +88,7 @@ class ChartFunctionTest {
         ChartFunction function = FORMATTERS.scaled(1000, "k");
 
         dataLabels.setFormatter("function() { return 1; }");
-        dataLabels.setFormatter(function);
+        dataLabels.setFormatterFunction(function);
         Assertions.assertSame(function, dataLabels.getFormatterFunction());
         Assertions.assertNull(dataLabels.getFormatter());
 
@@ -100,7 +100,8 @@ class ChartFunctionTest {
     void toJsonWithFunctions_functionsRemovedFromJsonWithTheirPaths() {
         ChartFunction tooltipFormatter = FORMATTERS.scaled(1, "%");
         ChartFunction labelFormatter = FORMATTERS.scaled(1000, "k");
-        chart.getConfiguration().getTooltip().setFormatter(tooltipFormatter);
+        chart.getConfiguration().getTooltip()
+                .setFormatterFunction(tooltipFormatter);
         chart.getConfiguration()
                 .setSeries(withFormatter(new ListSeries(1, 2), labelFormatter));
 
@@ -122,10 +123,10 @@ class ChartFunctionTest {
     void toJsonWithFunctions_functionInAxis_pathThroughAxisList() {
         ChartFunction function = FORMATTERS.scaled(1000, "k");
         Configuration configuration = chart.getConfiguration();
-        configuration.getxAxis().getLabels().setFormatter(function);
+        configuration.getxAxis().getLabels().setFormatterFunction(function);
         configuration.addyAxis(new YAxis());
         YAxis second = new YAxis();
-        second.getLabels().setFormatter(function);
+        second.getLabels().setFormatterFunction(function);
         configuration.addyAxis(second);
 
         JsonWithFunctions json = ChartSerialization
@@ -178,7 +179,7 @@ class ChartFunctionTest {
     @Test
     void toJson_functionWrittenAsNull() {
         chart.getConfiguration().getTooltip()
-                .setFormatter(FORMATTERS.scaled(1, "%"));
+                .setFormatterFunction(FORMATTERS.scaled(1, "%"));
 
         String json = ChartSerialization.toJSON(chart.getConfiguration());
 
@@ -188,7 +189,7 @@ class ChartFunctionTest {
     @Test
     void attached_drawChartWithFunction_sendsFunctionAsArgument() {
         ChartFunction function = FORMATTERS.scaled(1000, "k");
-        chart.getConfiguration().getTooltip().setFormatter(function);
+        chart.getConfiguration().getTooltip().setFormatterFunction(function);
         ui.add(chart);
         ui.dumpPendingJavaScriptInvocations();
 
@@ -256,7 +257,7 @@ class ChartFunctionTest {
         ChartFunction function = FORMATTERS.scaled(1000, "k");
         Theme theme = new Theme();
         DataLabels dataLabels = new DataLabels(true);
-        dataLabels.setFormatter(function);
+        dataLabels.setFormatterFunction(function);
         theme.getPlotOptions().getLine().setDataLabels(dataLabels);
 
         ChartOptions.get(ui.getUI()).setTheme(theme);
@@ -281,7 +282,7 @@ class ChartFunctionTest {
     private static <T extends com.vaadin.flow.component.charts.model.AbstractSeries> T withFormatter(
             T series, ChartFunction formatter) {
         DataLabels dataLabels = new DataLabels(true);
-        dataLabels.setFormatter(formatter);
+        dataLabels.setFormatterFunction(formatter);
         PlotOptionsLine plotOptions = new PlotOptionsLine();
         plotOptions.setDataLabels(dataLabels);
         series.setPlotOptions(plotOptions);

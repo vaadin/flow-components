@@ -34,7 +34,7 @@ import com.vaadin.flow.js.JsSnippet;
  * }
  *
  * SalesFormatters formatters = JsSnippets.of(SalesFormatters.class);
- * dataLabels.setFormatter(formatters.scaled(1000, "k"));
+ * dataLabels.setFormatterFunction(formatters.scaled(1000, "k"));
  * </pre>
  *
  * @since 25.4

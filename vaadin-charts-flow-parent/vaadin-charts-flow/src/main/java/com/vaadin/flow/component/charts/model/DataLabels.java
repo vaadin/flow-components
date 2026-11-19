@@ -305,8 +305,8 @@ public class DataLabels extends AbstractDataLabels {
      * JavaScript.
      * <p>
      * Setting a function this way clears a function set with
-     * {@link #setFormatter(ChartFunction)}, which works without compiling
-     * JavaScript in the browser.
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_formatter
      *            the source code of the JavaScript function
