@@ -42,7 +42,7 @@ public class Polar extends AbstractChartExample {
         xAxis.setMin(0);
         xAxis.setMax(360);
         Labels labels = new Labels();
-        labels.setFormatter("function() {return this.value + '°';}");
+        labels.setFormat("{value}°");
         xAxis.setLabels(labels);
         YAxis yAxis = new YAxis();
         yAxis.setMin(0);
