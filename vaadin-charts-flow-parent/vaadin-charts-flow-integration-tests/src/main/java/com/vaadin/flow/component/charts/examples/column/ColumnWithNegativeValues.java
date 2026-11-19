@@ -39,8 +39,8 @@ public class ColumnWithNegativeValues extends AbstractChartExample {
         conf.addxAxis(xAxis);
 
         Tooltip tooltip = new Tooltip();
-        tooltip.setFormatter(
-                "function() { return ''+ this.series.name +': '+ this.y +'';}");
+        tooltip.setHeaderFormat("");
+        tooltip.setPointFormat("{series.name}: {y}");
         conf.setTooltip(tooltip);
 
         conf.setCredits(new Credits(false));
