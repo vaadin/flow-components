@@ -60,8 +60,8 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.4.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.4.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-beta1")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
@@ -130,8 +130,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
             targetDetachRegistration.remove();
-            getTarget().getElement().executeJs(
-                    "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
+            getTarget().getElement().executeJs(ContextMenuJs.class)
+                    .removeTargetConnector();
             cancelTargetJavascriptExecution();
         }
 
@@ -156,13 +156,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         targetBeforeOpenRegistration = target.getElement()
                 .addEventListener("vaadin-context-menu-before-open",
                         this::beforeOpenHandler)
-                .addEventData(EVENT_DETAIL);
+                .addEventDataPath(EVENT_DETAIL);
     }
 
     private void updateListenOn() {
         var target = getTarget();
-        getElement().executeJs("this.listenOn=$0;",
-                target == null ? this : target);
+        getElement().executeJs(ContextMenuJs.class).setListenOn(
+                target == null ? getElement() : target.getElement());
     }
 
     /**
@@ -553,10 +553,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void requestTargetJsExecutions() {
         if (target != null) {
             cancelTargetJavascriptExecution();
-            targetJsRegistration = target.getElement().executeJs(
-                    "window.Vaadin.Flow.contextMenuTargetConnector.init(this);"
-                            + "this.$contextMenuTargetConnector.updateOpenOn($0);",
-                    openOnEventName);
+            targetJsRegistration = target.getElement()
+                    .executeJs(ContextMenuJs.class)
+                    .initTargetConnector(openOnEventName);
         }
     }
 
@@ -582,8 +581,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.contextMenuConnector.initLazy(this)");
+        getElement().executeJs(ContextMenuJs.class).initConnector();
     }
 
     void ensureTooltipElement() {

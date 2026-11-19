@@ -235,6 +235,20 @@ public class SeriesTooltip extends AbstractConfigurationObject {
         return _fn_pointFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>pointFormatter</code> option,
+     * as the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
+     * string is enough, use {@link #setPointFormat(String)}, which needs no
+     * JavaScript.
+     *
+     * @param _fn_pointFormatter
+     *            the source code of the JavaScript function
+     */
     public void setPointFormatter(String _fn_pointFormatter) {
         this._fn_pointFormatter = _fn_pointFormatter;
     }

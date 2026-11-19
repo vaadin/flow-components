@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.4.0-beta1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")
@@ -354,7 +354,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
             // if the component's value hasn't changed. The latter can be
             // the case when calling `clear()` in a `customValueSet` listener
             // which is triggered before any value is committed.
-            getElement().executeJs("this._inputElementValue = $0", "");
+            getElement().executeJs(ComboBoxJs.class).setInputElementValue("");
             return;
         }
 
@@ -365,8 +365,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().executeJs("this._inputElementValue = $0",
-                generateLabel(value));
+        getElement().executeJs(ComboBoxJs.class)
+                .setInputElementValue(generateLabel(value));
     }
 
     @Override

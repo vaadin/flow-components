@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/lit-renderer")
@@ -50,8 +51,7 @@ public class ComboBoxLitRendererPage extends Div {
 
     private void setLitRenderer(ComboBox<Integer> combo) {
         combo.setRenderer(LitRenderer
-                .<Integer> of(
-                        "<div id=\"item-${index}\">Lit: ${item.name}</div>")
+                .<Integer> of(JsSnippets.of(ItemTemplates.class).item())
                 .withProperty("name", item -> "Item " + item));
     }
 

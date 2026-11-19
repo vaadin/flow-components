@@ -50,8 +50,9 @@ public class DynamicExtremes extends AbstractChartExample {
         yAxis.setTitle(new AxisTitle("Temperature (°C)"));
         yAxis.getTitle().setAlign(VerticalAlign.HIGH);
 
-        configuration.getTooltip().setFormatter(
-                "return '<b>'+ this.series.name +'</b><br/>'+this.x +': '+ this.y +'°C'");
+        configuration.getTooltip().setHeaderFormat("");
+        configuration.getTooltip()
+                .setPointFormat("<b>{series.name}</b><br/>{x}: {y}°C");
 
         PlotOptionsLine plotOptions = new PlotOptionsLine();
         plotOptions.setDataLabels(new DataLabels(true));

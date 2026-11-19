@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-multi-select-combo-box/lit-renderer")
@@ -41,8 +42,7 @@ public class MultiSelectComboBoxLitRendererPage extends Div {
 
     private LitRenderer<Integer> createLitRenderer() {
         return LitRenderer
-                .<Integer> of(
-                        "<div id=\"item-${index}\">Lit: ${item.name}</div>")
+                .<Integer> of(JsSnippets.of(ItemTemplates.class).item())
                 .withProperty("name", item -> "Item " + item);
     }
 

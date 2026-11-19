@@ -77,8 +77,8 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
         PlotOptionsGauge plotOptionsGauge = new PlotOptionsGauge();
         plotOptionsGauge.setDataLabels(new DataLabels());
-        plotOptionsGauge.getDataLabels().setFormatter(
-                "function() {return '<span class=\"kmh\">'+ this.y + ' km/h</span><br/>' + '<span class=\"mph\">' + Math.round(this.y * 0.621) + ' mph</span>';}");
+        plotOptionsGauge.getDataLabels().setFormat(
+                "<span class=\"kmh\">{y} km/h</span><br/><span class=\"mph\">{(multiply y 0.621):.0f} mph</span>");
         plotOptionsGauge.setTooltip(new SeriesTooltip());
         plotOptionsGauge.getTooltip().setValueSuffix(" km/h");
         series.setPlotOptions(plotOptionsGauge);

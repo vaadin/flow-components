@@ -108,7 +108,7 @@ public class PdfViewerElement extends TestBenchElement {
      * Zooms in to the next zoom level with the zoom in button of the toolbar.
      */
     public void zoomIn() {
-        getToolbarButton("zoom-in").click();
+        getToolbarButton("toolbar-zoom-in").click();
     }
 
     /**
@@ -116,12 +116,11 @@ public class PdfViewerElement extends TestBenchElement {
      * toolbar.
      */
     public void zoomOut() {
-        getToolbarButton("zoom-out").click();
+        getToolbarButton("toolbar-zoom-out").click();
     }
 
-    private TestBenchElement getToolbarButton(String icon) {
-        return $("vaadin-pdf-viewer-button").withAttribute("icon", icon)
-                .single();
+    private TestBenchElement getToolbarButton(String slot) {
+        return $("vaadin-button").withAttribute("slot", slot).single();
     }
 
     /**

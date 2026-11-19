@@ -46,8 +46,8 @@ public class ChartOptions extends AbstractConfigurationObject {
             return;
         }
 
-        final ObjectNode configurationNode = JacksonUtils
-                .readTree(ChartSerialization.toJSON(this));
+        final ObjectNode configurationNode = StringFunctionReporter
+                .report(JacksonUtils.readTree(ChartSerialization.toJSON(this)));
         ui.getElement().executeJs(ChartJs.class)
                 .setHighchartsOptions(configurationNode);
     }

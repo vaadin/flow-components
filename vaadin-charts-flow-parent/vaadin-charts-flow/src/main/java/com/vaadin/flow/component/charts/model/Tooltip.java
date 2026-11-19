@@ -289,6 +289,21 @@ public class Tooltip extends AbstractConfigurationObject {
         return _fn_formatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>formatter</code> option, as the
+     * source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where format
+     * strings are enough, use {@link #setHeaderFormat(String)},
+     * {@link #setPointFormat(String)} and {@link #setFooterFormat(String)},
+     * which need no JavaScript.
+     *
+     * @param _fn_formatter
+     *            the source code of the JavaScript function
+     */
     public void setFormatter(String _fn_formatter) {
         this._fn_formatter = _fn_formatter;
     }
@@ -387,6 +402,20 @@ public class Tooltip extends AbstractConfigurationObject {
         return _fn_pointFormatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>pointFormatter</code> option,
+     * as the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
+     * string is enough, use {@link #setPointFormat(String)}, which needs no
+     * JavaScript.
+     *
+     * @param _fn_pointFormatter
+     *            the source code of the JavaScript function
+     */
     public void setPointFormatter(String _fn_pointFormatter) {
         this._fn_pointFormatter = _fn_pointFormatter;
     }
@@ -395,6 +424,18 @@ public class Tooltip extends AbstractConfigurationObject {
         return _fn_positioner;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>positioner</code> option, as
+     * the source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}.
+     *
+     * @param _fn_positioner
+     *            the source code of the JavaScript function
+     */
     public void setPositioner(String _fn_positioner) {
         this._fn_positioner = _fn_positioner;
     }

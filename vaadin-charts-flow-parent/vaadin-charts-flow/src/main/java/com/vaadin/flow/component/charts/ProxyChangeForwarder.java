@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.AxisDimension;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.databind.JsonNode;
+
 class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     private final Chart chart;
@@ -35,9 +37,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     public void dataAdded(DataAddedEvent event) {
         if (event.getItem() != null) {
             chart.getElement().callJsFunction("__callSeriesFunction",
-                    "addPoint", getSeriesIndex(event),
-                    JacksonUtils.getMapper().readTree(
-                            ChartSerialization.toJSON(event.getItem())),
+                    "addPoint", getSeriesIndex(event), toJson(event.getItem()),
                     true, event.isShift());
         }
     }
@@ -57,8 +57,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
         } else {
             chart.getElement().callJsFunction("__callPointFunction", "update",
                     getSeriesIndex(event), event.getPointIndex(),
-                    JacksonUtils.getMapper().readTree(
-                            ChartSerialization.toJSON(event.getItem())));
+                    toJson(event.getItem()));
         }
     }
 
@@ -94,16 +93,14 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void seriesAdded(SeriesAddedEvent event) {
         chart.getElement().callJsFunction("__callChartFunction", "addSeries",
-                JacksonUtils.readTree(ChartSerialization.toJSON(
-                        (AbstractConfigurationObject) event.getSeries())));
+                toJson((AbstractConfigurationObject) event.getSeries()));
     }
 
     @Override
     public void seriesChanged(SeriesChangedEvent event) {
         chart.getElement().callJsFunction("__callSeriesFunction", "update",
                 getSeriesIndex(event),
-                JacksonUtils.readTree(ChartSerialization.toJSON(
-                        (AbstractConfigurationObject) event.getSeries())));
+                toJson((AbstractConfigurationObject) event.getSeries()));
     }
 
     @Override
@@ -122,6 +119,11 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     private int getSeriesIndex(AbstractSeriesEvent event) {
         return chart.getConfiguration().getSeries().indexOf(event.getSeries());
+    }
+
+    private static JsonNode toJson(AbstractConfigurationObject object) {
+        return StringFunctionReporter.report(JacksonUtils.getMapper()
+                .readTree(ChartSerialization.toJSON(object)));
     }
 
 }
