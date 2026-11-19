@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,22 +30,11 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.dom.DomEventData;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.js.JsDefinition;
-import com.vaadin.flow.js.JsExpression;
-import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnPage extends VerticalLayout {
-
-    @JsDefinition
-    interface EventData extends Serializable {
-
-        @JsExpression("return event.stopPropagation();")
-        DomEventData<Void> stopPropagation();
-    }
 
     public static final String ID_SORT_BUTTON = "sort-button";
 
@@ -142,7 +130,7 @@ public class RemoveSortableColumnPage extends VerticalLayout {
             select.setItems(headers);
             select.setValue(headers.get(i));
             select.getElement().addEventListener("click", e -> {
-            }).addEventData(JsSnippets.of(EventData.class).stopPropagation());
+            }).stopPropagation();
             select.addValueChangeListener(e -> {
                 grid.redraw();
             });
