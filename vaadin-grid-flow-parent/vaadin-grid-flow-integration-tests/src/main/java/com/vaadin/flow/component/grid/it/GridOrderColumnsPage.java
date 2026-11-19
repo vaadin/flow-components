@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.io.Serializable;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.Button;
@@ -24,10 +25,21 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid/grid-order-columns")
 public class GridOrderColumnsPage extends VerticalLayout {
+
+    @JsDefinition
+    interface GridOrderColumnsPageJs extends Serializable {
+
+        @JsExpression("this._swapColumnOrders($0, $1)")
+        void swapColumnOrders(Element column1, Element column2);
+    }
+
     public GridOrderColumnsPage() {
         Grid<Integer> grid = new Grid<>();
         grid.appendHeaderRow();
@@ -66,9 +78,9 @@ public class GridOrderColumnsPage extends VerticalLayout {
         orderCol31Button.setId("button-31");
 
         Button visualOrderButton = new Button("Visual 2 1 3",
-                e -> grid.getElement().executeJs(
-                        "this._swapColumnOrders($0, $1)", column1.getElement(),
-                        column2.getElement()));
+                e -> grid.getElement().executeJs(GridOrderColumnsPageJs.class)
+                        .swapColumnOrders(column1.getElement(),
+                                column2.getElement()));
         visualOrderButton.setId("button-visual-order");
 
         add(new HorizontalLayout(orderCol123Button, orderCol321Button,

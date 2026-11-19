@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,12 +26,23 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/renderer-swap")
 public class GridRendererSwapPage extends Div {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`<span style=\"color: ${item.price > 50 ? 'red' : 'blue'}\">${item.price}</span>`;")
+        CompiledLitTemplate price();
+    }
 
     public GridRendererSwapPage() {
         List<Item> items = List.of(createItem("Item 1", 73.1),
@@ -53,8 +65,8 @@ public class GridRendererSwapPage extends Div {
         priceColumn.setEditorComponent(priceField);
 
         NativeButton swapRenderer = new NativeButton("Swap price renderer",
-                event -> priceColumn.setRenderer(LitRenderer.<Item> of(
-                        "<span style=\"color: ${item.price > 50 ? 'red' : 'blue'}\">${item.price}</span>")
+                event -> priceColumn.setRenderer(LitRenderer
+                        .<Item> of(JsSnippets.of(Templates.class).price())
                         .withProperty("price", Item::getPrice)));
         swapRenderer.setId("swap-renderer");
 

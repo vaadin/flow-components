@@ -15,14 +15,28 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/select-during-data-provider-change")
 public class SelectDuringDataProviderChangePage extends VerticalLayout {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`<div></div>`;")
+        CompiledLitTemplate details();
+    }
+
     private final Grid<Item> grid = new Grid<>();
     private final Button btn = new Button("Set items");
 
@@ -33,8 +47,9 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
 
         btn.addClickListener(ev -> setItems());
 
-        grid.setItemDetailsRenderer(LitRenderer.<Item> of("<div></div>")
-                .withProperty("id", i -> 1));
+        grid.setItemDetailsRenderer(
+                LitRenderer.<Item> of(JsSnippets.of(Templates.class).details())
+                        .withProperty("id", i -> 1));
         add(grid, btn);
     }
 
