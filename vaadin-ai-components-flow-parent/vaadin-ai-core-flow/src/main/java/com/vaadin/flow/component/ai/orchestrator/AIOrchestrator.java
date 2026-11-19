@@ -840,6 +840,7 @@ public class AIOrchestrator implements Serializable {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public Object[] tools() {
                 return tools == null ? new Object[0] : tools;
             }

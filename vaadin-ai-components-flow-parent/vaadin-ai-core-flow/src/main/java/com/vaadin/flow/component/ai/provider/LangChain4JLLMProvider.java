@@ -386,6 +386,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return UserMessage.from(contents);
     }
 
+    @SuppressWarnings("deprecation")
     private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
         var tools = request.tools();
         var explicitTools = request.explicitTools();
@@ -454,6 +455,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return baseExecutor::execute;
     }
 
+    @SuppressWarnings("deprecation")
     private List<ToolSpecification> prepareToolSpecifications(
             LLMRequest request) {
         var specs = new ArrayList<ToolSpecification>();

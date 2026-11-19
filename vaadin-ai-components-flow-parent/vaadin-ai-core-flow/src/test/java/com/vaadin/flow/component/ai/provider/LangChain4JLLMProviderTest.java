@@ -2926,6 +2926,7 @@ class LangChain4JLLMProviderTest {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public Object[] tools() {
                 return new Object[0];
             }
@@ -2996,11 +2997,13 @@ class LangChain4JLLMProviderTest {
         return response;
     }
 
+    @SuppressWarnings("deprecation")
     private record TestLLMRequest(String userMessage, String systemPrompt,
             List<AIAttachment> attachments,
             Object[] tools) implements LLMRequest {
     }
 
+    @SuppressWarnings("deprecation")
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
             List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
@@ -3019,6 +3022,7 @@ class LangChain4JLLMProviderTest {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public Object[] tools() {
             return new Object[0];
         }

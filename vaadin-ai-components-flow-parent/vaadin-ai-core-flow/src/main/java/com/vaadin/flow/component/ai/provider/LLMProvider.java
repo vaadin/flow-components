@@ -144,10 +144,22 @@ public interface LLMProvider {
          * error handling decides what reaches the LLM when a tool throws; the
          * {@link ToolException} contract only applies to the tools returned by
          * {@link #explicitTools()}.
+         * <p>
+         * The default implementation returns an empty array.
          *
          * @return array of tool objects, never {@code null} but may be empty
+         * @deprecated The orchestrator fills this array only with the objects
+         *             given to its deprecated
+         *             {@link com.vaadin.flow.component.ai.orchestrator.AIOrchestrator.Builder#withTools(Object...)
+         *             withTools} methods. Register vendor tool objects with the
+         *             vendor framework when you create the provider instead.
+         *             The orchestrator passes the tools of its controller in
+         *             {@link #explicitTools()}.
          */
-        Object[] tools();
+        @Deprecated(since = "25.4")
+        default Object[] tools() {
+            return new Object[0];
+        }
 
         /**
          * Gets the explicit tool definitions for this request. Unlike
