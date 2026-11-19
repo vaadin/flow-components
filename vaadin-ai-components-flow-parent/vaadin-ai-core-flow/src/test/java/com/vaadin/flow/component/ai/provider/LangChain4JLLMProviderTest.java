@@ -3151,20 +3151,26 @@ class LangChain4JLLMProviderTest {
         // LangChain4j logs the notice once per JVM, for the first service
         // built with tools but without explicit tool error handlers. Other
         // tests build such services with a customizer, so the flag that
-        // remembers the notice is reset first.
-        var alreadyLogged = Class
+        // remembers the notice is reset first, and restored for the tests
+        // that run after this one.
+        var alreadyLoggedField = Class
                 .forName("dev.langchain4j.service.ToolErrorHandlingNotice")
                 .getDeclaredField("ALREADY_LOGGED");
-        alreadyLogged.setAccessible(true);
-        ((AtomicBoolean) alreadyLogged.get(null)).set(false);
-        var notice = TestLoggerFactory.getTestLogger(
-                "dev.langchain4j.service.ToolErrorHandlingNotice");
-        notice.clearAll();
+        alreadyLoggedField.setAccessible(true);
+        var alreadyLogged = (AtomicBoolean) alreadyLoggedField.get(null);
+        var loggedBefore = alreadyLogged.getAndSet(false);
+        try {
+            var notice = TestLoggerFactory.getTestLogger(
+                    "dev.langchain4j.service.ToolErrorHandlingNotice");
+            notice.clearAll();
 
-        new LangChain4JLLMProvider(mockChatModel);
-        new LangChain4JLLMProvider(mockStreamingChatModel);
+            new LangChain4JLLMProvider(mockChatModel);
+            new LangChain4JLLMProvider(mockStreamingChatModel);
 
-        Assertions.assertEquals(List.of(), notice.getAllLoggingEvents());
+            Assertions.assertEquals(List.of(), notice.getAllLoggingEvents());
+        } finally {
+            alreadyLogged.set(loggedBefore);
+        }
     }
 
     @Test
