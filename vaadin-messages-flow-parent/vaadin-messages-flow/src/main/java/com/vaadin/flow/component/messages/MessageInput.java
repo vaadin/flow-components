@@ -57,6 +57,14 @@ public class MessageInput extends Component
     private MessageInputI18n i18n;
 
     /**
+     * Whether submitting was disabled when the latest submit arrived from the
+     * client. Read once per submit, like Flow reads the enabled state once per
+     * DOM event, so a listener that disables submitting does not affect the
+     * other listeners of the same submit.
+     */
+    private boolean ignoreClientSubmit;
+
+    /**
      * The {@code submit} event which is fired by {@link MessageInput}
      * component.
      */
@@ -95,6 +103,10 @@ public class MessageInput extends Component
      * Creates a new message input component.
      */
     public MessageInput() {
+        // Added before any submit listener, so it runs first for each submit
+        // from the client
+        getElement().addEventListener("submit",
+                event -> ignoreClientSubmit = isSubmitDisabled());
     }
 
     /**
@@ -106,6 +118,7 @@ public class MessageInput extends Component
      * @see #addSubmitListener(ComponentEventListener)
      */
     public MessageInput(ComponentEventListener<SubmitEvent> listener) {
+        this();
         addSubmitListener(listener);
     }
 
@@ -124,7 +137,7 @@ public class MessageInput extends Component
     public Registration addSubmitListener(
             ComponentEventListener<SubmitEvent> listener) {
         return addListener(SubmitEvent.class, event -> {
-            if (event.isFromClient() && isSubmitDisabled()) {
+            if (event.isFromClient() && ignoreClientSubmit) {
                 return;
             }
             listener.onComponentEvent(event);

@@ -27,6 +27,9 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 class MessageInputTest {
 
@@ -100,6 +103,31 @@ class MessageInputTest {
     }
 
     @Test
+    void submitDisabled_constructorListener_submitFromClient_listenerNotCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput = new MessageInput(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void listenerDisablesSubmit_submitFromClient_laterListenerCalled() {
+        var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
+        messageInput.addSubmitListener(
+                event -> messageInput.setSubmitDisabled(true));
+        messageInput.addSubmitListener(eventRef::set);
+
+        submitFromClient("foo");
+        Assertions.assertEquals("foo", eventRef.get().getValue());
+
+        eventRef.set(null);
+        submitFromClient("bar");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
     void submitDisabled_fireServerEvent_listenerCalled() {
         var eventRef = new AtomicReference<MessageInput.SubmitEvent>();
         messageInput.addSubmitListener(eventRef::set);
@@ -149,7 +177,10 @@ class MessageInputTest {
     }
 
     private void submitFromClient(String value) {
-        ComponentUtil.fireEvent(messageInput,
-                new MessageInput.SubmitEvent(messageInput, true, value));
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.value", value);
+        messageInput.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(messageInput.getElement(), "submit",
+                        eventData));
     }
 }
