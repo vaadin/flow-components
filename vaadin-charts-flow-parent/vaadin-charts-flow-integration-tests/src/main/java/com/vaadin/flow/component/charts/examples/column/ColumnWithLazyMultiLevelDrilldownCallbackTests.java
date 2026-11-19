@@ -8,12 +8,14 @@
  */
 package com.vaadin.flow.component.charts.examples.column;
 
+import java.io.Serializable;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.model.ChartFunction;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Cursor;
@@ -29,12 +31,24 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
 @Route("vaadin-charts/column/column-with-lazy-multi-level-drilldown-callback-tests")
 public class ColumnWithLazyMultiLevelDrilldownCallbackTests
         extends AbstractChartExample {
+
+    @JsDefinition
+    public interface LabelFormatters extends Serializable {
+        @JsExpression("return this.key.toUpperCase();")
+        ChartFunction upperCaseKey();
+    }
+
+    private static final LabelFormatters FORMATTERS = JsSnippets
+            .of(LabelFormatters.class);
 
     private OrderedList log;
     private int count;
@@ -106,7 +120,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
         final PlotOptionsSeries plotOptions = new PlotOptionsSeries();
         series.setPlotOptions(plotOptions);
         DataLabels dataLabels = new DataLabels(true);
-        dataLabels.setFormatter("return this.key.toUpperCase();");
+        dataLabels.setFormatterFunction(FORMATTERS.upperCaseKey());
         plotOptions.setDataLabels(dataLabels);
 
         createItems(prefix).forEach(series::addItemWithDrilldown);
