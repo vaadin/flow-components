@@ -504,16 +504,22 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * Returns the user message with the attachments of the turn running on the
-     * current thread added, when the message holds only the text of that turn,
-     * and the message as it is otherwise. With
-     * {@code storeRetrievedContentInChatMemory(false)}, LangChain4j stores the
-     * user message as the template rendered it, before retrieval augmentation,
-     * and so also without the attachments, which the provider passes
-     * separately.
+     * current thread added, when it is the first user message the turn stores
+     * and holds only the text of that turn, and the message as it is otherwise.
+     * With {@code storeRetrievedContentInChatMemory(false)}, LangChain4j stores
+     * the user message as the template rendered it, before retrieval
+     * augmentation, and so also without the attachments, which the provider
+     * passes separately. A user message stored later in the turn is one that
+     * LangChain4j stores again when it rewrites the memory, such as an earlier
+     * question with the same text.
      */
     private UserMessage withTurnAttachments(UserMessage message) {
         var turn = turnOnThread.get();
-        if (turn == null || !message.hasSingleText()
+        if (turn == null || turn.userMessageStored) {
+            return message;
+        }
+        turn.userMessageStored = true;
+        if (!message.hasSingleText()
                 || !message.singleText().equals(turn.userText)) {
             return message;
         }
@@ -1294,6 +1300,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * Set when the turn starts.
          */
         private List<Content> attachments = List.of();
+        /**
+         * Whether the provider's chat memory stored the user message of this
+         * turn.
+         */
+        private boolean userMessageStored;
         private FinishReason lastFinishReason;
         private boolean lastResponseHadFinishReason;
         private TokenUsage accumulatedUsage;

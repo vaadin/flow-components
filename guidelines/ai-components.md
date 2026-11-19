@@ -127,7 +127,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   results. With
   `storeRetrievedContentInChatMemory(false)`, LangChain4j stores the user
   message as the template rendered it, without the attachments the provider
-  passes separately, so the provider's memory adds them back. When
+  passes separately, so the provider's memory adds them back, to the first
+  user message the turn stores only. A memory rewrite within the turn stores
+  earlier questions again, and one of them may have the same text. When
   LangChain4j rolls back tools (`compensateOnToolErrors`), it rewrites the
   memory with `set()` within the turn. The provider's memory puts each
   message back where it was and stores it as given, so an earlier answer

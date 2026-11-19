@@ -3146,6 +3146,45 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_guardrailRemovesAnswer_keepsEarlierQuestionWithoutAttachments() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("secret")
+                                ? fatalWithMessageRemoval("Not allowed")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("A cat")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("A secret")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+        var image = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+
+        customized.stream(createSimpleRequest("What is this?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized
+                .stream(new TestLLMRequest("What is this?", null,
+                        List.of(image), new Object[0]))
+                .onErrorComplete().collectList().block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // Removing the rejected answer rewrites the chat memory. The first
+        // question has the text of the second, but not its attachment.
+        Assertions.assertEquals(UserMessage.from("What is this?"),
+                captor.getAllValues().get(2).messages().getFirst());
+    }
+
+    @Test
     void constructor_withoutCustomizer_logsNoToolErrorHandlingNotice()
             throws ReflectiveOperationException {
         // LangChain4j logs the notice once per JVM, for the first service
