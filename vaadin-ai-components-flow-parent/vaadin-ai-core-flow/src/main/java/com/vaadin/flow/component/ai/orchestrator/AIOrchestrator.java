@@ -1108,9 +1108,14 @@ public class AIOrchestrator implements Serializable {
          *            the objects containing tool methods
          * @return this reconnector
          * @deprecated Register the tool objects with the vendor framework when
-         *             you create the new provider instead, as the description
-         *             of this method shows. There, too, the vendor framework
-         *             handles their errors.
+         *             you create the new provider instead: add them to the
+         *             {@code ChatClient} that you pass to
+         *             {@link com.vaadin.flow.component.ai.provider.SpringAILLMProvider#SpringAILLMProvider(org.springframework.ai.chat.client.ChatClient)
+         *             SpringAILLMProvider(ChatClient)}, or in the customizer of
+         *             {@link com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider
+         *             LangChain4JLLMProvider}. The description of this method
+         *             shows both. There, too, the vendor framework handles
+         *             their errors.
          */
         @Deprecated(since = "25.4")
         public Reconnector withTools(Object... tools) {
@@ -1479,9 +1484,14 @@ public class AIOrchestrator implements Serializable {
          *            the objects containing tool methods
          * @return this builder
          * @deprecated Register the tool objects with the vendor framework when
-         *             you create the provider instead, as the description of
-         *             this method shows. There, too, the vendor framework
-         *             handles their errors.
+         *             you create the provider instead: add them to the
+         *             {@code ChatClient} that you pass to
+         *             {@link com.vaadin.flow.component.ai.provider.SpringAILLMProvider#SpringAILLMProvider(org.springframework.ai.chat.client.ChatClient)
+         *             SpringAILLMProvider(ChatClient)}, or in the customizer of
+         *             {@link com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider
+         *             LangChain4JLLMProvider}. The description of this method
+         *             shows both. There, too, the vendor framework handles
+         *             their errors.
          */
         @Deprecated(since = "25.4")
         public Builder withTools(Object... tools) {
