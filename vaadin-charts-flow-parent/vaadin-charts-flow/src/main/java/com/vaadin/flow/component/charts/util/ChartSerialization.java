@@ -27,7 +27,7 @@ import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
 import com.vaadin.flow.component.charts.model.serializers.StopSerializer;
 import com.vaadin.flow.component.charts.model.serializers.TimeUnitMultiplesSerializer;
-import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.CspViolationReporter;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -142,17 +142,20 @@ public class ChartSerialization implements Serializable {
         ChartFunctionSerializer.Collector collector = new ChartFunctionSerializer.Collector();
         JsonNode json;
         try {
-            json = JacksonUtils.getMapper()
-                    .readTree(jsonWriter.withAttribute(
-                            ChartFunctionSerializer.Collector.class, collector)
-                            .writeValueAsString(object));
+            json = jsonWriter
+                    .withAttribute(ChartFunctionSerializer.Collector.class,
+                            collector)
+                    .valueToTree(object);
         } catch (JacksonException e) {
             throw new RuntimeException("Error while serializing "
                     + object.getClass().getSimpleName(), e);
         }
-        collector.extract(json);
+        // Functions given as strings are only looked for when they are
+        // reported
+        collector.extract(json, CspViolationReporter.isEnabled());
         return new JsonWithFunctions(json, collector.getPaths(),
-                List.copyOf(collector.getFunctions()));
+                List.copyOf(collector.getFunctions()),
+                collector.hasStringFunction());
     }
 
     /**
@@ -168,9 +171,13 @@ public class ChartSerialization implements Serializable {
      *            names and array indexes
      * @param functions
      *            the functions, in the order of their paths
+     * @param hasStringFunction
+     *            whether the JSON has a function given as a string, which is
+     *            only looked for when the CSP mode reports it
      */
     public record JsonWithFunctions(JsonNode json, ArrayNode functionPaths,
-            List<ChartFunction> functions) implements Serializable {
+            List<ChartFunction> functions,
+            boolean hasStringFunction) implements Serializable {
 
         /**
          * Gets whether the configuration object has any functions.

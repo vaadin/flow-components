@@ -192,10 +192,9 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        JsonWithFunctions json = ChartSerialization
-                .toJsonWithFunctions(configuration);
-        ObjectNode configurationNode = StringFunctionReporter
-                .report((ObjectNode) json.json());
+        JsonWithFunctions json = StringFunctionReporter
+                .report(ChartSerialization.toJsonWithFunctions(configuration));
+        ObjectNode configurationNode = (ObjectNode) json.json();
 
         if (json.hasFunctions()) {
             getElement().executeJs(ChartJs.class).updateConfiguration(
@@ -744,11 +743,11 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            JsonWithFunctions json = ChartSerialization.toJsonWithFunctions(
-                    (AbstractConfigurationObject) drilldownSeries);
+            JsonWithFunctions json = StringFunctionReporter
+                    .report(ChartSerialization.toJsonWithFunctions(
+                            (AbstractConfigurationObject) drilldownSeries));
             getElement().executeJs(ChartJs.class).addSeriesAsDrilldown(
-                    seriesIndex, pointIndex,
-                    StringFunctionReporter.report((ObjectNode) json.json()),
+                    seriesIndex, pointIndex, (ObjectNode) json.json(),
                     json.functionPaths(), json.functionArray());
         }
 

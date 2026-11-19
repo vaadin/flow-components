@@ -46,10 +46,11 @@ public class ChartOptions extends AbstractConfigurationObject {
             return;
         }
 
-        JsonWithFunctions json = ChartSerialization.toJsonWithFunctions(this);
+        JsonWithFunctions json = StringFunctionReporter
+                .report(ChartSerialization.toJsonWithFunctions(this));
         ui.getElement().executeJs(ChartJs.class).setHighchartsOptions(
-                StringFunctionReporter.report((ObjectNode) json.json()),
-                json.functionPaths(), json.functionArray());
+                (ObjectNode) json.json(), json.functionPaths(),
+                json.functionArray());
     }
 
     /**

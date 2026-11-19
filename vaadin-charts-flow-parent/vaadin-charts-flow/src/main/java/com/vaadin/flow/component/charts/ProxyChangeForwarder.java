@@ -129,9 +129,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     private static JsonWithFunctions toJson(
             AbstractConfigurationObject object) {
-        JsonWithFunctions json = ChartSerialization.toJsonWithFunctions(object);
-        StringFunctionReporter.report(json.json());
-        return json;
+        return StringFunctionReporter
+                .report(ChartSerialization.toJsonWithFunctions(object));
     }
 
     /**

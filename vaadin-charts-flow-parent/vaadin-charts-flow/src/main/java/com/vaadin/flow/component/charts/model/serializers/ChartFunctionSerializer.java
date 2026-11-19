@@ -34,8 +34,8 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * When the serialization has a {@link Collector} as an attribute, the function
  * is added to it and a placeholder is written, which
- * {@link Collector#extract(JsonNode)} removes again. Without a collector, the
- * option is written as <code>null</code>.
+ * {@link Collector#extract(JsonNode, boolean)} removes again. Without a
+ * collector, the option is written as <code>null</code>.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -63,9 +63,20 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
      * Collects the functions of one serialization, and finds where they are in
      * the resulting JSON.
      * <p>
+     * The path of a function can not be taken while serializing: the generator
+     * that builds a JSON tree does not keep track of array indexes. So a
+     * placeholder is written instead, and found in the tree afterwards, in the
+     * same walk that looks for functions given as strings.
+     * <p>
      * For internal use only. May be renamed or removed in a future release.
      */
     public static final class Collector implements Serializable {
+
+        /**
+         * The prefix of the JSON keys whose string value the browser compiles
+         * into a function.
+         */
+        private static final String STRING_FUNCTION_PREFIX = "_fn_";
 
         // Random for each serialization, so that a string in the chart data
         // can not be mistaken for a placeholder
@@ -78,6 +89,8 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
 
         private final List<ChartFunction> functions = new ArrayList<>();
 
+        private boolean stringFunction;
+
         private String add(ChartFunction function) {
             collected.add(function);
             return placeholderPrefix + (collected.size() - 1);
@@ -87,21 +100,29 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
          * Removes the placeholders from the given JSON, and records the path
          * and the function of each. A placeholder in an object is removed with
          * its property, and one in an array is replaced with <code>null</code>.
+         * In the same walk, optionally looks for a function given as a string,
+         * under a key that starts with <code>_fn_</code>.
+         * <p>
+         * Does not walk the JSON when there are no placeholders and no string
+         * functions to look for.
          *
          * @param json
          *            the JSON written with this collector, not
          *            <code>null</code>
+         * @param findStringFunctions
+         *            whether to look for functions given as strings
          */
-        public void extract(JsonNode json) {
-            if (!collected.isEmpty()) {
-                extract(json, JacksonUtils.createArrayNode());
+        public void extract(JsonNode json, boolean findStringFunctions) {
+            if (!collected.isEmpty() || findStringFunctions) {
+                extract(json, new ArrayList<>());
             }
         }
 
         /**
-         * Gets the paths of the functions found by {@link #extract(JsonNode)},
-         * in the order of {@link #getFunctions()}. Each path is an array of
-         * property names and array indexes.
+         * Gets the paths of the functions found by
+         * {@link #extract(JsonNode, boolean)}, in the order of
+         * {@link #getFunctions()}. Each path is an array of property names and
+         * array indexes.
          *
          * @return the paths, not <code>null</code>
          */
@@ -110,7 +131,7 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
         }
 
         /**
-         * Gets the functions found by {@link #extract(JsonNode)}.
+         * Gets the functions found by {@link #extract(JsonNode, boolean)}.
          *
          * @return the functions, not <code>null</code>
          */
@@ -118,43 +139,83 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
             return functions;
         }
 
-        private void extract(JsonNode node, ArrayNode path) {
+        /**
+         * Gets whether {@link #extract(JsonNode, boolean)} found a function
+         * given as a string.
+         *
+         * @return <code>true</code> if the JSON has a function as a string
+         */
+        public boolean hasStringFunction() {
+            return stringFunction;
+        }
+
+        /**
+         * Walks the given node. The path of the node is kept in a list shared
+         * by the whole walk, and is copied only for a placeholder.
+         */
+        private void extract(JsonNode node, List<Object> path) {
             if (node instanceof ObjectNode object) {
-                for (Map.Entry<String, JsonNode> property : List
-                        .copyOf(object.properties())) {
-                    ArrayNode childPath = path.deepCopy()
-                            .add(property.getKey());
-                    if (record(property.getValue(), childPath)) {
-                        object.remove(property.getKey());
-                    } else {
-                        extract(property.getValue(), childPath);
+                List<String> placeholderKeys = null;
+                for (Map.Entry<String, JsonNode> property : object
+                        .properties()) {
+                    String key = property.getKey();
+                    JsonNode value = property.getValue();
+                    if (key.startsWith(STRING_FUNCTION_PREFIX)
+                            && value.isString()) {
+                        stringFunction = true;
+                    } else if (isPlaceholder(value)) {
+                        record(value, path, key);
+                        if (placeholderKeys == null) {
+                            placeholderKeys = new ArrayList<>();
+                        }
+                        placeholderKeys.add(key);
+                    } else if (value.isContainer()) {
+                        path.add(key);
+                        extract(value, path);
+                        path.removeLast();
                     }
+                }
+                if (placeholderKeys != null) {
+                    object.remove(placeholderKeys);
                 }
             } else if (node instanceof ArrayNode array) {
                 for (int index = 0; index < array.size(); index++) {
-                    ArrayNode childPath = path.deepCopy().add(index);
-                    if (record(array.get(index), childPath)) {
+                    JsonNode value = array.get(index);
+                    if (isPlaceholder(value)) {
+                        record(value, path, index);
                         array.set(index, NullNode.getInstance());
-                    } else {
-                        extract(array.get(index), childPath);
+                    } else if (value.isContainer()) {
+                        path.add(index);
+                        extract(value, path);
+                        path.removeLast();
                     }
                 }
             }
         }
 
-        private boolean record(JsonNode value, ArrayNode path) {
-            if (value == null || !value.isString()) {
-                return false;
+        private boolean isPlaceholder(JsonNode value) {
+            return !collected.isEmpty() && value.isString()
+                    && value.asString().startsWith(placeholderPrefix);
+        }
+
+        private void record(JsonNode placeholder, List<Object> path,
+                Object last) {
+            ArrayNode fullPath = paths.addArray();
+            for (Object segment : path) {
+                addSegment(fullPath, segment);
             }
-            String text = value.asString();
-            if (!text.startsWith(placeholderPrefix)) {
-                return false;
-            }
-            int index = Integer
-                    .parseInt(text.substring(placeholderPrefix.length()));
-            paths.add(path);
+            addSegment(fullPath, last);
+            int index = Integer.parseInt(placeholder.asString()
+                    .substring(placeholderPrefix.length()));
             functions.add(collected.get(index));
-            return true;
+        }
+
+        private static void addSegment(ArrayNode path, Object segment) {
+            if (segment instanceof Integer index) {
+                path.add(index);
+            } else {
+                path.add((String) segment);
+            }
         }
     }
 }
