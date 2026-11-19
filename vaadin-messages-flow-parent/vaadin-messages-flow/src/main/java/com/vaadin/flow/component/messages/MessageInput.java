@@ -114,8 +114,8 @@ public class MessageInput extends Component
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
-     * key. The listener is not called while submitting is disabled with
-     * {@link #setSubmitDisabled(boolean)}.
+     * key. The listener is not called for a submit that the browser sends while
+     * submitting is disabled with {@link #setSubmitDisabled(boolean)}.
      *
      * @param listener
      *            the listener
