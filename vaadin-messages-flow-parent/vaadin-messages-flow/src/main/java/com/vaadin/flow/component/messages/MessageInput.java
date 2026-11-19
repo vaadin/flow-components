@@ -115,8 +115,7 @@ public class MessageInput extends Component
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
      * key. The listener is not called while submitting is disabled with
-     * {@link #setSubmitDisabled(boolean)}. If a listener disables submitting,
-     * the listeners after it are not called for the same submit.
+     * {@link #setSubmitDisabled(boolean)}.
      *
      * @param listener
      *            the listener
