@@ -21,7 +21,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.Signal;
 
@@ -99,10 +99,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Creates an SVG icon with the given download handler resource.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served with a <code>Content-Disposition: inline</code>
+     * header, so that the browser shows it. The given handler is not changed,
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the download handler resource
@@ -116,10 +115,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Creates an SVG icon with the given download handler resource.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served with a <code>Content-Disposition: inline</code>
+     * header, so that the browser shows it. The given handler is not changed,
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the download handler resource
@@ -138,10 +136,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * Creates an SVG icon with the given download handler resource and binds
      * the given signal to the symbol.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served with a <code>Content-Disposition: inline</code>
+     * header, so that the browser shows it. The given handler is not changed,
+     * see {@link DownloadDisposition#INLINE}.
      * <p>
      * The symbol is kept synchronized with the signal value while the component
      * is attached. When the component is detached, signal value changes have no
@@ -256,33 +253,26 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * Defines the source of the icon from the given {@link DownloadHandler} The
      * resource must contain a valid SVG element.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served with a <code>Content-Disposition: inline</code>
+     * header, so that the browser shows it. The given handler is not changed,
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the source value, not null
      * @since 24.8
      */
     public void setSrc(DownloadHandler src) {
-        if (src instanceof AbstractDownloadHandler<?> handler) {
-            // change disposition to inline in pre-defined handlers,
-            // where it is 'attachment' by default
-            handler.inline();
-        }
         getElement().setAttribute("src",
                 new StreamResourceRegistry.ElementStreamResource(src,
-                        getElement()));
+                        getElement(), DownloadDisposition.INLINE));
     }
 
     /**
      * Defines the src and the symbol to be used in the icon.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served with a <code>Content-Disposition: inline</code>
+     * header, so that the browser shows it. The given handler is not changed,
+     * see {@link DownloadDisposition#INLINE}.
      *
      * @param src
      *            the source of the icon sprite file, not null

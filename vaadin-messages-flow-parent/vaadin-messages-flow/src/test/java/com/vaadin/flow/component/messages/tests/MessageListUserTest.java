@@ -30,9 +30,12 @@ import com.vaadin.flow.component.messages.MessageListTypingIndicatorFeatureFlagP
 import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -267,11 +270,19 @@ class MessageListUserTest {
     }
 
     @Test
-    void setImageHandler_servedInline() {
+    void setImageHandler_servedInline() throws Exception {
         alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
 
-        Assertions.assertTrue(imageHandler.isInline(),
+        var resource = (StreamResourceRegistry.ElementStreamResource) resolveImage(
+                alice.getImage()).orElseThrow();
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition(),
                 "Expected the image to be served inline");
+        Assertions.assertEquals("attachment; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(imageHandler,
+                        resource.getOwner()),
+                "Expected the given handler not to be changed");
     }
 
     @Test

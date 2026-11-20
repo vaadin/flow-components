@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.avatar.tests;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
+import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class AvatarTest {
@@ -123,5 +130,23 @@ class AvatarTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Avatar.class));
+    }
+
+    @Test
+    void setImageHandler_servedInline_handlerNotChanged() throws Exception {
+        InputStreamDownloadHandler handler = DownloadHandler.fromInputStream(
+                event -> DownloadResponse.error(500), "alice.png");
+        avatar.setImageHandler(handler);
+        ui.add(avatar);
+
+        var resource = (ElementStreamResource) ui.getSession()
+                .getResourceRegistry()
+                .getResource(URI.create(avatar.getImage())).orElseThrow();
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
+        Assertions.assertEquals("attachment; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        resource.getOwner()),
+                "The given handler should not be changed");
     }
 }
