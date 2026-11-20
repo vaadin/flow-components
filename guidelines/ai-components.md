@@ -65,17 +65,92 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- A vendor integration uses the vendor's public API only. Because the
+  dependency is optional, the application picks the vendor version, so a
+  member that disappears fails at the application's site, not in this
+  repository's build. LangChain4j marks such types `@Internal`
+  (`AiServiceContext`, `ToolService`, `CapturedContextSupport`).
+- `LangChain4JLLMProvider` runs each turn through a LangChain4j `AiServices`
+  service, and the customizer constructors hand the application the builder so
+  it can add RAG, MCP tool providers, guardrails and so on. The builder has
+  setters only, so the provider never reads back what the customizer
+  configured: it sets its replaceable defaults (memory, unbounded round trips,
+  the made-up tool result) before the customizer runs, and adds what must not
+  be replaced afterwards (its tool provider and listeners, which add up with
+  the customizer's, and the constructor's model). The provider cannot see
+  the tools the customizer adds, so it does not resolve a name clash with
+  the tools of the turn: LangChain4j rejects the turn, and the class Javadoc
+  asks for distinct names. Tools added in the
+  customizer keep LangChain4j's tool error handling, like any vendor `@Tool`
+  tool (see the error hygiene rule below). Only a provider without a
+  customizer sets the error handlers, which none of its own tools reach, so
+  that LangChain4j logs no notice asking for them. With a customizer,
+  LangChain4j logs that notice unless the customizer sets both handlers, also
+  when it adds no tools, since the provider's tool provider counts as tools.
+  The provider does not set handlers of its own choosing there. Any explicit
+  handler decides how the application's tools fail, and that stays with the
+  vendor's defaults and the application, as it does for the tools of a
+  `ChatClient` given to `SpringAILLMProvider`. LangChain4j plans to change
+  these defaults, which is what the notice announces. A different default is
+  a decision for both providers together. The checks of a turn
+  (cancellation, tool call limits, and the orchestrator's system prompt, which
+  wins over a customizer's `systemMessage`) sit in a proxy around that model
+  instead of in a builder setting the application might also use. The session
+  context goes into the user text before the service call, as with
+  `SpringAILLMProvider`, so retrieval and input guardrails see it. The proxy
+  does not pass a cancelled turn's model response on to the service, which
+  would otherwise run the tools it requests, including the customizer's. A
+  model call and a memory access do not say which turn they belong to, so the
+  provider binds the turn to the thread that starts it and to each streaming
+  callback, where the follow-up model calls happen. That keeps a cancelled
+  turn that is still running from passing the next turn's checks or touching
+  its tool traffic. With output guardrails, LangChain4j replays the original
+  streamed tokens after the guardrails ran, also when a guardrail rewrote the
+  answer, so the provider passes on the completed response's text instead.
+  Retrieval and input guardrails run inside the service call that starts a
+  turn, also for a `TokenStream`, so `setBackgroundExecution(true)` moves the
+  start of a streaming turn off the subscribing thread too. A moderation model
+  set in the customizer is not used: LangChain4j moderates only `@Moderate`
+  methods, never checks the result for a `TokenStream`, and rejects a
+  `@Moderate` method when no moderation model is set. An input guardrail does
+  that job.
 - Provider chat memory holds the user messages and the assistant's final
   answer of each turn. Tool calls and results are sent to the model only
   within their own turn, with both built-in providers, so a controller must
   not rely on the model remembering a previous turn's tool result; the
   instruction tools already tell the model to read the state again each
-  turn. `LangChain4JLLMProvider` also leaves a final answer without text out
-  of the memory. A model may answer that way once a tool call has done the
-  work, LangChain4j hands the answer over as an `AiMessage` with a `null`
-  text, and OpenAI's Chat Completions API rejects a replayed assistant
-  message that has neither content nor tool calls, which would fail every
-  later turn of the conversation.
+  turn. LangChain4j's loop writes every tool message into the chat memory,
+  so `LangChain4JLLMProvider`'s own memory (`TurnScopedChatMemory`) keeps
+  them in a list of the running turn instead. The turn's answers go to that
+  list too, after its tool messages, because an output guardrail that
+  reprompts sends the memory again and the model still needs the tool
+  results. With
+  `storeRetrievedContentInChatMemory(false)`, LangChain4j stores the user
+  message as the template rendered it, without the attachments the provider
+  passes separately, so the provider's memory adds them back, to the first
+  user message the turn stores only. A memory rewrite within the turn stores
+  earlier questions again, and one of them may have the same text. When
+  LangChain4j rolls back tools (`compensateOnToolErrors`), it rewrites the
+  memory with `set()` within the turn. The provider's memory puts each
+  message back where it was and stores it as given, so an earlier answer
+  stays ahead of the turn's question and a stored user message does not get
+  the attachments of the turn. With output
+  guardrails, LangChain4j leaves the answer in the memory as the model gave
+  it, also when a guardrail rewrote it or accepted a later one after a
+  reprompt. The provider replaces it with the answer the turn delivered, so
+  that later turns and a history restore show the model the conversation the
+  user saw. `SpringAILLMProvider` gets the same from Spring AI: its memory
+  advisor sees a response after the advisors ordered behind it changed it. A
+  turn that a guardrail fails keeps the rejected answer in the memory unless
+  the guardrail fails it with message removal. That is LangChain4j's default
+  and LangChain4j's option, and both are left as they are. A memory set in
+  the customizer replaces the provider's own and gets LangChain4j's behavior.
+  `LangChain4JLLMProvider` also leaves a final answer without text out of the
+  memory. A model may answer that way once a tool call has done the work,
+  LangChain4j hands the answer over as an `AiMessage` with a `null` text, and
+  OpenAI's Chat Completions API rejects a replayed assistant message that has
+  neither content nor tool calls, which would fail every later turn of the
+  conversation.
 - The response stream carries text only; everything else the model said
   about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the
@@ -167,10 +242,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
   against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
   the same as Spring AI's) and fails the turn with the public
-  `ToolCallLimitExceededException`. The check runs before any tool of that
-  round runs, and the tool traffic of the failed turn is discarded with it, so
-  the next turn continues from the chat memory as the last completed turn
-  left it; a cancelled turn likewise stops calling the model and the tools.
+  `ToolCallLimitExceededException`. A response is screened before its tools
+  run: in a round that exceeds a limit the provider leaves the tools it
+  supplies unexecuted and fails the turn before the next model call. Tools an
+  application configured in the customizer count against the limits too,
+  but the provider cannot hold them back, so those of that last round still
+  run; when they return immediately, LangChain4j makes no next model call
+  and the turn fails as it ends. The tool traffic of the failed turn is
+  discarded with it, so the next
+  turn continues from the chat memory as the last completed turn left it; a
+  cancelled turn likewise stops calling the model and runs no tool for a
+  response that arrives after the cancellation.
   `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
   itself and hands back a synthesized reply carrying its
   `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
