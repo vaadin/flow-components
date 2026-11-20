@@ -35,6 +35,7 @@ import com.vaadin.flow.component.charts.model.ChartFunction;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Cursor;
+import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.IntervalUnit;
@@ -209,7 +210,7 @@ class SVGGeneratorTest {
 
     @JsDefinition
     public interface Formatters extends Serializable {
-        @JsExpression("return this.value + ' formatted';")
+        @JsExpression("return this.y + ' formatted';")
         ChartFunction formatted();
     }
 
@@ -218,16 +219,25 @@ class SVGGeneratorTest {
             throws IOException, InterruptedException {
         ExportOptions options = new ExportOptions();
         options.setExecuteFunctions(true);
-        String expectedSVG = svgGenerator
-                .generate(createAreaChartConfiguration(), options);
-        Configuration configuration = createAreaChartConfiguration();
-        configuration.getyAxis().getLabels().setFormatterFunction(
+        String expectedSVG = svgGenerator.generate(createChartWithDataLabels(),
+                options);
+        Configuration configuration = createChartWithDataLabels();
+        DataLabels dataLabels = ((PlotOptionsSeries) configuration
+                .getPlotOptions().iterator().next()).getDataLabels();
+        dataLabels.setFormatterFunction(
                 JsSnippets.of(Formatters.class).formatted());
 
         String actualSVG = svgGenerator.generate(configuration, options);
 
         assertFalse(actualSVG.contains("formatted"));
         assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
+    }
+
+    private Configuration createChartWithDataLabels() {
+        Configuration configuration = createAreaChartConfiguration();
+        ((PlotOptionsSeries) configuration.getPlotOptions().iterator().next())
+                .setDataLabels(new DataLabels(true));
+        return configuration;
     }
 
     @Test
