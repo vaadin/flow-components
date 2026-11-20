@@ -31,6 +31,7 @@ import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -52,6 +53,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     private T selectedItem;
     private boolean deselectAllowed = true;
     private Registration selectionBindingCleanup;
+    private SerializableFunction<T, T> selectionBindingWriter;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -78,9 +80,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (isSelected(item)) {
             return;
         }
-        doSelect(item, false);
-
-        getGrid().doClientSideSelection(Collections.singleton(item));
+        if (doSelect(item, false)) {
+            getGrid().doClientSideSelection(Collections.singleton(item));
+        }
     }
 
     @Override
@@ -159,6 +161,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
                 var result = GridSelectionSignalHelper.bindValue(getGrid(),
                         this, valueSignal, writeCallback);
                 selectionBindingCleanup = result.cleanup();
+                selectionBindingWriter = result.writer();
                 return result.signalBinding();
             }
         };
@@ -197,6 +200,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (selectionBindingCleanup != null) {
             selectionBindingCleanup.remove();
             selectionBindingCleanup = null;
+            selectionBindingWriter = null;
         }
         deselectAll();
     }
@@ -210,11 +214,23 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
 
-    private void doSelect(T item, boolean userOriginated) {
+    private boolean doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;
         selectedItem = item;
+        if (selectionBindingWriter != null) {
+            T signalValue = selectionBindingWriter.apply(item);
+            if (!Objects.equals(getItemId(signalValue), getItemId(item))) {
+                // The write callback didn't accept the item, revert to the
+                // signal value without firing an event
+                selectedItem = signalValue;
+                getGrid().doClientSideSelection(
+                        Collections.singleton(signalValue));
+                return false;
+            }
+        }
         fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
                 getGrid().asSingleSelect(), oldValue, userOriginated));
+        return true;
     }
 
     private Object getItemId(T item) {
