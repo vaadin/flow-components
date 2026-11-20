@@ -192,17 +192,31 @@ describe('option values', () => {
     expect(parseSVG(result.svgString).querySelectorAll('.highcharts-series-group .highcharts-point')).to.have.lengthOf(1);
   });
 
-  ['https://vaadin.com', 'about.html', 'tel:+123'].forEach((href) => {
+  // Highcharts reports a link that fails its allow list as an invalid attribute and leaves it out
+  function getInvalidAttributes(options) {
+    const invalidAttributes = [];
+    const removeListener = Highcharts.addEvent(Highcharts, 'displayError', (e) => {
+      if (e.code === 33) {
+        invalidAttributes.push(e.params['Invalid attribute in config']);
+      }
+    });
+    try {
+      createChart(options);
+    } finally {
+      removeListener();
+    }
+    return invalidAttributes;
+  }
+
+  ['https://vaadin.com', '/about', '#about'].forEach((href) => {
     it(`should keep supported credits links: ${href}`, () => {
-      const chart = createChart({ credits: { enabled: true, href } });
-      expect(chart.options.credits.href).to.equal(href);
+      expect(getInvalidAttributes({ credits: { enabled: true, href } })).to.be.empty;
     });
   });
 
-  [UNSUPPORTED_URL, ` JAVASCRIPT:void(0)`, 'data:text/html,Text'].forEach((href) => {
-    it(`should ignore credits links that use an unsupported URL scheme: ${JSON.stringify(href)}`, () => {
-      const chart = createChart({ credits: { enabled: true, href } });
-      expect(chart.options.credits.href).to.be.undefined;
+  [UNSUPPORTED_URL, ` JAVASCRIPT:void(0)`, 'data:text/html,Text', 'about.html', 'tel:+123'].forEach((href) => {
+    it(`should ignore unsupported credits links: ${JSON.stringify(href)}`, () => {
+      expect(getInvalidAttributes({ credits: { enabled: true, href } })).to.include('href');
     });
   });
 
