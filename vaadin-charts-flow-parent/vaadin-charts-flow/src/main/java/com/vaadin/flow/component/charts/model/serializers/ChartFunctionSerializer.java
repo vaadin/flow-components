@@ -35,7 +35,9 @@ import tools.jackson.databind.node.ObjectNode;
  * When the serialization has a {@link Collector} as an attribute, the function
  * is added to it and a placeholder is written, which
  * {@link Collector#extract(JsonNode, boolean)} removes again. Without a
- * collector, the option is written as <code>null</code>.
+ * collector, the option is left out: the function counts as empty, and
+ * {@link com.vaadin.flow.component.charts.util.ChartSerialization} includes
+ * properties of type {@link ChartFunction} only when they are not empty.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -57,6 +59,12 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
         } else {
             gen.writeNull();
         }
+    }
+
+    @Override
+    public boolean isEmpty(SerializationContext context, ChartFunction value) {
+        return value == null || !(context
+                .getAttribute(Collector.class) instanceof Collector);
     }
 
     /**

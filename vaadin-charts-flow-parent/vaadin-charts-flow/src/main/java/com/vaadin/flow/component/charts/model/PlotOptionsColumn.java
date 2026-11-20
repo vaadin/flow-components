@@ -878,6 +878,9 @@ public class PlotOptionsColumn extends ColumnOptions {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setPointDescriptionFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
      *
      * @param pointDescriptionFormatter
      *            the function, or <code>null</code> to remove it

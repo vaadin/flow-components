@@ -364,6 +364,9 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setInputDateParser(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
      *
      * @param inputDateParser
      *            the function, or <code>null</code> to remove it

@@ -394,6 +394,9 @@ public class Legend extends AbstractConfigurationObject {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setLabelFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
      *
      * @param labelFormatter
      *            the function, or <code>null</code> to remove it

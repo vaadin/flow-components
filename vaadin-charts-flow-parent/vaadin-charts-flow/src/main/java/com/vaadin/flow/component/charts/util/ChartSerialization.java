@@ -69,6 +69,12 @@ public class ChartSerialization implements Serializable {
         JsonMapper.Builder builder = JsonMapper.builder()
                 .changeDefaultPropertyInclusion(incl -> incl
                         .withValueInclusion(JsonInclude.Include.NON_NULL))
+                // A function is left out of JSON that does not collect
+                // functions
+                .withConfigOverride(ChartFunction.class,
+                        override -> override.setInclude(JsonInclude.Value
+                                .construct(JsonInclude.Include.NON_EMPTY,
+                                        JsonInclude.Include.NON_EMPTY)))
                 .changeDefaultVisibility(handler -> handler
                         .withVisibility(PropertyAccessor.ALL, Visibility.NONE)
                         .withVisibility(PropertyAccessor.FIELD, Visibility.ANY))
@@ -108,7 +114,7 @@ public class ChartSerialization implements Serializable {
 
     /**
      * Serializes the given configuration object to JSON. A
-     * {@link ChartFunction} value is written as <code>null</code>: use
+     * {@link ChartFunction} value is left out: use
      * {@link #toJsonWithFunctions(AbstractConfigurationObject)} to get the
      * functions as well.
      *

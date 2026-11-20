@@ -33,6 +33,7 @@ import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.charts.util.ChartSerialization.JsonWithFunctions;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
@@ -177,13 +178,13 @@ class ChartFunctionTest {
     }
 
     @Test
-    void toJson_functionWrittenAsNull() {
+    void toJson_functionLeftOut() {
         chart.getConfiguration().getTooltip()
                 .setFormatterFunction(FORMATTERS.scaled(1, "%"));
 
         String json = ChartSerialization.toJSON(chart.getConfiguration());
 
-        Assertions.assertTrue(json.contains("\"formatter\":null"), json);
+        Assertions.assertFalse(json.contains("formatter"), json);
     }
 
     @Test
@@ -195,12 +196,14 @@ class ChartFunctionTest {
 
         chart.drawChart();
 
-        JsCall call = singleChartJsCall();
+        // One dump only: a dump clears all pending invocations
+        List<PendingJavaScriptInvocation> invocations = ui
+                .dumpPendingJavaScriptInvocations();
+        Assertions.assertEquals(1, invocations.size());
+        JsCall call = invocations.get(0).getInvocation().getJsCall();
+        Assertions.assertEquals(ChartJs.class, call.definitionType());
         Assertions.assertEquals("updateConfiguration", call.methodName());
         Assertions.assertEquals(function, call.flattenArguments().getLast());
-        Assertions.assertTrue(
-                ui.dumpJsCalls(chart.getElement(), "updateConfiguration")
-                        .isEmpty());
     }
 
     @Test

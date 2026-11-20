@@ -168,6 +168,9 @@ public class DragHandle extends AbstractConfigurationObject {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setPathFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
      *
      * @param pathFormatter
      *            the function, or <code>null</code> to remove it

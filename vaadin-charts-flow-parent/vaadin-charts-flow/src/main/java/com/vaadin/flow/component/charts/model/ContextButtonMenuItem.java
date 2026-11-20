@@ -65,6 +65,9 @@ public class ContextButtonMenuItem extends AbstractConfigurationObject {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setOnclick(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
      *
      * @param onclick
      *            the function, or <code>null</code> to remove it
