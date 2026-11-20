@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -29,19 +30,45 @@ import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/lit-renderer")
 public class GridLitRendererPage extends Div {
 
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`<span id=\"item-${index}\">Lit: ${item.name}</span>`;")
+        CompiledLitTemplate item();
+
+        @JsExpression("return html`<span id=\"details-${index}\">Lit: ${item.name}</span>`;")
+        CompiledLitTemplate details();
+
+        @JsExpression("return html`${index}`;")
+        CompiledLitTemplate index();
+
+        @JsExpression("return html`<div title='${item.firstName}'>${item.firstName}<br><small>${item.yearsOld}</small></div>`;")
+        CompiledLitTemplate person();
+
+        @JsExpression("return html`<div>${item.address.street}, number ${item.address.number}<br><small>${item.address.postalCode}</small></div>`;")
+        CompiledLitTemplate address();
+
+        @JsExpression("return html`<button @click=${functions.handleUpdate}>Update</button><button @click=${functions.handleRemove}>Remove</button>`;")
+        CompiledLitTemplate actions();
+    }
+
+    private static final Templates TEMPLATES = JsSnippets.of(Templates.class);
+
     public GridLitRendererPage() {
         Grid<Integer> grid = new Grid<>();
         grid.setItems(IntStream.range(0, 1000).boxed().toList());
-        grid.addColumn(LitRenderer
-                .<Integer> of(
-                        "<span id=\"item-${index}\">Lit: ${item.name}</span>")
+        grid.addColumn(LitRenderer.<Integer> of(TEMPLATES.item())
                 .withProperty("name", item -> "Item " + item))
                 .setEditorComponent(new Span("Editor component"));
         grid.getEditor().setBinder(new Binder<>());
@@ -97,12 +124,11 @@ public class GridLitRendererPage extends Div {
         grid.setItems(people);
 
         // You can use the index variable to print the row index (0 based)
-        grid.addColumn(LitRenderer.of("${index}")).setHeader("#");
+        grid.addColumn(LitRenderer.of(TEMPLATES.index())).setHeader("#");
 
         // You can set any property by using `withProperty`, including
         // properties not present on the original bean.
-        grid.addColumn(LitRenderer.<Person> of(
-                "<div title='${item.firstName}'>${item.firstName}<br><small>${item.yearsOld}</small></div>")
+        grid.addColumn(LitRenderer.<Person> of(TEMPLATES.person())
                 .withProperty("firstName", Person::getFirstName)
                 .withProperty("yearsOld",
                         person -> person.getAge() > 1
@@ -112,14 +138,12 @@ public class GridLitRendererPage extends Div {
 
         // You can also set complex objects directly. Internal properties of the
         // bean are accessible in the template.
-        grid.addColumn(LitRenderer.<Person> of(
-                "<div>${item.address.street}, number ${item.address.number}<br><small>${item.address.postalCode}</small></div>")
+        grid.addColumn(LitRenderer.<Person> of(TEMPLATES.address())
                 .withProperty("address", Person::getAddress))
                 .setHeader("Address");
 
         // You can set events handlers associated with the template.
-        grid.addColumn(LitRenderer.<Person> of(
-                "<button @click=${handleUpdate}>Update</button><button @click=${handleRemove}>Remove</button>")
+        grid.addColumn(LitRenderer.<Person> of(TEMPLATES.actions())
                 .withFunction("handleUpdate", person -> {
                     person.setFirstName(person.getFirstName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
@@ -136,9 +160,9 @@ public class GridLitRendererPage extends Div {
     }
 
     private void setLitRenderer(Grid<Integer> grid) {
-        grid.setItemDetailsRenderer(LitRenderer.<Integer> of(
-                "<span id=\"details-${index}\">Lit: ${item.name}</span>")
-                .withProperty("name", item -> "Item details " + item));
+        grid.setItemDetailsRenderer(
+                LitRenderer.<Integer> of(TEMPLATES.details())
+                        .withProperty("name", item -> "Item details " + item));
     }
 
     private void setComponentRenderer(Grid<Integer> grid) {

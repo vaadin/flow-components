@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -29,11 +30,22 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/multi-sort")
 public class GridMultiSortPage extends Div {
+
+    @JsDefinition
+    interface Templates extends Serializable {
+
+        @JsExpression("return html`<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>`;")
+        CompiledLitTemplate address();
+    }
 
     public GridMultiSortPage() {
         createSorting();
@@ -55,8 +67,8 @@ public class GridMultiSortPage extends Div {
                 .thenComparing(
                         (Person person) -> person.getAddress().getNumber());
 
-        grid.addColumn(LitRenderer.<Person> of(
-                "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
+        grid.addColumn(LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).address())
                 .withProperty("street",
                         person -> person.getAddress().getStreet())
                 .withProperty("number",
