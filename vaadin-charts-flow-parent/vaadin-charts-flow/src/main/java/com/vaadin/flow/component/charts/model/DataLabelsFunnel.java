@@ -327,6 +327,20 @@ public class DataLabelsFunnel extends AbstractDataLabels {
         return _fn_formatter;
     }
 
+    /**
+     * Sets the JavaScript function of the <code>formatter</code> option, as the
+     * source code of the function.
+     * <p>
+     * The browser compiles the function from this string, which a Content
+     * Security Policy without <code>unsafe-eval</code> blocks: in the strict
+     * CSP mode, sending a chart configuration that has a function throws a
+     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
+     * string is enough, use {@link #setFormat(String)}, which needs no
+     * JavaScript.
+     *
+     * @param _fn_formatter
+     *            the source code of the JavaScript function
+     */
     public void setFormatter(String _fn_formatter) {
         this._fn_formatter = _fn_formatter;
     }

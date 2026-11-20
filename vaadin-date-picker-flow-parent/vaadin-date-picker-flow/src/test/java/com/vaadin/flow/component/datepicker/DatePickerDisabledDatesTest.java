@@ -212,13 +212,17 @@ class DatePickerDisabledDatesTest {
         List<JavaScriptInvocation> invocations = ui
                 .dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation).toList();
-        int initIndex = indexOf(invocations, invocation -> invocation
-                .getExpression().contains("datepickerConnector.initLazy"));
+        int initIndex = indexOf(invocations,
+                invocation -> invocation.getJsCall() != null
+                        && invocation.getJsCall()
+                                .definitionType() == DatePickerJs.class
+                        && "initConnector"
+                                .equals(invocation.getJsCall().methodName()));
         int configIndex = indexOf(invocations,
                 invocation -> invocation.getJsCall() != null
                         && invocation.getJsCall().arguments()
                                 .contains("$connector.setDateMetadataConfig"));
-        Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
+        Assertions.assertTrue(initIndex >= 0, "Connector was not initialized");
         Assertions.assertTrue(configIndex > initIndex,
                 "Config must be pushed after the connector is initialized");
     }

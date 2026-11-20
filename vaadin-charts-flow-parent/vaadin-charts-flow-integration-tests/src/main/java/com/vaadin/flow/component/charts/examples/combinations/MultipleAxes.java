@@ -20,6 +20,7 @@ import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.Legend;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
+import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
@@ -50,7 +51,7 @@ public class MultipleAxes extends AbstractChartExample {
         y1.setShowEmpty(false);
         y1.setTitle(new AxisTitle("Temperature"));
         Labels labels = new Labels();
-        labels.setFormatter("return this.value +'°C'");
+        labels.setFormat("{value}°C");
         y1.setLabels(labels);
         y1.setOpposite(true);
         y1.setClassName("y1");
@@ -60,7 +61,7 @@ public class MultipleAxes extends AbstractChartExample {
         y2.setShowEmpty(false);
         y2.setTitle(new AxisTitle("Rainfall"));
         labels = new Labels();
-        labels.setFormatter("return this.value +' mm'");
+        labels.setFormat("{value} mm");
         y2.setLabels(labels);
         y2.setClassName("y2");
         conf.addyAxis(y2);
@@ -69,16 +70,14 @@ public class MultipleAxes extends AbstractChartExample {
         y3.setShowEmpty(false);
         y3.setTitle(new AxisTitle("Sea-Level Pressure"));
         labels = new Labels();
-        labels.setFormatter("return this.value +' mb'");
+        labels.setFormat("{value} mb");
         y3.setLabels(labels);
         y3.setOpposite(true);
         y3.setClassName("y3");
         conf.addyAxis(y3);
 
         Tooltip tooltip = new Tooltip();
-        tooltip.setFormatter("function() { "
-                + "var unit = { 'Rainfall': 'mm', 'Temperature': '°C', 'Sea-Level Pressure': 'mb' }[this.series.name];"
-                + "return ''+ this.x +': '+ this.y +' '+ unit; }");
+        tooltip.setHeaderFormat("");
         conf.setTooltip(tooltip);
 
         Legend legend = new Legend();
@@ -92,6 +91,7 @@ public class MultipleAxes extends AbstractChartExample {
 
         DataSeries series = new DataSeries();
         PlotOptionsColumn plotOptionsColumn = new PlotOptionsColumn();
+        plotOptionsColumn.setTooltip(createSeriesTooltip("mm"));
         series.setPlotOptions(plotOptionsColumn);
         series.setName("Rainfall");
         series.setyAxis(1);
@@ -101,6 +101,7 @@ public class MultipleAxes extends AbstractChartExample {
 
         series = new DataSeries();
         PlotOptionsSpline plotOptionsSpline = new PlotOptionsSpline();
+        plotOptionsSpline.setTooltip(createSeriesTooltip("mb"));
         series.setPlotOptions(plotOptionsSpline);
         series.setName("Sea-Level Pressure");
         series.setyAxis(2);
@@ -110,6 +111,7 @@ public class MultipleAxes extends AbstractChartExample {
 
         series = new DataSeries();
         plotOptionsSpline = new PlotOptionsSpline();
+        plotOptionsSpline.setTooltip(createSeriesTooltip("°C"));
         series.setPlotOptions(plotOptionsSpline);
         series.setName("Temperature");
         series.setData(7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3,
@@ -117,5 +119,11 @@ public class MultipleAxes extends AbstractChartExample {
         conf.addSeries(series);
 
         add(chart);
+    }
+
+    private static SeriesTooltip createSeriesTooltip(String unit) {
+        SeriesTooltip tooltip = new SeriesTooltip();
+        tooltip.setPointFormat("{x}: {y} " + unit);
+        return tooltip;
     }
 }

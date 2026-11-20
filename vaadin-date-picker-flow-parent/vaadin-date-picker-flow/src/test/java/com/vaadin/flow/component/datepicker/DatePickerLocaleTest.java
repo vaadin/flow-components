@@ -72,13 +72,17 @@ class DatePickerLocaleTest {
         List<JavaScriptInvocation> invocations = ui
                 .dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation).toList();
-        int initIndex = indexOf(invocations, invocation -> invocation
-                .getExpression().contains("datepickerConnector.initLazy"));
+        int initIndex = indexOf(invocations,
+                invocation -> invocation.getJsCall() != null
+                        && invocation.getJsCall()
+                                .definitionType() == DatePickerJs.class
+                        && "initConnector"
+                                .equals(invocation.getJsCall().methodName()));
         int i18nIndex = indexOf(invocations,
                 invocation -> invocation.getJsCall() != null
                         && invocation.getJsCall().arguments()
                                 .contains("$connector.updateI18n"));
-        Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
+        Assertions.assertTrue(initIndex >= 0, "Connector was not initialized");
         Assertions.assertTrue(i18nIndex > initIndex,
                 "I18n must be updated after the connector is initialized");
     }

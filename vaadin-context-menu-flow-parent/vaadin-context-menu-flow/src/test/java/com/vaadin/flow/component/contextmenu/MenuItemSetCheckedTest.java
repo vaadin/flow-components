@@ -126,7 +126,7 @@ class MenuItemSetCheckedTest {
 
     private static boolean isSetCheckedInvocation(
             PendingJavaScriptInvocation invocation) {
-        return invocation.getInvocation().getExpression()
-                .contains("contextMenuConnector.setChecked");
+        var call = invocation.getInvocation().getJsCall();
+        return call != null && "setChecked".equals(call.methodName());
     }
 }

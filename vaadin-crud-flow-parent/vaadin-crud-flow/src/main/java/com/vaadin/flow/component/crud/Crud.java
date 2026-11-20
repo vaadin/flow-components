@@ -33,6 +33,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -48,7 +49,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/crud", version = "25.4.0-beta1")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -173,12 +174,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         if (saveBtnDisabledOverridden) {
             overrideSaveDisabled(getSaveButton().isEnabled());
         }
-        getElement().executeJs("this.__validate = function () {return true;}");
+        getElement().executeJs(CrudJs.class).disableClientValidation();
     }
 
     private void overrideSaveDisabled(boolean enabled) {
-        getElement().executeJs("this.__isSaveBtnDisabled = () => {return $0;}",
-                !enabled);
+        getElement().executeJs(CrudJs.class).setSaveButtonDisabled(!enabled);
     }
 
     private void registerHandlers() {
@@ -296,7 +296,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().executeJs("this.editorOpened = $0", opened);
+        getElement().executeJs(CrudJs.class).setEditorOpened(opened);
     }
 
     /**
@@ -317,7 +317,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @since 2.0
      */
     public void setDirty(boolean dirty) {
-        getElement().executeJs("this.__isDirty = $0", dirty);
+        getElement().executeJs(CrudJs.class).setDirty(dirty);
     }
 
     /**
@@ -775,17 +775,17 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            column
      */
     public static void addEditColumn(Grid<?> grid, CrudI18n crudI18n) {
-        grid.addColumn(LitRenderer.of(createEditColumnTemplate(crudI18n)))
+        grid.addColumn(LitRenderer.of(JsSnippets.of(CrudTemplates.class)
+                .editColumnRenderer(getEditColumnLabel(crudI18n))))
                 .setKey(EDIT_COLUMN_KEY).setWidth("4em").setFlexGrow(0);
     }
 
-    private static String createEditColumnTemplate(CrudI18n crudI18n) {
+    private static String getEditColumnLabel(CrudI18n crudI18n) {
         String editLabel = crudI18n.getEditLabel();
         if (editLabel == null) {
             editLabel = "Edit item";
         }
-        return "<vaadin-crud-edit aria-label=\"" + editLabel
-                + "\"></vaadin-crud-edit>";
+        return editLabel;
     }
 
     /**
