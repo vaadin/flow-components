@@ -108,7 +108,8 @@ public class SVGGenerator implements AutoCloseable {
      * The chart does not have the functions of the configuration that are set
      * as a {@link com.vaadin.flow.component.charts.model.ChartFunction
      * ChartFunction}: they run only in the browser. Functions set as strings
-     * are used.
+     * run only when {@link ExportOptions#setExecuteFunctions(Boolean)} is set
+     * to <code>true</code>.
      *
      * @param chartConfiguration
      *            the {@link Configuration} with the chart's data.

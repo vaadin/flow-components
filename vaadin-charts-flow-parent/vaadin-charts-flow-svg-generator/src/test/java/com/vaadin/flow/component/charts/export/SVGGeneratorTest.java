@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.AxisType;
+import com.vaadin.flow.component.charts.model.ChartFunction;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Cursor;
@@ -44,6 +46,9 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 class SVGGeneratorTest {
 
@@ -199,6 +204,29 @@ class SVGGeneratorTest {
         Path expectedResultPath = Paths.get("src", "test", "resources",
                 "enabled-functions.svg");
         String expectedSVG = readUtf8File(expectedResultPath);
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
+    }
+
+    @JsDefinition
+    public interface Formatters extends Serializable {
+        @JsExpression("return this.value + ' formatted';")
+        ChartFunction formatted();
+    }
+
+    @Test
+    void exportWithChartFunction_functionLeftOut()
+            throws IOException, InterruptedException {
+        ExportOptions options = new ExportOptions();
+        options.setExecuteFunctions(true);
+        String expectedSVG = svgGenerator
+                .generate(createAreaChartConfiguration(), options);
+        Configuration configuration = createAreaChartConfiguration();
+        configuration.getyAxis().getLabels().setFormatterFunction(
+                JsSnippets.of(Formatters.class).formatted());
+
+        String actualSVG = svgGenerator.generate(configuration, options);
+
+        assertFalse(actualSVG.contains("formatted"));
         assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
     }
 
