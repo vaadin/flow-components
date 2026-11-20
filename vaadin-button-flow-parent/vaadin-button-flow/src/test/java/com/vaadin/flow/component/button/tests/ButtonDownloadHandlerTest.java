@@ -26,11 +26,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.download.DownloadTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
 class ButtonDownloadHandlerTest {
@@ -123,6 +125,65 @@ class ButtonDownloadHandlerTest {
         Assertions.assertNull(button.getDownloadHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(0, downloadAttributes().count());
+    }
+
+    @Test
+    void handlerAndTargetConstructor_newTab() {
+        InputStreamDownloadHandler builtIn = DownloadHandler
+                .fromInputStream(event -> null);
+        parent.remove(button);
+        button = new Button("Report", builtIn, DownloadTarget.NEW_TAB);
+        parent.add(button);
+
+        Assertions.assertEquals("Report", button.getText());
+        Assertions.assertSame(builtIn, button.getDownloadHandler());
+        Assertions.assertEquals(DownloadTarget.NEW_TAB,
+                button.getDownloadTarget());
+        Assertions.assertTrue(builtIn.isInline());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+    }
+
+    @Test
+    void newTab_builtInHandler_switchedToInline() {
+        InputStreamDownloadHandler builtIn = DownloadHandler
+                .fromInputStream(event -> null);
+        button.setDownloadHandler(builtIn);
+        Assertions.assertFalse(builtIn.isInline());
+
+        button.setDownloadTarget(DownloadTarget.NEW_TAB);
+        Assertions.assertTrue(builtIn.isInline());
+    }
+
+    @Test
+    void targetChanged_handlerKeptAndRegisteredAgain() {
+        ui.fakeClientCommunication();
+        String saveAsFileAttribute = downloadAttributes().findFirst()
+                .orElseThrow();
+
+        button.setDownloadTarget(DownloadTarget.NEW_TAB);
+
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+        Assertions.assertNotEquals(saveAsFileAttribute,
+                downloadAttributes().findFirst().orElseThrow());
+
+        button.setDownloadHandler(null);
+        button.setDownloadHandler(handler);
+
+        Assertions.assertEquals(DownloadTarget.NEW_TAB,
+                button.getDownloadTarget());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+    }
+
+    @Test
+    void nullTargetOrConstructorHandler_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> button.setDownloadTarget(null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new Button("Report", null, DownloadTarget.SAVE_AS_FILE));
     }
 
     /**

@@ -40,6 +40,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.component.download.DownloadTarget;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -54,6 +55,7 @@ import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -80,6 +82,7 @@ public class Button extends Component
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
     private DownloadHandler downloadHandler;
+    private DownloadTarget downloadTarget = DownloadTarget.SAVE_AS_FILE;
     private Registration downloadRegistration;
 
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
@@ -193,6 +196,30 @@ public class Button extends Component
         this();
         bindText(textSignal);
         addClickListener(clickListener);
+    }
+
+    /**
+     * Creates a button with a text and a handler that produces content to
+     * deliver to the given target when the button is clicked.
+     *
+     * @param text
+     *            the text inside the button
+     * @param downloadHandler
+     *            the handler that produces the content, not {@code null}
+     * @param downloadTarget
+     *            where the browser puts the content, not {@code null}
+     * @see #setText(String)
+     * @see #setDownloadHandler(DownloadHandler)
+     * @see #setDownloadTarget(DownloadTarget)
+     * @since 25.4
+     */
+    public Button(String text, DownloadHandler downloadHandler,
+            DownloadTarget downloadTarget) {
+        this();
+        setText(text);
+        setDownloadTarget(downloadTarget);
+        setDownloadHandler(Objects.requireNonNull(downloadHandler,
+                "downloadHandler must not be null"));
     }
 
     /**
@@ -380,11 +407,11 @@ public class Button extends Component
     }
 
     /**
-     * Gets the handler that produces the file downloaded when the button is
+     * Gets the handler that produces the content delivered when the button is
      * clicked.
      *
      * @return the download handler, or {@code null} if clicking the button does
-     *         not start a download
+     *         not deliver any content
      * @see #setDownloadHandler(DownloadHandler)
      * @since 25.4
      */
@@ -393,29 +420,33 @@ public class Button extends Component
     }
 
     /**
-     * Sets a handler that produces a file to download when the button is
-     * clicked. The download starts in the browser as part of the click, and
+     * Sets a handler that produces content to deliver when the button is
+     * clicked. By default the content is saved as a file; use
+     * {@link #setDownloadTarget(DownloadTarget)} to show it in a new browser
+     * tab instead. The download starts in the browser as part of the click, and
      * click listeners still run as usual. Setting a new handler replaces the
-     * previous one, and {@code null} stops the button from starting a download.
+     * previous one, and {@code null} stops the button from delivering content.
      * <p>
-     * The handler runs only when the browser requests the file, once per click,
-     * so you can create the content, file name and response headers at that
-     * point. If the handler fails, the browser reports a failed download
-     * instead of saving an empty file. Use the transfer callbacks of the
+     * The handler runs only when the browser requests the content, once per
+     * click, so you can create the content, file name and response headers at
+     * that point. If the handler fails, the browser reports an error instead of
+     * saving or showing empty content. Use the transfer callbacks of the
      * handler, for example
      * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler#whenComplete(com.vaadin.flow.function.SerializableConsumer)
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
      * <p>
-     * The file is only served while the button is attached, visible and
+     * The content is only served while the button is attached, visible and
      * enabled, so hiding or removing the button in a click listener makes the
-     * download fail. The exception is a button with
+     * download fail. For {@link DownloadTarget#NEW_TAB}, this also means that
+     * reloading the tab later fails once the button is gone, for example after
+     * the view with the button is closed. The exception is a button with
      * {@link #setDisableOnClick(boolean) disable on click}: it disables itself
-     * before the browser requests the file, so the file is also served while
-     * the button is disabled by the click. Once the enabled state is set
+     * before the browser requests the content, so the content is also served
+     * while the button is disabled by the click. Once the enabled state is set
      * explicitly, for example with {@code setEnabled(false)}, or a parent is
-     * disabled, the file is no longer served while the button is disabled. To
-     * serve the file regardless of the enabled state, pass
+     * disabled, the content is no longer served while the button is disabled.
+     * To serve the content regardless of the enabled state, pass
      * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}.
      *
      * <pre>{@code
@@ -426,20 +457,82 @@ public class Button extends Component
      * }</pre>
      *
      * @param downloadHandler
-     *            the handler that produces the file, or {@code null} to not
-     *            start a download on click
+     *            the handler that produces the content, or {@code null} to not
+     *            deliver any content on click
+     * @see #setDownloadTarget(DownloadTarget)
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
+        this.downloadHandler = downloadHandler;
+        updateDownloadRegistration();
+    }
+
+    /**
+     * Gets where the browser puts the content of the
+     * {@link #setDownloadHandler(DownloadHandler) download handler} when the
+     * button is clicked.
+     *
+     * @return the download target, not {@code null}; defaults to
+     *         {@link DownloadTarget#SAVE_AS_FILE}
+     * @see #setDownloadTarget(DownloadTarget)
+     * @since 25.4
+     */
+    public DownloadTarget getDownloadTarget() {
+        return downloadTarget;
+    }
+
+    /**
+     * Sets where the browser puts the content of the
+     * {@link #setDownloadHandler(DownloadHandler) download handler} when the
+     * button is clicked: saved as a file, which is the default, or shown in a
+     * new browser tab. The target is kept when the handler is replaced or
+     * cleared.
+     * <p>
+     * With {@link DownloadTarget#NEW_TAB}, the browser shows the content when
+     * it can, for example a PDF or an image, and saves it as a file otherwise.
+     * The built-in handlers, such as
+     * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
+     * content inline. This changes the handler instance, so it also serves
+     * inline wherever else it is used. A custom handler should call
+     * {@link DownloadEvent#inline(String)} itself, since content served as an
+     * attachment is saved instead of shown. The handler returned by
+     * {@link DownloadHandler#allowDisabled()} can not be switched, so call
+     * {@link AbstractDownloadHandler#inline() inline()} before it, for example
+     * {@code DownloadHandler.forFile(file).inline().allowDisabled()}.
+     *
+     * <pre>{@code
+     * Button view = new Button("View invoice");
+     * view.setDownloadHandler(DownloadHandler.forFile(invoicePdf));
+     * view.setDownloadTarget(DownloadTarget.NEW_TAB);
+     * }</pre>
+     *
+     * @param downloadTarget
+     *            where the browser puts the content, not {@code null}
+     * @see DownloadTarget
+     * @since 25.4
+     */
+    public void setDownloadTarget(DownloadTarget downloadTarget) {
+        this.downloadTarget = Objects.requireNonNull(downloadTarget,
+                "downloadTarget must not be null");
+        updateDownloadRegistration();
+    }
+
+    private void updateDownloadRegistration() {
         if (downloadRegistration != null) {
             downloadRegistration.remove();
             downloadRegistration = null;
         }
-        this.downloadHandler = downloadHandler;
-        if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this,
-                    allowDisabledByClick(downloadHandler));
+        if (downloadHandler == null) {
+            return;
         }
+        if (downloadTarget == DownloadTarget.NEW_TAB
+                && downloadHandler instanceof AbstractDownloadHandler<?> builtIn) {
+            // Download can only switch the handler it gets to inline, which
+            // here is the wrapper that allows disable on click
+            builtIn.inline();
+        }
+        downloadRegistration = Download.onClick(this,
+                allowDisabledByClick(downloadHandler), downloadTarget);
     }
 
     /**
