@@ -54,6 +54,23 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Checks whether the sidebar with the page thumbnails is shown.
+     *
+     * @return {@code true} if the sidebar is shown, {@code false} otherwise
+     */
+    public boolean isSidebarOpened() {
+        return getPropertyBoolean("sidebarOpened");
+    }
+
+    /**
+     * Shows the sidebar if it is hidden, or hides it if it is shown, by
+     * clicking the sidebar button of the toolbar.
+     */
+    public void toggleSidebar() {
+        getToolbarButton("toolbar-sidebar").click();
+    }
+
+    /**
      * Gets the current page, which is the page that takes up most of the
      * visible area.
      *
