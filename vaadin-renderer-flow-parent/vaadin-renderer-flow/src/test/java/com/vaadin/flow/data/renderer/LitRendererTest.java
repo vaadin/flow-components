@@ -15,15 +15,38 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.Trigger;
+import com.vaadin.flow.component.trigger.internal.TriggerInputJs;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
+import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @JsDefinition
+    interface EmailTemplates extends Serializable {
+
+        @JsExpression("return html`<button @click=${() => functions.first(item.email)}>${item.email}</button>`;")
+        CompiledLitTemplate email();
+    }
 
     @Test
     void doNotAllowFunctionNamesWithFunctions() {
@@ -72,4 +95,107 @@ class LitRendererTest {
         Assertions.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
+    @Test
+    void clientActions_sentToTheClientInDeclarationOrder() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+        JsFunction second = JsSnippets.of(TriggerInputJs.class).returnNull();
+        JsFunction first = JsSnippets.of(TriggerInputJs.class).returnNull();
+
+        // A declared template, so that client actions work with a strict
+        // Content Security Policy too
+        LitRenderer.<String> of(JsSnippets.of(EmailTemplates.class).email())
+                .withProperty("email", ValueProvider.identity())
+                .withClientAction("second", actionReturning(second))
+                .withClientAction("first", actionReturning(first))
+                .render(container.getElement(), new KeyMapper<>(), "renderer");
+
+        // The client pairs the action names with the functions by position
+        List<Object> arguments = getRendererArguments(container,
+                "setCompiledLitRenderer");
+        Assertions.assertEquals("[\"second\",\"first\"]",
+                arguments.get(6).toString());
+        JsFunction[] functions = (JsFunction[]) arguments.get(7);
+        Assertions.assertEquals(2, functions.length);
+        Assertions.assertSame(second, functions[0]);
+        Assertions.assertSame(first, functions[1]);
+    }
+
+    @Test
+    void noClientActions_clientStillGetsAnEmptyBundle() {
+        ui.setCspMode(CspMode.OFF);
+        TestDiv container = new TestDiv();
+        ui.add(container);
+
+        LitRenderer.<String> of("<span>${item}</span>")
+                .render(container.getElement(), new KeyMapper<>(), "renderer");
+        ui.getUI().getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        List<Object> arguments = getRendererArguments(container,
+                "setLitRenderer");
+
+        Assertions.assertEquals("[]", arguments.get(6).toString());
+        Assertions.assertArrayEquals(new JsFunction[0],
+                (JsFunction[]) arguments.get(7));
+    }
+
+    @Test
+    void removingTheRenderer_unbindsItsClientActions() {
+        ui.setCspMode(CspMode.OFF);
+        TestDiv container = new TestDiv();
+        ui.add(container);
+        AtomicBoolean unbound = new AtomicBoolean();
+        Action action = new Action() {
+            @Override
+            protected JsFunction toJs(Trigger trigger) {
+                trigger.addCleanup(() -> unbound.set(true));
+                return JsSnippets.of(TriggerInputJs.class).returnNull();
+            }
+        };
+
+        Registration registration = LitRenderer.<String> of("<span></span>")
+                .withClientAction("act", action)
+                .render(container.getElement(), new KeyMapper<>(), "renderer")
+                .getRegistration();
+        Assertions.assertFalse(unbound.get());
+
+        registration.remove();
+        Assertions.assertTrue(unbound.get(),
+                "removing the renderer must unbind its client actions");
+    }
+
+    @Test
+    void doNotAllowClientActionNamesWithSpaces() {
+        LitRenderer<Object> renderer = LitRenderer.of("");
+        Action action = Clipboard.writeText();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> renderer.withClientAction("illegal name", action));
+    }
+
+    @Test
+    void doNotAllowClientActionNameAlreadyUsedByAFunction() {
+        LitRenderer<Object> renderer = LitRenderer.of("").withFunction("copy",
+                item -> {
+                });
+        Action action = Clipboard.writeText();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> renderer.withClientAction("copy", action));
+    }
+
+    private List<Object> getRendererArguments(TestDiv container,
+            String methodName) {
+        return ui.dumpJsCalls(container.getElement(), LitRendererJs.class)
+                .stream().filter(call -> methodName.equals(call.methodName()))
+                .findFirst().orElseThrow().arguments();
+    }
+
+    private static Action actionReturning(JsFunction function) {
+        return new Action() {
+            @Override
+            protected JsFunction toJs(Trigger trigger) {
+                return function;
+            }
+        };
+    }
 }

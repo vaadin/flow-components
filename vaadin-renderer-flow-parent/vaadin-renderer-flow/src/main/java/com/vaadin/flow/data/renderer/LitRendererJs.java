@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
@@ -51,11 +52,17 @@ interface LitRendererJs extends Serializable {
      *            identifies the renderer
      * @param appId
      *            the id of the application
+     * @param clientActions
+     *            the names of the client-side actions of the renderer
+     * @param clientActionFunctions
+     *            the rendered client-side actions, positionally matching
+     *            {@code clientActions}
      */
-    @JsExpression("window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5);")
+    @JsExpression("window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5, $6, $7);")
     void setLitRenderer(String rendererName, String templateExpression,
             ReturnChannelRegistration returnChannel, ArrayNode clientCallables,
-            String propertyNamespace, String appId);
+            String propertyNamespace, String appId, ArrayNode clientActions,
+            JsFunction... clientActionFunctions);
 
     /**
      * Sets a renderer that runs a template declared in the bundle. Called on
@@ -76,12 +83,18 @@ interface LitRendererJs extends Serializable {
      *            identifies the renderer
      * @param appId
      *            the id of the application
+     * @param clientActions
+     *            the names of the client-side actions of the renderer
+     * @param clientActionFunctions
+     *            the rendered client-side actions, positionally matching
+     *            {@code clientActions}
      */
-    @JsExpression("window.Vaadin.setCompiledLitRenderer(this, $0, $1, $2, $3, $4, $5);")
+    @JsExpression("window.Vaadin.setCompiledLitRenderer(this, $0, $1, $2, $3, $4, $5, $6, $7);")
     void setCompiledLitRenderer(String rendererName,
             CompiledLitTemplate template,
             ReturnChannelRegistration returnChannel, ArrayNode clientCallables,
-            String propertyNamespace, String appId);
+            String propertyNamespace, String appId, ArrayNode clientActions,
+            JsFunction... clientActionFunctions);
 
     /**
      * Removes the renderer, unless another renderer replaced it. Called on the
