@@ -62,6 +62,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private static final String SIDEBAR_OPENED_PROPERTY = "sidebarOpened";
+
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
@@ -75,6 +77,7 @@ public class PdfViewer extends Component implements HasSize {
         getElement().setProperty("page", 1);
         getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
         getElement().setProperty("toolbarCollapsed", false);
+        getElement().setProperty(SIDEBAR_OPENED_PROPERTY, false);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
@@ -86,6 +89,9 @@ public class PdfViewer extends Component implements HasSize {
         getElement().addPropertyChangeListener("toolbarCollapsed",
                 event -> fireEvent(new ToolbarCollapsedChangeEvent(this,
                         event.isUserOriginated(), isToolbarCollapsed())));
+        getElement().addPropertyChangeListener(SIDEBAR_OPENED_PROPERTY,
+                event -> fireEvent(new SidebarOpenedChangeEvent(this,
+                        event.isUserOriginated(), isSidebarOpened())));
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> resetDocumentState());
@@ -386,6 +392,30 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets whether the sidebar with the page thumbnails is shown. The default
+     * value is {@code false}.
+     *
+     * @return {@code true} if the sidebar is shown, {@code false} otherwise
+     */
+    @Synchronize(property = SIDEBAR_OPENED_PROPERTY, value = "sidebar-opened-changed")
+    public boolean isSidebarOpened() {
+        return getElement().getProperty(SIDEBAR_OPENED_PROPERTY, false);
+    }
+
+    /**
+     * Sets whether the sidebar with the page thumbnails is shown. The sidebar
+     * is next to the pages, at the start side, and shows a thumbnail of each
+     * page. Clicking a thumbnail goes to its page. The user can also show and
+     * hide the sidebar with the sidebar button of the toolbar.
+     *
+     * @param sidebarOpened
+     *            {@code true} to show the sidebar, {@code false} to hide it
+     */
+    public void setSidebarOpened(boolean sidebarOpened) {
+        getElement().setProperty(SIDEBAR_OPENED_PROPERTY, sidebarOpened);
+    }
+
+    /**
      * Gets the container for your own controls, such as buttons, in the
      * toolbar. The controls are placed after the built-in page and zoom
      * controls, before the download button. Empty by default.
@@ -497,6 +527,20 @@ public class PdfViewer extends Component implements HasSize {
     public Registration addToolbarCollapsedChangeListener(
             ComponentEventListener<ToolbarCollapsedChangeEvent> listener) {
         return addListener(ToolbarCollapsedChangeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called when the sidebar is shown or hidden,
+     * either by the user clicking the sidebar button or with
+     * {@link #setSidebarOpened(boolean)}.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addSidebarOpenedChangeListener(
+            ComponentEventListener<SidebarOpenedChangeEvent> listener) {
+        return addListener(SidebarOpenedChangeEvent.class, listener);
     }
 
     /**
@@ -653,6 +697,41 @@ public class PdfViewer extends Component implements HasSize {
          */
         public boolean isToolbarCollapsed() {
             return toolbarCollapsed;
+        }
+    }
+
+    /**
+     * Event fired when the sidebar is shown or hidden.
+     */
+    public static class SidebarOpenedChangeEvent
+            extends ComponentEvent<PdfViewer> {
+        private final boolean sidebarOpened;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param sidebarOpened
+         *            {@code true} if the sidebar is now shown, {@code false} if
+         *            it is now hidden
+         */
+        public SidebarOpenedChangeEvent(PdfViewer source, boolean fromClient,
+                boolean sidebarOpened) {
+            super(source, fromClient);
+            this.sidebarOpened = sidebarOpened;
+        }
+
+        /**
+         * Gets whether the sidebar is now shown.
+         *
+         * @return {@code true} if the sidebar is shown, {@code false} if it is
+         *         hidden
+         */
+        public boolean isSidebarOpened() {
+            return sidebarOpened;
         }
     }
 

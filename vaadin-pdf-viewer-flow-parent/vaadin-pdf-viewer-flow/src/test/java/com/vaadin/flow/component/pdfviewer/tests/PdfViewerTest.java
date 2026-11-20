@@ -26,6 +26,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.SidebarOpenedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ToolbarCollapsedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
@@ -409,6 +410,57 @@ class PdfViewerTest {
     }
 
     @Test
+    void setSidebarOpened_isSidebarOpened() {
+        Assertions.assertFalse(viewer.isSidebarOpened());
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarOpened", true));
+
+        viewer.setSidebarOpened(true);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("sidebarOpened", false));
+        Assertions.assertTrue(viewer.isSidebarOpened());
+
+        viewer.setSidebarOpened(false);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarOpened", true));
+        Assertions.assertFalse(viewer.isSidebarOpened());
+    }
+
+    @Test
+    void setSidebarOpened_sidebarOpenedChangeEventFired() {
+        var events = new ArrayList<SidebarOpenedChangeEvent>();
+        viewer.addSidebarOpenedChangeListener(events::add);
+
+        viewer.setSidebarOpened(true);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isSidebarOpened());
+    }
+
+    @Test
+    void sidebarOpenedOnClient_sidebarOpenedChangeEventFired() {
+        var events = new ArrayList<SidebarOpenedChangeEvent>();
+        viewer.addSidebarOpenedChangeListener(events::add);
+
+        fakeClientPropertyChange("sidebarOpened", true);
+        fakeClientPropertyChange("sidebarOpened", false);
+
+        Assertions.assertEquals(2, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isSidebarOpened());
+        Assertions.assertTrue(events.get(1).isFromClient());
+        Assertions.assertFalse(events.get(1).isSidebarOpened());
+    }
+
+    @Test
+    void sidebarOpenedSynchronizedOnSidebarOpenedChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("sidebar-opened-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                        + "sidebarOpened"));
+    }
+
+    @Test
     void documentLoaded_pageCountUpdatedBeforeDocumentLoadListener() {
         var pageCount = new AtomicReference<Integer>();
         viewer.addDocumentLoadListener(
@@ -515,7 +567,9 @@ class PdfViewerTest {
                 .setPageFit("pageFit").setDocument("document")
                 .setPageLabel("pageLabel").setLoading("loading").setLink("link")
                 .setGoToPage("goToPage").setExternalLink("externalLink")
-                .setDownload("download");
+                .setDownload("download").setSidebar("sidebar")
+                .setThumbnails("thumbnails")
+                .setThumbnailLabel("thumbnailLabel");
         viewer.setI18n(i18n);
 
         Assertions.assertSame(i18n, viewer.getI18n());
@@ -523,7 +577,7 @@ class PdfViewerTest {
         var keys = List.of("previousPage", "nextPage", "page", "pageError",
                 "zoomIn", "zoomOut", "zoom", "pageWidth", "pageFit", "document",
                 "pageLabel", "loading", "link", "goToPage", "externalLink",
-                "download");
+                "download", "sidebar", "thumbnails", "thumbnailLabel");
         Assertions.assertEquals(keys.size(), json.size());
         keys.forEach(
                 key -> Assertions.assertEquals(key, json.get(key).asString()));
