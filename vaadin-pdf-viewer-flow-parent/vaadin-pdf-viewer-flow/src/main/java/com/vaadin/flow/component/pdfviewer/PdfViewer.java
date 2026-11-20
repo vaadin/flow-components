@@ -62,6 +62,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private static final String SIDEBAR_OPENED_PROPERTY = "sidebarOpened";
+
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
@@ -75,7 +77,7 @@ public class PdfViewer extends Component implements HasSize {
         getElement().setProperty("page", 1);
         getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
         getElement().setProperty("toolbarCollapsed", false);
-        getElement().setProperty("sidebarOpened", false);
+        getElement().setProperty(SIDEBAR_OPENED_PROPERTY, false);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
@@ -87,7 +89,7 @@ public class PdfViewer extends Component implements HasSize {
         getElement().addPropertyChangeListener("toolbarCollapsed",
                 event -> fireEvent(new ToolbarCollapsedChangeEvent(this,
                         event.isUserOriginated(), isToolbarCollapsed())));
-        getElement().addPropertyChangeListener("sidebarOpened",
+        getElement().addPropertyChangeListener(SIDEBAR_OPENED_PROPERTY,
                 event -> fireEvent(new SidebarOpenedChangeEvent(this,
                         event.isUserOriginated(), isSidebarOpened())));
         addDocumentLoadListener(
@@ -395,9 +397,9 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return {@code true} if the sidebar is shown, {@code false} otherwise
      */
-    @Synchronize(property = "sidebarOpened", value = "sidebar-opened-changed")
+    @Synchronize(property = SIDEBAR_OPENED_PROPERTY, value = "sidebar-opened-changed")
     public boolean isSidebarOpened() {
-        return getElement().getProperty("sidebarOpened", false);
+        return getElement().getProperty(SIDEBAR_OPENED_PROPERTY, false);
     }
 
     /**
@@ -410,7 +412,7 @@ public class PdfViewer extends Component implements HasSize {
      *            {@code true} to show the sidebar, {@code false} to hide it
      */
     public void setSidebarOpened(boolean sidebarOpened) {
-        getElement().setProperty("sidebarOpened", sidebarOpened);
+        getElement().setProperty(SIDEBAR_OPENED_PROPERTY, sidebarOpened);
     }
 
     /**
