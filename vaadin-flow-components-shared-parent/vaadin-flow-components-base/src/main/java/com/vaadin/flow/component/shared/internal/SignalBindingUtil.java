@@ -20,6 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.BindingContext;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementEffect;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -91,9 +92,10 @@ public final class SignalBindingUtil {
     }
 
     /**
-     * Creates a signal effect with {@link Signal#effect} and returns a
+     * Creates a signal effect owned by the component and returns a
      * {@link SignalBinding} that is notified with the updated signal value when
-     * the effect runs.
+     * the effect runs. Like other bindings, the current signal value is applied
+     * right away, also when the component is not attached.
      * <p>
      * This is useful for implementing bind APIs in components which only run
      * side-effects (update a class field, run Javascript), but can not use an
@@ -144,7 +146,7 @@ public final class SignalBindingUtil {
         T[] previous = (T[]) new Object[] { signal.peek() };
         SignalBinding<T> binding = new SignalBinding<>();
 
-        Signal.effect(owner, ctx -> {
+        new ElementEffect(owner.getElement(), ctx -> {
             T value = signal.get();
             effect.accept(value);
             if (binding.hasCallbacks()) {

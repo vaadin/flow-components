@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.dom.BindingContext;
+import com.vaadin.flow.dom.ElementEffect;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -79,7 +80,7 @@ class GridSelectionSignalHelper {
         boolean[] fromSignal = { false };
         V[] previousValue = (V[]) new Object[] { valueSignal.peek() };
 
-        Registration effectReg = Signal.effect(owner, ctx -> {
+        Registration effectReg = new ElementEffect(owner.getElement(), ctx -> {
             V newValue = valueSignal.get();
             V oldValue = previousValue[0];
             try {
@@ -98,7 +99,7 @@ class GridSelectionSignalHelper {
                 }
             }
             previousValue[0] = newValue;
-        });
+        })::close;
 
         Registration listenerReg = target.addValueChangeListener(event -> {
             if (!fromSignal[0]) {
