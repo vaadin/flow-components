@@ -20,7 +20,7 @@ import com.vaadin.flow.js.JsSnippet;
 
 /**
  * A Lit template that renders an item, declared by a method of a
- * {@link com.vaadin.flow.js.JsDefinition} interface. The build collects the
+ * {@link com.vaadin.flow.js.JsSnippets} interface. The build collects the
  * JavaScript into the bundle, so the browser does not compile the template from
  * a string, which a content security policy without <code>unsafe-eval</code>
  * forbids.
@@ -28,8 +28,7 @@ import com.vaadin.flow.js.JsSnippet;
  * The JavaScript is the body of a function that returns the template:
  *
  * <pre>
- * &#64;JsDefinition
- * interface PersonTemplates extends Serializable {
+ * interface PersonTemplates extends JsSnippets {
  *
  *     &#64;JsExpression("""
  *             return html`&lt;span title=${$0} &#64;click=${functions.select}&gt;

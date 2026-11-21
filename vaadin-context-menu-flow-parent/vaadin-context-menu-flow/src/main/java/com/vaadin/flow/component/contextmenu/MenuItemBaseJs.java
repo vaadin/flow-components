@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link MenuItemBase} runs on its element in the browser,
@@ -27,8 +25,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface MenuItemBaseJs extends Serializable {
+interface MenuItemBaseJs extends JsInvokers {
 
     /**
      * Sets the checked state of the menu item in the context menu connector.

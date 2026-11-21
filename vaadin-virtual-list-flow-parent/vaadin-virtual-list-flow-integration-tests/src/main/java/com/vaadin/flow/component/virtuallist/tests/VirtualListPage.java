@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
@@ -52,8 +50,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-virtual-list/virtual-list-test")
 public class VirtualListPage extends Div {
 
-    @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`${item.name} - ${item.age} - ${item.user}`;")
         CompiledLitTemplate personRenderer();

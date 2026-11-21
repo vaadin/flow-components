@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.fieldhighlighter;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link FieldHighlighterInitializer} runs on a field
@@ -27,8 +25,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface FieldHighlighterJs extends Serializable {
+interface FieldHighlighterJs extends JsInvokers {
 
     /**
      * Initializes the field highlighter for a field. {@code this} is the field

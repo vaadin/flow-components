@@ -8,11 +8,9 @@
  */
 package com.vaadin.flow.component.crud;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Crud} runs on its element in the browser, for
@@ -20,8 +18,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface CrudJs extends Serializable {
+interface CrudJs extends JsInvokers {
 
     /**
      * Replaces the validation of the editor form in the browser with a function

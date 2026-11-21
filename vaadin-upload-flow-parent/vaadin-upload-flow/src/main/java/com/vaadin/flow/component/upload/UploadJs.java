@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.upload;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Upload} runs on its element in the browser, for
@@ -27,8 +25,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface UploadJs extends Serializable {
+interface UploadJs extends JsInvokers {
 
     /**
      * Sets the maximum number of files that the user can select.

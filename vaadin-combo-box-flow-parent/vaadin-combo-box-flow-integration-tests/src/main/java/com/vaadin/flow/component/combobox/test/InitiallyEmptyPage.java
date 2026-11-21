@@ -15,21 +15,18 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/initially-empty")
 public class InitiallyEmptyPage extends Div {
 
-    @JsDefinition
-    interface ContainerJs extends Serializable {
+    interface ContainerJs extends JsInvokers {
 
         @JsExpression("this.__parent = this.parentElement; this.remove();")
         PendingJavaScriptResult detach();

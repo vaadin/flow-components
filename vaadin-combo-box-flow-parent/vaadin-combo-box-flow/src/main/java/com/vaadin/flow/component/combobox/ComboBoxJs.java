@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link ComboBox} and {@link MultiSelectComboBox} run in
@@ -28,8 +26,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface ComboBoxJs extends Serializable {
+interface ComboBoxJs extends JsInvokers {
 
     /**
      * Installs the combo box connector, <code>$connector</code>, on the combo

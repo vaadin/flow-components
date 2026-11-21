@@ -19,8 +19,8 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -35,8 +35,7 @@ import tools.jackson.databind.node.ArrayNode;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface GridJs extends Serializable {
+interface GridJs extends JsInvokers {
 
     /**
      * Installs the grid connector, <code>$connector</code>, on the grid

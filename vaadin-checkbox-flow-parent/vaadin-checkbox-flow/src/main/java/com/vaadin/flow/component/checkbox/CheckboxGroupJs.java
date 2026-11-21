@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link CheckboxGroup} runs in the browser, for
@@ -28,8 +26,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface CheckboxGroupJs extends Serializable {
+interface CheckboxGroupJs extends JsInvokers {
 
     /**
      * Sets the {@code disabled} property of an item's checkbox.

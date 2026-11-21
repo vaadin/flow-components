@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.tabs;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Tabs} runs in the browser, for
@@ -27,8 +25,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface TabsJs extends Serializable {
+interface TabsJs extends JsInvokers {
 
     /**
      * Adds a listener to the tabs element that updates the selected tab on the

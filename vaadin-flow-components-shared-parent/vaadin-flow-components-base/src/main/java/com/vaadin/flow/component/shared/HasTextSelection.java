@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * Mixin interface for field components that wrap a native HTML input and
@@ -85,8 +83,7 @@ public interface HasTextSelection extends HasElement {
     /**
      * For internal use only. May be renamed or removed in a future release.
      */
-    @JsDefinition
-    interface TextSelectionJs extends Serializable {
+    interface TextSelectionJs extends JsInvokers {
 
         /**
          * Sets the text selection of the input element and focuses the field.

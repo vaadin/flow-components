@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link TreeGrid} runs in the browser, in addition to the
@@ -27,8 +25,7 @@ import com.vaadin.flow.js.JsExpression;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@JsDefinition
-interface TreeGridJs extends Serializable {
+interface TreeGridJs extends JsInvokers {
 
     /**
      * Installs the tree grid connector, <code>$connector</code>, on the tree
