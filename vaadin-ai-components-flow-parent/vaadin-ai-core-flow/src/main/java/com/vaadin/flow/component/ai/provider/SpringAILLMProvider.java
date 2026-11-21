@@ -568,6 +568,7 @@ public class SpringAILLMProvider implements LLMProvider {
                 : message);
     }
 
+    @SuppressWarnings("deprecation")
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {

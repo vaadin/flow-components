@@ -200,6 +200,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void reconnect_withoutTools_usesEmptyTools() throws Throwable {
         var tool = new SampleTool();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
@@ -230,6 +231,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void reconnect_withTools_restoresTools() throws Throwable {
         var tool = new SampleTool();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
