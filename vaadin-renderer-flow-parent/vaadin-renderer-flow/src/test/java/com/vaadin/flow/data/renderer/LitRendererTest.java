@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,7 +41,7 @@ class LitRendererTest {
     MockUIExtension ui = new MockUIExtension();
 
     @JsDefinition
-    interface EmailTemplates extends Serializable {
+    interface EmailTemplates extends JsSnippets {
 
         @JsExpression("return html`<button @click=${() => functions.first(item.email)}>${item.email}</button>`;")
         CompiledLitTemplate email();
