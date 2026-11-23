@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -30,7 +29,7 @@ import tools.jackson.databind.node.ArrayNode;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface LitRendererJs extends Serializable {
+interface LitRendererJs extends JsInvokers {
 
     /**
      * Sets a renderer that compiles the template from a string. Called on the
