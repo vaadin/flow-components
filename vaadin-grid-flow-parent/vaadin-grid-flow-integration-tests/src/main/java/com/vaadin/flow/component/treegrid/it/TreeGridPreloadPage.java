@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -49,7 +48,7 @@ public class TreeGridPreloadPage extends VerticalLayout
         implements HasUrlParameter<String> {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`${index}`;")
         CompiledLitTemplate index();

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,7 +47,7 @@ import com.vaadin.flow.server.Command;
 public class AddingColumnsPage extends Div {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`<div>${item.age}</div>`;")
         CompiledLitTemplate age();

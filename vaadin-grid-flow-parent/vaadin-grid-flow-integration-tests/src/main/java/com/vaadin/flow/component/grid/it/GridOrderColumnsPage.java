@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.Button;
@@ -28,13 +27,14 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid/grid-order-columns")
 public class GridOrderColumnsPage extends VerticalLayout {
 
     @JsDefinition
-    interface GridOrderColumnsPageJs extends Serializable {
+    interface GridOrderColumnsPageJs extends JsInvokers {
 
         @JsExpression("this._swapColumnOrders($0, $1)")
         void swapColumnOrders(Element column1, Element column2);

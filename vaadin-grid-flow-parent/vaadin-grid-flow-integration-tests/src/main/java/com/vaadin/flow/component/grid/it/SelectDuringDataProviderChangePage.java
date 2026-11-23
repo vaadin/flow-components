@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,7 +29,7 @@ import com.vaadin.flow.router.Route;
 public class SelectDuringDataProviderChangePage extends VerticalLayout {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`<div></div>`;")
         CompiledLitTemplate details();

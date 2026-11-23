@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.button.Button;
@@ -32,13 +31,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/item-click-listener")
 public class ItemClickListenerPage extends Div {
 
     @JsDefinition
-    interface ItemClickListenerPageJs extends Serializable {
+    interface ItemClickListenerPageJs extends JsInvokers {
 
         @JsExpression("this.addEventListener('click', e => e.preventDefault())")
         void preventDefaultOnClick();

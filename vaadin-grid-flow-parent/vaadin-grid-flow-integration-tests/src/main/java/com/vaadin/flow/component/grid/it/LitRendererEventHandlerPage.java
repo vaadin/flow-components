@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -32,7 +30,7 @@ import com.vaadin.flow.router.Route;
 public class LitRendererEventHandlerPage extends Div {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`<div>${item.name} <button @click=${functions.clicked}>Click</button></div>`;")
         CompiledLitTemplate person();

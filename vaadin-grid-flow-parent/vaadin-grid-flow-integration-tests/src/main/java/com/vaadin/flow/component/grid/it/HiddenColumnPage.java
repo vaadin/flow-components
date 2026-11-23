@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.Collections;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -36,7 +35,7 @@ import com.vaadin.flow.router.Route;
 public class HiddenColumnPage extends Div {
 
     @JsDefinition
-    interface EventFilters extends Serializable {
+    interface EventFilters extends JsSnippets {
 
         @JsExpression("return event.key === 'Escape' || event.key === 'Esc';")
         DomEventFilter isEscape();

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -41,7 +40,7 @@ import com.vaadin.flow.router.Route;
 public class GridMultiSortPage extends Div {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>`;")
         CompiledLitTemplate address();

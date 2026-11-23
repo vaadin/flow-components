@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,7 +37,7 @@ import com.vaadin.flow.router.Route;
 public class GridRendererSwapPage extends Div {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("return html`<span style=\"color: ${item.price > 50 ? 'red' : 'blue'}\">${item.price}</span>`;")
         CompiledLitTemplate price();

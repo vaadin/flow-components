@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -40,7 +39,7 @@ public class GridItemRefreshPage extends Div {
     public static final int UPDATED_SECOND_FIELD = 12345;
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         // Update the cell values only in the DOM, not in the grid data cache.
         // Update the previous cell in an animation frame: click also selects
