@@ -300,9 +300,9 @@ public class DataLabels extends AbstractDataLabels {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
-     * string is enough, use {@link #setFormat(String)}, which needs no
-     * JavaScript.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
+     * Where a format string is enough, use {@link #setFormat(String)}, which
+     * needs no JavaScript.
      *
      * @param _fn_formatter
      *            the source code of the JavaScript function

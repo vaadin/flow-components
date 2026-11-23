@@ -32,9 +32,9 @@ import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.component.shared.internal.SuppressForbidden;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.internal.CspViolationReporter;
+import com.vaadin.flow.internal.ContentSecurityPolicyViolationReporter;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
-import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -407,7 +407,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * The JavaScript is sent to the browser as a string, which the browser
      * compiles and a Content Security Policy without <code>unsafe-eval</code>
      * blocks. The call is reported as soon as this method is called: in the
-     * strict CSP mode it throws a {@link CspViolationException}.
+     * strict CSP mode it throws a
+     * {@link ContentSecurityPolicyViolationException}.
      *
      * @param expression
      *            the JavaScript expression to run
@@ -421,7 +422,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     @Deprecated(since = "25.4", forRemoval = true)
     protected void executeJsWhenAttached(String expression,
             Serializable... parameters) {
-        CspViolationReporter.reportStringJavaScript();
+        ContentSecurityPolicyViolationReporter.reportStringJavaScript();
         runBeforeClientResponseWhenAttached(
                 () -> executeStringJavaScript(expression, parameters));
     }

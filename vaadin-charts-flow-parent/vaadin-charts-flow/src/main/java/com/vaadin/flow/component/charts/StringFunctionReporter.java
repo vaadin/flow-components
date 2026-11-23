@@ -11,7 +11,7 @@ package com.vaadin.flow.component.charts;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.vaadin.flow.internal.CspViolationReporter;
+import com.vaadin.flow.internal.ContentSecurityPolicyViolationReporter;
 
 import tools.jackson.databind.JsonNode;
 
@@ -22,7 +22,8 @@ import tools.jackson.databind.JsonNode;
  * The browser compiles such a function, which a Content Security Policy without
  * <code>unsafe-eval</code> blocks. The report follows the CSP mode: nothing
  * when it is off, a warning in the warn mode and a
- * {@link com.vaadin.flow.server.CspViolationException} in the strict mode.
+ * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException} in the
+ * strict mode.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -48,7 +49,7 @@ final class StringFunctionReporter implements Serializable {
      */
     static <T extends JsonNode> T report(T json) {
         if (hasStringFunction(json)) {
-            CspViolationReporter.reportStringJavaScript();
+            ContentSecurityPolicyViolationReporter.reportStringJavaScript();
         }
         return json;
     }
