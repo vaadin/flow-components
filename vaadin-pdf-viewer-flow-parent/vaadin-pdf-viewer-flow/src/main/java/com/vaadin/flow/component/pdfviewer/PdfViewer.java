@@ -542,6 +542,20 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Adds a listener that is called when the user chooses a page thumbnail in
+     * the sidebar, with a click or with Enter or Space. The viewer scrolls to
+     * the page of the thumbnail.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addThumbnailClickListener(
+            ComponentEventListener<ThumbnailClickEvent> listener) {
+        return addListener(ThumbnailClickEvent.class, listener);
+    }
+
+    /**
      * Adds a listener that is called when a document has been loaded.
      *
      * @param listener
@@ -730,6 +744,40 @@ public class PdfViewer extends Component implements HasSize {
          */
         public boolean isSidebarOpened() {
             return sidebarOpened;
+        }
+    }
+
+    /**
+     * Event fired when the user chooses a page thumbnail in the sidebar, with a
+     * click or with Enter or Space.
+     */
+    @DomEvent("thumbnail-click")
+    public static class ThumbnailClickEvent extends ComponentEvent<PdfViewer> {
+        private final int page;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param page
+         *            the page number of the thumbnail, starting from 1
+         */
+        public ThumbnailClickEvent(PdfViewer source, boolean fromClient,
+                @EventData("event.detail.page") int page) {
+            super(source, fromClient);
+            this.page = page;
+        }
+
+        /**
+         * Gets the page number of the chosen thumbnail.
+         *
+         * @return the page number, starting from 1
+         */
+        public int getPage() {
+            return page;
         }
     }
 

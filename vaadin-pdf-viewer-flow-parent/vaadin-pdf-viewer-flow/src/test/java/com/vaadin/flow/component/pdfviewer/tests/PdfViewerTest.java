@@ -27,6 +27,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.SidebarOpenedChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.ThumbnailClickEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ToolbarCollapsedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
@@ -536,6 +537,21 @@ class PdfViewerTest {
         Assertions.assertTrue(event.isFromClient());
         Assertions.assertEquals(6, event.getPageCount());
         Assertions.assertEquals("Title", event.getTitle());
+    }
+
+    @Test
+    void thumbnailClickOnClient_thumbnailClickEventFired() {
+        var eventRef = new AtomicReference<ThumbnailClickEvent>();
+        viewer.addThumbnailClickListener(eventRef::set);
+
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.page", 4);
+        fakeClientDomEvent("thumbnail-click", eventData);
+
+        var event = eventRef.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertTrue(event.isFromClient());
+        Assertions.assertEquals(4, event.getPage());
     }
 
     @Test
