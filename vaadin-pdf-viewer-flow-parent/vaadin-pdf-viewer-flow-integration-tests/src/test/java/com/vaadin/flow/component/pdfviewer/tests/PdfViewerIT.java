@@ -78,15 +78,15 @@ public class PdfViewerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void toggleSidebar_sidebarOpened() {
+    public void showHideSidebar_sidebarOpened() {
         clickElementWithJs("set-url-src");
         waitUntil(driver -> !viewer.isLoading());
         Assert.assertFalse(viewer.isSidebarOpened());
 
-        viewer.toggleSidebar();
+        viewer.showSidebar();
         Assert.assertTrue(viewer.isSidebarOpened());
 
-        viewer.toggleSidebar();
+        viewer.hideSidebar();
         Assert.assertFalse(viewer.isSidebarOpened());
     }
 }

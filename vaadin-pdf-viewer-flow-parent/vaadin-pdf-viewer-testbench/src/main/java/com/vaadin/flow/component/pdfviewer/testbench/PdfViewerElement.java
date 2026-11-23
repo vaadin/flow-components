@@ -63,11 +63,23 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
-     * Shows the sidebar if it is hidden, or hides it if it is shown, by
-     * clicking the sidebar button of the toolbar.
+     * Shows the sidebar by clicking the sidebar button of the toolbar. Does
+     * nothing if the sidebar is already shown.
      */
-    public void toggleSidebar() {
-        getToolbarButton("toolbar-sidebar").click();
+    public void showSidebar() {
+        if (!isSidebarOpened()) {
+            getToolbarButton("toolbar-sidebar").click();
+        }
+    }
+
+    /**
+     * Hides the sidebar by clicking the sidebar button of the toolbar. Does
+     * nothing if the sidebar is already hidden.
+     */
+    public void hideSidebar() {
+        if (isSidebarOpened()) {
+            getToolbarButton("toolbar-sidebar").click();
+        }
     }
 
     /**
