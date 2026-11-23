@@ -30,6 +30,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -39,6 +40,7 @@ import com.vaadin.flow.router.RouterLink;
 public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
         implements BeforeEnterObserver {
 
+    @JsDefinition
     interface OverlayJs extends JsInvokers {
 
         @JsExpression("setTimeout(() => this.$.overlay._updateOverlayWidth())")

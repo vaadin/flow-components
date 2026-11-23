@@ -10,6 +10,7 @@ package com.vaadin.flow.component.richtexteditor;
 
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -19,6 +20,7 @@ import com.vaadin.flow.js.JsInvokers;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@JsDefinition
 interface RichTextEditorJs extends JsInvokers {
 
     /**

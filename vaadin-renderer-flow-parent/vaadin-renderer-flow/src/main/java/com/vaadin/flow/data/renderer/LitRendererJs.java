@@ -16,6 +16,7 @@
 package com.vaadin.flow.data.renderer;
 
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -27,6 +28,7 @@ import tools.jackson.databind.node.ArrayNode;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@JsDefinition
 interface LitRendererJs extends JsInvokers {
 
     /**

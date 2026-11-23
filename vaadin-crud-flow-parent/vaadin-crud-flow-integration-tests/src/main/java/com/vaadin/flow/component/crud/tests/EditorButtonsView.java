@@ -17,6 +17,7 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
@@ -24,6 +25,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "vaadin-crud/editorbuttons")
 public class EditorButtonsView extends VerticalLayout {
 
+    @JsDefinition
     interface EditorButtonsViewJs extends JsInvokers {
 
         @JsExpression("this.click()")

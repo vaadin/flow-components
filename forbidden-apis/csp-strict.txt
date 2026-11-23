@@ -7,24 +7,24 @@
 # Modules without Flow, such as the TestBench elements, cannot call them
 @ignoreMissingClasses
 
-@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare it in a JsInvokers interface and call it through executeJs(Class), or in a JsSnippets interface and get it from JsSnippets.of(Class)
+@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare it in a @JsDefinition interface that extends JsInvokers and call it through executeJs(Class), or in one that extends JsSnippets and get it from JsSnippets.of(Class)
 com.vaadin.flow.dom.Element#executeJs(java.lang.String,java.lang.Object[])
 com.vaadin.flow.dom.Element#executeJs(java.lang.String,java.io.Serializable[])
 com.vaadin.flow.component.page.Page#executeJs(java.lang.String,java.lang.Object[])
 com.vaadin.flow.component.page.Page#executeJs(java.lang.String,java.io.Serializable[])
 
-@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare a JsFunction in a JsSnippets interface
+@defaultMessage Sends JavaScript as a string, which a strict Content Security Policy blocks. Declare a JsFunction in a @JsDefinition interface that extends JsSnippets
 com.vaadin.flow.dom.JsFunction#of(java.lang.String,java.lang.Object[])
 com.vaadin.flow.component.page.Page#addDynamicImport(java.lang.String)
 com.vaadin.flow.dom.Element#addJsInitializer(java.lang.String,java.lang.Object[])
 com.vaadin.flow.component.Shortcuts#setShortcutListenOnElement(java.lang.String,com.vaadin.flow.component.Component)
 
-@defaultMessage Adds event data as a string, which the browser compiles unless it is a property path. Use addEventDataPath(...) or addEventDataElementPath(...) for a property path, or a DomEventData from a JsSnippets interface
+@defaultMessage Adds event data as a string, which the browser compiles unless it is a property path. Use addEventDataPath(...) or addEventDataElementPath(...) for a property path, or a DomEventData from a @JsDefinition interface that extends JsSnippets
 com.vaadin.flow.dom.DomListenerRegistration#addEventData(java.lang.String)
 com.vaadin.flow.dom.DomListenerRegistration#addEventDataElement(java.lang.String)
 
-@defaultMessage Sets an event filter as a string, which the browser compiles unless it is a property path. Declare a DomEventFilter in a JsSnippets interface and set it with setFilterExpression(...)
+@defaultMessage Sets an event filter as a string, which the browser compiles unless it is a property path. Declare a DomEventFilter in a @JsDefinition interface that extends JsSnippets and set it with setFilterExpression(...)
 com.vaadin.flow.dom.DomListenerRegistration#setFilter(java.lang.String)
 
-@defaultMessage Sends a Lit template as a string, which the browser compiles and a strict Content Security Policy blocks. Declare the template in a JsSnippets interface
+@defaultMessage Sends a Lit template as a string, which the browser compiles and a strict Content Security Policy blocks. Declare the template in a @JsDefinition interface that extends JsSnippets
 com.vaadin.flow.data.renderer.LitRenderer#of(java.lang.String)

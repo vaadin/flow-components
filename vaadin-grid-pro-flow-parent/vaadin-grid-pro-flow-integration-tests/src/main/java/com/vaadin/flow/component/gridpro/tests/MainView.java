@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "vaadin-grid-pro")
 public class MainView extends VerticalLayout {
 
+    @JsDefinition
     interface ColumnJs extends JsInvokers {
 
         @JsExpression("this._focusButtonMode = true")

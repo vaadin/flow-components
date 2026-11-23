@@ -15,6 +15,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-map/modify-style")
 public class ModifyStylePage extends Div {
 
+    @JsDefinition
     interface RenderCountJs extends JsInvokers {
 
         @JsExpression("""

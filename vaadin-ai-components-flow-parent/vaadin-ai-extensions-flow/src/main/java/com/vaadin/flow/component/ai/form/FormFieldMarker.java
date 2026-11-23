@@ -18,6 +18,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -268,6 +269,7 @@ final class FormFieldMarker {
      * <p>
      * For internal use only. May be renamed or removed in a future release.
      */
+    @JsDefinition
     interface FormFieldMarkerJs extends JsInvokers {
 
         /**

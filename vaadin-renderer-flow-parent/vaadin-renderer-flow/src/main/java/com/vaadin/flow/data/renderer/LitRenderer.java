@@ -161,6 +161,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * Example:
      *
      * <pre>
+     * &#64;JsDefinition
      * interface PersonTemplates extends JsSnippets {
      *
      *     &#64;JsExpression("return html`&lt;div&gt;Name: ${item.name}&lt;/div&gt;`;")

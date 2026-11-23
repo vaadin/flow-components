@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -24,6 +25,7 @@ import com.vaadin.flow.js.JsInvokers;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@JsDefinition
 interface EditorJs extends JsInvokers {
 
     /**

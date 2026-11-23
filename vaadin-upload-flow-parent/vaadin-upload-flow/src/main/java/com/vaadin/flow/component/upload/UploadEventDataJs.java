@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.dom.DomEventData;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.js.JsSnippets;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@JsDefinition
 interface UploadEventDataJs extends JsSnippets {
 
     /**

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.CspMode;
@@ -103,6 +104,7 @@ class MockUIExtensionCspModeTest {
         }
     }
 
+    @JsDefinition
     interface TestJs extends JsInvokers {
 
         @JsExpression("this.foo = $0")

@@ -28,6 +28,7 @@ import com.vaadin.flow.js.JsSnippet;
  * The JavaScript is the body of a function that returns the template:
  *
  * <pre>
+ * &#64;JsDefinition
  * interface PersonTemplates extends JsSnippets {
  *
  *     &#64;JsExpression("""

@@ -25,6 +25,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.internal.StringUtil;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
@@ -37,6 +38,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-upload")
 public class UploadView extends Div {
 
+    @JsDefinition
     interface UploadViewJs extends JsInvokers {
 
         @JsExpression("return this.files")

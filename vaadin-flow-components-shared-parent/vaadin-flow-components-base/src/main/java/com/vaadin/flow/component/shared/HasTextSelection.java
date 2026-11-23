@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -83,6 +84,7 @@ public interface HasTextSelection extends HasElement {
     /**
      * For internal use only. May be renamed or removed in a future release.
      */
+    @JsDefinition
     interface TextSelectionJs extends JsInvokers {
 
         /**

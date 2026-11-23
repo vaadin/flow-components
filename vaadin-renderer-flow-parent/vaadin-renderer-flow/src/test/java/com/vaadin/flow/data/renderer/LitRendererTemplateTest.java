@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.server.CspMode;
@@ -45,6 +46,7 @@ class LitRendererTemplateTest {
 
     private Element container;
 
+    @JsDefinition
     interface TestTemplates extends JsSnippets {
 
         @JsExpression("return html`<span title=${$0}>${item.name}</span>`;")

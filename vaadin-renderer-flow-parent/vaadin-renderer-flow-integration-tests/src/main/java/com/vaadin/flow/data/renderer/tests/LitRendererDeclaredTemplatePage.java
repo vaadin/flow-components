@@ -24,6 +24,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
@@ -33,6 +34,7 @@ public class LitRendererDeclaredTemplatePage extends Div {
 
     static final List<String> ITEMS = List.of("a", "b", "c");
 
+    @JsDefinition
     interface Templates extends JsSnippets {
 
         /**

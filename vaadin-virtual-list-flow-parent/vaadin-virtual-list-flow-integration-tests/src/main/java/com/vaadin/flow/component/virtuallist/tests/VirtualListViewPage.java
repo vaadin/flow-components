@@ -40,6 +40,7 @@ import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
@@ -47,6 +48,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-virtual-list/virtual-list-view")
 public class VirtualListViewPage extends Div {
 
+    @JsDefinition
     interface Templates extends JsSnippets {
 
         @JsExpression("""

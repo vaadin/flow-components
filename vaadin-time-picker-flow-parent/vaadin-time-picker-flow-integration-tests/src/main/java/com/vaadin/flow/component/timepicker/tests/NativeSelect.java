@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -31,6 +32,7 @@ public class NativeSelect
         extends AbstractSinglePropertyField<NativeSelect, String>
         implements HasSize, HasStyle, Focusable<NativeSelect> {
 
+    @JsDefinition
     interface NativeSelectJs extends JsInvokers {
 
         @JsExpression("if (this._value !== undefined) { this.value = this._value; this._value = undefined; }")

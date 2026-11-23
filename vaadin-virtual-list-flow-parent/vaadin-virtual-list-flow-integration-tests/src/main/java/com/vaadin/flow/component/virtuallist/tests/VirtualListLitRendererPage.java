@@ -24,6 +24,7 @@ import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
@@ -31,6 +32,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-virtual-list/lit-renderer")
 public class VirtualListLitRendererPage extends Div {
 
+    @JsDefinition
     interface Templates extends JsSnippets {
 
         @JsExpression("return html`<div id=\"item-${index}\" @click=\"${functions.clicked}\">Lit: ${item.name}</div>`;")

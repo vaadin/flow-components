@@ -25,6 +25,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -202,6 +203,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * The JavaScript that the controller runs in the browser, for
      * {@link com.vaadin.flow.dom.Element#executeJs(Class)}.
      */
+    @JsDefinition
     interface DisableOnClickJs extends JsInvokers {
 
         /**

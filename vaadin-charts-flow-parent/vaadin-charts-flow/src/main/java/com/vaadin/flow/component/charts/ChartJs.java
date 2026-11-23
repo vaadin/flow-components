@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.charts;
 
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
 
@@ -19,6 +20,7 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@JsDefinition
 interface ChartJs extends JsInvokers {
 
     /**

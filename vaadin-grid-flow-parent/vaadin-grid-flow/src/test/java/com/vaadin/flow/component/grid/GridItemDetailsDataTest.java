@@ -27,6 +27,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.tests.MockUIExtension;
@@ -39,6 +40,7 @@ class GridItemDetailsDataTest {
     private Grid<String> grid;
     private List<String> detailsItems = new ArrayList<>();
 
+    @JsDefinition
     interface DetailsTemplates extends JsSnippets {
 
         @JsExpression("return html`${item.details}`;")
