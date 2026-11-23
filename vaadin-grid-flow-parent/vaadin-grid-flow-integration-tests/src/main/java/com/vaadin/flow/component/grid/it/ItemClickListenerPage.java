@@ -29,10 +29,21 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/item-click-listener")
 public class ItemClickListenerPage extends Div {
+
+    @JsDefinition
+    interface ItemClickListenerPageJs extends JsInvokers {
+
+        @JsExpression("this.addEventListener('click', e => e.preventDefault())")
+        void preventDefaultOnClick();
+    }
+
     static final String GRID_FILTER_FOCUSABLE_HEADER = "grid-filter-focusable-header";
 
     public ItemClickListenerPage() {
@@ -54,8 +65,8 @@ public class ItemClickListenerPage extends Div {
         grid.addComponentColumn(Checkbox::new);
         grid.addComponentColumn(item -> {
             Span span = new Span("Action");
-            span.getElement().executeJs(
-                    "$0.addEventListener('click', e => e.preventDefault())");
+            span.getElement().executeJs(ItemClickListenerPageJs.class)
+                    .preventDefaultOnClick();
             return span;
         }).setHeader("Action");
         grid.addComponentColumn(item -> new Button(VaadinIcon.PENCIL.create()))
