@@ -135,14 +135,12 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         getSpreadsheet().scroll(500);
         getSpreadsheet().scroll(0);
 
-        // Count rendered column headers after resize
-        int countAfter = getHeaderCount(".rh");
-
         Assert.assertEquals("Height should be the same", spreadsheetHeight,
                 getSpreadsheet().getSize().getHeight());
-        Assert.assertEquals(
-                "Number of rendered rows should remain the same after resize",
-                countBefore, countAfter);
+
+        // Rows are rendered asynchronously after scrolling, so wait for the
+        // number of rendered rows to be the same as before the resize
+        waitUntil(driver -> getHeaderCount(".rh") == countBefore);
     }
 
     @Test
