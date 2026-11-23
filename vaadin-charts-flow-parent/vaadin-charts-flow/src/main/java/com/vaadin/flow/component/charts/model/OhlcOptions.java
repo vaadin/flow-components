@@ -500,7 +500,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, for the
      * subclasses that implement {@link #setPointDescriptionFormatter(String)}.
      */
-    void clearPointDescriptionFormatterFunction() {
+    protected void clearPointDescriptionFormatterFunction() {
         pointDescriptionFormatter = null;
     }
 

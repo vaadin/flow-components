@@ -198,7 +198,7 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * {@link #setFormatterFunction(ChartFunction)}, for the subclasses that
      * implement {@link #setFormatter(String)}.
      */
-    void clearFormatterFunction() {
+    protected void clearFormatterFunction() {
         formatter = null;
     }
 
