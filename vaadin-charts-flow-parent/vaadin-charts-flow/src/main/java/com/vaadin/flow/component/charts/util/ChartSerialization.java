@@ -102,8 +102,10 @@ public class ChartSerialization implements Serializable {
      * for it, adding custom serializers might be needed.
      * <p>
      * A writer that is not built from {@link #createObjectMapper()} or
-     * {@link #createObjectMapper(ValueSerializerModifier)} does not send the
-     * {@link ChartFunction} values of a configuration to the browser.
+     * {@link #createObjectMapper(ValueSerializerModifier)} cannot serialize
+     * {@link ChartFunction} values: build the writer with
+     * {@link #createObjectMapper()} or
+     * {@link #createObjectMapper(ValueSerializerModifier)} to use them.
      *
      * @param newObjectWriter
      * @see #createObjectMapper()
