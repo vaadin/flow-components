@@ -39,8 +39,7 @@ public class Area extends AbstractChartExample {
 
         YAxis yAxis = configuration.getyAxis();
         yAxis.setTitle("Billions");
-        yAxis.getLabels()
-                .setFormatter("function () { return this.value / 1000;}");
+        yAxis.getLabels().setFormat("{divide value 1000}");
 
         configuration.getTooltip().setValueSuffix(" millions");
 

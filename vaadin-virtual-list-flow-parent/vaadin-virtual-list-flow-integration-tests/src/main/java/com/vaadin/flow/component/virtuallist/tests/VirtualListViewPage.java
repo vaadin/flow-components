@@ -49,7 +49,7 @@ import com.vaadin.flow.router.Route;
 public class VirtualListViewPage extends Div {
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         @JsExpression("""
                 return html`<div style='font-size:20px; margin:10px; padding:10px; \

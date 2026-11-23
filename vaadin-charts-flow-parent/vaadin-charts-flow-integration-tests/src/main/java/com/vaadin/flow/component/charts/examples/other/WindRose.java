@@ -48,8 +48,7 @@ public class WindRose extends AbstractChartExample {
         yAxis.setMin(0);
         yAxis.setEndOnTick(false);
         yAxis.setShowLastLabel(true);
-        yAxis.getLabels()
-                .setFormatter("function() { return this.value + '%';}");
+        yAxis.getLabels().setFormat("{value}%");
 
         conf.getTooltip().setValueSuffix("%");
 
