@@ -428,6 +428,23 @@ class PdfViewerTest {
     }
 
     @Test
+    void setSidebarButtonVisible_isSidebarButtonVisible() {
+        Assertions.assertTrue(viewer.isSidebarButtonVisible());
+        Assertions.assertFalse(
+                viewer.getElement().hasProperty("sidebarButtonHidden"));
+
+        viewer.setSidebarButtonVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("sidebarButtonHidden", false));
+        Assertions.assertFalse(viewer.isSidebarButtonVisible());
+
+        viewer.setSidebarButtonVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarButtonHidden", true));
+        Assertions.assertTrue(viewer.isSidebarButtonVisible());
+    }
+
+    @Test
     void setSidebarOpened_sidebarOpenedChangeEventFired() {
         var events = new ArrayList<SidebarOpenedChangeEvent>();
         viewer.addSidebarOpenedChangeListener(events::add);

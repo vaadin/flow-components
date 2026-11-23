@@ -404,13 +404,38 @@ public class PdfViewer extends Component implements HasSize {
      * Sets whether the sidebar with the page thumbnails is shown. The sidebar
      * is next to the pages, at the start side, and shows a thumbnail of each
      * page. Clicking a thumbnail goes to its page. The user can also show and
-     * hide the sidebar with the sidebar button of the toolbar.
+     * hide the sidebar with the sidebar button of the toolbar, see
+     * {@link #setSidebarButtonVisible(boolean)}.
      *
      * @param sidebarOpened
      *            {@code true} to show the sidebar, {@code false} to hide it
      */
     public void setSidebarOpened(boolean sidebarOpened) {
         getElement().setProperty("sidebarOpened", sidebarOpened);
+    }
+
+    /**
+     * Gets whether the toolbar shows the sidebar button. The default is
+     * {@code true}.
+     *
+     * @return {@code true} if the sidebar button is visible, {@code false}
+     *         otherwise
+     */
+    public boolean isSidebarButtonVisible() {
+        return !getElement().getProperty("sidebarButtonHidden", false);
+    }
+
+    /**
+     * Sets whether the toolbar shows the button that shows and hides the
+     * sidebar. {@link #setSidebarOpened(boolean)} works also while the button
+     * is hidden.
+     *
+     * @param sidebarButtonVisible
+     *            {@code true} to show the sidebar button, {@code false} to hide
+     *            it
+     */
+    public void setSidebarButtonVisible(boolean sidebarButtonVisible) {
+        getElement().setProperty("sidebarButtonHidden", !sidebarButtonVisible);
     }
 
     /**
