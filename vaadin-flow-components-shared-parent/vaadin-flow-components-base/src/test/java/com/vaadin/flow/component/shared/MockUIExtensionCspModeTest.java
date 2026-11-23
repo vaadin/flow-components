@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.CspMode;
 import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.flow.server.VaadinService;
@@ -104,7 +105,7 @@ class MockUIExtensionCspModeTest {
     }
 
     @JsDefinition
-    interface TestJs {
+    interface TestJs extends JsInvokers {
 
         @JsExpression("this.foo = $0")
         void setFoo(int foo);

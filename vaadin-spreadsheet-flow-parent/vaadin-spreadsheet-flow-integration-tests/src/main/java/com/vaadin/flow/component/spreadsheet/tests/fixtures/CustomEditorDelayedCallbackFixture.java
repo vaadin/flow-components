@@ -129,7 +129,8 @@ public class CustomEditorDelayedCallbackFixture implements SpreadsheetFixture {
             typed.setValue(CALLBACK_VALUE_PREFIX + columnIndex);
             // autoselect only fires on focus, which has already happened, so
             // the new text has to be selected explicitly.
-            customEditor.getElement().executeJs("this.inputElement.select();");
+            customEditor.getElement().executeJs(CustomEditorJs.class)
+                    .selectInputText();
         }
     }
 }

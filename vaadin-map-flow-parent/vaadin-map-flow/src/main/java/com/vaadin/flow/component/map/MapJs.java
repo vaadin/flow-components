@@ -8,11 +8,10 @@
  */
 package com.vaadin.flow.component.map;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Map} runs in the browser, for
@@ -22,7 +21,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface MapJs extends Serializable {
+interface MapJs extends JsInvokers {
 
     /**
      * Initializes the map connector on the map element.
