@@ -35,20 +35,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * PDF Viewer is a component for showing PDF documents. The browser loads the
  * document, so the viewer needs a URL: either give a URL with
  * {@link #setSrc(String)}, or serve the document from the application with
- * {@link #setSrc(DownloadHandler)}, which generates the URL. A path to a file
- * on the server, such as {@code "/data/report.pdf"}, does not work as a URL;
- * use a download handler for it:
+ * {@link #setSrc(DownloadHandler)}, which generates the URL. A path in the
+ * server's file system, such as {@code "/data/report.pdf"}, does not work as a
+ * URL; serve the file with a download handler instead:
  *
  * <pre>
- * // A file on the server's file system
  * PdfViewer viewer = new PdfViewer(
  *         DownloadHandler.forFile(new File("/data/report.pdf")));
  * viewer.setHeight("600px");
- *
- * // A resource on the classpath, e.g. in src/main/resources
- * viewer.setSrc(DownloadHandler.forClassResource(getClass(),
- *         "/documents/report.pdf"));
  * </pre>
+ * <p>
+ * See {@link #setSrc(DownloadHandler)} for more examples.
  * <p>
  * You can add your own controls to the toolbar with
  * {@link #getToolbarActions()}.
@@ -143,14 +140,13 @@ public class PdfViewer extends Component implements HasSize {
      * be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
-     * as the application, or the server must allow it with CORS headers. A
-     * relative URL, such as {@code "files/report.pdf"}, is resolved against the
-     * URL of the page in the browser.
+     * as the application, or the server must allow it with CORS headers.
      * <p>
-     * The URL is not a path on the server: a file path such as
-     * {@code "/data/report.pdf"} or {@code "src/main/resources/report.pdf"}
-     * fails to load, unless the application happens to serve a file at that
-     * URL. To show a file or a classpath resource of the application, use
+     * The URL is not a path in the server's file system: a file such as
+     * {@code "/data/report.pdf"} on the server's disk, or
+     * {@code "src/main/resources/report.pdf"} in the project, fails to load
+     * unless the web server serves it at that URL. To show a file or a
+     * classpath resource of the application, use
      * {@link #setSrc(DownloadHandler)}.
      *
      * @param src
@@ -183,9 +179,11 @@ public class PdfViewer extends Component implements HasSize {
      *         "/documents/report.pdf"));
      *
      * // A document generated in memory
-     * viewer.setSrc(DownloadHandler.fromInputStream(event -&gt; new DownloadResponse(
-     *         new ByteArrayInputStream(createReport()), "report.pdf",
-     *         "application/pdf", -1)));
+     * viewer.setSrc(DownloadHandler.fromInputStream(event -&gt; {
+     *     byte[] pdf = createReport();
+     *     return new DownloadResponse(new ByteArrayInputStream(pdf), "report.pdf",
+     *             "application/pdf", pdf.length);
+     * }));
      * </pre>
      *
      * @param downloadHandler
