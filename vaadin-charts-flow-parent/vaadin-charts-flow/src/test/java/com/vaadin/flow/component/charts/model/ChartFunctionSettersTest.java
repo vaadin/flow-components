@@ -8,11 +8,13 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -58,7 +60,21 @@ class ChartFunctionSettersTest {
 
     @Test
     void everyFunctionOptionHasFunctionSetter() throws Exception {
-        Assertions.assertEquals(53, functionOptions().size());
+        List<String> missing = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<String>> entry : functionOptionNames()
+                .entrySet()) {
+            Class<?> type = entry.getKey();
+            for (String option : entry.getValue()) {
+                String capitalized = capitalize(option);
+                if (!hasMethod(type, "set" + capitalized + "Function",
+                        ChartFunction.class)
+                        || !hasMethod(type, "get" + capitalized + "Function")) {
+                    missing.add(type.getSimpleName() + "." + option);
+                }
+            }
+        }
+        Assertions.assertFalse(functionOptionNames().isEmpty());
+        Assertions.assertEquals(List.of(), missing);
     }
 
     @Test
@@ -114,28 +130,60 @@ class ChartFunctionSettersTest {
 
     private static List<FunctionOption> functionOptions() throws Exception {
         List<FunctionOption> options = new ArrayList<>();
-        for (Class<?> type : modelClasses()) {
-            for (Method setter : type.getMethods()) {
-                String name = setter.getName();
-                if (!name.startsWith("set") || !name.endsWith("Function")
-                        || setter.getParameterCount() != 1 || setter
-                                .getParameterTypes()[0] != ChartFunction.class) {
-                    continue;
-                }
-                String capitalized = name.substring(3,
-                        name.length() - "Function".length());
-                String option = Character.toLowerCase(capitalized.charAt(0))
-                        + capitalized.substring(1);
+        for (Map.Entry<Class<?>, List<String>> entry : functionOptionNames()
+                .entrySet()) {
+            Class<?> type = entry.getKey();
+            for (String option : entry.getValue()) {
+                String capitalized = capitalize(option);
                 String stringSetter = STRING_SETTERS.getOrDefault(
                         type.getSimpleName() + "." + option,
                         "set" + capitalized);
                 options.add(new FunctionOption(type, option,
                         type.getMethod("get" + capitalized + "Function"),
-                        setter, type.getMethod("get" + capitalized),
+                        type.getMethod("set" + capitalized + "Function",
+                                ChartFunction.class),
+                        type.getMethod("get" + capitalized),
                         type.getMethod(stringSetter, String.class)));
             }
         }
         return options;
+    }
+
+    /**
+     * Gets the function options of each concrete model class, from the
+     * {@code _fn_} fields of the class and its superclasses.
+     */
+    private static Map<Class<?>, List<String>> functionOptionNames()
+            throws Exception {
+        Map<Class<?>, List<String>> options = new LinkedHashMap<>();
+        for (Class<?> type : modelClasses()) {
+            List<String> names = new ArrayList<>();
+            for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (field.getName().startsWith("_fn_")) {
+                        names.add(field.getName().substring(4));
+                    }
+                }
+            }
+            if (!names.isEmpty()) {
+                options.put(type, names);
+            }
+        }
+        return options;
+    }
+
+    private static boolean hasMethod(Class<?> type, String name,
+            Class<?>... parameterTypes) {
+        try {
+            type.getMethod(name, parameterTypes);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private static String capitalize(String option) {
+        return Character.toUpperCase(option.charAt(0)) + option.substring(1);
     }
 
     /**
