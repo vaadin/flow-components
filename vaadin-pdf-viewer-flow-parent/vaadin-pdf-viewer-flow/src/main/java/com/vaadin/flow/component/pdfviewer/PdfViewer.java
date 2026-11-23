@@ -164,7 +164,8 @@ public class PdfViewer extends Component implements HasSize {
      * {@link #getSrc()} returns, and the viewer loads it like a URL set with
      * {@link #setSrc(String)}.
      * <p>
-     * For example, to show a file stored on the server:
+     * The factory methods of {@link DownloadHandler} create handlers for the
+     * common cases, for example for a file stored on the server:
      *
      * <pre>
      * viewer.setSrc(DownloadHandler.forFile(new File("/data/report.pdf")));
