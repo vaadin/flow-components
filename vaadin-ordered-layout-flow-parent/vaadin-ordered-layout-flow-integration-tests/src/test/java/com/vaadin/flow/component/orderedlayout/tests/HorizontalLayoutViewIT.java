@@ -73,7 +73,7 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
         assertBasicFlexPropertiesAreSet(hLayout);
 
         Assert.assertEquals("space-between",
-                hLayout.getCssValue("justify-content"));
+                getAlignment(hLayout, "justify-content"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
                 .id("horizontal-layout-justify-content-radio-button");
@@ -81,26 +81,27 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.START.name().toLowerCase());
         Assert.assertEquals("flex-start",
-                hLayout.getCssValue("justify-content"));
+                getAlignment(hLayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.END.name().toLowerCase());
-        Assert.assertEquals("flex-end", hLayout.getCssValue("justify-content"));
+        Assert.assertEquals("flex-end",
+                getAlignment(hLayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.BETWEEN.name().toLowerCase());
         Assert.assertEquals("space-between",
-                hLayout.getCssValue("justify-content"));
+                getAlignment(hLayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.AROUND.name().toLowerCase());
         Assert.assertEquals("space-around",
-                hLayout.getCssValue("justify-content"));
+                getAlignment(hLayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.EVENLY.name().toLowerCase());
         Assert.assertEquals("space-evenly",
-                hLayout.getCssValue("justify-content"));
+                getAlignment(hLayout, "justify-content"));
     }
 
     @Test
@@ -108,29 +109,29 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
         WebElement vlayout = findElement(By.id("layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("center", vlayout.getCssValue("align-items"));
+        Assert.assertEquals("center", getAlignment(vlayout, "align-items"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
                 .id("horizontal-layout-alignment-radio-button");
         rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
-                .equals(vlayout.getCssValue("align-items")));
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.CENTER.name().toLowerCase());
-        waitUntil(
-                driver -> "center".equals(vlayout.getCssValue("align-items")));
+        waitUntil(driver -> "center"
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.STRETCH.name().toLowerCase());
-        waitUntil(
-                driver -> "stretch".equals(vlayout.getCssValue("align-items")));
+        waitUntil(driver -> "stretch"
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.START.name().toLowerCase());
         waitUntil(driver -> "flex-start"
-                .equals(vlayout.getCssValue("align-items")));
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.BASELINE.name().toLowerCase());
         waitUntil(driver -> "baseline"
-                .equals(vlayout.getCssValue("align-items")));
+                .equals(getAlignment(vlayout, "align-items")));
     }
 
     @Test
@@ -140,19 +141,19 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         WebElement child = vlayout.findElement(By.id("start-aligned"));
-        Assert.assertEquals("flex-start", child.getCssValue("align-self"));
+        Assert.assertEquals("flex-start", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("center-aligned"));
-        Assert.assertEquals("center", child.getCssValue("align-self"));
+        Assert.assertEquals("center", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("end-aligned"));
-        Assert.assertEquals("flex-end", child.getCssValue("align-self"));
+        Assert.assertEquals("flex-end", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("stretch-aligned"));
-        Assert.assertEquals("stretch", child.getCssValue("align-self"));
+        Assert.assertEquals("stretch", getAlignment(child, "align-self"));
     }
 
     @Test
@@ -175,7 +176,7 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
         WebElement hlayout = findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(hlayout);
 
-        Assert.assertEquals("center", hlayout.getCssValue("justify-content"));
+        Assert.assertEquals("center", getAlignment(hlayout, "justify-content"));
 
         Assert.assertTrue(isElementPresent(By.id("center")));
     }
@@ -194,6 +195,16 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
         Assert.assertEquals("row", vlayout.getCssValue("flex-direction"));
+    }
+
+    /**
+     * Gets the computed value of an alignment property. Chrome 158 and newer
+     * report {@code flex-start} and {@code flex-end} as {@code flow-start} and
+     * {@code flow-end}, so those are mapped back to keep the expected values
+     * the same in all browser versions.
+     */
+    private static String getAlignment(WebElement element, String property) {
+        return element.getCssValue(property).replaceFirst("^flow-", "flex-");
     }
 
     private void checkThemeChanges(WebElement layoutToCheck, String themeName,
