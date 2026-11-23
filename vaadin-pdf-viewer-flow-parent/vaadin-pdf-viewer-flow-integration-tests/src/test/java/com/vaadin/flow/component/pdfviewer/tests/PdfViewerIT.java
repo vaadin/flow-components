@@ -86,6 +86,12 @@ public class PdfViewerIT extends AbstractComponentIT {
         viewer.showSidebar();
         Assert.assertTrue(viewer.isSidebarOpened());
 
+        viewer.showSidebar();
+        Assert.assertTrue(viewer.isSidebarOpened());
+
+        viewer.hideSidebar();
+        Assert.assertFalse(viewer.isSidebarOpened());
+
         viewer.hideSidebar();
         Assert.assertFalse(viewer.isSidebarOpened());
     }
