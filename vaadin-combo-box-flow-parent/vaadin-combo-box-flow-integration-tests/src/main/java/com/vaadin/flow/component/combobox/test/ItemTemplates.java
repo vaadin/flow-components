@@ -15,17 +15,16 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Lit templates shared by the renderer views.
  */
 @JsDefinition
-interface ItemTemplates extends Serializable {
+interface ItemTemplates extends JsSnippets {
 
     @JsExpression("return html`<div id=\"item-${index}\">Lit: ${item.name}</div>`;")
     CompiledLitTemplate item();

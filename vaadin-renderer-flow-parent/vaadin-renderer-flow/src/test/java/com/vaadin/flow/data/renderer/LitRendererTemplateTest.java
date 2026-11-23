@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -48,7 +47,7 @@ class LitRendererTemplateTest {
     private Element container;
 
     @JsDefinition
-    interface TestTemplates extends Serializable {
+    interface TestTemplates extends JsSnippets {
 
         @JsExpression("return html`<span title=${$0}>${item.name}</span>`;")
         CompiledLitTemplate name(String title);

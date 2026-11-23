@@ -8,11 +8,10 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -23,7 +22,7 @@ import tools.jackson.databind.node.ArrayNode;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface DashboardJs extends Serializable {
+interface DashboardJs extends JsInvokers {
 
     /**
      * Patches the dashboard element so that it can hold the virtual children
