@@ -42,10 +42,10 @@ public class GridItemRefreshPage extends Div {
     @JsDefinition
     interface Templates extends Serializable {
 
-        // update the element values from client side so that it should only
-        // be updated in DOM, not in caches
-        // updating the previous cell in animation frame so that grid active
-        // item handling doesn't reset the changes
+        // Update the cell values only in the DOM, not in the grid data cache.
+        // Update the previous cell in an animation frame: click also selects
+        // the row, and the grid then re-renders the row cells synchronously,
+        // which would reset the change.
         @JsFunctionParameterNames("e")
         @JsExpression("""
                 const div = e.currentTarget;
