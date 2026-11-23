@@ -32,14 +32,22 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * PDF Viewer is a component for showing PDF documents. Give the document as a
- * URL with {@link #setSrc(String)}, or serve it from the application with
- * {@link #setSrc(DownloadHandler)}:
+ * PDF Viewer is a component for showing PDF documents. The browser loads the
+ * document, so the viewer needs a URL: either give a URL with
+ * {@link #setSrc(String)}, or serve the document from the application with
+ * {@link #setSrc(DownloadHandler)}, which generates the URL. A path to a file
+ * on the server, such as {@code "/data/report.pdf"}, does not work as a URL;
+ * use a download handler for it:
  *
  * <pre>
+ * // A file on the server's file system
  * PdfViewer viewer = new PdfViewer(
- *         DownloadHandler.forClassResource(getClass(), "report.pdf"));
+ *         DownloadHandler.forFile(new File("/data/report.pdf")));
  * viewer.setHeight("600px");
+ *
+ * // A resource on the classpath, e.g. in src/main/resources
+ * viewer.setSrc(DownloadHandler.forClassResource(getClass(),
+ *         "/documents/report.pdf"));
  * </pre>
  * <p>
  * You can add your own controls to the toolbar with
@@ -92,7 +100,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Creates a PDF viewer that shows the document at the given URL.
+     * Creates a PDF viewer that shows the document at the given URL. The
+     * browser fetches the URL, so it cannot be a path to a file on the server.
+     * To show such a file, use {@link #PdfViewer(DownloadHandler)}.
      *
      * @param src
      *            the URL of the document, or {@code null} to show no document
@@ -133,8 +143,14 @@ public class PdfViewer extends Component implements HasSize {
      * be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
-     * as the application, or the server must allow it with CORS headers. To
-     * serve a document from the application, use
+     * as the application, or the server must allow it with CORS headers. A
+     * relative URL, such as {@code "files/report.pdf"}, is resolved against the
+     * URL of the page in the browser.
+     * <p>
+     * The URL is not a path on the server: a file path such as
+     * {@code "/data/report.pdf"} or {@code "src/main/resources/report.pdf"}
+     * fails to load, unless the application happens to serve a file at that
+     * URL. To show a file or a classpath resource of the application, use
      * {@link #setSrc(DownloadHandler)}.
      *
      * @param src
@@ -150,11 +166,27 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets a download handler that serves the document to show, for example one
-     * created with the factory methods of {@link DownloadHandler}. The
-     * framework generates a URL for the handler, which {@link #getSrc()}
-     * returns, and the viewer loads it like a URL set with
-     * {@link #setSrc(String)}.
+     * Sets a download handler that serves the document to show. Use this to
+     * show a document from the server, such as a file, a classpath resource, or
+     * a document generated in memory. The framework generates a URL for the
+     * handler, which {@link #getSrc()} returns, and the viewer loads it like a
+     * URL set with {@link #setSrc(String)}.
+     * <p>
+     * The factory methods of {@link DownloadHandler} cover the common cases:
+     *
+     * <pre>
+     * // A file on the server's file system
+     * viewer.setSrc(DownloadHandler.forFile(new File("/data/report.pdf")));
+     *
+     * // A resource on the classpath, e.g. in src/main/resources/documents
+     * viewer.setSrc(DownloadHandler.forClassResource(getClass(),
+     *         "/documents/report.pdf"));
+     *
+     * // A document generated in memory
+     * viewer.setSrc(DownloadHandler.fromInputStream(event -&gt; new DownloadResponse(
+     *         new ByteArrayInputStream(createReport()), "report.pdf",
+     *         "application/pdf", -1)));
+     * </pre>
      *
      * @param downloadHandler
      *            the download handler that serves the document, not
