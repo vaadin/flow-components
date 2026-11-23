@@ -26,13 +26,29 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-details-row")
 public class GridDetailsRowPage extends Div {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("""
+                return html`<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>\
+                <div>Hi! My name is <b>${item.firstName}!</b></div>\
+                <div><button @click=${functions.handleClick}>Update Person</button></div>\
+                </div>`;
+                """)
+        CompiledLitTemplate details();
+    }
 
     private List<DetailItem> items = new ArrayList<>();
     private Grid<DetailItem> grid = new Grid<>();
@@ -97,11 +113,8 @@ public class GridDetailsRowPage extends Div {
 
         // Any renderer can be used for the item details. By default, the
         // details are opened and closed by clicking the rows.
-        detailsGrid.setItemDetailsRenderer(LitRenderer.<Person> of(
-                "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
-                        + "<div>Hi! My name is <b>${item.firstName}!</b></div>"
-                        + "<div><button @click=${handleClick}>Update Person</button></div>"
-                        + "</div>")
+        detailsGrid.setItemDetailsRenderer(LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).details())
                 .withProperty("firstName", Person::getFirstName)
                 .withFunction("handleClick", person -> {
                     person.setFirstName(person.getFirstName() + " Updated");
