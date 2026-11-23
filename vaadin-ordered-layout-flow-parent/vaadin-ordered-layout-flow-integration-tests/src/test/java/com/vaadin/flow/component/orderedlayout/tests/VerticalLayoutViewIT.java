@@ -65,33 +65,34 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
                 .id("vertical-layout-justify-content-radio-button");
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.START.name().toLowerCase());
         Assert.assertEquals("flex-start",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.END.name().toLowerCase());
-        Assert.assertEquals("flex-end", vlayout.getCssValue("justify-content"));
+        Assert.assertEquals("flex-end",
+                getAlignment(vlayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.BETWEEN.name().toLowerCase());
         Assert.assertEquals("space-between",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.AROUND.name().toLowerCase());
         Assert.assertEquals("space-around",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         rbg.selectByText(
                 FlexComponent.JustifyContentMode.EVENLY.name().toLowerCase());
         Assert.assertEquals("space-evenly",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
     }
 
     @Test
@@ -100,25 +101,25 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
                 By.id("vertical-layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
+        Assert.assertEquals("stretch", getAlignment(vlayout, "align-items"));
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
                 .id("vertical-layout-alignment-radio-button");
 
         rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
-                .equals(vlayout.getCssValue("align-items")));
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.CENTER.name().toLowerCase());
-        waitUntil(
-                driver -> "center".equals(vlayout.getCssValue("align-items")));
+        waitUntil(driver -> "center"
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.STRETCH.name().toLowerCase());
-        waitUntil(
-                driver -> "stretch".equals(vlayout.getCssValue("align-items")));
+        waitUntil(driver -> "stretch"
+                .equals(getAlignment(vlayout, "align-items")));
 
         rbg.selectByText(FlexComponent.Alignment.START.name().toLowerCase());
         waitUntil(driver -> "flex-start"
-                .equals(vlayout.getCssValue("align-items")));
+                .equals(getAlignment(vlayout, "align-items")));
     }
 
     @Test
@@ -128,19 +129,19 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
-                vlayout.getCssValue("justify-content"));
+                getAlignment(vlayout, "justify-content"));
 
         WebElement child = vlayout.findElement(By.id("start-aligned"));
-        Assert.assertEquals("flex-start", child.getCssValue("align-self"));
+        Assert.assertEquals("flex-start", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("center-aligned"));
-        Assert.assertEquals("center", child.getCssValue("align-self"));
+        Assert.assertEquals("center", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("end-aligned"));
-        Assert.assertEquals("flex-end", child.getCssValue("align-self"));
+        Assert.assertEquals("flex-end", getAlignment(child, "align-self"));
 
         child = vlayout.findElement(By.id("stretch-aligned"));
-        Assert.assertEquals("stretch", child.getCssValue("align-self"));
+        Assert.assertEquals("stretch", getAlignment(child, "align-self"));
     }
 
     @Test
@@ -164,9 +165,9 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
         WebElement vlayout = findElement(By.id("vertical-layout-with-center"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("center", vlayout.getCssValue("justify-content"));
+        Assert.assertEquals("center", getAlignment(vlayout, "justify-content"));
         WebElement component = vlayout.findElement(By.id("center"));
-        Assert.assertEquals("center", component.getCssValue("align-self"));
+        Assert.assertEquals("center", getAlignment(component, "align-self"));
     }
 
     @Test
@@ -183,6 +184,16 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
         Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
+    }
+
+    /**
+     * Gets the computed value of an alignment property. Chrome 158 and newer
+     * report {@code flex-start} and {@code flex-end} as {@code flow-start} and
+     * {@code flow-end}, so those are mapped back to keep the expected values
+     * the same in all browser versions.
+     */
+    private static String getAlignment(WebElement element, String property) {
+        return element.getCssValue(property).replaceFirst("^flow-", "flex-");
     }
 
     private void checkThemeChanges(WebElement layoutToCheck, String themeName,
