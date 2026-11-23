@@ -164,22 +164,10 @@ public class PdfViewer extends Component implements HasSize {
      * {@link #getSrc()} returns, and the viewer loads it like a URL set with
      * {@link #setSrc(String)}.
      * <p>
-     * The factory methods of {@link DownloadHandler} cover the common cases:
+     * For example, to show a file stored on the server:
      *
      * <pre>
-     * // A file on the server's file system
      * viewer.setSrc(DownloadHandler.forFile(new File("/data/report.pdf")));
-     *
-     * // A resource on the classpath, e.g. in src/main/resources/documents
-     * viewer.setSrc(DownloadHandler.forClassResource(getClass(),
-     *         "/documents/report.pdf"));
-     *
-     * // A document generated in memory
-     * viewer.setSrc(DownloadHandler.fromInputStream(event -&gt; {
-     *     byte[] pdf = createReport();
-     *     return new DownloadResponse(new ByteArrayInputStream(pdf), "report.pdf",
-     *             "application/pdf", pdf.length);
-     * }));
      * </pre>
      *
      * @param downloadHandler
