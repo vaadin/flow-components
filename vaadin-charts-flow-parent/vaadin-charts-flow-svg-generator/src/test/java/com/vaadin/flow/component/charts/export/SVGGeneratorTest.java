@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -209,7 +208,7 @@ class SVGGeneratorTest {
     }
 
     @JsDefinition
-    public interface Formatters extends Serializable {
+    public interface Formatters extends JsSnippets {
         @JsExpression("return this.y + ' formatted';")
         ChartFunction formatted();
     }

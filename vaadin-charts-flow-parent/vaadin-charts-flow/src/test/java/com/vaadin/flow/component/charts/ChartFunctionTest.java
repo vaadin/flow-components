@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -48,7 +47,7 @@ import tools.jackson.databind.node.ArrayNode;
 class ChartFunctionTest {
 
     @JsDefinition
-    public interface Formatters extends Serializable {
+    public interface Formatters extends JsSnippets {
         @JsExpression("return this.y / $0 + $1;")
         ChartFunction scaled(int divisor, String suffix);
     }

@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.charts.examples.other;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.model.ChartFunction;
@@ -28,7 +26,7 @@ import com.vaadin.flow.router.Route;
 public class DeclaredFunctions extends AbstractChartExample {
 
     @JsDefinition
-    public interface Formatters extends Serializable {
+    public interface Formatters extends JsSnippets {
         @JsExpression("return this.y / $0 + $1;")
         ChartFunction scaled(int divisor, String suffix);
     }

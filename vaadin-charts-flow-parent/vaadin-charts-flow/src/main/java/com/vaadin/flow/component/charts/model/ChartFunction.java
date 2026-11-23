@@ -27,7 +27,7 @@ import com.vaadin.flow.js.JsSnippet;
  *
  * <pre>
  * &#64;JsDefinition
- * public interface SalesFormatters extends Serializable {
+ * public interface SalesFormatters extends JsSnippets {
  *
  *     &#64;JsExpression("return this.y / $0 + $1;")
  *     ChartFunction scaled(int divisor, String suffix);

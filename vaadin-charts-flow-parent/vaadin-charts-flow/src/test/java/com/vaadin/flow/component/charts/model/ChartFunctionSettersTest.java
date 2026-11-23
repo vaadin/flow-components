@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -34,7 +33,7 @@ import com.vaadin.flow.js.JsSnippets;
 class ChartFunctionSettersTest {
 
     @JsDefinition
-    public interface Functions extends Serializable {
+    public interface Functions extends JsSnippets {
         @JsExpression("return this.y;")
         ChartFunction function();
     }

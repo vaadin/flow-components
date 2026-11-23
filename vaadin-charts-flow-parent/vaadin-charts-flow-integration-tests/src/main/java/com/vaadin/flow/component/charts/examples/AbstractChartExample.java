@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.examples;
 
-import java.io.Serializable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -25,6 +24,7 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.Command;
 
 import tools.jackson.core.JacksonException;
@@ -37,7 +37,7 @@ import tools.jackson.databind.json.JsonMapper;
 public abstract class AbstractChartExample extends Div {
 
     @JsDefinition
-    public interface AlertJs extends Serializable {
+    public interface AlertJs extends JsInvokers {
         @JsExpression("window.alert($0)")
         void alert(String message);
     }

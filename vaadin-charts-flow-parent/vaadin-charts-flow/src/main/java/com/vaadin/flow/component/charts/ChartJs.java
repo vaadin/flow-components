@@ -8,11 +8,10 @@
  */
 package com.vaadin.flow.component.charts;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.charts.model.ChartFunction;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -24,7 +23,7 @@ import tools.jackson.databind.node.ObjectNode;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface ChartJs extends Serializable {
+interface ChartJs extends JsInvokers {
 
     /**
      * Declares <code>putFunctions(target, paths, functions)</code>, which sets

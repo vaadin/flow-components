@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.examples.column;
 
-import java.io.Serializable;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -42,7 +41,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
         extends AbstractChartExample {
 
     @JsDefinition
-    public interface LabelFormatters extends Serializable {
+    public interface LabelFormatters extends JsSnippets {
         @JsExpression("return this.key.toUpperCase();")
         ChartFunction upperCaseKey();
     }
