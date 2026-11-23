@@ -229,7 +229,60 @@ class ChartFunctionTest {
         Assertions.assertEquals("callElementFunction", call.methodName());
         List<Object> arguments = call.flattenArguments();
         Assertions.assertEquals("__callChartFunction", arguments.get(0));
+        Assertions.assertEquals(
+                "[\"addSeries\",{\"data\":[1,2],\"dataLabels\":{\"enabled\":true},\"type\":\"line\"}]",
+                arguments.get(1).toString());
         Assertions.assertEquals(List.of("[1,\"dataLabels\",\"formatter\"]"),
+                paths((ArrayNode) arguments.get(2)));
+        Assertions.assertEquals(function, arguments.get(3));
+    }
+
+    @Test
+    void attached_addPointWithFunction_sendsFunctionAsArgument() {
+        DataSeries series = new DataSeries();
+        series.add(new DataSeriesItem("a", 1));
+        chart.getConfiguration().addSeries(series);
+        ui.add(chart);
+        ui.dumpPendingJavaScriptInvocations();
+        ChartFunction function = FORMATTERS.scaled(1000, "k");
+
+        series.add(withFormatter(new DataSeriesItem("b", 2), function), true,
+                false);
+
+        JsCall call = singleChartJsCall();
+        Assertions.assertEquals("callElementFunction", call.methodName());
+        List<Object> arguments = call.flattenArguments();
+        Assertions.assertEquals("__callSeriesFunction", arguments.get(0));
+        Assertions.assertEquals(
+                "[\"addPoint\",0,{\"dataLabels\":{\"enabled\":true},\"name\":\"b\",\"y\":2},true,false]",
+                arguments.get(1).toString());
+        Assertions.assertEquals(List.of("[2,\"dataLabels\",\"formatter\"]"),
+                paths((ArrayNode) arguments.get(2)));
+        Assertions.assertEquals(function, arguments.get(3));
+    }
+
+    @Test
+    void attached_updatePointWithFunction_sendsFunctionAsArgument() {
+        DataSeries series = new DataSeries();
+        series.add(new DataSeriesItem("a", 1));
+        DataSeriesItem item = new DataSeriesItem("b", 2);
+        series.add(item);
+        chart.getConfiguration().addSeries(series);
+        ui.add(chart);
+        ui.dumpPendingJavaScriptInvocations();
+        ChartFunction function = FORMATTERS.scaled(1000, "k");
+
+        withFormatter(item, function);
+        series.update(item);
+
+        JsCall call = singleChartJsCall();
+        Assertions.assertEquals("callElementFunction", call.methodName());
+        List<Object> arguments = call.flattenArguments();
+        Assertions.assertEquals("__callPointFunction", arguments.get(0));
+        Assertions.assertEquals(
+                "[\"update\",0,1,{\"dataLabels\":{\"enabled\":true},\"name\":\"b\",\"y\":2}]",
+                arguments.get(1).toString());
+        Assertions.assertEquals(List.of("[3,\"dataLabels\",\"formatter\"]"),
                 paths((ArrayNode) arguments.get(2)));
         Assertions.assertEquals(function, arguments.get(3));
     }
@@ -279,6 +332,14 @@ class ChartFunctionTest {
 
     private static List<String> paths(ArrayNode paths) {
         return paths.valueStream().map(JsonNode::toString).toList();
+    }
+
+    private static DataSeriesItem withFormatter(DataSeriesItem item,
+            ChartFunction formatter) {
+        DataLabels dataLabels = new DataLabels(true);
+        dataLabels.setFormatterFunction(formatter);
+        item.setDataLabels(dataLabels);
+        return item;
     }
 
     private static <T extends com.vaadin.flow.component.charts.model.AbstractSeries> T withFormatter(
