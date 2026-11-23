@@ -8,17 +8,16 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that the combo box custom editors of the fixtures run in the
  * browser, for {@link com.vaadin.flow.dom.Element#executeJs(Class)}.
  */
 @JsDefinition
-interface CustomEditorJs extends Serializable {
+interface CustomEditorJs extends JsInvokers {
 
     /**
      * Selects the text of the input element. Runs on the combo box element.

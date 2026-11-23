@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.ai.form;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -21,6 +20,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -270,7 +270,7 @@ final class FormFieldMarker {
      * For internal use only. May be renamed or removed in a future release.
      */
     @JsDefinition
-    interface FormFieldMarkerJs extends Serializable {
+    interface FormFieldMarkerJs extends JsInvokers {
 
         /**
          * Hands the content wrapper to the web component, which renders it into

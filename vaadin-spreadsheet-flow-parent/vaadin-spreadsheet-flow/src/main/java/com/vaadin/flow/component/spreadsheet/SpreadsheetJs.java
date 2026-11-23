@@ -8,12 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Spreadsheet} runs on its element in the browser,
@@ -22,7 +22,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface SpreadsheetJs extends Serializable {
+interface SpreadsheetJs extends JsInvokers {
 
     /**
      * Updates the formula bar of the spreadsheet with the given cell, in a

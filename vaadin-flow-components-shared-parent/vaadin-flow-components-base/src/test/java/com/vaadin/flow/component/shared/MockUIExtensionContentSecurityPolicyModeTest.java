@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.ContentSecurityPolicyMode;
 import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.flow.server.VaadinService;
@@ -104,7 +105,7 @@ class MockUIExtensionContentSecurityPolicyModeTest {
     }
 
     @JsDefinition
-    interface TestJs {
+    interface TestJs extends JsInvokers {
 
         @JsExpression("this.foo = $0")
         void setFoo(int foo);

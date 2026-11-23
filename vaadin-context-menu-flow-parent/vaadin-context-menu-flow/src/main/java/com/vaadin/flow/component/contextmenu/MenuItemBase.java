@@ -415,7 +415,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * @param parameters
      *            the parameters of the expression
      * @deprecated Declare the JavaScript in a
-     *             {@link com.vaadin.flow.js.JsDefinition} interface and call it
+     *             {@link com.vaadin.flow.js.JsInvokers} interface and call it
      *             with {@link com.vaadin.flow.dom.Element#executeJs(Class)}
      *             instead. This method will be removed in a future release.
      */

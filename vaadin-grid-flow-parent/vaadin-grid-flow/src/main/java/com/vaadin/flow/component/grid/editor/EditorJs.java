@@ -15,10 +15,9 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link EditorRenderer} runs in the browser, for
@@ -27,7 +26,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface EditorJs extends Serializable {
+interface EditorJs extends JsInvokers {
 
     /**
      * Patches the renderer of a column so that it renders the editor component
