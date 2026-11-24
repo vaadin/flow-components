@@ -4153,6 +4153,29 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_roundWithAnnotatedToolCallPastTheLimit_executesNoneOfItsCalls() {
+        provider.setMaxCallsPerTool(2);
+        var tools = new CountingToolClass();
+        var request = new TestLLMRequest("Count", null, Collections.emptyList(),
+                new Object[] { tools });
+        var toolResponse = mockResponseWithToolRequests("count", "count",
+                "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'count'"),
+                error.getMessage());
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The calls before the one past the limit are not executed either");
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
     void stream_limitExceeded_nextTurnContinuesFromLastCompletedRound() {
         provider.setMaxCallsPerTool(1);
         var request = requestWithCountingTool("myTool", new AtomicInteger());
@@ -4409,6 +4432,31 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals(2, messages.size());
         Assertions.assertTrue(
                 messages.stream().allMatch(UserMessage.class::isInstance));
+    }
+
+    @Test
+    void stream_cancelledDuringToolRound_skipsTheRemainingAnnotatedToolCalls() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var tools = new CountingToolClass();
+        var cancel = createExplicitTool("cancel", "Cancels the turn", null,
+                args -> {
+                    subscriber.cancel();
+                    return "cancelled";
+                });
+        var request = new TestLLMRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[] { tools },
+                List.of(cancel));
+        var toolResponse = mockResponseWithToolRequests("cancel", "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        provider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "A tool call that follows the cancellation in its round "
+                        + "must not run");
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
     }
 
     @Test
