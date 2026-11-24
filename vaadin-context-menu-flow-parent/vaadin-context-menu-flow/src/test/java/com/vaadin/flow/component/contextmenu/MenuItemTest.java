@@ -27,8 +27,8 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
+import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.tests.MockUIExtension;
 
 /**
@@ -121,7 +121,7 @@ class MenuItemTest {
     @SuppressWarnings("removal")
     @Test
     void executeJsWhenAttached_runsScriptAfterAttach() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         item.executeJsWhenAttached("this.foo = $0", "bar");
 
         ui.add(contextMenu);
@@ -137,9 +137,9 @@ class MenuItemTest {
     @SuppressWarnings("removal")
     @Test
     void executeJsWhenAttached_strictMode_throwsAtCall() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> item.executeJsWhenAttached("this.foo = $0", "bar"));
 
         ui.add(contextMenu);
