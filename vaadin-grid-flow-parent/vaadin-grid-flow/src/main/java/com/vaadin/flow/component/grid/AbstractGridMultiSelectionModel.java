@@ -576,7 +576,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
     /**
      * Passes the selection to the write callback of the bound signal. If the
      * signal doesn't accept it, reverts the selection to the signal value
-     * without firing an event and syncs the changed items to the client.
+     * without firing an event and syncs to the client every item whose state
+     * may differ there: the changed items, the attempted selection and the
+     * signal value.
      *
      * @param changedItems
      *            the items whose selection state was changed
@@ -586,15 +588,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (selectionBinding == null) {
             return true;
         }
-        Set<Object> newSelectionIds = new HashSet<>(selected.keySet());
+        Map<Object, T> attemptedItems = new LinkedHashMap<>(selected);
         Map<Object, T> signalItems = mapItemsById(
                 selectionBinding.writer().apply(getSelectedItems()));
-        if (signalItems.keySet().equals(newSelectionIds)) {
+        if (signalItems.keySet().equals(attemptedItems.keySet())) {
             return true;
         }
         selected.clear();
         selected.putAll(signalItems);
-        Map<Boolean, Set<T>> itemsBySelected = changedItems.stream()
+        Map<Object, T> itemsToSync = mapItemsById(changedItems);
+        itemsToSync.putAll(attemptedItems);
+        itemsToSync.putAll(signalItems);
+        Map<Boolean, Set<T>> itemsBySelected = itemsToSync.values().stream()
                 .collect(Collectors.partitioningBy(this::isSelected,
                         Collectors.toCollection(LinkedHashSet::new)));
         sendSelectionUpdate(itemsBySelected.get(true),
@@ -605,7 +610,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return false;
     }
 
-    private Map<Object, T> mapItemsById(Set<T> items) {
+    private Map<Object, T> mapItemsById(Collection<T> items) {
         return items.stream().collect(LinkedHashMap::new,
                 (map, item) -> map.put(this.getItemId(item), item),
                 Map::putAll);
