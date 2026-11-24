@@ -139,6 +139,20 @@ class ChartFunctionTest {
     }
 
     @Test
+    void toJsonWithFunctions_cspOff_stringFunctionNotReported() {
+        ui.setCspMode(CspMode.OFF);
+        chart.getConfiguration().getTooltip().setFormatter("function() {}");
+        chart.getConfiguration().setSeries(withFormatter(new ListSeries(1, 2),
+                FORMATTERS.scaled(1000, "k")));
+
+        JsonWithFunctions json = ChartSerialization
+                .toJsonWithFunctions(chart.getConfiguration());
+
+        Assertions.assertTrue(json.hasFunctions());
+        Assertions.assertFalse(json.hasStringFunction());
+    }
+
+    @Test
     void toJsonWithFunctions_sameJsonAsToJson() {
         Configuration configuration = chart.getConfiguration();
         configuration.getxAxis().setCategories("a", "b");
@@ -304,7 +318,13 @@ class ChartFunctionTest {
 
         JsCall call = singleChartJsCall();
         Assertions.assertEquals("addSeriesAsDrilldown", call.methodName());
-        Assertions.assertEquals(function, call.flattenArguments().getLast());
+        List<Object> arguments = call.flattenArguments();
+        Assertions.assertEquals(5, arguments.size());
+        Assertions.assertFalse(((JsonNode) arguments.get(2)).get("dataLabels")
+                .has("formatter"));
+        Assertions.assertEquals(List.of("[\"dataLabels\",\"formatter\"]"),
+                paths((ArrayNode) arguments.get(3)));
+        Assertions.assertEquals(function, arguments.get(4));
     }
 
     @Test
@@ -320,8 +340,14 @@ class ChartFunctionTest {
         List<JsCall> calls = ui.dumpJsCalls(ui.getUI().getElement(),
                 ChartJs.class);
         Assertions.assertEquals(1, calls.size());
-        Assertions.assertEquals(function,
-                calls.get(0).flattenArguments().getLast());
+        List<Object> arguments = calls.get(0).flattenArguments();
+        Assertions.assertEquals(3, arguments.size());
+        Assertions.assertFalse(((JsonNode) arguments.get(0)).get("plotOptions")
+                .get("line").get("dataLabels").has("formatter"));
+        Assertions.assertEquals(List
+                .of("[\"plotOptions\",\"line\",\"dataLabels\",\"formatter\"]"),
+                paths((ArrayNode) arguments.get(1)));
+        Assertions.assertEquals(function, arguments.get(2));
     }
 
     private JsCall singleChartJsCall() {

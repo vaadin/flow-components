@@ -333,7 +333,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * {@link #setFormatter(String)}.
      * <p>
      * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
      *
      * @param formatter
      *            the function, or <code>null</code> to remove it
@@ -478,7 +479,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * {@link #setPointFormatter(String)}.
      * <p>
      * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
      *
      * @param pointFormatter
      *            the function, or <code>null</code> to remove it
@@ -533,7 +535,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * {@link #setPositioner(String)}.
      * <p>
      * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
      *
      * @param positioner
      *            the function, or <code>null</code> to remove it

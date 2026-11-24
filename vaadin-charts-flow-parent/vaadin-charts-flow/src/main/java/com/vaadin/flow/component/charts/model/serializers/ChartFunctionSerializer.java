@@ -99,6 +99,8 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
 
         private boolean stringFunction;
 
+        private boolean findStringFunctions;
+
         private String add(ChartFunction function) {
             collected.add(function);
             return placeholderPrefix + (collected.size() - 1);
@@ -121,6 +123,7 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
          *            whether to look for functions given as strings
          */
         public void extract(JsonNode json, boolean findStringFunctions) {
+            this.findStringFunctions = findStringFunctions;
             if (!collected.isEmpty() || findStringFunctions) {
                 extract(json, new ArrayList<>());
             }
@@ -168,7 +171,8 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
                         .properties()) {
                     String key = property.getKey();
                     JsonNode value = property.getValue();
-                    if (key.startsWith(STRING_FUNCTION_PREFIX)
+                    if (findStringFunctions
+                            && key.startsWith(STRING_FUNCTION_PREFIX)
                             && value.isString()) {
                         stringFunction = true;
                     } else if (isPlaceholder(value)) {
