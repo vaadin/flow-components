@@ -17,6 +17,7 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.component.charts.util.ChartSerialization.JsonWithFunctions;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -45,10 +46,11 @@ public class ChartOptions extends AbstractConfigurationObject {
             return;
         }
 
-        final ObjectNode configurationNode = (ObjectNode) StringFunctionReporter
-                .report(ChartSerialization.toJsonTree(this));
-        ui.getElement().executeJs(ChartJs.class)
-                .setHighchartsOptions(configurationNode);
+        JsonWithFunctions json = StringFunctionReporter
+                .report(ChartSerialization.toJsonWithFunctions(this));
+        ui.getElement().executeJs(ChartJs.class).setHighchartsOptions(
+                (ObjectNode) json.json(), json.functionPaths(),
+                json.functionArray());
     }
 
     /**

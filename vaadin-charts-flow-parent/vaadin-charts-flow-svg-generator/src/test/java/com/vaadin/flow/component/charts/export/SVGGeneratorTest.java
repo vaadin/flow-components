@@ -30,9 +30,11 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.AxisType;
+import com.vaadin.flow.component.charts.model.ChartFunction;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Cursor;
+import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.IntervalUnit;
@@ -44,6 +46,9 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 class SVGGeneratorTest {
 
@@ -200,6 +205,38 @@ class SVGGeneratorTest {
                 "enabled-functions.svg");
         String expectedSVG = readUtf8File(expectedResultPath);
         assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
+    }
+
+    @JsDefinition
+    public interface Formatters extends JsSnippets {
+        @JsExpression("return this.y + ' formatted';")
+        ChartFunction formatted();
+    }
+
+    @Test
+    void exportWithChartFunction_functionLeftOut()
+            throws IOException, InterruptedException {
+        ExportOptions options = new ExportOptions();
+        options.setExecuteFunctions(true);
+        String expectedSVG = svgGenerator.generate(createChartWithDataLabels(),
+                options);
+        Configuration configuration = createChartWithDataLabels();
+        DataLabels dataLabels = ((PlotOptionsSeries) configuration
+                .getPlotOptions().iterator().next()).getDataLabels();
+        dataLabels.setFormatterFunction(
+                JsSnippets.of(Formatters.class).formatted());
+
+        String actualSVG = svgGenerator.generate(configuration, options);
+
+        assertFalse(actualSVG.contains("formatted"));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
+    }
+
+    private Configuration createChartWithDataLabels() {
+        Configuration configuration = createAreaChartConfiguration();
+        ((PlotOptionsSeries) configuration.getPlotOptions().iterator().next())
+                .setDataLabels(new DataLabels(true));
+        return configuration;
     }
 
     @Test
