@@ -95,7 +95,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     void updateSelectAllCheckBoxVisibility() {
-        boolean wasVisible = selectionColumn.isSelectAllCheckBoxVisible();
+        boolean wasVisible = selectionColumn.isSelectAllCheckboxVisible();
         boolean visible = isSelectAllCheckboxVisible();
         selectionColumn.setSelectAllCheckBoxVisibility(visible);
         if (visible && !wasVisible) {

@@ -87,7 +87,7 @@ public class GridSelectionColumn extends Component {
         getElement().setProperty("_selectAllHidden", !visible);
     }
 
-    boolean isSelectAllCheckBoxVisible() {
+    boolean isSelectAllCheckboxVisible() {
         return !getElement().getProperty("_selectAllHidden", false);
     }
 
