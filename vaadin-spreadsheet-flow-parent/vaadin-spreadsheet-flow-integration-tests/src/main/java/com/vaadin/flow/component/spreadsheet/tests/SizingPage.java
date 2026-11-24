@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.Div;
@@ -22,13 +20,14 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-spreadsheet/sizing")
 public class SizingPage extends Div {
 
     @JsDefinition
-    interface PanelJs extends Serializable {
+    interface PanelJs extends JsInvokers {
 
         @JsExpression("return this.shadowRoot.querySelector('.bottom-right-pane').style.top")
         PendingJavaScriptResult getPanelPosition();
