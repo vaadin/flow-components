@@ -1,4 +1,4 @@
-# AI components benchmark
+# AI integrations benchmark
 
 JUnit suite that runs the AI controllers (`FormAIController`, `GridAIController`,
 `ChartAIController`) against a real LLM and scores the result. It measures the
