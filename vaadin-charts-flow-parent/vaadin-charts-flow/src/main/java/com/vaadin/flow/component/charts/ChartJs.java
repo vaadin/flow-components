@@ -8,10 +8,9 @@
  */
 package com.vaadin.flow.component.charts;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -22,7 +21,7 @@ import tools.jackson.databind.node.ObjectNode;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface ChartJs extends Serializable {
+interface ChartJs extends JsInvokers {
 
     /**
      * Sets the global Highcharts options and redraws all charts.

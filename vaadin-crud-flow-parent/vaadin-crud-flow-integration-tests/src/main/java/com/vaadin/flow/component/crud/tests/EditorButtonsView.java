@@ -10,8 +10,6 @@ package com.vaadin.flow.component.crud.tests;
 
 import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
@@ -21,13 +19,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/editorbuttons")
 public class EditorButtonsView extends VerticalLayout {
 
     @JsDefinition
-    interface EditorButtonsViewJs extends Serializable {
+    interface EditorButtonsViewJs extends JsInvokers {
 
         @JsExpression("this.click()")
         void click();

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,6 +31,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
@@ -42,7 +42,7 @@ public class TimePickerLocalizationView extends Div
         implements HasUrlParameter<String> {
 
     @JsDefinition
-    interface LocalTimeTextBlockJs extends Serializable {
+    interface LocalTimeTextBlockJs extends JsInvokers {
 
         @JsExpression("$0['innerText'] = new Date($1).toLocaleTimeString($2, {hour: 'numeric', minute: 'numeric'});")
         void showTime(Element textBlock, String dateTime, String languageTag);
