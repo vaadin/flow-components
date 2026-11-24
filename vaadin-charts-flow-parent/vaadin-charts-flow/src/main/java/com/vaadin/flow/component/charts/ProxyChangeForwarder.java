@@ -21,7 +21,6 @@ import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AxisDimension;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
-import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
@@ -122,8 +121,8 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     }
 
     private static JsonNode toJson(AbstractConfigurationObject object) {
-        return StringFunctionReporter.report(JacksonUtils.getMapper()
-                .readTree(ChartSerialization.toJSON(object)));
+        return StringFunctionReporter
+                .report(ChartSerialization.toJsonTree(object));
     }
 
 }

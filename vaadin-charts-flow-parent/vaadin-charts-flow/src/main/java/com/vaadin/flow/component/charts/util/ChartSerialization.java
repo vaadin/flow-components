@@ -26,6 +26,7 @@ import com.vaadin.flow.component.charts.model.serializers.StopSerializer;
 import com.vaadin.flow.component.charts.model.serializers.TimeUnitMultiplesSerializer;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.json.JsonMapper;
@@ -100,6 +101,24 @@ public class ChartSerialization implements Serializable {
             return jsonWriter.writeValueAsString(object);
         } catch (JacksonException e) {
             e.printStackTrace();
+            throw new RuntimeException("Error while serializing "
+                    + object.getClass().getSimpleName(), e);
+        }
+    }
+
+    /**
+     * Serializes the given configuration object to a JSON tree.
+     * <p>
+     * For internal use only. May be renamed or removed in a future release.
+     *
+     * @param object
+     *            the object to serialize
+     * @return the JSON tree
+     */
+    public static JsonNode toJsonTree(AbstractConfigurationObject object) {
+        try {
+            return jsonWriter.valueToTree(object);
+        } catch (JacksonException e) {
             throw new RuntimeException("Error while serializing "
                     + object.getClass().getSimpleName(), e);
         }
