@@ -28,9 +28,9 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Tests that {@link ChartSerialization#toJsonTree} gives the same JSON as
- * {@link ChartSerialization#toJSON}, without POJO nodes, which a mapper without
- * the chart serializers would write.
+ * Tests that {@link ChartSerialization#toJsonWithFunctions} gives the same JSON
+ * as {@link ChartSerialization#toJSON}, without POJO nodes, which a mapper
+ * without the chart serializers would write.
  */
 class JsonTreeSerializationTest {
 
@@ -76,7 +76,7 @@ class JsonTreeSerializationTest {
 
     private static JsonNode assertSameAsToJSON(
             AbstractConfigurationObject object) {
-        JsonNode tree = ChartSerialization.toJsonTree(object);
+        JsonNode tree = ChartSerialization.toJsonWithFunctions(object).json();
         assertNoPojoNode(tree);
         Assertions.assertEquals(
                 JacksonUtils.readTree(ChartSerialization.toJSON(object)), tree);
