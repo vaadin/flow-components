@@ -639,7 +639,7 @@ public class PlotOptionsScatter extends PointOptions {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, which works

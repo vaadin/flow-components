@@ -412,7 +412,7 @@
                             <vaadin.productionMode>false</vaadin.productionMode>
                             <vaadin.reuseDevServer>true</vaadin.reuseDevServer>
                             <vaadin.frontend.hotdeploy>true</vaadin.frontend.hotdeploy>
-                            <vaadin.csp>${csp.mode}</vaadin.csp>
+                            <vaadin.contentSecurityPolicy>${csp.mode}</vaadin.contentSecurityPolicy>
                         </systemProperties>
                     </configuration>
                     <executions>
