@@ -56,7 +56,7 @@ public class AvatarIT extends AbstractComponentIT {
 
         toggleImg.click();
         getPropsBtn.click();
-        Assert.assertEquals("https://vaadin.com/", imgBlock.getText());
+        Assert.assertEquals(AvatarPage.IMAGE_URL, imgBlock.getText());
 
         toggleResourceHandler.click();
         getPropsBtn.click();
@@ -77,10 +77,7 @@ public class AvatarIT extends AbstractComponentIT {
         Assert.assertTrue("img url contains file name",
                 resourceBlock.getText().contains("user%2B.png"));
 
-        // Would fail if the image resource wasn't hosted. The Content
-        // Security Policy blocks the external image of the first step.
-        checkLogsForErrors(
-                message -> message.contains("'https://vaadin.com/'"));
+        checkLogsForErrors(); // would fail if the image resource wasn't hosted
     }
 
     @Test
