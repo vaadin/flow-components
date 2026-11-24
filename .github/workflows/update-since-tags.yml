@@ -66,9 +66,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # main and the newest maintenance branch, as in vaadin/flow; bump the latter
+        # main and the newest maintenance branch; bump the latter
         # when a new minor branch is cut.
-        branch: [main, '25.3']
+        branch: [main, '25.4']
     steps:
       - name: Dispatch for ${{ matrix.branch }}
         env:
