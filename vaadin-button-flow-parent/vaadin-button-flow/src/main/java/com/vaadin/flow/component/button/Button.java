@@ -55,7 +55,6 @@ import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -488,17 +487,14 @@ public class Button extends Component
      * new browser tab. The target is kept when the handler is replaced or
      * cleared.
      * <p>
-     * With {@link DownloadTarget#NEW_TAB}, the browser shows the content when
-     * it can, for example a PDF or an image, and saves it as a file otherwise.
-     * The built-in handlers, such as
-     * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
-     * content inline. This changes the handler instance, so it also serves
-     * inline wherever else it is used. A custom handler should call
-     * {@link DownloadEvent#inline(String)} itself, since content served as an
-     * attachment is saved instead of shown. The handler returned by
-     * {@link DownloadHandler#allowDisabled()} can not be switched, so call
-     * {@link AbstractDownloadHandler#inline() inline()} before it, for example
-     * {@code DownloadHandler.forFile(file).inline().allowDisabled()}.
+     * With {@link DownloadTarget#NEW_TAB}, the content is served inline, so the
+     * browser shows it when it can, for example a PDF or an image, and saves it
+     * as a file otherwise. With {@link DownloadTarget#SAVE_AS_FILE}, it is
+     * served as an attachment. This applies to the file name that the handler
+     * gives, whatever the handler itself asks for, see
+     * {@link com.vaadin.flow.server.streams.DownloadDisposition}. The handler
+     * is not changed, so the same instance can also be used elsewhere, for
+     * example in an {@code Anchor} that downloads the content.
      *
      * <pre>{@code
      * Button view = new Button("View invoice");
@@ -524,12 +520,6 @@ public class Button extends Component
         }
         if (downloadHandler == null) {
             return;
-        }
-        if (downloadTarget == DownloadTarget.NEW_TAB
-                && downloadHandler instanceof AbstractDownloadHandler<?> builtIn) {
-            // Download can only switch the handler it gets to inline, which
-            // here is the wrapper that allows disable on click
-            builtIn.inline();
         }
         downloadRegistration = Download.onClick(this,
                 allowDisabledByClick(downloadHandler), downloadTarget);

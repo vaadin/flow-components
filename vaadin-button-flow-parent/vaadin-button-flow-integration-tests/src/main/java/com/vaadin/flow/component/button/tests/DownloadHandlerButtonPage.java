@@ -30,23 +30,27 @@ public class DownloadHandlerButtonPage extends Div {
     static final String DOWNLOAD_BODY = "button-download-body";
 
     public DownloadHandlerButtonPage() {
+        // One handler for all buttons, so the tests also check that showing
+        // it in a new tab doesn't change how the other buttons serve it
+        DownloadHandler handler = createDownloadHandler();
+
         Button button = new Button("Download");
         button.setId("download-button");
-        button.setDownloadHandler(createDownloadHandler());
+        button.setDownloadHandler(handler);
 
         Button disableOnClick = new Button("Download, disable on click");
         disableOnClick.setId("download-disable-on-click-button");
         disableOnClick.setDisableOnClick(true);
-        disableOnClick.setDownloadHandler(createDownloadHandler());
+        disableOnClick.setDownloadHandler(handler);
 
-        Button newTab = new Button("View", createDownloadHandler(),
+        Button newTab = new Button("View", handler,
                 DownloadTarget.NEW_TAB);
         newTab.setId("new-tab-button");
 
         Button newTabDisableOnClick = new Button("View, disable on click");
         newTabDisableOnClick.setId("new-tab-disable-on-click-button");
         newTabDisableOnClick.setDisableOnClick(true);
-        newTabDisableOnClick.setDownloadHandler(createDownloadHandler());
+        newTabDisableOnClick.setDownloadHandler(handler);
         newTabDisableOnClick.setDownloadTarget(DownloadTarget.NEW_TAB);
 
         add(button, disableOnClick, newTab, newTabDisableOnClick);

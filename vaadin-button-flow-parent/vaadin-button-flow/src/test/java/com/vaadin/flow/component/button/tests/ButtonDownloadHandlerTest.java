@@ -139,20 +139,18 @@ class ButtonDownloadHandlerTest {
         Assertions.assertSame(builtIn, button.getDownloadHandler());
         Assertions.assertEquals(DownloadTarget.NEW_TAB,
                 button.getDownloadTarget());
-        Assertions.assertTrue(builtIn.isInline());
         ui.fakeClientCommunication();
         Assertions.assertEquals(1, downloadAttributes().count());
     }
 
     @Test
-    void newTab_builtInHandler_switchedToInline() {
+    void newTab_builtInHandler_notChanged() {
         InputStreamDownloadHandler builtIn = DownloadHandler
                 .fromInputStream(event -> null);
         button.setDownloadHandler(builtIn);
-        Assertions.assertFalse(builtIn.isInline());
 
         button.setDownloadTarget(DownloadTarget.NEW_TAB);
-        Assertions.assertTrue(builtIn.isInline());
+        Assertions.assertFalse(builtIn.isInline());
     }
 
     @Test
