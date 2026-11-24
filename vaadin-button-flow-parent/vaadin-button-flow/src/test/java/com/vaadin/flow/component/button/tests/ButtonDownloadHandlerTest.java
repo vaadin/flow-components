@@ -32,7 +32,6 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
 class ButtonDownloadHandlerTest {
@@ -129,14 +128,12 @@ class ButtonDownloadHandlerTest {
 
     @Test
     void handlerAndTargetConstructor_newTab() {
-        InputStreamDownloadHandler builtIn = DownloadHandler
-                .fromInputStream(event -> null);
         parent.remove(button);
-        button = new Button("Report", builtIn, DownloadTarget.NEW_TAB);
+        button = new Button("Report", handler, DownloadTarget.NEW_TAB);
         parent.add(button);
 
         Assertions.assertEquals("Report", button.getText());
-        Assertions.assertSame(builtIn, button.getDownloadHandler());
+        Assertions.assertSame(handler, button.getDownloadHandler());
         Assertions.assertEquals(DownloadTarget.NEW_TAB,
                 button.getDownloadTarget());
         ui.fakeClientCommunication();
