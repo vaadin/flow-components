@@ -3094,6 +3094,36 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_streamingToolCallPastTheLimitBeforeAnswer_runsNoOutputGuardrail() {
+        var validations = new AtomicInteger();
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        validations.incrementAndGet();
+                        return success();
+                    }
+                }));
+        customized.setMaxCallsPerTool(1);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockResponseWithToolRequests("count", "count"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        // The turn failed before the model answered, so the guardrails have
+        // no answer to check
+        Assertions.assertEquals(0, validations.get());
+    }
+
+    @Test
     void customizer_streamingToolCallPastTheLimitInGuardrailReprompt_failsTurnWithoutBlocking() {
         var tools = new CountingToolClass();
         var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
@@ -4422,6 +4452,28 @@ class LangChain4JLLMProviderTest {
 
         Mockito.verify(mockChatModel, Mockito.times(2))
                 .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_metadataSinkThrows_logsTheFailure() {
+        var sinkFailure = new IllegalStateException("The sink failed");
+        var request = requestWithMetadataSink("Hello", List.of(),
+                (Consumer<ResponseMetadata>) metadata -> {
+                    throw sinkFailure;
+                });
+        var answer = mockSimpleResponse("Hi");
+        Mockito.when(answer.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(answer);
+
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        // The turn goes on without its metadata, so the log is the only
+        // trace of the failure
+        var logged = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getThrowable().orElse(null) == sinkFailure);
+        Assertions.assertTrue(logged, "Expected the sink failure to be logged");
     }
 
     @Test
