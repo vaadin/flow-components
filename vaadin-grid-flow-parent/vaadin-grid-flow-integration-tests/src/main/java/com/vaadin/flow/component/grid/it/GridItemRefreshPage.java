@@ -22,8 +22,14 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-item-refresh-page")
@@ -32,14 +38,31 @@ public class GridItemRefreshPage extends Div {
     public static final String UPDATED_FIRST_FIELD = "updated";
     public static final int UPDATED_SECOND_FIELD = 12345;
 
-    // update the element values from client side so that it should only be
-    // updated in DOM, not in caches
-    // updating the previous cell in animation frame so that grid active item
-    // handling doesn't reset the changes
-    private static final String EDIT_CELL_VALUE = "debugger; this['innerText'] = 'EDITED';window.requestAnimationFrame(() => {this.parentElement.previousElementSibling['textContent']='EDITED';})";
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        // Update the cell values only in the DOM, not in the grid data cache.
+        // Update the previous cell in an animation frame: click also selects
+        // the row, and the grid then re-renders the row cells synchronously,
+        // which would reset the change.
+        @JsFunctionParameterNames("e")
+        @JsExpression("""
+                const div = e.currentTarget;
+                div['innerText'] = 'EDITED';
+                window.requestAnimationFrame(() => {
+                    div.parentElement.previousElementSibling['textContent'] = 'EDITED';
+                });
+                """)
+        JsFunction editCellValue();
+
+        @JsExpression("return html`<div id=${item.thirdField} @click=${$0}>${item.thirdField}</div>`;")
+        CompiledLitTemplate editableCell(JsFunction onClick);
+    }
+
+    private static final Templates TEMPLATES = JsSnippets.of(Templates.class);
+
     private static final LitRenderer<Bean> UPDATE_RENDERER = LitRenderer
-            .of("<div id=${item.thirdField} onclick=\"" + EDIT_CELL_VALUE
-                    + "\">${item.thirdField}</div>");
+            .of(TEMPLATES.editableCell(TEMPLATES.editCellValue()));
 
     private static class Bean {
         private String firstField;

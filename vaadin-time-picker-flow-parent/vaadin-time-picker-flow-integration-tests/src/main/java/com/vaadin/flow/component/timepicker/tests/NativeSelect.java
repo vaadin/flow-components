@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -26,6 +25,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 @Tag("select")
 public class NativeSelect
@@ -33,7 +33,7 @@ public class NativeSelect
         implements HasSize, HasStyle, Focusable<NativeSelect> {
 
     @JsDefinition
-    interface NativeSelectJs extends Serializable {
+    interface NativeSelectJs extends JsInvokers {
 
         @JsExpression("if (this._value !== undefined) { this.value = this._value; this._value = undefined; }")
         void applyPendingValue();

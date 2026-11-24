@@ -7,7 +7,7 @@
         <version>3.0.3</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>25.4-SNAPSHOT</version>
+    <version>25.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -74,7 +74,7 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.4-SNAPSHOT</flow.version>
+        <flow.version>25.5-SNAPSHOT</flow.version>
         <testbench.version>25.4.0-beta2</testbench.version>
         <license-checker.version>3.1.5</license-checker.version>
         <maven.compiler.release>21</maven.compiler.release>
@@ -120,7 +120,7 @@
         <spring-data-commons.version>4.2.0</spring-data-commons.version>
         <reactor-core.version>3.9.0</reactor-core.version>
         <langchain4j.version>1.24.0</langchain4j.version>
-        <spring-ai.version>2.0.2</spring-ai.version>
+        <spring-ai.version>2.1.0</spring-ai.version>
         <slf4j.version>2.0.20</slf4j.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>6.1.3</junit.jupiter.version>
