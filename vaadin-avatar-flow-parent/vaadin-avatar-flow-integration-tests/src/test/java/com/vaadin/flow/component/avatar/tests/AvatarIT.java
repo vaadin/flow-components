@@ -77,7 +77,10 @@ public class AvatarIT extends AbstractComponentIT {
         Assert.assertTrue("img url contains file name",
                 resourceBlock.getText().contains("user%2B.png"));
 
-        checkLogsForErrors(); // would fail if the image resource wasn't hosted
+        // Would fail if the image resource wasn't hosted. The Content
+        // Security Policy blocks the external image of the first step.
+        checkLogsForErrors(
+                message -> message.contains("'https://vaadin.com/'"));
     }
 
     @Test
