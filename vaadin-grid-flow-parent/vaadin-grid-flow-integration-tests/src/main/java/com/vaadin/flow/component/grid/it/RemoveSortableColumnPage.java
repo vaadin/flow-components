@@ -130,7 +130,7 @@ public class RemoveSortableColumnPage extends VerticalLayout {
             select.setItems(headers);
             select.setValue(headers.get(i));
             select.getElement().addEventListener("click", e -> {
-            }).addEventData("event.stopPropagation()");
+            }).stopPropagation();
             select.addValueChangeListener(e -> {
                 grid.redraw();
             });
