@@ -27,7 +27,7 @@ import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
 import com.vaadin.flow.component.charts.model.serializers.StopSerializer;
 import com.vaadin.flow.component.charts.model.serializers.TimeUnitMultiplesSerializer;
-import com.vaadin.flow.internal.CspViolationReporter;
+import com.vaadin.flow.internal.ContentSecurityPolicyViolationReporter;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -160,7 +160,8 @@ public class ChartSerialization implements Serializable {
         }
         // Functions given as strings are only looked for when they are
         // reported
-        collector.extract(json, CspViolationReporter.isEnabled());
+        collector.extract(json,
+                ContentSecurityPolicyViolationReporter.isEnabled());
         return new JsonWithFunctions(json, collector.getPaths(),
                 List.copyOf(collector.getFunctions()),
                 collector.hasStringFunction());
