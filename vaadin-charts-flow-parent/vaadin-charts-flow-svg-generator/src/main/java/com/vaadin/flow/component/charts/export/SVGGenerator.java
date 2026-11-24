@@ -104,6 +104,12 @@ public class SVGGenerator implements AutoCloseable {
     /**
      * Generate an SVG string that can be used to render a chart with data from
      * a {@link Configuration} instance.
+     * <p>
+     * The chart does not have the functions of the configuration that are set
+     * as a {@link com.vaadin.flow.component.charts.model.ChartFunction
+     * ChartFunction}: they run only in the browser. Functions set as strings
+     * run only when {@link ExportOptions#setExecuteFunctions(Boolean)} is set
+     * to <code>true</code>.
      *
      * @param chartConfiguration
      *            the {@link Configuration} with the chart's data.
