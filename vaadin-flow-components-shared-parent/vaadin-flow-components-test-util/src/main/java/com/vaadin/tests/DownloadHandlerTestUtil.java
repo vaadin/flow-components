@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.dom.Element;
@@ -84,8 +85,8 @@ public final class DownloadHandlerTestUtil {
         Mockito.doAnswer(invocation -> {
             header.set(invocation.getArgument(1));
             return null;
-        }).when(response).setHeader(Mockito.eq("Content-Disposition"),
-                Mockito.any());
+        }).when(response).setHeader(ArgumentMatchers.eq("Content-Disposition"),
+                ArgumentMatchers.any());
         handler.handleRequest(request, response,
                 Mockito.mock(VaadinSession.class), owner);
         return header.get();
