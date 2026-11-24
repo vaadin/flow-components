@@ -47,7 +47,7 @@ final class StringFunctionReporter implements Serializable {
      * @return the given JSON
      */
     static <T extends JsonNode> T report(T json) {
-        if (hasStringFunction(json)) {
+        if (CspViolationReporter.isEnabled() && hasStringFunction(json)) {
             CspViolationReporter.reportStringJavaScript();
         }
         return json;
