@@ -131,7 +131,7 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Nested
-    class MultiSelectWriteCallbackRefuses {
+    class WriteCallbackRefuses {
 
         private ValueSignal<Set<String>> signal;
         private AbstractGridMultiSelectionModel<String> model;

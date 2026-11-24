@@ -127,7 +127,7 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Nested
-    class SingleSelectWriteCallbackRefuses {
+    class WriteCallbackRefuses {
 
         private ValueSignal<String> signal;
         private AbstractGridSingleSelectionModel<String> model;
