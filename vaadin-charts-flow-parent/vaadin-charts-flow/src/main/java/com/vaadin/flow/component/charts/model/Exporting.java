@@ -26,6 +26,7 @@ public class Exporting extends AbstractConfigurationObject {
     private Buttons buttons;
     private Boolean enabled;
     private String _fn_error;
+    private ChartFunction error;
     private Boolean fallbackToExportServer;
     private String filename;
     private String libURL;
@@ -123,12 +124,46 @@ public class Exporting extends AbstractConfigurationObject {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setErrorFunction(ChartFunction)}, which works without compiling
+     * JavaScript in the browser.
      *
      * @param _fn_error
      *            the source code of the JavaScript function
      */
     public void setError(String _fn_error) {
         this._fn_error = _fn_error;
+        this.error = null;
+    }
+
+    /**
+     * @see #setErrorFunction(ChartFunction)
+     */
+    public ChartFunction getErrorFunction() {
+        return error;
+    }
+
+    /**
+     * Sets the function of the <code>error</code> option, declared in a
+     * {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setError(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param error
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setErrorFunction(ChartFunction error) {
+        this.error = error;
+        this._fn_error = null;
     }
 
     /**

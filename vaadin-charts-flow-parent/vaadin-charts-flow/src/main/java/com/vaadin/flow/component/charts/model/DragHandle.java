@@ -22,6 +22,7 @@ public class DragHandle extends AbstractConfigurationObject {
     private Color lineColor;
     private Number lineWidth;
     private String _fn_pathFormatter;
+    private ChartFunction pathFormatter;
     private Number zIndex;
 
     /**
@@ -139,11 +140,45 @@ public class DragHandle extends AbstractConfigurationObject {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPathFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_pathFormatter
      *            the source code of the JavaScript function
      */
     public void setPathFormatter(String _fn_pathFormatter) {
         this._fn_pathFormatter = _fn_pathFormatter;
+        this.pathFormatter = null;
+    }
+
+    /**
+     * @see #setPathFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getPathFormatterFunction() {
+        return pathFormatter;
+    }
+
+    /**
+     * Sets the function of the <code>pathFormatter</code> option, declared in a
+     * {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPathFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param pathFormatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setPathFormatterFunction(ChartFunction pathFormatter) {
+        this.pathFormatter = pathFormatter;
+        this._fn_pathFormatter = null;
     }
 }

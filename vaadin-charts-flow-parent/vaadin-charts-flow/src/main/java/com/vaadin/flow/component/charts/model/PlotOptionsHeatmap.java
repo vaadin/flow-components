@@ -56,6 +56,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
     private Number maxPointWidth;
     private Number opacity;
     private String _fn_pointDescriptionFormatter;
+    private ChartFunction pointDescriptionFormatter;
     private Number rowsize;
     private Boolean selected;
     private Boolean shadow;
@@ -693,6 +694,10 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, which works
+     * without compiling JavaScript in the browser.
      *
      * @param _fn_pointDescriptionFormatter
      *            the source code of the JavaScript function
@@ -700,6 +705,37 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
     public void setPointDescriptionFormatter(
             String _fn_pointDescriptionFormatter) {
         this._fn_pointDescriptionFormatter = _fn_pointDescriptionFormatter;
+        this.pointDescriptionFormatter = null;
+    }
+
+    /**
+     * @see #setPointDescriptionFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getPointDescriptionFormatterFunction() {
+        return pointDescriptionFormatter;
+    }
+
+    /**
+     * Sets the function of the <code>pointDescriptionFormatter</code> option,
+     * declared in a {@link com.vaadin.flow.js.JsDefinition JsDefinition}
+     * interface. The browser runs the function from the frontend bundle, so it
+     * works under a Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointDescriptionFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param pointDescriptionFormatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setPointDescriptionFormatterFunction(
+            ChartFunction pointDescriptionFormatter) {
+        this.pointDescriptionFormatter = pointDescriptionFormatter;
+        this._fn_pointDescriptionFormatter = null;
     }
 
     /**
