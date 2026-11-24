@@ -75,8 +75,6 @@ import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.V;
 import dev.langchain4j.service.memory.ChatMemoryAccess;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
-import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
-import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import dev.langchain4j.service.tool.ToolExecutor;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
@@ -421,11 +419,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
             // the builder does not tell whether it did. Any handler the
             // provider set there would decide how the application's tools
             // fail, which stays with LangChain4j's defaults and the
-            // application.
-            builder.toolArgumentsErrorHandler(
-                    ToolArgumentsErrorHandler.failInvocation());
-            builder.toolExecutionErrorHandler(
-                    ToolExecutionErrorHandler.failInvocation());
+            // application. The handlers are lambdas because LangChain4j has
+            // its failInvocation() handlers only from 1.21 on, and the
+            // application picks the LangChain4j version.
+            builder.toolArgumentsErrorHandler((error, context) -> {
+                throw LangChain4JLLMProvider.<RuntimeException> rethrow(error);
+            });
+            builder.toolExecutionErrorHandler((error, context) -> {
+                throw LangChain4JLLMProvider.<RuntimeException> rethrow(error);
+            });
         }
         complete(builder, chatModel, streamingChatModel);
         this.service = builder.build();
