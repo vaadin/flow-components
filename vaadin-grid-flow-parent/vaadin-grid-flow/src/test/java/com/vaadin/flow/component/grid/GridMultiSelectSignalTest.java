@@ -22,6 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
@@ -32,7 +33,6 @@ import com.vaadin.tests.AbstractSignalsTest;
 class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
     private Grid<String> grid;
-    private final List<Set<String>> multiSelectEvents = new ArrayList<>();
 
     @BeforeEach
     void setup() {
@@ -122,108 +122,95 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
         Assertions.assertEquals(1, callCount[0]);
     }
 
-    @Test
-    void bindValue_writeCallbackRefuses_selectionRevertedWithoutEvent() {
-        grid.setItems("foo", "bar", "baz");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        var signal = new ValueSignal<>(Set.of("foo"));
-        grid.asMultiSelect().bindValue(signal, v -> {
-        });
-        UI.getCurrent().add(grid);
-        List<Set<String>> events = new ArrayList<>();
-        grid.asMultiSelect()
-                .addValueChangeListener(e -> events.add(e.getValue()));
+    @Nested
+    class MultiSelectWriteCallbackRefuses {
 
-        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("bar");
-        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
+        private ValueSignal<Set<String>> signal;
+        private AbstractGridMultiSelectionModel<String> model;
+        private final List<Set<String>> events = new ArrayList<>();
 
-        grid.asMultiSelect().select("baz");
-        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
+        @BeforeEach
+        void setup() {
+            grid.setItems("foo", "bar", "baz");
+            grid.setSelectionMode(Grid.SelectionMode.MULTI);
+            signal = new ValueSignal<>(Set.of("foo"));
+            grid.asMultiSelect().bindValue(signal, v -> {
+            });
+            UI.getCurrent().add(grid);
+            grid.asMultiSelect()
+                    .addValueChangeListener(e -> events.add(e.getValue()));
+            model = (AbstractGridMultiSelectionModel<String>) grid
+                    .getSelectionModel();
+        }
 
-        Assertions.assertEquals(Set.of("foo"), signal.peek());
-        Assertions.assertEquals(List.of(), events);
-    }
+        @Test
+        void selectFromClient_selectionRevertedWithoutEvent() {
+            model.selectFromClient("bar");
 
-    @Test
-    void bindValue_writeCallbackRefusesSelectAll_selectionAndCheckboxReverted() {
-        var model = bindRefusingMultiSelect(Set.of("foo"));
+            assertSelectionReverted();
+        }
 
-        model.selectAll();
+        @Test
+        void select_selectionRevertedWithoutEvent() {
+            model.select("bar");
 
-        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
-        assertSelectAllCheckboxState(false, true);
-        Assertions.assertEquals(List.of(), multiSelectEvents);
-    }
+            assertSelectionReverted();
+        }
 
-    @Test
-    void bindValue_writeCallbackRefusesClientSelectAll_selectionAndCheckboxReverted() {
-        var model = bindRefusingMultiSelect(Set.of("foo"));
+        @Test
+        void deselect_selectionAndCheckboxReverted() {
+            signal.set(Set.of("foo", "bar", "baz"));
+            events.clear();
 
-        model.clientSelectAll();
+            model.deselect("foo");
 
-        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
-        assertSelectAllCheckboxState(false, true);
-        Assertions.assertEquals(List.of(), multiSelectEvents);
-    }
+            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
+        }
 
-    @Test
-    void bindValue_writeCallbackRefusesDeselectAll_selectionAndCheckboxReverted() {
-        var model = bindRefusingMultiSelect(Set.of("foo", "bar", "baz"));
+        @Test
+        void selectAll_selectionAndCheckboxReverted() {
+            model.selectAll();
 
-        model.deselectAll();
+            assertSelectionReverted();
+        }
 
-        Assertions.assertEquals(Set.of("foo", "bar", "baz"),
-                grid.asMultiSelect().getValue());
-        assertSelectAllCheckboxState(true, false);
-        Assertions.assertEquals(List.of(), multiSelectEvents);
-    }
+        @Test
+        void clientSelectAll_selectionAndCheckboxReverted() {
+            model.clientSelectAll();
 
-    @Test
-    void bindValue_writeCallbackRefusesClientDeselectAll_selectionAndCheckboxReverted() {
-        var model = bindRefusingMultiSelect(Set.of("foo", "bar", "baz"));
+            assertSelectionReverted();
+        }
 
-        model.clientDeselectAll();
+        @Test
+        void deselectAll_selectionAndCheckboxReverted() {
+            model.deselectAll();
 
-        Assertions.assertEquals(Set.of("foo", "bar", "baz"),
-                grid.asMultiSelect().getValue());
-        assertSelectAllCheckboxState(true, false);
-        Assertions.assertEquals(List.of(), multiSelectEvents);
-    }
+            assertSelectionReverted();
+        }
 
-    @Test
-    void bindValue_writeCallbackRefusesDeselect_selectionAndCheckboxReverted() {
-        var model = bindRefusingMultiSelect(Set.of("foo", "bar", "baz"));
+        @Test
+        void clientDeselectAll_selectionAndCheckboxReverted() {
+            model.clientDeselectAll();
 
-        model.deselect("foo");
+            assertSelectionReverted();
+        }
 
-        Assertions.assertEquals(Set.of("foo", "bar", "baz"),
-                grid.asMultiSelect().getValue());
-        assertSelectAllCheckboxState(true, false);
-        Assertions.assertEquals(List.of(), multiSelectEvents);
-    }
+        private void assertSelectionReverted() {
+            assertSelectionReverted(Set.of("foo"), false, true);
+        }
 
-    private AbstractGridMultiSelectionModel<String> bindRefusingMultiSelect(
-            Set<String> initialValue) {
-        grid.setItems("foo", "bar", "baz");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.asMultiSelect().bindValue(new ValueSignal<>(initialValue), v -> {
-        });
-        UI.getCurrent().add(grid);
-        grid.asMultiSelect().addValueChangeListener(
-                e -> multiSelectEvents.add(e.getValue()));
-        return (AbstractGridMultiSelectionModel<String>) grid
-                .getSelectionModel();
-    }
+        private void assertSelectionReverted(Set<String> selection,
+                boolean selectAll, boolean indeterminate) {
+            Assertions.assertEquals(selection, grid.asMultiSelect().getValue());
+            Assertions.assertEquals(selection, signal.peek());
+            Assertions.assertEquals(List.of(), events);
 
-    private void assertSelectAllCheckboxState(boolean selectAll,
-            boolean indeterminate) {
-        var column = ((AbstractGridMultiSelectionModel<String>) grid
-                .getSelectionModel()).getSelectionColumn();
-        Assertions.assertEquals(selectAll,
-                column.getElement().getProperty("selectAll", false));
-        Assertions.assertEquals(indeterminate,
-                column.getElement().getProperty("_indeterminate", false));
+            var column = model.getSelectionColumn();
+            Assertions.assertEquals(selectAll,
+                    column.getElement().getProperty("selectAll", false));
+            Assertions.assertEquals(indeterminate,
+                    column.getElement().getProperty("_indeterminate", false));
+        }
     }
 
     @Test

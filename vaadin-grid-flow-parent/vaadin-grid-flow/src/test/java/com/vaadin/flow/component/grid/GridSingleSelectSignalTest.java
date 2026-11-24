@@ -22,6 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
@@ -32,7 +33,6 @@ import com.vaadin.tests.AbstractSignalsTest;
 class GridSingleSelectSignalTest extends AbstractSignalsTest {
 
     private Grid<String> grid;
-    private final List<Set<String>> multiSelectEvents = new ArrayList<>();
 
     @BeforeEach
     void setup() {
@@ -126,26 +126,59 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         Assertions.assertEquals(1, callCount[0]);
     }
 
-    @Test
-    void bindValue_writeCallbackRefuses_selectionRevertedWithoutEvent() {
-        grid.setItems("foo", "bar", "baz");
-        var signal = new ValueSignal<>("foo");
-        grid.asSingleSelect().bindValue(signal, v -> {
-        });
-        UI.getCurrent().add(grid);
-        List<String> events = new ArrayList<>();
-        grid.asSingleSelect()
-                .addValueChangeListener(e -> events.add(e.getValue()));
+    @Nested
+    class SingleSelectWriteCallbackRefuses {
 
-        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("bar");
-        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+        private ValueSignal<String> signal;
+        private AbstractGridSingleSelectionModel<String> model;
+        private final List<String> events = new ArrayList<>();
 
-        grid.select("baz");
-        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+        @BeforeEach
+        void setup() {
+            grid.setItems("foo", "bar", "baz");
+            signal = new ValueSignal<>("foo");
+            grid.asSingleSelect().bindValue(signal, v -> {
+            });
+            UI.getCurrent().add(grid);
+            grid.asSingleSelect()
+                    .addValueChangeListener(e -> events.add(e.getValue()));
+            model = (AbstractGridSingleSelectionModel<String>) grid
+                    .getSelectionModel();
+        }
 
-        Assertions.assertEquals("foo", signal.peek());
-        Assertions.assertEquals(List.of(), events);
+        @Test
+        void selectFromClient_selectionRevertedWithoutEvent() {
+            model.selectFromClient("bar");
+
+            assertSelectionReverted();
+        }
+
+        @Test
+        void select_selectionRevertedWithoutEvent() {
+            model.select("bar");
+
+            assertSelectionReverted();
+        }
+
+        @Test
+        void deselectFromClient_selectionRevertedWithoutEvent() {
+            model.deselectFromClient("foo");
+
+            assertSelectionReverted();
+        }
+
+        @Test
+        void deselect_selectionRevertedWithoutEvent() {
+            model.deselect("foo");
+
+            assertSelectionReverted();
+        }
+
+        private void assertSelectionReverted() {
+            Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+            Assertions.assertEquals("foo", signal.peek());
+            Assertions.assertEquals(List.of(), events);
+        }
     }
 
     @Test
