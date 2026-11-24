@@ -149,31 +149,35 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         @Test
         void selectFromClient_selectionRevertedWithoutEvent() {
             model.selectFromClient("bar");
-            assertSelectionReverted();
+            assertSelectionState("foo");
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void select_selectionRevertedWithoutEvent() {
             model.select("bar");
-            assertSelectionReverted();
+            assertSelectionState("foo");
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void deselectFromClient_selectionRevertedWithoutEvent() {
             model.deselectFromClient("foo");
-            assertSelectionReverted();
+            assertSelectionState("foo");
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void deselect_selectionRevertedWithoutEvent() {
             model.deselect("foo");
-            assertSelectionReverted();
+            assertSelectionState("foo");
+            Assertions.assertEquals(0, events.size());
         }
 
-        private void assertSelectionReverted() {
-            Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
-            Assertions.assertEquals("foo", signal.peek());
-            Assertions.assertEquals(0, events.size());
+        private void assertSelectionState(String selection) {
+            Assertions.assertEquals(selection,
+                    grid.asSingleSelect().getValue());
+            Assertions.assertEquals(selection, signal.peek());
         }
     }
 

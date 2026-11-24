@@ -153,13 +153,17 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
         @Test
         void selectFromClient_selectionRevertedWithoutEvent() {
             model.selectFromClient("bar");
-            assertSelectionReverted();
+            assertSelectionState(Set.of("foo"));
+            assertCheckboxState(false, true);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void select_selectionRevertedWithoutEvent() {
             model.select("bar");
-            assertSelectionReverted();
+            assertSelectionState(Set.of("foo"));
+            assertCheckboxState(false, true);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
@@ -168,26 +172,34 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
             events.clear();
 
             model.deselect("foo");
-            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
+            assertSelectionState(Set.of("foo", "bar", "baz"));
+            assertCheckboxState(true, false);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void selectAll_selectionAndCheckboxReverted() {
             model.selectAll();
-            assertSelectionReverted();
+            assertSelectionState(Set.of("foo"));
+            assertCheckboxState(false, true);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void clientSelectAll_selectionAndCheckboxReverted() throws Exception {
             setSelectAllFromClient(true);
             model.clientSelectAll();
-            assertSelectionReverted();
+            assertSelectionState(Set.of("foo"));
+            assertCheckboxState(false, true);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
         void deselectAll_selectionAndCheckboxReverted() {
             model.deselectAll();
-            assertSelectionReverted();
+            assertSelectionState(Set.of("foo"));
+            assertCheckboxState(false, true);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
@@ -197,7 +209,9 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
             setSelectAllFromClient(false);
             model.clientDeselectAll();
-            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
+            assertSelectionState(Set.of("foo", "bar", "baz"));
+            assertCheckboxState(true, false);
+            Assertions.assertEquals(0, events.size());
         }
 
         @Test
@@ -208,7 +222,9 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
             setSelectAllFromClient(false);
             model.deselectFromClient("foo");
-            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
+            assertSelectionState(Set.of("foo", "bar", "baz"));
+            assertCheckboxState(true, false);
+            Assertions.assertEquals(0, events.size());
         }
 
         private void setSelectAllFromClient(boolean selectAll)
@@ -218,16 +234,13 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
                     .deferredUpdateFromClient("selectAll", selectAll).run();
         }
 
-        private void assertSelectionReverted() {
-            assertSelectionReverted(Set.of("foo"), false, true);
-        }
-
-        private void assertSelectionReverted(Set<String> selection,
-                boolean selectAll, boolean indeterminate) {
+        private void assertSelectionState(Set<String> selection) {
             Assertions.assertEquals(selection, grid.asMultiSelect().getValue());
             Assertions.assertEquals(selection, signal.peek());
-            Assertions.assertEquals(0, events.size());
+        }
 
+        private void assertCheckboxState(boolean selectAll,
+                boolean indeterminate) {
             var column = model.getSelectionColumn();
             Assertions.assertEquals(selectAll,
                     column.getElement().getProperty("selectAll", false));
