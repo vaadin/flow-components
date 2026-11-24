@@ -19,15 +19,26 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/lit-renderer-event-handler")
 public class LitRendererEventHandlerPage extends Div {
 
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`<div>${item.name} <button @click=${functions.clicked}>Click</button></div>`;")
+        CompiledLitTemplate person();
+    }
+
     public LitRendererEventHandlerPage() {
-        LitRenderer<Person> renderer = LitRenderer.<Person> of(
-                "<div>${item.name} <button @click=${clicked}>Click</button></div>")
+        LitRenderer<Person> renderer = LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).person())
                 .withProperty("name", Person::getFirstName)
                 .withFunction("clicked", this::clicked);
 
