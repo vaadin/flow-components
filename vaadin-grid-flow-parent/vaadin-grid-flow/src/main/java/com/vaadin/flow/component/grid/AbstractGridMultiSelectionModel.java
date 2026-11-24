@@ -231,19 +231,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectAll() {
-        updateSelection(
-                fetchAllItems()
-                        .collect(Collectors.toCollection(LinkedHashSet::new)),
-                Collections.emptySet());
-        selectionColumn.setSelectAllCheckboxState(true);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        doSelectAll(false);
     }
 
     @Override
     public void deselectAll() {
-        updateSelection(Collections.emptySet(), getSelectedItems());
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        doDeselectAll(false);
     }
 
     @Override
@@ -436,10 +429,14 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
+        doSelectAll(true);
+    }
+
+    private void doSelectAll(boolean userOriginated) {
         doUpdateSelection(
                 fetchAllItems()
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
-                Collections.emptySet(), true);
+                Collections.emptySet(), userOriginated);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -495,7 +492,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
-        doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
+        doDeselectAll(true);
+    }
+
+    private void doDeselectAll(boolean userOriginated) {
+        doUpdateSelection(Collections.emptySet(), getSelectedItems(),
+                userOriginated);
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
