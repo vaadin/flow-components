@@ -14,9 +14,6 @@
         <module>vaadin-markdown-flow</module>
         <module>vaadin-markdown-testbench</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>
