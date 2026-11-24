@@ -337,13 +337,24 @@ class GridMultiSelectionModelTest {
         assertFalse(fromClient.get());
 
         model.deselectAll();
-        assertFalse(fromClient.get());
-
         model.clientSelectAll();
         assertTrue(fromClient.get());
+    }
 
+    @Test
+    void deselectAllEvent_isFromClient() {
+        var model = (AbstractGridMultiSelectionModel<Person>) selectionModel;
+        AtomicReference<Boolean> fromClient = new AtomicReference<>();
+        model.addMultiSelectionListener(
+                event -> fromClient.set(event.isFromClient()));
+
+        model.selectAll();
         model.clientDeselectAll();
         assertTrue(fromClient.get());
+
+        model.clientSelectAll();
+        model.deselectAll();
+        assertFalse(fromClient.get());
     }
 
     @Test
