@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -44,7 +45,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 @NpmPackage(value = "@vaadin/side-nav", version = "25.4.0-beta2")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component implements HasSideNavItems, HasSize,
-        HasStyle, HasThemeVariant<SideNavVariant> {
+        HasStyle, HasThemeVariant<SideNavVariant>, HasAriaLabel {
 
     private Element labelElement;
 
