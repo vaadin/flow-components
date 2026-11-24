@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.internal.StringUtil;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -39,7 +39,7 @@ import com.vaadin.flow.router.Route;
 public class UploadView extends Div {
 
     @JsDefinition
-    interface UploadViewJs extends Serializable {
+    interface UploadViewJs extends JsInvokers {
 
         @JsExpression("return this.files")
         PendingJavaScriptResult getFiles();

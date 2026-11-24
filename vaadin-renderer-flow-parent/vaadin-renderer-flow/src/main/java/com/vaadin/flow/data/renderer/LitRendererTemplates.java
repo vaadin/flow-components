@@ -15,10 +15,9 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * The templates of the built-in renderers, declared so that the browser does
@@ -28,7 +27,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface LitRendererTemplates extends Serializable {
+interface LitRendererTemplates extends JsSnippets {
 
     /**
      * Returns the template of {@link ComponentRenderer}. It renders the
