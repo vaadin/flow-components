@@ -1068,6 +1068,99 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withStreamingError_withI18n_setsCustomErrorMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        orchestratorWithI18n(
+                new AIOrchestratorI18n().setErrorMessage("Virhe tapahtui."))
+                .prompt("Hello");
+
+        Mockito.verify(mockMessage).setText("Virhe tapahtui.");
+    }
+
+    @Test
+    void prompt_withTimeout_withI18n_setsCustomTimeoutErrorMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new TimeoutException("Timed out")));
+
+        orchestratorWithI18n(new AIOrchestratorI18n()
+                .setTimeoutErrorMessage("Pyyntö aikakatkaistiin."))
+                .prompt("Hello");
+
+        Mockito.verify(mockMessage).setText("Pyyntö aikakatkaistiin.");
+    }
+
+    @Test
+    void prompt_withStreamingError_withI18nWithoutErrorMessage_setsDefaultErrorMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        orchestratorWithI18n(new AIOrchestratorI18n()
+                .setTimeoutErrorMessage("Pyyntö aikakatkaistiin."))
+                .prompt("Hello");
+
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
+    }
+
+    @Test
+    void prompt_withPreStreamThrow_withI18n_setsCustomErrorMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("onRequest failed"))
+                .when(controller).onRequest(Mockito.any());
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withI18n(new AIOrchestratorI18n()
+                        .setErrorMessage("Virhe tapahtui."))
+                .build();
+        Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+
+        Mockito.verify(mockMessage).setText("Virhe tapahtui.");
+    }
+
+    @Test
+    void prompt_withControllerOnResponseThrows_withI18n_addsCustomErrorMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("Controller error"))
+                .when(controller).onResponse(Mockito.any());
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withI18n(new AIOrchestratorI18n()
+                        .setErrorMessage("Virhe tapahtui."))
+                .build().prompt("Hello");
+
+        Mockito.verify(mockMessageList).addMessage("Virhe tapahtui.",
+                "Assistant", Collections.emptyList());
+    }
+
+    @Test
     void prompt_withoutMessageList_stillSendsToProvider() {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -1320,6 +1413,13 @@ class AIOrchestratorTest {
                 .withMessageList(mockMessageList);
         Assertions.assertThrows(NullPointerException.class,
                 () -> builder.withAssistantName(null));
+    }
+
+    @Test
+    void builder_withNullI18n_throws() {
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> builder.withI18n(null));
     }
 
     @Test
@@ -3504,6 +3604,15 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withI18nCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withI18n(new AIOrchestratorI18n());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withI18n(new AIOrchestratorI18n()).build();
+        assertBuilderWarning("i18n");
+    }
+
+    @Test
     void builder_withResponseListenerCalledTwice_logsWarning() {
         var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
                 .withResponseListener(event -> {
@@ -3523,7 +3632,7 @@ class AIOrchestratorTest {
         // with-method (component, controller, ...), do not add it here —
         // ensure build() claims it.
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
-                "withAssistantName", "withRequestInterceptor",
+                "withAssistantName", "withI18n", "withRequestInterceptor",
                 "withRequestListener", "withAttachmentClickListener",
                 "withResponseListener", "withHistory", "withMetadata");
 
@@ -4295,6 +4404,11 @@ class AIOrchestratorTest {
         // window in which the hook would have run.
         Mockito.verify(controller, Mockito.after(500).never())
                 .onResponse(Mockito.any());
+    }
+
+    private AIOrchestrator orchestratorWithI18n(AIOrchestratorI18n i18n) {
+        return AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withI18n(i18n).build();
     }
 
     private AIOrchestrator orchestratorWith(AIController controller) {
