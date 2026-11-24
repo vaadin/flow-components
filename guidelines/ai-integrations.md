@@ -1,4 +1,4 @@
-# AI Components
+# AI Integrations
 
 `vaadin-ai-integrations-flow-parent` is not a regular component wrapper group:
 it provides server-side support for building AI-powered applications
