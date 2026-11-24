@@ -1493,8 +1493,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
+        getElement().executeJs(ComboBoxJs.class).initConnector();
     }
 
     @Override

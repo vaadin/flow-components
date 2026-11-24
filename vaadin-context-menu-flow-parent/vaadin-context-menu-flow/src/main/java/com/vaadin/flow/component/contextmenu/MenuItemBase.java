@@ -29,9 +29,12 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.component.shared.internal.SuppressForbidden;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.CspViolationReporter;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -188,9 +191,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
         // A menu that stays open after a click (keepOpen) does not re-render
         // its items, so the connector toggles the checkmark attribute directly.
-        executeJsWhenAttached(
-                "window.Vaadin.Flow.contextMenuConnector.setChecked(this, $0)",
-                checked);
+        runBeforeClientResponseWhenAttached(() -> getElement()
+                .executeJs(MenuItemBaseJs.class).setChecked(checked));
     }
 
     /**
@@ -398,10 +400,41 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
     protected abstract S createSubMenu();
 
+    /**
+     * Runs the given JavaScript on the element of this menu item before the
+     * next response, once the item is attached.
+     * <p>
+     * The JavaScript is sent to the browser as a string, which the browser
+     * compiles and a Content Security Policy without <code>unsafe-eval</code>
+     * blocks. The call is reported as soon as this method is called: in the
+     * strict CSP mode it throws a {@link CspViolationException}.
+     *
+     * @param expression
+     *            the JavaScript expression to run
+     * @param parameters
+     *            the parameters of the expression
+     * @deprecated Declare the JavaScript in a
+     *             {@link com.vaadin.flow.js.JsInvokers} interface and call it
+     *             with {@link com.vaadin.flow.dom.Element#executeJs(Class)}
+     *             instead. This method will be removed in a future release.
+     */
+    @Deprecated(since = "25.4", forRemoval = true)
     protected void executeJsWhenAttached(String expression,
             Serializable... parameters) {
-        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
-                this,
-                context -> getElement().executeJs(expression, parameters)));
+        CspViolationReporter.reportStringJavaScript();
+        runBeforeClientResponseWhenAttached(
+                () -> executeStringJavaScript(expression, parameters));
+    }
+
+    @SuppressForbidden
+    private void executeStringJavaScript(String expression,
+            Serializable... parameters) {
+        getElement().executeJs(expression, parameters);
+    }
+
+    private void runBeforeClientResponseWhenAttached(
+            SerializableRunnable command) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> command.run()));
     }
 }

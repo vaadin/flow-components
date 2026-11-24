@@ -49,7 +49,7 @@ public class WaterfallChart extends AbstractChartExample {
         DataLabels dataLabels = new DataLabels(true);
         dataLabels.setVerticalAlign(VerticalAlign.TOP);
         dataLabels.setY(-30);
-        dataLabels.setFormatter("function() { return this.y / 1000 + 'k'; }");
+        dataLabels.setFormat("{divide y 1000}k");
         opts.setDataLabels(dataLabels);
 
         dataSeries.setPlotOptions(opts);

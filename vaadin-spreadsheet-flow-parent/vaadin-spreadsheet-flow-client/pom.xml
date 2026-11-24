@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>25.4-SNAPSHOT</version>
+        <version>25.5-SNAPSHOT</version>
     </parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spreadsheet-flow-client</artifactId>
@@ -109,6 +109,15 @@
                     <includes>
                         <include>META-INF/**</include>
                     </includes>
+                </configuration>
+            </plugin>
+            <!-- In legacy mode, javadoc also reads the sources packed in the
+                 vaadin-server jar and fails on their missing dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <legacyMode>false</legacyMode>
                 </configuration>
             </plugin>
             <plugin>

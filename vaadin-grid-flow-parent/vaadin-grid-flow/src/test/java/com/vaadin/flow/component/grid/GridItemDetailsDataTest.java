@@ -24,8 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.tests.MockUIExtension;
 
 class GridItemDetailsDataTest {
@@ -36,6 +40,13 @@ class GridItemDetailsDataTest {
     private Grid<String> grid;
     private List<String> detailsItems = new ArrayList<>();
 
+    @JsDefinition
+    interface DetailsTemplates extends JsSnippets {
+
+        @JsExpression("return html`${item.details}`;")
+        CompiledLitTemplate details();
+    }
+
     @BeforeEach
     void setup() {
         grid = new Grid<>();
@@ -45,7 +56,8 @@ class GridItemDetailsDataTest {
 
     @Test
     void litRenderer_detailsDataGeneratedOnlyForVisibleDetails() {
-        grid.setItemDetailsRenderer(LitRenderer.<String> of("${item.details}")
+        grid.setItemDetailsRenderer(LitRenderer
+                .<String> of(JsSnippets.of(DetailsTemplates.class).details())
                 .withProperty("details", item -> {
                     detailsItems.add(item);
                     return "Details of " + item;

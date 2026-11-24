@@ -49,12 +49,20 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/message-input", version = "25.4.0-beta2")
 public class MessageInput extends Component
         implements Focusable<MessageInput>, HasSize, HasStyle, HasEnabled,
         HasTooltip, HasThemeVariant<MessageInputVariant> {
 
     private MessageInputI18n i18n;
+
+    /**
+     * Whether submitting was disabled when the latest submit arrived from the
+     * client. Read once per submit, like Flow reads the enabled state once per
+     * DOM event, so a listener that disables submitting does not affect the
+     * other listeners of the same submit.
+     */
+    private boolean ignoreClientSubmit;
 
     /**
      * The {@code submit} event which is fired by {@link MessageInput}
@@ -95,6 +103,10 @@ public class MessageInput extends Component
      * Creates a new message input component.
      */
     public MessageInput() {
+        // Added before any submit listener, so it runs first for each submit
+        // from the client
+        getElement().addEventListener("submit",
+                event -> ignoreClientSubmit = isSubmitDisabled());
     }
 
     /**
@@ -106,6 +118,7 @@ public class MessageInput extends Component
      * @see #addSubmitListener(ComponentEventListener)
      */
     public MessageInput(ComponentEventListener<SubmitEvent> listener) {
+        this();
         addSubmitListener(listener);
     }
 
@@ -114,7 +127,8 @@ public class MessageInput extends Component
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
-     * key.
+     * key. The listener is not called for a submit that the browser sends while
+     * submitting is disabled with {@link #setSubmitDisabled(boolean)}.
      *
      * @param listener
      *            the listener
@@ -122,7 +136,12 @@ public class MessageInput extends Component
      */
     public Registration addSubmitListener(
             ComponentEventListener<SubmitEvent> listener) {
-        return addListener(SubmitEvent.class, listener);
+        return addListener(SubmitEvent.class, event -> {
+            if (event.isFromClient() && ignoreClientSubmit) {
+                return;
+            }
+            listener.onComponentEvent(event);
+        });
     }
 
     /**
@@ -142,6 +161,10 @@ public class MessageInput extends Component
      * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
      * input field, and the typed text is kept. Use this, for example, to
      * prevent sending a message while a file is still uploading.
+     * <p>
+     * The server also ignores a submit that the browser sends while submitting
+     * is disabled, so listeners added with
+     * {@link #addSubmitListener(ComponentEventListener)} are not called for it.
      * <p>
      * The default value is {@code false}.
      *

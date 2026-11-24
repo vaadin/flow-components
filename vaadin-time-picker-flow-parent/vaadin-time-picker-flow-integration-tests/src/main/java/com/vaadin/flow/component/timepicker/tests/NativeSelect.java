@@ -23,11 +23,21 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 @Tag("select")
 public class NativeSelect
         extends AbstractSinglePropertyField<NativeSelect, String>
         implements HasSize, HasStyle, Focusable<NativeSelect> {
+
+    @JsDefinition
+    interface NativeSelectJs extends JsInvokers {
+
+        @JsExpression("if (this._value !== undefined) { this.value = this._value; this._value = undefined; }")
+        void applyPendingValue();
+    }
 
     public NativeSelect() {
         super("value", "", false);
@@ -51,7 +61,6 @@ public class NativeSelect
         }
         // Workaround for Flow setting "value" property too early before the
         // children (<option> elements) are added
-        getElement().executeJs(
-                "if (this._value !== undefined) { this.value = this._value; this._value = undefined; }");
+        getElement().executeJs(NativeSelectJs.class).applyPendingValue();
     }
 }

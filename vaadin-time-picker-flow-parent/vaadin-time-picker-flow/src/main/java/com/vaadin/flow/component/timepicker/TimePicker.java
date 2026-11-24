@@ -113,7 +113,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.4.0-beta2")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker
@@ -714,9 +714,8 @@ public class TimePicker
     private void initConnector() {
         // can't run this with getElement().executeJs(...) since then
         // setLocale might be called before this causing client side error
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
-                getElement()));
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(TimePickerJs.class)
+                .initConnector(getElement()));
     }
 
     /**

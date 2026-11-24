@@ -43,8 +43,9 @@ public class BasicLineWithCallouts extends AbstractChartExample {
         YAxis yAxis = configuration.getyAxis();
         yAxis.setTitle(new AxisTitle("Temperature (°C)"));
 
-        configuration.getTooltip().setFormatter(
-                "'<b>'+ this.series.name +'</b><br/>'+this.x +': '+ this.y +'°C'");
+        configuration.getTooltip().setHeaderFormat("");
+        configuration.getTooltip()
+                .setPointFormat("<b>{series.name}</b><br/>{x}: {y}°C");
 
         PlotOptionsLine plotOptions = new PlotOptionsLine();
         plotOptions.setEnableMouseTracking(false);

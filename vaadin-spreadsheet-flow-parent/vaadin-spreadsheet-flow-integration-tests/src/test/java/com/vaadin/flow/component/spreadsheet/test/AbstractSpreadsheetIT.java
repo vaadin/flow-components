@@ -744,6 +744,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private static final String WEB_SOCKET_CONNECTION_ERROR_PREFIX = "WebSocket connection to ";
 
+    // Chrome 158 and newer block the unload handler that the GWT client of
+    // the spreadsheet sets, and log an error for it
+    private static final String UNLOAD_POLICY_VIOLATION = "Permissions policy violation: unload is not allowed";
+
     // Helper adopted from TestBenchHelpers
     protected void checkLogsForErrors(
             Predicate<String> acceptableMessagePredicate) {
@@ -752,6 +756,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                     || logEntry.getMessage().contains(" 404 "))
                     && !logEntry.getMessage()
                             .contains(WEB_SOCKET_CONNECTION_ERROR_PREFIX)
+                    && !logEntry.getMessage().contains(UNLOAD_POLICY_VIOLATION)
                     && !acceptableMessagePredicate
                             .test(logEntry.getMessage())) {
                 throw new AssertionError(String.format(

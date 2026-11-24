@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>25.4-SNAPSHOT</version>
+        <version>25.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
@@ -14,6 +14,10 @@
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <cvdlName>vaadin-spreadsheet-flow</cvdlName>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+        <!-- Set here instead of in the parent: the integration tests cannot
+             run in strict mode until Charts supports declared functions,
+             see https://github.com/vaadin/flow-components/issues/10723 -->
+        <csp.mode>strict</csp.mode>
     </properties>
     <dependencies>
         <dependency>

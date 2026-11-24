@@ -142,7 +142,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.4.0-beta2")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.4.0")
@@ -943,9 +943,8 @@ public class DatePicker
     }
 
     private void initConnector() {
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
-                getElement()));
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(DatePickerJs.class)
+                .initConnector(getElement()));
     }
 
     /**

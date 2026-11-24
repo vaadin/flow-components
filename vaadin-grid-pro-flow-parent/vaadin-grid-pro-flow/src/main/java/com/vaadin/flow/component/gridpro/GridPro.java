@@ -55,7 +55,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.4.0-alpha7")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.4.0-beta2")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -147,14 +147,14 @@ public class GridPro<E> extends Grid<E> {
                 column.getEditorField().setValue(gridProPreEditValue);
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
-                UI.getCurrentOrThrow().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.handleCustomEditorValueUpdate($0, $1, $2)",
-                        column.getEditorField().getElement(), itemKey,
-                        this.getElement());
+                UI.getCurrentOrThrow().getPage().executeJs(GridProJs.class)
+                        .handleCustomEditorValueUpdate(
+                                column.getEditorField().getElement(), itemKey,
+                                this.getElement());
             }
         });
-        addAttachListener(e -> getElement().executeJs(
-                "window.Vaadin.Flow.gridProConnector.initUpdatingCellAnimation(this);"));
+        addAttachListener(e -> getElement().executeJs(GridProJs.class)
+                .initUpdatingCellAnimation());
     }
 
     /**
@@ -212,8 +212,8 @@ public class GridPro<E> extends Grid<E> {
 
             addDataGenerator(this::generateCellEditableData);
 
-            addAttachListener(e -> this.getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.initCellEditableProvider(this)"));
+            addAttachListener(e -> this.getElement().executeJs(GridProJs.class)
+                    .initCellEditableProvider());
         }
 
         private void generateCellEditableData(T item, ObjectNode jsonObject) {
@@ -695,8 +695,7 @@ public class GridPro<E> extends Grid<E> {
             var gridProPreEditValue = ComponentUtil.getData(column,
                     "gridProPreEditValue");
 
-            getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell(this);");
+            getElement().executeJs(GridProJs.class).clearUpdatingCell();
 
             if (column.getEditorField() != null) {
                 // Custom editor column

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>25.4-SNAPSHOT</version>
+        <version>25.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-date-picker-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -14,6 +14,9 @@
         <module>vaadin-date-picker-flow</module>
         <module>vaadin-date-picker-testbench</module>
     </modules>
+    <properties>
+        <csp.mode>strict</csp.mode>
+    </properties>
     <dependencies/>
     <profiles>
         <profile>
