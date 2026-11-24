@@ -254,7 +254,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   could count the calls as well, but not keep the service from running the
   tools. The exception is `executeToolsConcurrently()` with a streaming
   model, where LangChain4j starts a tool before the response that requests
-  it is complete, so the tools of that last round still run. The tool
+  it is complete, so the tools of that last round still run. On a streaming
+  model, a held-back response is replaced with an error on the response
+  handler, which ends the turn. That does not work once the service has the
+  answer of the turn: a model call after it belongs to an output
+  guardrail's reprompt, and LangChain4j waits for the response of the
+  reprompt's first call on the thread that runs the guardrails, behind a
+  latch that only a complete response releases
+  (`StreamingToSynchronousChatExecutor`). An error there would end the turn
+  and leave that thread blocked. So from the answer on, the provider ends a
+  cancelled or failed turn itself and gives the handler an answer without
+  text or tool calls, on which the guardrails finish. The tool
   traffic of the failed turn is
   discarded with it, so the next
   turn continues from the chat memory as the last completed turn left it; a

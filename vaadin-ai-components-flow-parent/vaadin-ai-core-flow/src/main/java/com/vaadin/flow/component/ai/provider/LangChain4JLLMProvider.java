@@ -165,7 +165,12 @@ import tools.jackson.databind.JsonNode;
  * received. When a guardrail fails the turn, the answer it rejected stays in
  * the chat memory, unless the guardrail asks LangChain4j to remove it with
  * {@code fatalWithMessageRemoval(...)} or
- * {@code failureWithMessageRemoval(...)}.
+ * {@code failureWithMessageRemoval(...)}. When a turn with a
+ * {@link StreamingChatModel} is cancelled, or fails on a tool call limit, while
+ * a guardrail has asked the model again, your guardrails check an answer
+ * without text once more: LangChain4j needs an answer to finish. The turn has
+ * ended by then, so what the guardrails return for that answer is not passed
+ * on.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -608,7 +613,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 // instead, the exception would surface in the handler of the
                 // previous response, where what becomes of it is up to the
                 // model implementation.
-                handler.get().onError(e);
+                endTurn(turn, handler.get(), e);
                 return null;
             }
             var passedOn = arguments.clone();
@@ -680,7 +685,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * run tools which must not run, and returns whether it did. A complete tool
      * call, where LangChain4j starts a tool when it executes tools
      * concurrently, is dropped once the turn is cancelled. A complete response
-     * is replaced with an error that ends the turn when the turn is cancelled,
+     * ends the turn instead of reaching the service when the turn is cancelled,
      * or when a tool call of the response exceeds a limit.
      */
     private static boolean holdBack(Turn turn, String call, Object[] arguments,
@@ -694,16 +699,39 @@ public class LangChain4JLLMProvider implements LLMProvider {
         if (turn.isCancelled()) {
             LOGGER.debug("The turn was cancelled, discarding the model "
                     + "response");
-            handler.onError(new TurnCancelledException());
+            endTurn(turn, handler, new TurnCancelledException());
             return true;
         }
         try {
             turn.observeResponse((ChatResponse) arguments[0]);
             return false;
         } catch (ToolCallLimitExceededException e) {
-            handler.onError(e);
+            endTurn(turn, handler, e);
             return true;
         }
+    }
+
+    /**
+     * Ends the turn with the given error where a streaming model would report
+     * its response to the given handler.
+     * <p>
+     * The error goes to the handler, which ends the turn, unless the service
+     * already has the answer of the turn. A model call after the answer is one
+     * of an output guardrail that asks the model again, and LangChain4j waits
+     * for the response of such a call on the thread that runs the guardrails:
+     * an error reported to that handler ends the turn, but the thread keeps
+     * waiting. So the turn is ended here, and the handler gets an answer with
+     * no text and no tool calls, on which the guardrails finish.
+     */
+    private static void endTurn(Turn turn, StreamingChatResponseHandler handler,
+            RuntimeException error) {
+        if (!turn.answered) {
+            handler.onError(error);
+            return;
+        }
+        turn.fail(error);
+        handler.onCompleteResponse(
+                ChatResponse.builder().aiMessage(AiMessage.from("")).build());
     }
 
     /**
@@ -1316,6 +1344,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private boolean lastResponseHadFinishReason;
         private TokenUsage accumulatedUsage;
         /**
+         * Whether the service has received the answer of this turn, a response
+         * without tool calls. A model call that follows it is one of an output
+         * guardrail that asks the model again.
+         */
+        private boolean answered;
+        /**
          * Whether output guardrails checked the answer of this turn. Set on the
          * thread that then completes the turn.
          */
@@ -1397,19 +1431,17 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * past a limit ends the turn here. Given to the service, it would run
          * the tools of the round, also those the provider does not supply. The
          * metadata comes first, as the round trip was made whether or not the
-         * turn goes on.
+         * turn goes on. A response without tool calls is the answer of the
+         * turn.
          *
          * @throws ToolCallLimitExceededException
          *             if a tool call the response requests exceeds a limit
          */
         void observeResponse(ChatResponse response) {
             observeMetadata(response);
-            screenToolCalls(response);
-        }
-
-        private void screenToolCalls(ChatResponse response) {
             var aiMessage = response.aiMessage();
             if (aiMessage == null || !aiMessage.hasToolExecutionRequests()) {
+                answered = true;
                 return;
             }
             for (var toolRequest : aiMessage.toolExecutionRequests()) {

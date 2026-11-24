@@ -3093,6 +3093,113 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals(List.of(), results);
     }
 
+    @Test
+    void customizer_streamingToolCallPastTheLimitInGuardrailReprompt_failsTurnWithoutBlocking() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.tools(tools)
+                        .outputGuardrails(repromptingGuardrail()));
+        customized.setMaxCallsPerTool(2);
+        var responses = new ArrayList<>(List.of(
+                ChatResponse.builder().aiMessage(AiMessage.from("It is warm"))
+                        .build(),
+                mockResponseWithToolRequests("count", "count", "count")));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(responses.removeFirst());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var error = new AtomicReference<Throwable>();
+
+        // LangChain4j waits for the answer to a reprompt on the thread that
+        // runs the guardrails, here the subscribing one
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(token -> {
+                }, error::set));
+
+        Assertions.assertInstanceOf(ToolCallLimitExceededException.class,
+                error.get());
+        Assertions.assertEquals(0, tools.calls.get());
+        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void customizer_streamingCancelledWhileModelAnswersGuardrailReprompt_doesNotBlock() {
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(repromptingGuardrail()));
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var modelCalls = new AtomicInteger();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            if (modelCalls.incrementAndGet() == 1) {
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build());
+            } else {
+                subscriber.cancel();
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build());
+            }
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(subscriber));
+
+        Assertions.assertEquals(2, modelCalls.get());
+    }
+
+    @Test
+    void customizer_streamingCancelledBeforeGuardrailReprompt_doesNotCallModelOrBlock() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        if (responseFromLLM.text().contains("warm")) {
+                            subscriber.cancel();
+                            return reprompt("No temperature",
+                                    "Give the temperature");
+                        }
+                        return success();
+                    }
+                }));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("It is warm")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(subscriber));
+
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    /**
+     * A guardrail that asks the model again when its answer contains "warm".
+     */
+    private static OutputGuardrail repromptingGuardrail() {
+        return new OutputGuardrail() {
+            @Override
+            public OutputGuardrailResult validate(AiMessage responseFromLLM) {
+                return responseFromLLM.text().contains("warm")
+                        ? reprompt("No temperature", "Give the temperature")
+                        : success();
+            }
+        };
+    }
+
     private static OutputGuardrail redactingGuardrail() {
         return new OutputGuardrail() {
             @Override
