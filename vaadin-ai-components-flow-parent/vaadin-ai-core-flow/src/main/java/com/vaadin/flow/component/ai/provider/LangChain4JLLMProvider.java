@@ -214,11 +214,13 @@ import tools.jackson.databind.JsonNode;
  * calls and their results, including those of a turn that failed or was
  * cancelled, with {@code storeRetrievedContentInChatMemory(false)} a user
  * message without its attachments, and with output guardrails the answer as the
- * model gave it, not as the guardrails returned it. History restore with
- * {@link #setHistory(List, Map)} writes to the chat memory the service uses,
- * whichever it is. A {@code chatMemoryProvider} set in the customizer creates
- * that memory on the first turn, so a history restored before it is not written
- * and a warning is logged.
+ * model gave it, not as the guardrails returned it. You own that memory:
+ * {@link #setHistory(List, Map)} restores a saved conversation into the
+ * provider's own chat memory and does nothing when the customizer set one, so
+ * load the conversation into your memory yourself. Restoring a conversation
+ * through {@code AIOrchestrator.Builder.withHistory(List, Map)} still matters
+ * then: the message list the user sees and the orchestrator's own conversation
+ * history are restored by the orchestrator, not by the provider.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -942,11 +944,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
         Objects.requireNonNull(history, "History must not be null");
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
-        var chatMemory = service.getChatMemory(DEFAULT_MEMORY_ID);
-        if (chatMemory == null) {
-            LOGGER.warn("History restoration was requested, but the service "
-                    + "has no chat memory for the default conversation, so "
-                    + "the restored conversation does not reach the LLM.");
+        if (service.getChatMemory(DEFAULT_MEMORY_ID) != chatMemory) {
+            LOGGER.debug("Skipping history restoration: the customizer set a "
+                    + "chat memory, which the application owns. Load the "
+                    + "conversation into that memory instead.");
             return;
         }
         chatMemory.clear();

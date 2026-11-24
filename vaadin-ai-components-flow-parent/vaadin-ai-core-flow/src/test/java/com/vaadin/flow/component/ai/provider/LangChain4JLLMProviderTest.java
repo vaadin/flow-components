@@ -3304,35 +3304,51 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void setHistory_customizerChatMemory_restoresIntoThatMemory() {
+    void setHistory_customizerChatMemory_leavesThatMemoryAsItIs() {
+        // The application owns the memory, which holds more than a restore
+        // writes: here the tool call and its result
         var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var toolRequest = ToolExecutionRequest.builder().id("1")
+                .name("getTemperature").arguments("{}").build();
+        var stored = List.of(UserMessage.from("Temperature?"),
+                AiMessage.from(List.of(toolRequest)),
+                ToolExecutionResultMessage.from(toolRequest, "22°C"),
+                AiMessage.from("It is 22°C"));
+        stored.forEach(memory::add);
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service.chatMemory(memory));
 
         customized.setHistory(
-                List.of(new ChatMessage(ChatMessage.Role.USER,
-                        "Previous question", null, null)),
+                List.of(new ChatMessage(ChatMessage.Role.USER, "Temperature?",
+                        null, null),
+                        new ChatMessage(ChatMessage.Role.ASSISTANT,
+                                "It is 22°C", null, null)),
                 Collections.emptyMap());
 
-        Assertions.assertEquals(List.of(UserMessage.from("Previous question")),
-                memory.messages());
+        Assertions.assertEquals(stored, memory.messages());
     }
 
     @Test
-    void setHistory_customizerChatMemoryProviderBeforeFirstTurn_logsWarning() {
+    void setHistory_customizerChatMemoryProvider_leavesThatMemoryAsItIs() {
         var memory = MessageWindowChatMemory.withMaxMessages(10);
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service.chatMemoryProvider(memoryId -> memory));
+        var history = List.of(new ChatMessage(ChatMessage.Role.USER,
+                "Previous question", null, null));
 
-        customized.setHistory(
-                List.of(new ChatMessage(ChatMessage.Role.USER,
-                        "Previous question", null, null)),
-                Collections.emptyMap());
+        // The memory provider creates the memory on the first turn
+        customized.setHistory(history, Collections.emptyMap());
+        Assertions.assertEquals(List.of(), memory.messages());
 
-        Assertions.assertTrue(memory.messages().isEmpty());
-        Assertions.assertTrue(logger.getLoggingEvents().stream()
-                .anyMatch(event -> event.getLevel() == Level.WARN
-                        && event.getMessage().contains("History restoration")));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi there")).build());
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+        var stored = memory.messages();
+        customized.setHistory(history, Collections.emptyMap());
+
+        Assertions.assertEquals(2, stored.size());
+        Assertions.assertEquals(stored, memory.messages());
     }
 
     @Test
@@ -3783,18 +3799,14 @@ class LangChain4JLLMProviderTest {
 
     @Test
     void requestPrompt_replacesCustomizerSystemMessageNotKeptFirst() {
-        // A window memory with its defaults adds the system message after a
-        // restored conversation instead of ahead of it
+        // A window memory with its defaults adds the system message after
+        // the conversation it holds instead of ahead of it
         var memory = MessageWindowChatMemory.withMaxMessages(10);
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service.systemMessage("Configured")
                         .chatMemory(memory));
-        customized.setHistory(
-                List.of(new ChatMessage(ChatMessage.Role.USER,
-                        "Previous question", null, null),
-                        new ChatMessage(ChatMessage.Role.ASSISTANT,
-                                "Previous answer", null, null)),
-                Collections.emptyMap());
+        memory.add(UserMessage.from("Previous question"));
+        memory.add(AiMessage.from("Previous answer"));
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
