@@ -3038,6 +3038,37 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_streamingOutputGuardrail_textAlongsideToolCallIsNotEmitted() {
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .outputGuardrails(redactingGuardrail()));
+        var toolCall = ChatResponse.builder().aiMessage(AiMessage.from(
+                "Looking up code 1234",
+                List.of(ToolExecutionRequest.builder().id("1")
+                        .name("getTemperature").arguments("{}").build())))
+                .build();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Looking up ");
+            handler.onPartialResponse("code 1234");
+            handler.onCompleteResponse(toolCall);
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("22°C at 1234");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("22°C at 1234")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = customized.stream(createSimpleRequest("Temperature?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("[redacted]"), results);
+    }
+
+    @Test
     void customizer_outputGuardrailAndImmediateToolReturn_textAlongsideToolCallIsNotEmitted() {
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service
