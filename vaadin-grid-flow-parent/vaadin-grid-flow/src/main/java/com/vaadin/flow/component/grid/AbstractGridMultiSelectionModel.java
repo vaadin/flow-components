@@ -577,8 +577,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
      * Passes the selection to the write callback of the bound signal. If the
      * signal doesn't accept it, reverts the selection to the signal value
      * without firing an event and syncs to the client every item whose state
-     * may differ there: the changed items, the attempted selection and the
-     * signal value.
+     * may differ there: the changed items, the new selection and the signal
+     * value.
      *
      * @param changedItems
      *            the items whose selection state was changed
@@ -588,17 +588,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (selectionBinding == null) {
             return true;
         }
-        Map<Object, T> attemptedItems = new LinkedHashMap<>(selected);
-        Map<Object, T> signalItems = mapItemsById(
+        Map<Object, T> newSelection = new LinkedHashMap<>(selected);
+        Map<Object, T> signalSelection = mapItemsById(
                 selectionBinding.writer().apply(getSelectedItems()));
-        if (signalItems.keySet().equals(attemptedItems.keySet())) {
+        if (signalSelection.keySet().equals(newSelection.keySet())) {
             return true;
         }
         selected.clear();
-        selected.putAll(signalItems);
+        selected.putAll(signalSelection);
         Map<Object, T> itemsToSync = mapItemsById(changedItems);
-        itemsToSync.putAll(attemptedItems);
-        itemsToSync.putAll(signalItems);
+        itemsToSync.putAll(newSelection);
+        itemsToSync.putAll(signalSelection);
         Map<Boolean, Set<T>> itemsBySelected = itemsToSync.values().stream()
                 .collect(Collectors.partitioningBy(this::isSelected,
                         Collectors.toCollection(LinkedHashSet::new)));
