@@ -58,7 +58,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * @since 25.4
  */
 @Tag("vaadin-pdf-viewer")
-@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-beta1")
+@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-beta2")
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
