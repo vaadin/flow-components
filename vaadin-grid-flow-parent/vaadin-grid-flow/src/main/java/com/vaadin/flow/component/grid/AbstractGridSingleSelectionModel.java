@@ -208,11 +208,12 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             SelectionEvent<Grid<T>, T> event);
 
     private void doSelect(T item, boolean userOriginated) {
-        T newItem = selectionBinding == null ? item
-                : selectionBinding.writer().apply(item);
-        if (!isSelected(newItem)) {
+        if (selectionBinding != null) {
+            item = selectionBinding.writer().apply(item);
+        }
+        if (!isSelected(item)) {
             T oldValue = selectedItem;
-            selectedItem = newItem;
+            selectedItem = item;
             fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
                     getGrid().asSingleSelect(), oldValue, userOriginated));
         }
