@@ -78,9 +78,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (isSelected(item)) {
             return;
         }
-        doSelect(item, false);
-
-        getGrid().doClientSideSelection(Collections.singleton(item));
+        if (doSelect(item, false)) {
+            getGrid().doClientSideSelection(Collections.singleton(item));
+        }
     }
 
     @Override
@@ -209,11 +209,23 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
 
-    private void doSelect(T item, boolean userOriginated) {
+    private boolean doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;
         selectedItem = item;
+        if (selectionBinding != null) {
+            T signalValue = selectionBinding.writer().apply(item);
+            if (!Objects.equals(getItemId(signalValue), getItemId(item))) {
+                // The write callback didn't accept the item, revert to the
+                // signal value without firing an event
+                selectedItem = signalValue;
+                getGrid().doClientSideSelection(
+                        Collections.singleton(signalValue));
+                return false;
+            }
+        }
         fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
                 getGrid().asSingleSelect(), oldValue, userOriginated));
+        return true;
     }
 
     private Object getItemId(T item) {

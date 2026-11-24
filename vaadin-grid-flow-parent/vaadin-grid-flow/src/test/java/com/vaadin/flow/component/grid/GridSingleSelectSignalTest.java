@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +32,7 @@ import com.vaadin.tests.AbstractSignalsTest;
 class GridSingleSelectSignalTest extends AbstractSignalsTest {
 
     private Grid<String> grid;
+    private final List<Set<String>> multiSelectEvents = new ArrayList<>();
 
     @BeforeEach
     void setup() {
@@ -121,6 +124,28 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         ((GridSingleSelectionModel<String>) grid.getSelectionModel())
                 .selectFromClient("baz");
         Assertions.assertEquals(1, callCount[0]);
+    }
+
+    @Test
+    void bindValue_writeCallbackRefuses_selectionRevertedWithoutEvent() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, v -> {
+        });
+        UI.getCurrent().add(grid);
+        List<String> events = new ArrayList<>();
+        grid.asSingleSelect()
+                .addValueChangeListener(e -> events.add(e.getValue()));
+
+        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("bar");
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        grid.select("baz");
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        Assertions.assertEquals("foo", signal.peek());
+        Assertions.assertEquals(List.of(), events);
     }
 
     @Test
