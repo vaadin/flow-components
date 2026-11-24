@@ -51,6 +51,9 @@ public class GridSelectionColumn extends Component {
             SerializableRunnable deselectAllCallback) {
         this.selectAllCallback = selectAllCallback;
         this.deselectAllCallback = deselectAllCallback;
+        getElement().addPropertyChangeListener("selectAll",
+                "select-all-changed", event -> {
+                });
     }
 
     /**
