@@ -287,44 +287,38 @@ class AbstractGridMultiSelectionModelTest {
 
     @Test
     void selectFromClientWhileCheckboxHidden_showCheckbox_updatesCheckboxStates() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
         var selectionModel = (GridMultiSelectionModel<String>) grid
-                .getSelectionModel();
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
-        Element columnElement = getGridSelectionColumn(grid).getElement();
 
         selectionModel.selectFromClient("foo");
         selectionModel.selectFromClient("bar");
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
 
-        Assertions.assertTrue(
-                (boolean) columnElement.getPropertyRaw("selectAll"));
-        Assertions.assertFalse(
-                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertTrue(column.getProperty("selectAll", false));
+        Assertions.assertFalse(column.getProperty("_indeterminate", false));
     }
 
     @Test
     void deselectFromClientWhileCheckboxHidden_showCheckbox_updatesCheckboxStates() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
         var selectionModel = (GridMultiSelectionModel<String>) grid
-                .getSelectionModel();
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
         selectionModel.selectAll();
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
-        Element columnElement = getGridSelectionColumn(grid).getElement();
 
         selectionModel.deselectFromClient("foo");
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
 
-        Assertions.assertFalse(
-                (boolean) columnElement.getPropertyRaw("selectAll"));
-        Assertions.assertTrue(
-                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertFalse(column.getProperty("selectAll", false));
+        Assertions.assertTrue(column.getProperty("_indeterminate", false));
     }
 
     @Test
