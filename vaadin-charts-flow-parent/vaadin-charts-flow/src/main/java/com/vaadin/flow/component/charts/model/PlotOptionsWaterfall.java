@@ -919,7 +919,8 @@ public class PlotOptionsWaterfall extends ColumnOptions {
      * {@link #setPointDescriptionFormatter(String)}.
      * <p>
      * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
      *
      * @param pointDescriptionFormatter
      *            the function, or <code>null</code> to remove it
