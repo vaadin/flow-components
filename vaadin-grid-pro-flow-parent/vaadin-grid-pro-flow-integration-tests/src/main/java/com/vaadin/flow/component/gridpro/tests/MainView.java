@@ -26,10 +26,20 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid-pro")
 public class MainView extends VerticalLayout {
+
+    @JsDefinition
+    interface ColumnJs extends JsInvokers {
+
+        @JsExpression("this._focusButtonMode = true")
+        void enableFocusButtonMode();
+    }
 
     public MainView() {
         createEditorColumns();
@@ -94,7 +104,8 @@ public class MainView extends VerticalLayout {
                 }).setHeader("Department").setWidth("300px");
         // Force enable focus button mode to verify that item click listener
         // also works when focusable div is rendered as cell content
-        departmentColumn.getElement().executeJs("this._focusButtonMode = true");
+        departmentColumn.getElement().executeJs(ColumnJs.class)
+                .enableFocusButtonMode();
 
         ComponentRenderer<Span, Person> booleanRenderer = new ComponentRenderer<>(
                 person -> new Span(person.isSubscriber() ? "Yes" : "No"));

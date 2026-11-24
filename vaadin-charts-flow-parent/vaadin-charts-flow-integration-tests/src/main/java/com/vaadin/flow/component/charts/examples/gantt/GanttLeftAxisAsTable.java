@@ -88,10 +88,8 @@ public class GanttLeftAxisAsTable extends AbstractChartExample {
         column.setTitle("Est. Days");
         final Labels label = new Labels();
         label.setUseHTML(true);
-        label.setFormatter(
-                "function () { var point = this.point,days = (1000 * 60 * 60 * 24),"
-                        + "    number = (point.x2 - point.x) / days; "
-                        + "    return '<div style=\"width: 50px; text-align: center\">' + Math.round(number * 100) / 100 + '</div>'; }");
+        label.setFormat(
+                "<div style=\"width: 50px; text-align: center\">{divide (subtract point.x2 point.x) 86400000}</div>");
         column.setLabels(label);
         return column;
     }

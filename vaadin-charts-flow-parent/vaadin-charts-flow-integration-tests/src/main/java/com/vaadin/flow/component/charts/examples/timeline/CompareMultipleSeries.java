@@ -39,8 +39,7 @@ public class CompareMultipleSeries extends AbstractChartExample {
 
         YAxis yAxis = new YAxis();
         Labels label = new Labels();
-        label.setFormatter(
-                "function() { return (this.value > 0 ? ' + ' : '') + this.value + '%'; }");
+        label.setFormat("{#if (gt value 0)} + {/if}{value}%");
         yAxis.setLabels(label);
 
         PlotLine plotLine = new PlotLine();

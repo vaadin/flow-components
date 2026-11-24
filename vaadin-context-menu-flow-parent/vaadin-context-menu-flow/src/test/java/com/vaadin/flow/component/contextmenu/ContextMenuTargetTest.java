@@ -227,9 +227,6 @@ class ContextMenuTargetTest {
         var invocation = initInvocations.get(0);
         Assertions.assertEquals(target.getElement().getNode(),
                 invocation.getOwner());
-        Assertions.assertEquals(
-                "return (async function() { window.Vaadin.Flow.contextMenuTargetConnector.init(this);this.$contextMenuTargetConnector.updateOpenOn($0);}).apply($1)",
-                invocation.getInvocation().getExpression());
     }
 
     private void assertNoTargetConnectorInit(
@@ -249,25 +246,26 @@ class ContextMenuTargetTest {
         var invocation = removeInvocations.get(0);
         Assertions.assertEquals(target.getElement().getNode(),
                 invocation.getOwner());
-        Assertions.assertEquals(
-                "return (async function() { if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }}).apply($0)",
-                invocation.getInvocation().getExpression());
     }
 
     private List<PendingJavaScriptInvocation> filterTargetConnectorInitInvocations(
             List<PendingJavaScriptInvocation> invocations) {
         return invocations.stream()
-                .filter(invocation -> invocation.getInvocation().getExpression()
-                        .contains("contextMenuTargetConnector.init"))
+                .filter(invocation -> isCall(invocation, "initTargetConnector"))
                 .toList();
     }
 
     private List<PendingJavaScriptInvocation> filterTargetConnectorRemoveInvocations(
             List<PendingJavaScriptInvocation> invocations) {
-        return invocations.stream()
-                .filter(invocation -> invocation.getInvocation().getExpression()
-                        .contains("contextMenuTargetConnector.removeConnector"))
+        return invocations.stream().filter(
+                invocation -> isCall(invocation, "removeTargetConnector"))
                 .toList();
+    }
+
+    private static boolean isCall(PendingJavaScriptInvocation invocation,
+            String methodName) {
+        var call = invocation.getInvocation().getJsCall();
+        return call != null && methodName.equals(call.methodName());
     }
 
     protected List<PendingJavaScriptInvocation> getPendingInvocations() {

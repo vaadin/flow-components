@@ -61,7 +61,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.0
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.4.0-beta1")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.4.0-beta2")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -1194,7 +1194,8 @@ public class RichTextEditor
                 // HTML value, which will eventually trigger a server-side value
                 // change event on the component
                 RichTextEditor.this.getElement()
-                        .executeJs("return this.htmlValue").then(jsonNode -> {
+                        .executeJs(RichTextEditorJs.class).getHtmlValue()
+                        .then(jsonNode -> {
                             isHtmlValueSync = true;
                             RichTextEditor.this.setValue(jsonNode.asString());
                             isHtmlValueSync = false;

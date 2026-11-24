@@ -79,14 +79,12 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-beta1")
+@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-beta2")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component
         implements HasComponents, HasSize, HasStyle,
         HasThemeVariant<DialogVariant>, HasAriaRole, HasAriaDescription {
-
-    private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
     private int configuredCloseActionListeners;
     private String minWidth;
@@ -1162,17 +1160,7 @@ public class Dialog extends Component
         // being dispatched on the document, we prevent it ourselves and
         // delegate closing to the server-side. Do not register the listener on
         // the document directly, as that would leak memory.
-        getElement().executeJs(
-                """
-                          this.$.overlay.addEventListener('vaadin-overlay-close', () => {
-                            document.addEventListener('vaadin-overlay-close', (e) => {
-                              if (!e.defaultPrevented && e.detail.overlay === this.$.overlay) {
-                                e.preventDefault();
-                                this.$server.handleClientClose();
-                              }
-                            }, { once: true });
-                          });
-                        """);
+        getElement().executeJs(DialogJs.class).registerClientCloseHandler();
     }
 
     @ClientCallable
@@ -1376,8 +1364,8 @@ public class Dialog extends Component
     }
 
     private void setDimension(String dimension, String value) {
-        getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
-                dimension, value);
+        getElement().executeJs(DialogJs.class).setOverlayStyle(dimension,
+                value);
     }
 
     private void reapplyDimensions() {

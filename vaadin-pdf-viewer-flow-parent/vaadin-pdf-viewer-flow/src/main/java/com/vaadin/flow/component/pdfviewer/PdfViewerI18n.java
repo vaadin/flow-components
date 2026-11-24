@@ -24,12 +24,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class PdfViewerI18n implements Serializable {
     private String previousPage;
     private String nextPage;
+    private String page;
     private String pageError;
     private String zoomIn;
     private String zoomOut;
+    private String zoom;
     private String pageWidth;
     private String pageFit;
     private String document;
+    private String pageLabel;
+    private String loading;
     private String link;
     private String goToPage;
     private String externalLink;
@@ -77,6 +81,27 @@ public class PdfViewerI18n implements Serializable {
      */
     public PdfViewerI18n setNextPage(String nextPage) {
         this.nextPage = nextPage;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name of the page number field.
+     *
+     * @return the accessible name
+     */
+    public String getPage() {
+        return page;
+    }
+
+    /**
+     * Sets the accessible name of the page number field.
+     *
+     * @param page
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setPage(String page) {
+        this.page = page;
         return this;
     }
 
@@ -147,6 +172,27 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
+     * Gets the accessible name of the zoom select.
+     *
+     * @return the accessible name
+     */
+    public String getZoom() {
+        return zoom;
+    }
+
+    /**
+     * Sets the accessible name of the zoom select.
+     *
+     * @param zoom
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setZoom(String zoom) {
+        this.zoom = zoom;
+        return this;
+    }
+
+    /**
      * Gets the text of the zoom option that fits the page width.
      *
      * @return the text
@@ -206,6 +252,49 @@ public class PdfViewerI18n implements Serializable {
      */
     public PdfViewerI18n setDocument(String document) {
         this.document = document;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name of a page in the document.
+     *
+     * @return the accessible name
+     */
+    public String getPageLabel() {
+        return pageLabel;
+    }
+
+    /**
+     * Sets the accessible name of a page in the document. {@code {page}} is
+     * replaced with the page number, for example {@code "Page {page}"}.
+     *
+     * @param pageLabel
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setPageLabel(String pageLabel) {
+        this.pageLabel = pageLabel;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name of the loading indicator.
+     *
+     * @return the accessible name
+     */
+    public String getLoading() {
+        return loading;
+    }
+
+    /**
+     * Sets the accessible name of the loading indicator.
+     *
+     * @param loading
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setLoading(String loading) {
+        this.loading = loading;
         return this;
     }
 

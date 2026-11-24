@@ -15,20 +15,29 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Unit tests for MenuItem.
  */
 class MenuItemTest {
+
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
 
     private ContextMenu contextMenu;
     private MenuItem item;
@@ -107,6 +116,47 @@ class MenuItemTest {
         item.setDisableOnClick(true);
         clickMenuItem(item);
         Assertions.assertTrue(item.isEnabled());
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void executeJsWhenAttached_runsScriptAfterAttach() {
+        ui.setCspMode(CspMode.OFF);
+        item.executeJsWhenAttached("this.foo = $0", "bar");
+
+        ui.add(contextMenu);
+
+        List<PendingJavaScriptInvocation> invocations = getStringInvocations();
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertTrue(invocations.get(0).getInvocation().getExpression()
+                .contains("this.foo = $0"));
+        Assertions.assertTrue(invocations.get(0).getInvocation().getParameters()
+                .contains("bar"));
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void executeJsWhenAttached_strictMode_throwsAtCall() {
+        ui.setCspMode(CspMode.STRICT);
+
+        Assertions.assertThrows(CspViolationException.class,
+                () -> item.executeJsWhenAttached("this.foo = $0", "bar"));
+
+        ui.add(contextMenu);
+        Assertions.assertEquals(List.of(), getStringInvocations());
+    }
+
+    /**
+     * Gets the pending invocations on the item element that were sent as a
+     * string script, leaving out the declared calls.
+     */
+    private List<PendingJavaScriptInvocation> getStringInvocations() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .filter(invocation -> invocation.getOwner() == item.getElement()
+                        .getNode())
+                .filter(invocation -> invocation.getInvocation()
+                        .getJsCall() == null)
+                .toList();
     }
 
     private static void clickMenuItem(MenuItem menuItem) {
