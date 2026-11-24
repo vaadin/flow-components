@@ -514,6 +514,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             Map<Object, T> resultingSelection = mapItemsById(
                     selectionBinding.writer().apply(
                             new LinkedHashSet<>(requestedSelection.values())));
+
             addedItems = new LinkedHashMap<>(resultingSelection);
             addedItems.keySet().removeAll(selected.keySet());
             removedItems = new LinkedHashMap<>(selected);
