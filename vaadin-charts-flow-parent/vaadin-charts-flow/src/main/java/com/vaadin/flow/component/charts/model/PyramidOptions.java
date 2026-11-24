@@ -370,7 +370,11 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, which works
-     * without compiling JavaScript in the browser.
+     * without compiling JavaScript in the browser. To do so, an implementation
+     * calls {@link #clearPointDescriptionFormatterFunction()}. It also accepts
+     * <code>null</code>, which
+     * {@link #setPointDescriptionFormatterFunction(ChartFunction)} passes to
+     * clear the string function.
      *
      * @param _fn_pointDescriptionFormatter
      *            the source code of the JavaScript function

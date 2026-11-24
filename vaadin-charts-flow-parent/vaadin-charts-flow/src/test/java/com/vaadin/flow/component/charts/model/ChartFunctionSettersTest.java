@@ -73,8 +73,15 @@ class ChartFunctionSettersTest {
                 }
             }
         }
-        Assertions.assertFalse(functionOptionNames().isEmpty());
         Assertions.assertEquals(List.of(), missing);
+    }
+
+    @Test
+    void functionOptionsFound() throws Exception {
+        List<FunctionOption> options = functionOptions();
+        // Fails when the discovery loses classes. Update the number when a
+        // function option is added or removed.
+        Assertions.assertEquals(53, options.size(), options.toString());
     }
 
     @Test
