@@ -153,17 +153,13 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
         @Test
         void selectFromClient_selectionRevertedWithoutEvent() {
             model.selectFromClient("bar");
-            assertSelectionState(Set.of("foo"));
-            assertCheckboxState(false, true);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted();
         }
 
         @Test
         void select_selectionRevertedWithoutEvent() {
             model.select("bar");
-            assertSelectionState(Set.of("foo"));
-            assertCheckboxState(false, true);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted();
         }
 
         @Test
@@ -172,34 +168,26 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
             events.clear();
 
             model.deselect("foo");
-            assertSelectionState(Set.of("foo", "bar", "baz"));
-            assertCheckboxState(true, false);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
         }
 
         @Test
         void selectAll_selectionAndCheckboxReverted() {
             model.selectAll();
-            assertSelectionState(Set.of("foo"));
-            assertCheckboxState(false, true);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted();
         }
 
         @Test
         void clientSelectAll_selectionAndCheckboxReverted() throws Exception {
             setSelectAllFromClient(true);
             model.clientSelectAll();
-            assertSelectionState(Set.of("foo"));
-            assertCheckboxState(false, true);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted();
         }
 
         @Test
         void deselectAll_selectionAndCheckboxReverted() {
             model.deselectAll();
-            assertSelectionState(Set.of("foo"));
-            assertCheckboxState(false, true);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted();
         }
 
         @Test
@@ -209,9 +197,7 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
             setSelectAllFromClient(false);
             model.clientDeselectAll();
-            assertSelectionState(Set.of("foo", "bar", "baz"));
-            assertCheckboxState(true, false);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
         }
 
         @Test
@@ -222,9 +208,7 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
             setSelectAllFromClient(false);
             model.deselectFromClient("foo");
-            assertSelectionState(Set.of("foo", "bar", "baz"));
-            assertCheckboxState(true, false);
-            Assertions.assertEquals(0, events.size());
+            assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
         }
 
         private void setSelectAllFromClient(boolean selectAll)
@@ -234,13 +218,16 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
                     .deferredUpdateFromClient("selectAll", selectAll).run();
         }
 
-        private void assertSelectionState(Set<String> selection) {
-            Assertions.assertEquals(selection, grid.asMultiSelect().getValue());
-            Assertions.assertEquals(selection, signal.peek());
+        private void assertSelectionReverted() {
+            assertSelectionReverted(Set.of("foo"), false, true);
         }
 
-        private void assertCheckboxState(boolean selectAll,
-                boolean indeterminate) {
+        private void assertSelectionReverted(Set<String> selection,
+                boolean selectAll, boolean indeterminate) {
+            Assertions.assertEquals(selection, grid.asMultiSelect().getValue());
+            Assertions.assertEquals(selection, signal.peek());
+            Assertions.assertEquals(0, events.size());
+
             var column = model.getSelectionColumn();
             Assertions.assertEquals(selectAll,
                     column.getElement().getProperty("selectAll", false));
