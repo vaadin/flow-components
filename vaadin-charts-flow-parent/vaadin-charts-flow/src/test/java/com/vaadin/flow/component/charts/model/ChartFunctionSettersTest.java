@@ -29,8 +29,8 @@ import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
- * Checks each {@link ChartFunction} setter of the model against the String
- * setter of the same option.
+ * Checks the {@link ChartFunction} setter of every function option of the
+ * model, against the String setter of the same option.
  */
 class ChartFunctionSettersTest {
 
@@ -56,6 +56,25 @@ class ChartFunctionSettersTest {
         public String toString() {
             return type.getSimpleName() + "." + option;
         }
+    }
+
+    @Test
+    void everyFunctionOptionHasFunctionSetter() throws Exception {
+        List<String> missing = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<String>> entry : functionOptionNames()
+                .entrySet()) {
+            Class<?> type = entry.getKey();
+            for (String option : entry.getValue()) {
+                String capitalized = capitalize(option);
+                if (!hasMethod(type, "set" + capitalized + "Function",
+                        ChartFunction.class)
+                        || !hasMethod(type, "get" + capitalized + "Function")) {
+                    missing.add(type.getSimpleName() + "." + option);
+                }
+            }
+        }
+        Assertions.assertFalse(functionOptionNames().isEmpty());
+        Assertions.assertEquals(List.of(), missing);
     }
 
     @Test
@@ -116,10 +135,6 @@ class ChartFunctionSettersTest {
             Class<?> type = entry.getKey();
             for (String option : entry.getValue()) {
                 String capitalized = capitalize(option);
-                if (!hasMethod(type, "set" + capitalized + "Function",
-                        ChartFunction.class)) {
-                    continue;
-                }
                 String stringSetter = STRING_SETTERS.getOrDefault(
                         type.getSimpleName() + "." + option,
                         "set" + capitalized);
@@ -131,7 +146,6 @@ class ChartFunctionSettersTest {
                         type.getMethod(stringSetter, String.class)));
             }
         }
-        Assertions.assertFalse(options.isEmpty());
         return options;
     }
 

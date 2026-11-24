@@ -27,6 +27,7 @@ import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
+import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -63,6 +64,36 @@ class ChartFunctionTest {
     void setup() {
         ui.setCspMode(CspMode.STRICT);
         chart = new Chart();
+    }
+
+    @Test
+    void tooltip_setFormatter_functionAndStringClearEachOther() {
+        Tooltip tooltip = new Tooltip();
+        ChartFunction function = FORMATTERS.scaled(1000, "k");
+
+        tooltip.setFormatter("function() { return 1; }");
+        tooltip.setFormatterFunction(function);
+        Assertions.assertSame(function, tooltip.getFormatterFunction());
+        Assertions.assertNull(tooltip.getFormatter());
+
+        tooltip.setFormatter("function() { return 1; }");
+        Assertions.assertNull(tooltip.getFormatterFunction());
+        Assertions.assertEquals("function() { return 1; }",
+                tooltip.getFormatter());
+    }
+
+    @Test
+    void dataLabels_setFormatter_functionAndStringClearEachOther() {
+        DataLabels dataLabels = new DataLabels(true);
+        ChartFunction function = FORMATTERS.scaled(1000, "k");
+
+        dataLabels.setFormatter("function() { return 1; }");
+        dataLabels.setFormatterFunction(function);
+        Assertions.assertSame(function, dataLabels.getFormatterFunction());
+        Assertions.assertNull(dataLabels.getFormatter());
+
+        dataLabels.setFormatter("function() { return 1; }");
+        Assertions.assertNull(dataLabels.getFormatterFunction());
     }
 
     @Test
