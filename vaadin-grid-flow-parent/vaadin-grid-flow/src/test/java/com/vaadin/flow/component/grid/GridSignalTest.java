@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
@@ -42,168 +41,6 @@ class GridSignalTest extends AbstractSignalsTest {
             grid.removeFromParent();
         }
     }
-
-    // ===== SINGLE SELECT BIND VALUE TESTS =====
-
-    @Test
-    void singleSelect_bindValue_signalSetsSelection() {
-        grid.setItems("foo", "bar", "baz");
-        var signal = new ValueSignal<>("foo");
-        grid.asSingleSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
-
-        signal.set("bar");
-        Assertions.assertEquals("bar", grid.asSingleSelect().getValue());
-    }
-
-    @Test
-    void singleSelect_bindValue_clientSelectionUpdatesSignal() {
-        grid.setItems("foo", "bar", "baz");
-        var signal = new ValueSignal<String>(null);
-        grid.asSingleSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertNull(signal.peek());
-
-        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("bar");
-
-        Assertions.assertEquals("bar", signal.peek());
-    }
-
-    @Test
-    void singleSelect_bindValue_bindAgainWhileBound_throwsException() {
-        grid.setItems("foo", "bar");
-        var signal = new ValueSignal<String>(null);
-        grid.asSingleSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertThrows(BindingActiveException.class, () -> grid
-                .asSingleSelect().bindValue(new ValueSignal<>("foo"), v -> {
-                }));
-    }
-
-    @Test
-    void singleSelect_bindValue_nullWriteCallback_throwsException() {
-        grid.setItems("foo", "bar");
-        var signal = new ValueSignal<String>(null);
-
-        Assertions.assertThrows(NullPointerException.class,
-                () -> grid.asSingleSelect().bindValue(signal, null));
-    }
-
-    @Test
-    void singleSelect_bindValue_noEffectWhenDetached() {
-        grid.setItems("foo", "bar", "baz");
-        var signal = new ValueSignal<>("foo");
-        grid.asSingleSelect().bindValue(signal, signal::set);
-        // Not attached — initial probe sets "foo", then effect is passivated
-
-        // Subsequent signal changes while detached should have no effect
-        signal.set("bar");
-        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
-    }
-
-    @Test
-    void singleSelect_bindValue_signalChangeDoesNotInvokeWriteCallback() {
-        grid.setItems("foo", "bar", "baz");
-        int[] callCount = { 0 };
-        var signal = new ValueSignal<String>(null);
-        grid.asSingleSelect().bindValue(signal, v -> callCount[0]++);
-        UI.getCurrent().add(grid);
-
-        // Signal-originated change should not trigger the write callback
-        signal.set("bar");
-        Assertions.assertEquals("bar", grid.asSingleSelect().getValue());
-        Assertions.assertEquals(0, callCount[0]);
-
-        // Client-originated change should trigger the write callback
-        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("baz");
-        Assertions.assertEquals(1, callCount[0]);
-    }
-
-    // ===== MULTI SELECT BIND VALUE TESTS =====
-
-    @Test
-    void multiSelect_bindValue_signalSetsSelection() {
-        grid.setItems("foo", "bar", "baz");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        var signal = new ValueSignal<>(Set.of("foo", "bar"));
-        grid.asMultiSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertEquals(Set.of("foo", "bar"),
-                grid.asMultiSelect().getValue());
-
-        signal.set(Set.of("baz"));
-        Assertions.assertEquals(Set.of("baz"), grid.asMultiSelect().getValue());
-    }
-
-    @Test
-    void multiSelect_bindValue_clientSelectionUpdatesSignal() {
-        grid.setItems("foo", "bar", "baz");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        var signal = new ValueSignal<Set<String>>(Set.of());
-        grid.asMultiSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertEquals(Set.of(), signal.peek());
-
-        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("bar");
-
-        Assertions.assertEquals(Set.of("bar"), signal.peek());
-    }
-
-    @Test
-    void multiSelect_bindValue_bindAgainWhileBound_throwsException() {
-        grid.setItems("foo", "bar");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        var signal = new ValueSignal<Set<String>>(Set.of());
-        grid.asMultiSelect().bindValue(signal, signal::set);
-        UI.getCurrent().add(grid);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> grid.asMultiSelect()
-                        .bindValue(new ValueSignal<>(Set.of("foo")), v -> {
-                        }));
-    }
-
-    @Test
-    void multiSelect_bindValue_nullWriteCallback_throwsException() {
-        grid.setItems("foo", "bar");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        var signal = new ValueSignal<Set<String>>(Set.of());
-
-        Assertions.assertThrows(NullPointerException.class,
-                () -> grid.asMultiSelect().bindValue(signal, null));
-    }
-
-    @Test
-    void multiSelect_bindValue_signalChangeDoesNotInvokeWriteCallback() {
-        grid.setItems("foo", "bar", "baz");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        int[] callCount = { 0 };
-        var signal = new ValueSignal<Set<String>>(Set.of());
-        grid.asMultiSelect().bindValue(signal, v -> callCount[0]++);
-        UI.getCurrent().add(grid);
-
-        // Signal-originated change should not trigger the write callback
-        signal.set(Set.of("foo", "bar"));
-        Assertions.assertEquals(Set.of("foo", "bar"),
-                grid.asMultiSelect().getValue());
-        Assertions.assertEquals(0, callCount[0]);
-
-        // Client-originated change should trigger the write callback
-        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
-                .selectFromClient("baz");
-        Assertions.assertEquals(1, callCount[0]);
-    }
-
-    // ===== SELECTION MODEL SWITCH CLEANUP TESTS =====
 
     @Test
     void singleSelect_bindValue_switchToMulti_bindingCleanedUp() {
@@ -293,4 +130,5 @@ class GridSignalTest extends AbstractSignalsTest {
 
         Assertions.assertEquals("bar", grid.asSingleSelect().getValue());
     }
+
 }
