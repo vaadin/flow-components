@@ -35,11 +35,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
-import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.shared.SharedValueSignal;
 import com.vaadin.tests.MockUIExtension;
-
-import tools.jackson.core.type.TypeReference;
 
 class AbstractGridMultiSelectionModelTest {
     @RegisterExtension
@@ -783,25 +779,6 @@ class AbstractGridMultiSelectionModelTest {
         grid.setItemSelectableProvider(null);
         Assertions.assertFalse(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
-    }
-
-    @Test
-    void selectInTransaction_writeCallbackStoresOtherSelection_sendsStoredSelectionToClient() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar", "baz");
-        SharedValueSignal<Set<String>> signal = new SharedValueSignal<>(
-                Set.of("foo"), new TypeReference<>() {
-                });
-        grid.asMultiSelect().bindValue(signal,
-                value -> signal.set(Set.of("bar", "baz")));
-        selected.clear();
-        deselected.clear();
-
-        Signal.runInTransaction(() -> grid.select("bar"));
-
-        Assertions.assertEquals(Set.of("bar", "baz"), grid.getSelectedItems());
-        Assertions.assertEquals(Set.of("bar", "baz"), selected);
-        Assertions.assertEquals(Set.of("foo"), deselected);
     }
 
     @Test

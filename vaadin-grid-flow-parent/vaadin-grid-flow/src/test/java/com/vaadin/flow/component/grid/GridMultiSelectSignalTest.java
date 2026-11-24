@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +31,12 @@ import com.vaadin.flow.internal.change.MapPutChange;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
+
+import tools.jackson.core.type.TypeReference;
 
 class GridMultiSelectSignalTest extends AbstractSignalsTest {
 
@@ -257,6 +262,44 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
             Assertions.assertEquals(indeterminate,
                     column.getElement().getProperty("_indeterminate", false));
         }
+    }
+
+    @Test
+    void bindValue_writeCallbackStoresOtherSelectionInTransaction_sendsStoredSelectionToClient() {
+        Set<String> clientSelected = new HashSet<>();
+        Set<String> clientDeselected = new HashSet<>();
+        grid = new Grid<>() {
+            @Override
+            void doClientSideSelection(Set<String> items) {
+                clientSelected.addAll(items);
+            }
+
+            @Override
+            void doClientSideDeselection(Set<String> items) {
+                clientDeselected.addAll(items);
+            }
+
+            @Override
+            boolean isInActiveRange(String item) {
+                return true;
+            }
+        };
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new SharedValueSignal<Set<String>>(Set.of("foo"),
+                new TypeReference<>() {
+                });
+        grid.asMultiSelect().bindValue(signal,
+                value -> signal.set(Set.of("bar", "baz")));
+        UI.getCurrent().add(grid);
+        clientSelected.clear();
+        clientDeselected.clear();
+
+        Signal.runInTransaction(() -> grid.select("bar"));
+
+        Assertions.assertEquals(Set.of("bar", "baz"), grid.getSelectedItems());
+        Assertions.assertEquals(Set.of("bar", "baz"), clientSelected);
+        Assertions.assertEquals(Set.of("foo"), clientDeselected);
     }
 
     @Test
