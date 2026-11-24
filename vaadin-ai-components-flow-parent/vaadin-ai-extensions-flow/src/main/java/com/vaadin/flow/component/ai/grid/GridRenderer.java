@@ -9,7 +9,10 @@
 package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,6 +48,17 @@ public final class GridRenderer implements Serializable {
             .getLogger(GridRenderer.class);
 
     private static final String DEFAULT_EMPTY_STATE_TEXT = "No results";
+
+    // A float holds about seven significant decimal digits
+    private static final int FLOAT_SIGNIFICANT_DIGITS = 7;
+
+    // A double holds 15 significant decimal digits reliably. Sums over many
+    // rows build up rounding error in the last of them, so two are dropped.
+    private static final int DOUBLE_SIGNIFICANT_DIGITS = 13;
+
+    // Smaller fractions of a float or double are rounding residue, such as
+    // a balance that should be zero
+    private static final int MAX_FRACTION_DIGITS = 10;
 
     private GridRenderer() {
     }
@@ -111,9 +125,9 @@ public final class GridRenderer implements Serializable {
             column = grid.addColumn(new LocalDateTimeRenderer<>(
                     row -> toLocalDateTime(row.get(columnName))));
         } else if (sampleValue instanceof Number) {
-            column = grid.addColumn(
-                    new NumberRenderer<>(row -> (Number) row.get(columnName),
-                            java.text.NumberFormat.getInstance()));
+            column = grid.addColumn(new NumberRenderer<>(
+                    row -> toFormattableNumber((Number) row.get(columnName)),
+                    createNumberFormat()));
             column.setTextAlign(ColumnTextAlign.END);
         } else {
             column = grid.addColumn(row -> {
@@ -124,6 +138,38 @@ public final class GridRenderer implements Serializable {
 
         column.setHeader(header).setKey(columnName).setSortable(true)
                 .setAutoWidth(true).setResizable(true);
+    }
+
+    private static NumberFormat createNumberFormat() {
+        var numberFormat = NumberFormat.getInstance();
+        // The default format rounds to three fraction digits, which would
+        // show values that differ from the query result
+        numberFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+        return numberFormat;
+    }
+
+    private static Number toFormattableNumber(Number value) {
+        // Floats and doubles carry binary rounding digits, such as
+        // 19.989999771118164 for 19.99f or 434.99999999999994 for 435
+        if (value instanceof Float floatValue && Float.isFinite(floatValue)) {
+            return roundFraction(floatValue, FLOAT_SIGNIFICANT_DIGITS);
+        }
+        if (value instanceof Double doubleValue
+                && Double.isFinite(doubleValue)) {
+            return roundFraction(doubleValue, DOUBLE_SIGNIFICANT_DIGITS);
+        }
+        return value;
+    }
+
+    private static BigDecimal roundFraction(double value,
+            int significantDigits) {
+        // Integer digits are kept. Rounding the BigDecimal, not the format,
+        // shows a negative residue as 0 instead of -0.
+        var decimal = BigDecimal.valueOf(value);
+        var integerDigits = decimal.precision() - decimal.scale();
+        var fractionDigits = Math.clamp(significantDigits - integerDigits, 0,
+                MAX_FRACTION_DIGITS);
+        return decimal.setScale(fractionDigits, RoundingMode.HALF_EVEN);
     }
 
     private static void applyColumnGrouping(Grid<AIDataRow> grid) {

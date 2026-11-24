@@ -23,9 +23,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -41,6 +43,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
@@ -876,6 +879,112 @@ class GridAIControllerTest {
             var expected = date.toInstant().atZone(ZoneId.systemDefault())
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             Assertions.assertEquals(expected, GridFormatting.formatValue(date));
+        }
+    }
+
+    // --- Number columns ---
+
+    @Nested
+    class NumberColumnTests {
+
+        private Locale defaultLocale;
+
+        @BeforeEach
+        void setLocale() {
+            defaultLocale = Locale.getDefault();
+            Locale.setDefault(Locale.US);
+        }
+
+        @AfterEach
+        void restoreLocale() {
+            Locale.setDefault(defaultLocale);
+        }
+
+        @Test
+        void bigDecimal_showsAllFractionDigits() {
+            Assertions.assertEquals("0.0725",
+                    renderNumber(new BigDecimal("0.0725")));
+        }
+
+        @Test
+        void smallBigDecimal_isNotRoundedToZero() {
+            Assertions.assertEquals("0.0004",
+                    renderNumber(new BigDecimal("0.0004")));
+        }
+
+        @Test
+        void double_showsAllFractionDigits() {
+            Assertions.assertEquals("0.0725", renderNumber(0.0725));
+        }
+
+        @Test
+        void computedDouble_hasNoBinaryRoundingDigits() {
+            Assertions.assertEquals("435", renderNumber(434.99999999999994));
+            Assertions.assertEquals("0.3", renderNumber(0.1 + 0.2));
+        }
+
+        @Test
+        void doubleSumOfManyRows_hasNoBinaryRoundingDigits() {
+            var sum = 0.0;
+            for (var i = 0; i < 10000; i++) {
+                sum += 0.1;
+            }
+            Assertions.assertEquals("1,000", renderNumber(sum));
+        }
+
+        @Test
+        void doubleResidue_isShownAsZero() {
+            Assertions.assertEquals("0", renderNumber(2.842170943040401E-14));
+            Assertions.assertEquals("0", renderNumber(-2.842170943040401E-14));
+        }
+
+        @Test
+        void smallDouble_keepsSignificantDigits() {
+            Assertions.assertEquals("0.0000001234", renderNumber(0.0000001234));
+        }
+
+        @Test
+        void largeDouble_keepsIntegerDigits() {
+            Assertions.assertEquals("1,234,567,890,123,456",
+                    renderNumber(1234567890123456.0));
+        }
+
+        @Test
+        void float_hasNoBinaryRoundingDigits() {
+            Assertions.assertEquals("19.99", renderNumber(19.99f));
+            Assertions.assertEquals("0.1", renderNumber(0.1f));
+        }
+
+        @Test
+        void float_showsAllFractionDigits() {
+            Assertions.assertEquals("0.0725", renderNumber(0.0725f));
+        }
+
+        @Test
+        void floatSum_hasNoBinaryRoundingDigits() {
+            var sum = 0f;
+            for (var i = 0; i < 12; i++) {
+                sum += 2.4f;
+            }
+            Assertions.assertEquals("28.8", renderNumber(sum));
+        }
+
+        @Test
+        void nonFiniteNumber_isRendered() {
+            Assertions.assertEquals("NaN", renderNumber(Float.NaN));
+            Assertions.assertEquals("NaN", renderNumber(Double.NaN));
+        }
+
+        @SuppressWarnings("unchecked")
+        private String renderNumber(Number value) {
+            var numberRow = row("value", value);
+            dbProvider.queryResults = List.of(numberRow);
+            simulateUpdate("SELECT value FROM t");
+
+            var renderer = (LitRenderer<AIDataRow>) grid.getColumnByKey("value")
+                    .getRenderer();
+            return (String) renderer.getValueProviders().get("label")
+                    .apply(new AIDataRow(numberRow));
         }
     }
 
