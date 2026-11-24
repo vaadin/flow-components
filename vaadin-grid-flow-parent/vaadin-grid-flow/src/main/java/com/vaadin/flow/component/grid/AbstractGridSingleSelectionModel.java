@@ -78,9 +78,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (isSelected(item)) {
             return;
         }
-        if (doSelect(item, false)) {
-            getGrid().doClientSideSelection(Collections.singleton(item));
-        }
+        doSelect(item, false);
     }
 
     @Override
@@ -209,37 +207,16 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
 
-    private boolean doSelect(T item, boolean userOriginated) {
-        T oldValue = selectedItem;
-        selectedItem = item;
-        if (!writeSelectionToSignal(item)) {
-            return false;
+    private void doSelect(T item, boolean userOriginated) {
+        T newItem = selectionBinding == null ? item
+                : selectionBinding.writer().apply(item);
+        if (!isSelected(newItem)) {
+            T oldValue = selectedItem;
+            selectedItem = newItem;
+            fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
+                    getGrid().asSingleSelect(), oldValue, userOriginated));
         }
-        fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
-                getGrid().asSingleSelect(), oldValue, userOriginated));
-        return true;
-    }
-
-    /**
-     * Passes the selection to the write callback of the bound signal. If the
-     * signal doesn't accept it, reverts the selection to the signal value
-     * without firing an event and syncs it to the client.
-     *
-     * @param item
-     *            the item being selected
-     * @return {@code false} if the selection was reverted
-     */
-    private boolean writeSelectionToSignal(T item) {
-        if (selectionBinding == null) {
-            return true;
-        }
-        T signalValue = selectionBinding.writer().apply(item);
-        if (Objects.equals(getItemId(signalValue), getItemId(item))) {
-            return true;
-        }
-        selectedItem = signalValue;
-        getGrid().doClientSideSelection(Collections.singleton(signalValue));
-        return false;
+        getGrid().doClientSideSelection(Collections.singleton(selectedItem));
     }
 
     private Object getItemId(T item) {

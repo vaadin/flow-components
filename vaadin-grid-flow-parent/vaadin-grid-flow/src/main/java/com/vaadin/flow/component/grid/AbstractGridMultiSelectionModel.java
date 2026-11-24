@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -124,31 +123,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item) || !selectable) {
             return;
         }
-
-        Set<T> oldSelection = getSelectedItems();
-        selected.put(getItemId(item), item);
-        if (!writeSelectionToSignal(Set.of(item))) {
-            return;
+        doUpdateSelection(Set.of(item), Collections.emptySet(), true);
+        if (isSelected(item)) {
+            ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                    getGrid(), item, true, selectionColumn.isShiftKeyDown()));
+        } else {
+            // The browser already selected the item, but the signal didn't
+            // keep it
+            getGrid().doClientSideDeselection(Set.of(item));
         }
-
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                getGrid().asMultiSelect(), oldSelection, true));
-
-        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
-                getGrid(), item, true, selectionColumn.isShiftKeyDown()));
-
-        if (!isSelectAllCheckboxVisible()) {
-            // Skip changing the state of Select All checkbox if it was
-            // meant to be hidden
-            return;
-        }
-
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(
-                !isHierarchicalDataProvider() && size == selected.size());
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -157,30 +140,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item) || !selectable) {
             return;
         }
-
-        Set<T> oldSelection = getSelectedItems();
-        selected.remove(getItemId(item));
-        if (!writeSelectionToSignal(Set.of(item))) {
-            return;
+        doUpdateSelection(Collections.emptySet(), Set.of(item), true);
+        if (!isSelected(item)) {
+            ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                    getGrid(), item, false, selectionColumn.isShiftKeyDown()));
+        } else {
+            // The browser already deselected the item, but the signal didn't
+            // keep it
+            getGrid().doClientSideSelection(Set.of(item));
         }
-
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                getGrid().asMultiSelect(), oldSelection, true));
-
-        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
-                getGrid(), item, false, selectionColumn.isShiftKeyDown()));
-
-        if (!isSelectAllCheckboxVisible()) {
-            // Skip changing the state of Select All checkbox if it was
-            // meant to be hidden
-            return;
-        }
-
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -238,9 +206,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (item != null) {
             deselected.add(item);
         }
-        boolean accepted = doUpdateSelection(Collections.emptySet(), deselected,
-                false);
-        if (accepted) {
+        doUpdateSelection(Collections.emptySet(), deselected, false);
+        if (!isSelected(item)) {
             selectionColumn.setSelectAllCheckboxState(false);
         }
     }
@@ -448,11 +415,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     private void doSelectAll(boolean userOriginated) {
-        boolean accepted = doUpdateSelection(
-                fetchAllItems()
-                        .collect(Collectors.toCollection(LinkedHashSet::new)),
-                Collections.emptySet(), userOriginated);
-        if (accepted) {
+        Set<T> items = fetchAllItems()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        doUpdateSelection(items, Collections.emptySet(), userOriginated);
+        if (items.stream().allMatch(this::isSelected)) {
             selectionColumn.setSelectAllCheckboxState(true);
             selectionColumn.setSelectAllCheckboxIndeterminateState(false);
         }
@@ -513,19 +479,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     private void doDeselectAll(boolean userOriginated) {
-        boolean accepted = doUpdateSelection(Collections.emptySet(),
-                getSelectedItems(), userOriginated);
-        if (accepted) {
+        doUpdateSelection(Collections.emptySet(), getSelectedItems(),
+                userOriginated);
+        if (selected.isEmpty()) {
             selectionColumn.setSelectAllCheckboxState(false);
             selectionColumn.setSelectAllCheckboxIndeterminateState(false);
         }
     }
 
-    /**
-     * @return {@code false} if the bound signal didn't accept the change and
-     *         the selection was reverted
-     */
-    private boolean doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
+    private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
             boolean userOriginated) {
         Map<Object, T> addedItemsMap = mapItemsById(addedItems);
         Map<Object, T> removedItemsMap = mapItemsById(removedItems);
@@ -534,83 +496,58 @@ public abstract class AbstractGridMultiSelectionModel<T>
                     addedItemsMap.remove(key);
                     removedItemsMap.remove(key);
                 });
-        return doUpdateSelection(addedItemsMap, removedItemsMap,
-                userOriginated);
+        doUpdateSelection(addedItemsMap, removedItemsMap, userOriginated);
     }
 
-    private boolean doUpdateSelection(Map<Object, T> addedItems,
+    private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
-
         if (selected.keySet().containsAll(addedItems.keySet()) && Collections
                 .disjoint(selected.keySet(), removedItems.keySet())) {
-            return true;
+            return;
         }
-        Set<T> oldSelection = getSelectedItems();
-        removedItems.keySet().forEach(selected::remove);
-        selected.putAll(addedItems);
-        if (!writeSelectionToSignal(Stream.concat(addedItems.values().stream(),
-                removedItems.values().stream()).toList())) {
-            return false;
+        if (selectionBinding != null) {
+            Map<Object, T> requestedSelection = new LinkedHashMap<>(selected);
+            requestedSelection.keySet().removeAll(removedItems.keySet());
+            requestedSelection.putAll(addedItems);
+
+            // Apply the selection that the signal stores, which can differ
+            // from the requested selection
+            Map<Object, T> resultingSelection = mapItemsById(
+                    selectionBinding.writer().apply(
+                            new LinkedHashSet<>(requestedSelection.values())));
+            addedItems = new LinkedHashMap<>(resultingSelection);
+            addedItems.keySet().removeAll(selected.keySet());
+            removedItems = new LinkedHashMap<>(selected);
+            removedItems.keySet().removeAll(resultingSelection.keySet());
         }
 
-        sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
-                getGrid()::doClientSideSelection);
-        sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
-                getGrid()::doClientSideDeselection);
+        if (!addedItems.isEmpty() || !removedItems.isEmpty()) {
+            Set<T> oldSelection = getSelectedItems();
+            selected.keySet().removeAll(removedItems.keySet());
+            selected.putAll(addedItems);
 
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                getGrid().asMultiSelect(), oldSelection, userOriginated));
-        updateSelectAllCheckboxState();
-        return true;
+            sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
+                    getGrid()::doClientSideSelection);
+            sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
+                    getGrid()::doClientSideDeselection);
+
+            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                    getGrid().asMultiSelect(), oldSelection, userOriginated));
+        }
+
+        // Avoid a size query for a select all checkbox that the user can't
+        // see
+        if (!userOriginated || isSelectAllCheckboxVisible()) {
+            long size = getDataProviderSize();
+            selectionColumn.setSelectAllCheckboxState(
+                    !isHierarchicalDataProvider() && size == selected.size());
+            selectionColumn.setSelectAllCheckboxIndeterminateState(
+                    isHierarchicalDataProvider() ? selected.size() > 0
+                            : selected.size() > 0 && selected.size() < size);
+        }
     }
 
-    private void updateSelectAllCheckboxState() {
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(
-                !isHierarchicalDataProvider() && size == selected.size());
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
-    }
-
-    /**
-     * Passes the selection to the write callback of the bound signal. If the
-     * signal doesn't accept it, reverts the selection to the signal value
-     * without firing an event and syncs to the client every item whose state
-     * may differ there: the changed items, the new selection and the signal
-     * value.
-     *
-     * @param changedItems
-     *            the items whose selection state was changed
-     * @return {@code false} if the selection was reverted
-     */
-    private boolean writeSelectionToSignal(Collection<T> changedItems) {
-        if (selectionBinding == null) {
-            return true;
-        }
-        Map<Object, T> newSelection = new LinkedHashMap<>(selected);
-        Map<Object, T> signalSelection = mapItemsById(
-                selectionBinding.writer().apply(getSelectedItems()));
-        if (signalSelection.keySet().equals(newSelection.keySet())) {
-            return true;
-        }
-        selected.clear();
-        selected.putAll(signalSelection);
-        Map<Object, T> itemsToSync = mapItemsById(changedItems);
-        itemsToSync.putAll(newSelection);
-        itemsToSync.putAll(signalSelection);
-        Map<Boolean, Set<T>> itemsBySelected = itemsToSync.values().stream()
-                .collect(Collectors.partitioningBy(this::isSelected,
-                        Collectors.toCollection(LinkedHashSet::new)));
-        sendSelectionUpdate(itemsBySelected.get(true),
-                getGrid()::doClientSideSelection);
-        sendSelectionUpdate(itemsBySelected.get(false),
-                getGrid()::doClientSideDeselection);
-        updateSelectAllCheckboxState();
-        return false;
-    }
-
-    private Map<Object, T> mapItemsById(Collection<T> items) {
+    private Map<Object, T> mapItemsById(Set<T> items) {
         return items.stream().collect(LinkedHashMap::new,
                 (map, item) -> map.put(this.getItemId(item), item),
                 Map::putAll);

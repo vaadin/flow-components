@@ -80,11 +80,11 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void select_singleItemSignature_selectFormClient_dontSendToClientSide() {
+    void select_singleItemSignature_selectFormClient_sendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.getSelectionModel().selectFromClient("foo");
-        Assertions.assertEquals(0, selected.size());
+        Assertions.assertEquals(Set.of("foo"), selected);
     }
 
     @Test
@@ -99,13 +99,13 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void singleItemSignature_deselectFormClient_dontSendToClientSide() {
+    void singleItemSignature_deselectFormClient_sendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
 
         grid.getSelectionModel().deselectFromClient("foo");
-        Assertions.assertEquals(0, deselected.size());
+        Assertions.assertEquals(Set.of("foo"), deselected);
     }
 
     @Test
