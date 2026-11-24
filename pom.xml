@@ -76,7 +76,7 @@
     <properties>
         <flow.version>25.5-SNAPSHOT</flow.version>
         <testbench.version>25.4.0-beta2</testbench.version>
-        <license-checker.version>3.1.4</license-checker.version>
+        <license-checker.version>3.1.5</license-checker.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -118,9 +118,9 @@
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.2.0</spring-data-commons.version>
-        <reactor-core.version>3.8.8</reactor-core.version>
+        <reactor-core.version>3.9.0</reactor-core.version>
         <langchain4j.version>1.23.0</langchain4j.version>
-        <spring-ai.version>2.0.2</spring-ai.version>
+        <spring-ai.version>2.1.0</spring-ai.version>
         <slf4j.version>2.0.20</slf4j.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>6.1.3</junit.jupiter.version>

@@ -95,7 +95,8 @@ public class CustomEditorSelectFixture implements SpreadsheetFixture {
                 @SuppressWarnings("unchecked")
                 ComboBox<String> comboBox = (ComboBox<String>) customEditor;
                 comboBox.setValue(FRUITS[columnIndex % FRUITS.length]);
-                comboBox.getElement().executeJs("this.inputElement.select();");
+                comboBox.getElement().executeJs(CustomEditorJs.class)
+                        .selectInputText();
             }
         }
     }
