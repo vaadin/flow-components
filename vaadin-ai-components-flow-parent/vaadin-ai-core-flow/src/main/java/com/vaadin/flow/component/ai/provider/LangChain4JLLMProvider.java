@@ -146,9 +146,11 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * <b>Retrieval augmentation:</b> a content retriever or retrieval augmentor set
  * in the customizer works on the text of the user message, which ends with the
- * session context of the turn, as do input guardrails. The attachments of the
- * turn are added to the augmented message, and the provider's chat memory keeps
- * them with the user message also when
+ * session context of the turn. The attachments of the turn are added to the
+ * augmented message, and input guardrails check that message, so they also
+ * receive the retrieved content and a message part for each image, text, PDF,
+ * audio or video attachment. The provider's chat memory keeps the attachments
+ * with the user message also when
  * {@code storeRetrievedContentInChatMemory(false)} leaves the retrieved content
  * out of it. Retrieval and input guardrails run on the thread that asks for the
  * response, before the model is called, also with a {@link StreamingChatModel}.
