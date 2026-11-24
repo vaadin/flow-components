@@ -107,8 +107,7 @@ public class ChartSerialization implements Serializable {
     }
 
     /**
-     * Serializes the given configuration object to a JSON tree, without writing
-     * it to a string and parsing it back.
+     * Serializes the given configuration object to a JSON tree.
      * <p>
      * For internal use only. May be renamed or removed in a future release.
      *
