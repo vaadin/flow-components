@@ -237,6 +237,26 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void bindValue_writeCallbackDropsItem_selectionEventHasAddedItems() {
+        grid.setItems("foo", "bar", "baz");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new ValueSignal<Set<String>>(Set.of());
+        grid.asMultiSelect().bindValue(signal, v -> signal.set(Set.copyOf(
+                v.stream().filter(item -> !item.equals("baz")).toList())));
+        UI.getCurrent().add(grid);
+        List<Set<String>> addedSelections = new ArrayList<>();
+        grid.asMultiSelect().addSelectionListener(
+                e -> addedSelections.add(e.getAddedSelection()));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+
+        Assertions.assertEquals(Set.of("foo", "bar"),
+                grid.asMultiSelect().getValue());
+        Assertions.assertEquals(List.of(Set.of("foo", "bar")), addedSelections);
+    }
+
+    @Test
     void bindValue_writeCallbackStoresOtherSelectionInTransaction_sendsStoredSelectionToClient() {
         Set<String> clientSelected = new HashSet<>();
         Set<String> clientDeselected = new HashSet<>();
