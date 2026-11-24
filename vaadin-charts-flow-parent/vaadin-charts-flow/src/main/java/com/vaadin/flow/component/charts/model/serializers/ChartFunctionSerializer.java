@@ -10,6 +10,7 @@ package com.vaadin.flow.component.charts.model.serializers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -141,10 +142,10 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
         /**
          * Gets the functions found by {@link #extract(JsonNode, boolean)}.
          *
-         * @return the functions, not <code>null</code>
+         * @return an unmodifiable list of the functions, not <code>null</code>
          */
         public List<ChartFunction> getFunctions() {
-            return functions;
+            return Collections.unmodifiableList(functions);
         }
 
         /**
@@ -172,7 +173,7 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
                             && value.isString()) {
                         stringFunction = true;
                     } else if (isPlaceholder(value)) {
-                        record(value, path, key);
+                        recordPath(value, path, key);
                         if (placeholderKeys == null) {
                             placeholderKeys = new ArrayList<>();
                         }
@@ -190,7 +191,7 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
                 for (int index = 0; index < array.size(); index++) {
                     JsonNode value = array.get(index);
                     if (isPlaceholder(value)) {
-                        record(value, path, index);
+                        recordPath(value, path, index);
                         array.set(index, NullNode.getInstance());
                     } else if (value.isContainer()) {
                         path.add(index);
@@ -206,7 +207,7 @@ public class ChartFunctionSerializer extends ValueSerializer<ChartFunction> {
                     && value.asString().startsWith(placeholderPrefix);
         }
 
-        private void record(JsonNode placeholder, List<Object> path,
+        private void recordPath(JsonNode placeholder, List<Object> path,
                 Object last) {
             ArrayNode fullPath = paths.addArray();
             for (Object segment : path) {

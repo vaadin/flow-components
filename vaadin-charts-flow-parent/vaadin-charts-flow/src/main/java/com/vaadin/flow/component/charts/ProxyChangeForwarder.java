@@ -33,6 +33,8 @@ import tools.jackson.databind.node.ArrayNode;
 
 class ProxyChangeForwarder implements ConfigurationChangeListener {
 
+    private static final String SERIES_FUNCTION = "__callSeriesFunction";
+
     private final Chart chart;
 
     ProxyChangeForwarder(Chart chart) {
@@ -42,7 +44,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void dataAdded(DataAddedEvent event) {
         if (event.getItem() != null) {
-            callWithConfiguration("__callSeriesFunction", "addPoint",
+            callWithConfiguration(SERIES_FUNCTION, "addPoint",
                     getSeriesIndex(event), toJson(event.getItem()), true,
                     event.isShift());
         }
@@ -70,10 +72,10 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
     @Override
     public void seriesStateChanged(SeriesStateEvent event) {
         if (event.isEnabled()) {
-            chart.getElement().callJsFunction("__callSeriesFunction", "show",
+            chart.getElement().callJsFunction(SERIES_FUNCTION, "show",
                     getSeriesIndex(event));
         } else {
-            chart.getElement().callJsFunction("__callSeriesFunction", "hide",
+            chart.getElement().callJsFunction(SERIES_FUNCTION, "hide",
                     getSeriesIndex(event));
         }
     }
@@ -104,8 +106,7 @@ class ProxyChangeForwarder implements ConfigurationChangeListener {
 
     @Override
     public void seriesChanged(SeriesChangedEvent event) {
-        callWithConfiguration("__callSeriesFunction", "update",
-                getSeriesIndex(event),
+        callWithConfiguration(SERIES_FUNCTION, "update", getSeriesIndex(event),
                 toJson((AbstractConfigurationObject) event.getSeries()));
     }
 
