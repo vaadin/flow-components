@@ -219,6 +219,7 @@ public class Icon extends ImageStyle {
      *             if the icon has a {@link #getWidth() width} or
      *             {@link #getHeight() height}, as a size can not be combined
      *             with a scale
+     * @since 25.4
      */
     @Override
     public void setScale(double scale) {

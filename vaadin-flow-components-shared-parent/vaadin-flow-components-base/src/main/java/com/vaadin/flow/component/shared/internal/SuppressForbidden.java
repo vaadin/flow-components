@@ -30,6 +30,8 @@ import java.lang.annotation.Target;
  * a call into a small annotated method instead.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
+ * 
+ * @since 25.4
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })

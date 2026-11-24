@@ -417,6 +417,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *             {@link com.vaadin.flow.js.JsInvokers} interface and call it
      *             with {@link com.vaadin.flow.dom.Element#executeJs(Class)}
      *             instead. This method will be removed in a future release.
+     * @since 22.0
      */
     @Deprecated(since = "25.4", forRemoval = true)
     protected void executeJsWhenAttached(String expression,

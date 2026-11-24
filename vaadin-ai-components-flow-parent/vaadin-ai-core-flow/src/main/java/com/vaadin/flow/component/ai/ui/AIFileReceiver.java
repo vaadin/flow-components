@@ -48,7 +48,7 @@ public interface AIFileReceiver extends Serializable {
      * {@code false}.
      *
      * @return {@code true} if a file is being uploaded, {@code false} otherwise
-     * @since 25.3
+     * @since 25.3.6
      */
     default boolean isUploading() {
         return false;

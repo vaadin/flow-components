@@ -66,6 +66,7 @@ public record ChartState(List<String> queries, Configuration configuration,
      *            the SQL queries, not {@code null}
      * @param configuration
      *            the chart configuration, not {@code null}
+     * @since 25.3.1
      */
     public ChartState(List<String> queries, Configuration configuration) {
         this(queries, configuration, null);
