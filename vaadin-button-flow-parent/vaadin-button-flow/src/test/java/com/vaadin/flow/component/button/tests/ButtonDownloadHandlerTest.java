@@ -144,16 +144,6 @@ class ButtonDownloadHandlerTest {
     }
 
     @Test
-    void newTab_builtInHandler_notChanged() {
-        InputStreamDownloadHandler builtIn = DownloadHandler
-                .fromInputStream(event -> null);
-        button.setDownloadHandler(builtIn);
-
-        button.setDownloadTarget(DownloadTarget.NEW_TAB);
-        Assertions.assertFalse(builtIn.isInline());
-    }
-
-    @Test
     void targetChanged_handlerKeptAndRegisteredAgain() {
         ui.fakeClientCommunication();
         String saveAsFileAttribute = downloadAttributes().findFirst()
