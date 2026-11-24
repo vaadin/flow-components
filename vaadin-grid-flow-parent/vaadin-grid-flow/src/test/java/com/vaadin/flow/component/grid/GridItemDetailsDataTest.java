@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ class GridItemDetailsDataTest {
     private List<String> detailsItems = new ArrayList<>();
 
     @JsDefinition
-    interface DetailsTemplates extends Serializable {
+    interface DetailsTemplates extends JsSnippets {
 
         @JsExpression("return html`${item.details}`;")
         CompiledLitTemplate details();

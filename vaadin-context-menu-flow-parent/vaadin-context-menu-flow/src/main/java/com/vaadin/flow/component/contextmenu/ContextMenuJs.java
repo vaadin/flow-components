@@ -15,12 +15,11 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link ContextMenuBase} runs in the browser, for
@@ -30,7 +29,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface ContextMenuJs extends Serializable {
+interface ContextMenuJs extends JsInvokers {
 
     /**
      * Installs the context menu connector on the context menu element.

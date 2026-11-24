@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.notification;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Notification} runs on its element in the browser,
@@ -28,7 +27,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface NotificationJs extends Serializable {
+interface NotificationJs extends JsInvokers {
 
     /**
      * Patches the notification element so that it can hold the child components

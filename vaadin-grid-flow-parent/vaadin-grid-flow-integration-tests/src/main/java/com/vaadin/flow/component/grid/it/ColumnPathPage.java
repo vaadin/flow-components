@@ -20,11 +20,22 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/column-path")
 public class ColumnPathPage extends Div {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`${item.firstName}`;")
+        CompiledLitTemplate firstName();
+    }
 
     public ColumnPathPage() {
         Grid<Person> grid = new Grid<>();
@@ -33,7 +44,8 @@ public class ColumnPathPage extends Div {
                 new Person("Person 2", null, null, 42, null, null));
 
         grid.addColumn(Person::getFirstName).setHeader("Using path");
-        grid.addColumn(LitRenderer.<Person> of("${item.firstName}")
+        grid.addColumn(LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).firstName())
                 .withProperty("firstName", Person::getFirstName))
                 .setHeader("Using template");
         grid.addColumn(Person::getFirstName)

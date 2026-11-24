@@ -25,10 +25,21 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.dom.DomEventFilter;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/hidden-column")
 public class HiddenColumnPage extends Div {
+
+    @JsDefinition
+    interface EventFilters extends JsSnippets {
+
+        @JsExpression("return event.key === 'Escape' || event.key === 'Esc';")
+        DomEventFilter isEscape();
+    }
 
     public HiddenColumnPage() {
         Grid<Person> grid = new Grid<>();
@@ -55,7 +66,8 @@ public class HiddenColumnPage extends Div {
 
         grid.getElement()
                 .addEventListener("keyup", event -> grid.getEditor().cancel())
-                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
+                .setFilterExpression(
+                        JsSnippets.of(EventFilters.class).isEscape());
 
         NativeButton hideUnhide = new NativeButton("Hide/unhide Name column",
                 event -> nameColumn.setVisible(!nameColumn.isVisible()));

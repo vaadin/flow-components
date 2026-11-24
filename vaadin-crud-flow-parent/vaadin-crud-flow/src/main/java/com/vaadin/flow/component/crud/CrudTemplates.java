@@ -8,11 +8,10 @@
  */
 package com.vaadin.flow.component.crud;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * The Lit templates of {@link Crud}, declared so that the browser does not
@@ -21,7 +20,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface CrudTemplates extends Serializable {
+interface CrudTemplates extends JsSnippets {
 
     /**
      * Returns the template of the renderer of {@link Crud#addEditColumn}. It

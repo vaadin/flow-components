@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.ai.form;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -21,6 +20,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -49,7 +49,7 @@ import tools.jackson.databind.node.ObjectNode;
  * inject the badge into — stays inert on the client, so a non-Vaadin field
  * never shows a marker.
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.4.0-beta1")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.4.0-beta2")
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 
@@ -270,7 +270,7 @@ final class FormFieldMarker {
      * For internal use only. May be renamed or removed in a future release.
      */
     @JsDefinition
-    interface FormFieldMarkerJs extends Serializable {
+    interface FormFieldMarkerJs extends JsInvokers {
 
         /**
          * Hands the content wrapper to the web component, which renders it into

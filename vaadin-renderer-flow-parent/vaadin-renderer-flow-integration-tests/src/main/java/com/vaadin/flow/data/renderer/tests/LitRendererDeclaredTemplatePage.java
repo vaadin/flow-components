@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.UI;
@@ -36,7 +35,7 @@ public class LitRendererDeclaredTemplatePage extends Div {
     static final List<String> ITEMS = List.of("a", "b", "c");
 
     @JsDefinition
-    interface Templates extends Serializable {
+    interface Templates extends JsSnippets {
 
         /**
          * Renders each argument of the template, so that the test can check

@@ -20,19 +20,30 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Address;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-grid/beangridpage")
 public class BeanGridPage extends Div {
 
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`<div>${item.name} ${item.age}</div>`;")
+        CompiledLitTemplate details();
+    }
+
     public BeanGridPage() {
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setItems(new Person("Jorma", 2018), new Person("Jarvi", 33));
-        grid.setItemDetailsRenderer(
-                LitRenderer.<Person> of("<div>${item.name} ${item.age}</div>")
-                        .withProperty("name", Person::getFirstName)
-                        .withProperty("age", Person::getAge));
+        grid.setItemDetailsRenderer(LitRenderer
+                .<Person> of(JsSnippets.of(Templates.class).details())
+                .withProperty("name", Person::getFirstName)
+                .withProperty("age", Person::getAge));
         add(grid);
 
         createSetColumnsGrid();

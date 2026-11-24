@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.map;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -19,13 +17,14 @@ import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/modify-style")
 public class ModifyStylePage extends Div {
 
     @JsDefinition
-    interface RenderCountJs extends Serializable {
+    interface RenderCountJs extends JsInvokers {
 
         @JsExpression("""
                 const map = $0;
