@@ -159,7 +159,10 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * <p>
      * Setting a function this way clears a function set with
      * {@link #setFormatterFunction(ChartFunction)}, which works without
-     * compiling JavaScript in the browser.
+     * compiling JavaScript in the browser. To do so, an implementation calls
+     * {@link #clearFormatterFunction()}. It also accepts <code>null</code>,
+     * which {@link #setFormatterFunction(ChartFunction)} passes to clear the
+     * string function.
      */
     public abstract void setFormatter(String _fn_formatter);
 
