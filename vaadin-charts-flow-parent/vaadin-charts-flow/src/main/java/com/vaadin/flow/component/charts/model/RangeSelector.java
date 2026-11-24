@@ -37,7 +37,6 @@ public class RangeSelector extends AbstractConfigurationObject {
     private Number inputBoxWidth;
     private String inputDateFormat;
     private String _fn_inputDateParser;
-    private ChartFunction inputDateParser;
     private String inputEditDateFormat;
     private Boolean inputEnabled;
     private ButtonPosition inputPosition;
@@ -336,45 +335,12 @@ public class RangeSelector extends AbstractConfigurationObject {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
-     * <p>
-     * Setting a function this way clears a function set with
-     * {@link #setInputDateParserFunction(ChartFunction)}, which works without
-     * compiling JavaScript in the browser.
      *
      * @param _fn_inputDateParser
      *            the source code of the JavaScript function
      */
     public void setInputDateParser(String _fn_inputDateParser) {
         this._fn_inputDateParser = _fn_inputDateParser;
-        this.inputDateParser = null;
-    }
-
-    /**
-     * @see #setInputDateParserFunction(ChartFunction)
-     */
-    public ChartFunction getInputDateParserFunction() {
-        return inputDateParser;
-    }
-
-    /**
-     * Sets the function of the <code>inputDateParser</code> option, declared in
-     * a {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
-     * browser runs the function from the frontend bundle, so it works under a
-     * Content Security Policy without <code>unsafe-eval</code>.
-     * <p>
-     * Setting a function this way clears a function set with
-     * {@link #setInputDateParser(String)}.
-     * <p>
-     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
-     *
-     * @param inputDateParser
-     *            the function, or <code>null</code> to remove it
-     * @since 25.4
-     */
-    public void setInputDateParserFunction(ChartFunction inputDateParser) {
-        this.inputDateParser = inputDateParser;
-        this._fn_inputDateParser = null;
     }
 
     /**

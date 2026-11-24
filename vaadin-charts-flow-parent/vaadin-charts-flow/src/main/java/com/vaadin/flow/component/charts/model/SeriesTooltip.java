@@ -26,7 +26,6 @@ public class SeriesTooltip extends AbstractConfigurationObject {
     private Number padding;
     private String pointFormat;
     private String _fn_pointFormatter;
-    private ChartFunction pointFormatter;
     private Boolean split;
     private Number valueDecimals;
     private String valuePrefix;
@@ -246,45 +245,12 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * {@link com.vaadin.flow.server.CspViolationException}. Where a format
      * string is enough, use {@link #setPointFormat(String)}, which needs no
      * JavaScript.
-     * <p>
-     * Setting a function this way clears a function set with
-     * {@link #setPointFormatterFunction(ChartFunction)}, which works without
-     * compiling JavaScript in the browser.
      *
      * @param _fn_pointFormatter
      *            the source code of the JavaScript function
      */
     public void setPointFormatter(String _fn_pointFormatter) {
         this._fn_pointFormatter = _fn_pointFormatter;
-        this.pointFormatter = null;
-    }
-
-    /**
-     * @see #setPointFormatterFunction(ChartFunction)
-     */
-    public ChartFunction getPointFormatterFunction() {
-        return pointFormatter;
-    }
-
-    /**
-     * Sets the function of the <code>pointFormatter</code> option, declared in
-     * a {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
-     * browser runs the function from the frontend bundle, so it works under a
-     * Content Security Policy without <code>unsafe-eval</code>.
-     * <p>
-     * Setting a function this way clears a function set with
-     * {@link #setPointFormatter(String)}.
-     * <p>
-     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
-     * function.
-     *
-     * @param pointFormatter
-     *            the function, or <code>null</code> to remove it
-     * @since 25.4
-     */
-    public void setPointFormatterFunction(ChartFunction pointFormatter) {
-        this.pointFormatter = pointFormatter;
-        this._fn_pointFormatter = null;
     }
 
     /**

@@ -773,10 +773,6 @@ public class PlotOptionsArea extends AreaOptions {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
-     * <p>
-     * Setting a function this way clears a function set with
-     * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, which works
-     * without compiling JavaScript in the browser.
      *
      * @param _fn_pointDescriptionFormatter
      *            the source code of the JavaScript function
@@ -784,7 +780,6 @@ public class PlotOptionsArea extends AreaOptions {
     public void setPointDescriptionFormatter(
             String _fn_pointDescriptionFormatter) {
         this._fn_pointDescriptionFormatter = _fn_pointDescriptionFormatter;
-        clearPointDescriptionFormatterFunction();
     }
 
     /**
