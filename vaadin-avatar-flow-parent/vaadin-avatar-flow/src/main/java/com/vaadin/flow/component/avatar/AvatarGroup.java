@@ -50,6 +50,7 @@ import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -241,9 +242,12 @@ public class AvatarGroup extends Component
          * Setting the image as a resource with this method resets the image URL
          * that was set with {@link AvatarGroupItem#setImage(String)}.
          * <p>
-         * The content is served with a <code>Content-Disposition: inline</code>
-         * header, so that the browser shows it. The given handler is not
-         * changed, see {@link DownloadDisposition#INLINE}.
+         * The content is served inline, so that the browser shows it: a file
+         * name the handler gives with {@link DownloadEvent#fileName(String)},
+         * as the built-in handlers do, is sent with a
+         * <code>Content-Disposition:
+         * inline</code> header. A handler that asks for <code>attachment</code>
+         * itself keeps that choice.
          * <p>
          * The handler is registered as a resource of the avatar group that the
          * item belongs to while the group is attached, and is unregistered when

@@ -38,6 +38,7 @@ import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -534,9 +535,11 @@ public class MessageListItem implements Serializable {
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      * <p>
      * The handler is registered as a resource of the message list that the item
      * belongs to while the list is attached, and is unregistered when the list

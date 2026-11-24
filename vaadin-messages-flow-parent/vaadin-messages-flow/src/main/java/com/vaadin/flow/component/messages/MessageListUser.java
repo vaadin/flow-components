@@ -31,6 +31,7 @@ import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -186,9 +187,11 @@ public class MessageListUser implements Serializable {
      * and is unregistered when the user is removed from the list or the list is
      * detached.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      * <p>
      * This removes an image URL set with {@link #setImage(String)}.
      *

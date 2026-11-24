@@ -30,6 +30,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -262,9 +263,11 @@ public class Avatar extends Component
      * Setting the image as a resource with this method resets the image URL
      * that was set with {@link Avatar#setImage(String)}.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      *
      * @see Avatar#setImage(String)
      * @param downloadHandler

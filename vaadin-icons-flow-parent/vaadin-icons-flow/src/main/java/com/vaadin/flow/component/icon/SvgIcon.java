@@ -22,6 +22,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.Signal;
 
@@ -99,9 +100,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Creates an SVG icon with the given download handler resource.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      *
      * @param src
      *            the download handler resource
@@ -115,9 +118,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Creates an SVG icon with the given download handler resource.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      *
      * @param src
      *            the download handler resource
@@ -136,9 +141,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * Creates an SVG icon with the given download handler resource and binds
      * the given signal to the symbol.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      * <p>
      * The symbol is kept synchronized with the signal value while the component
      * is attached. When the component is detached, signal value changes have no
@@ -253,9 +260,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * Defines the source of the icon from the given {@link DownloadHandler} The
      * resource must contain a valid SVG element.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      *
      * @param src
      *            the source value, not null
@@ -270,9 +279,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Defines the src and the symbol to be used in the icon.
      * <p>
-     * The content is served with a <code>Content-Disposition: inline</code>
-     * header, so that the browser shows it. The given handler is not changed,
-     * see {@link DownloadDisposition#INLINE}.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      *
      * @param src
      *            the source of the icon sprite file, not null
