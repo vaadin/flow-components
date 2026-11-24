@@ -10,11 +10,9 @@ package com.vaadin.flow.component.charts.model.serializers;
 
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
-import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
-import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Custom bean serializer for {@link DataSeriesItem}
@@ -42,42 +40,38 @@ public class DataSeriesItemBeanSerializer
 
         } else if (bean instanceof OhlcItem) {
             OhlcItem ohlcBean = (OhlcItem) bean;
-            ArrayNode jsonArray = JacksonUtils.createArrayNode();
-            jsonArray.addPOJO(ohlcBean.getX());
-            jsonArray.addPOJO(ohlcBean.getOpen());
-            jsonArray.addPOJO(ohlcBean.getHigh());
-            jsonArray.addPOJO(ohlcBean.getLow());
-            jsonArray.addPOJO(ohlcBean.getClose());
-            jgen.writeTree(jsonArray);
+            writeArray(jgen, context, ohlcBean.getX(), ohlcBean.getOpen(),
+                    ohlcBean.getHigh(), ohlcBean.getLow(), ohlcBean.getClose());
 
         } else {
             Number x = bean.getX();
             Number y = bean.getY();
             if (x != null) {
-                ArrayNode jsonArray = JacksonUtils.createArrayNode();
-                jsonArray.addPOJO(x);
                 if (y != null) {
-                    jsonArray.addPOJO(y);
+                    writeArray(jgen, context, x, y);
                 } else if (bean.getLow() != null) {
-                    jsonArray.addPOJO(bean.getLow());
-                    jsonArray.addPOJO(bean.getHigh());
+                    writeArray(jgen, context, x, bean.getLow(), bean.getHigh());
                 } else {
-                    jsonArray.addNull();
-                    jsonArray.addNull();
+                    writeArray(jgen, context, x, null, null);
                 }
-                jgen.writeTree(jsonArray);
             } else {
                 // If no x set, make it like list series, just number or
                 // min-max pairs
                 if (y != null) {
-                    jgen.writePOJO(y);
+                    context.writeValue(jgen, y);
                 } else {
-                    ArrayNode jsonArray = JacksonUtils.createArrayNode();
-                    jsonArray.addPOJO(bean.getLow());
-                    jsonArray.addPOJO(bean.getHigh());
-                    jgen.writeTree(jsonArray);
+                    writeArray(jgen, context, bean.getLow(), bean.getHigh());
                 }
             }
         }
+    }
+
+    private static void writeArray(JsonGenerator jgen,
+            SerializationContext context, Number... values) {
+        jgen.writeStartArray();
+        for (Number value : values) {
+            context.writeValue(jgen, value);
+        }
+        jgen.writeEndArray();
     }
 }

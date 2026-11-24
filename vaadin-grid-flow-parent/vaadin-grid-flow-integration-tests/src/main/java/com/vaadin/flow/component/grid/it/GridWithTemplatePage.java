@@ -19,13 +19,24 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-template-test")
 public class GridWithTemplatePage extends Div {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`${index}`;")
+        CompiledLitTemplate index();
+    }
 
     public GridWithTemplatePage() {
         add(new H2("Grid in a template"));
@@ -89,8 +100,8 @@ public class GridWithTemplatePage extends Div {
         setCommonGridFeatures(grid, gridInATemplate.getId().get());
 
         grid.addColumn(value -> value).setFlexGrow(2);
-        grid.addColumn(LitRenderer.of("${index}")).setFlexGrow(0)
-                .setWidth("20px");
+        grid.addColumn(LitRenderer.of(JsSnippets.of(Templates.class).index()))
+                .setFlexGrow(0).setWidth("20px");
         grid.addColumn(new ComponentRenderer<>(
                 value -> getTestTemplate(value, grid.getId().get())))
                 .setFrozen(true).setResizable(true);
@@ -136,8 +147,8 @@ public class GridWithTemplatePage extends Div {
         setCommonGridFeatures(grid, "standalone-columns-with-properties");
 
         grid.addColumn(value -> value).setFlexGrow(2);
-        grid.addColumn(LitRenderer.of("${index}")).setFlexGrow(0)
-                .setWidth("20px");
+        grid.addColumn(LitRenderer.of(JsSnippets.of(Templates.class).index()))
+                .setFlexGrow(0).setWidth("20px");
         grid.addColumn(new ComponentRenderer<>(
                 value -> getTestTemplate(value, grid.getId().get())))
                 .setFrozen(true).setResizable(true);

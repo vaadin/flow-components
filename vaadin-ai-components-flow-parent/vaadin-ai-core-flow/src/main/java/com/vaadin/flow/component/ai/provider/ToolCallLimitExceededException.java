@@ -22,14 +22,15 @@ package com.vaadin.flow.component.ai.provider;
  * A model that keeps requesting tool calls instead of answering never ends the
  * turn on its own, and each round costs another model call. Both built-in
  * providers therefore end such a turn with this exception.
- * {@link LangChain4JLLMProvider} runs the tool-calling loop itself and throws
+ * {@link LangChain4JLLMProvider} counts the tool calls of a turn and throws
  * once the model has requested more calls to any one tool, or more tool calls
  * in total, than {@link LangChain4JLLMProvider#setMaxCallsPerTool(int)} and
- * {@link LangChain4JLLMProvider#setMaxTotalToolCalls(int)} allow; none of the
- * tool calls of the refused round are executed, and the model is not called
- * again. {@link SpringAILLMProvider} throws when Spring AI, which runs the loop
- * itself, stops it at its own limits. You receive the exception as the error of
- * the turn, through
+ * {@link LangChain4JLLMProvider#setMaxTotalToolCalls(int)} allow. None of the
+ * tool calls of the refused round are executed, with the one exception that
+ * {@link LangChain4JLLMProvider#setMaxCallsPerTool(int)} describes, and the
+ * model is not called again. {@link SpringAILLMProvider} throws when Spring AI,
+ * which runs the loop itself, stops it at its own limits. You receive the
+ * exception as the error of the turn, through
  * {@link com.vaadin.flow.component.ai.orchestrator.ResponseListener.ResponseEvent#getError()
  * ResponseEvent.getError()} in the
  * {@link com.vaadin.flow.component.ai.orchestrator.ResponseListener} and in

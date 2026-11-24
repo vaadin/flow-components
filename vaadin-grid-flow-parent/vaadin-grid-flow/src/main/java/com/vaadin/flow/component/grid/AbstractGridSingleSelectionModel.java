@@ -51,7 +51,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     private T selectedItem;
     private boolean deselectAllowed = true;
-    private Registration selectionBindingCleanup;
+    private GridSelectionSignalHelper.BindResult<T> selectionBinding;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -153,13 +153,12 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             @Override
             public SignalBinding<T> bindValue(Signal<T> valueSignal,
                     SerializableConsumer<T> writeCallback) {
-                if (selectionBindingCleanup != null) {
+                if (selectionBinding != null) {
                     throw new BindingActiveException();
                 }
-                var result = GridSelectionSignalHelper.bindValue(getGrid(),
-                        this, valueSignal, writeCallback);
-                selectionBindingCleanup = result.cleanup();
-                return result.signalBinding();
+                selectionBinding = GridSelectionSignalHelper
+                        .bindValue(getGrid(), this, valueSignal, writeCallback);
+                return selectionBinding.signalBinding();
             }
         };
     }
@@ -194,9 +193,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     @Override
     protected void remove() {
         super.remove();
-        if (selectionBindingCleanup != null) {
-            selectionBindingCleanup.remove();
-            selectionBindingCleanup = null;
+        if (selectionBinding != null) {
+            selectionBinding.cleanup().remove();
+            selectionBinding = null;
         }
         deselectAll();
     }

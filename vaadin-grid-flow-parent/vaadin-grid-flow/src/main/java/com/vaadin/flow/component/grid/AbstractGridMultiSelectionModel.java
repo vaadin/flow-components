@@ -65,7 +65,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
-    private Registration selectionBindingCleanup;
+    private GridSelectionSignalHelper.BindResult<Set<T>> selectionBinding;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -107,9 +107,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     protected void remove() {
         super.remove();
-        if (selectionBindingCleanup != null) {
-            selectionBindingCleanup.remove();
-            selectionBindingCleanup = null;
+        if (selectionBinding != null) {
+            selectionBinding.cleanup().remove();
+            selectionBinding = null;
         }
         deselectAll();
         if (selectionColumn.getParent().map(getGrid()::equals).orElse(false)) {
@@ -231,19 +231,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectAll() {
-        updateSelection(
-                fetchAllItems()
-                        .collect(Collectors.toCollection(LinkedHashSet::new)),
-                Collections.emptySet());
-        selectionColumn.setSelectAllCheckboxState(true);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        doSelectAll(false);
     }
 
     @Override
     public void deselectAll() {
-        updateSelection(Collections.emptySet(), getSelectedItems());
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+        doDeselectAll(false);
     }
 
     @Override
@@ -307,13 +300,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
             @Override
             public SignalBinding<Set<T>> bindValue(Signal<Set<T>> valueSignal,
                     SerializableConsumer<Set<T>> writeCallback) {
-                if (selectionBindingCleanup != null) {
+                if (selectionBinding != null) {
                     throw new BindingActiveException();
                 }
-                var result = GridSelectionSignalHelper.bindValue(getGrid(),
-                        this, valueSignal, writeCallback);
-                selectionBindingCleanup = result.cleanup();
-                return result.signalBinding();
+                selectionBinding = GridSelectionSignalHelper
+                        .bindValue(getGrid(), this, valueSignal, writeCallback);
+                return selectionBinding.signalBinding();
             }
         };
     }
@@ -436,10 +428,14 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
+        doSelectAll(true);
+    }
+
+    private void doSelectAll(boolean userOriginated) {
         doUpdateSelection(
                 fetchAllItems()
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
-                Collections.emptySet(), true);
+                Collections.emptySet(), userOriginated);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -495,7 +491,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelectAllCheckboxVisible()) {
             return;
         }
-        doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
+        doDeselectAll(true);
+    }
+
+    private void doDeselectAll(boolean userOriginated) {
+        doUpdateSelection(Collections.emptySet(), getSelectedItems(),
+                userOriginated);
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
