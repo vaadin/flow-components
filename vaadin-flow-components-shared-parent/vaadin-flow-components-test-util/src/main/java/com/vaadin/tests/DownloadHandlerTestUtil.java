@@ -22,9 +22,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
 
 /**
@@ -33,6 +35,27 @@ import com.vaadin.flow.server.streams.ElementRequestHandler;
 public final class DownloadHandlerTestUtil {
 
     private DownloadHandlerTestUtil() {
+    }
+
+    /**
+     * Serves a request for the given registered resource, like the browser gets
+     * it, and returns the {@code Content-Disposition} header of the response.
+     * The disposition of the resource is passed on to the handler.
+     *
+     * @param resource
+     *            the resource a component registered
+     * @return the header value, or {@code null} if the handler did not set it
+     * @throws IOException
+     *             if the handler fails
+     */
+    public static String servedContentDisposition(
+            ElementStreamResource resource) throws IOException {
+        VaadinRequest request = Mockito.mock(VaadinRequest.class);
+        Mockito.when(request.getAttribute(
+                StreamRequestHandler.DISPOSITION_REQUEST_ATTRIBUTE))
+                .thenReturn(resource.getDisposition());
+        return serve(resource.getElementRequestHandler(), request,
+                resource.getOwner());
     }
 
     /**
@@ -49,6 +72,11 @@ public final class DownloadHandlerTestUtil {
      */
     public static String servedContentDisposition(ElementRequestHandler handler,
             Element owner) throws IOException {
+        return serve(handler, Mockito.mock(VaadinRequest.class), owner);
+    }
+
+    private static String serve(ElementRequestHandler handler,
+            VaadinRequest request, Element owner) throws IOException {
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
         Mockito.when(response.getOutputStream())
                 .thenReturn(new ByteArrayOutputStream());
@@ -58,7 +86,7 @@ public final class DownloadHandlerTestUtil {
             return null;
         }).when(response).setHeader(Mockito.eq("Content-Disposition"),
                 Mockito.any());
-        handler.handleRequest(Mockito.mock(VaadinRequest.class), response,
+        handler.handleRequest(request, response,
                 Mockito.mock(VaadinSession.class), owner);
         return header.get();
     }

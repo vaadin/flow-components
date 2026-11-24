@@ -144,6 +144,8 @@ class AvatarTest {
                 .getResource(URI.create(avatar.getImage())).orElseThrow();
         Assertions.assertEquals(DownloadDisposition.INLINE,
                 resource.getDisposition());
+        Assertions.assertEquals("inline; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(resource));
         Assertions.assertEquals("attachment; filename=\"alice.png\"",
                 DownloadHandlerTestUtil.servedContentDisposition(handler,
                         resource.getOwner()),
