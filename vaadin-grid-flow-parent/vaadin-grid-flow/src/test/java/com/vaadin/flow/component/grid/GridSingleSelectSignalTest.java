@@ -178,6 +178,24 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void bindValue_writeCallbackReplacesValue_valueChangeFiredOnce() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("bar");
+        grid.asSingleSelect().bindValue(signal,
+                v -> signal.set(v != null ? v : "foo"));
+        UI.getCurrent().add(grid);
+        List<String> events = new ArrayList<>();
+        grid.asSingleSelect()
+                .addValueChangeListener(e -> events.add(e.getValue()));
+
+        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
+                .deselectFromClient("bar");
+
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+        Assertions.assertEquals(List.of("foo"), events);
+    }
+
+    @Test
     void bindValue_switchToMulti_bindingCleanedUp() {
         grid.setItems("foo", "bar", "baz");
         var signal = new ValueSignal<>("foo");
