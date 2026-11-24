@@ -149,28 +149,24 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         @Test
         void selectFromClient_selectionRevertedWithoutEvent() {
             model.selectFromClient("bar");
-
             assertSelectionReverted();
         }
 
         @Test
         void select_selectionRevertedWithoutEvent() {
             model.select("bar");
-
             assertSelectionReverted();
         }
 
         @Test
         void deselectFromClient_selectionRevertedWithoutEvent() {
             model.deselectFromClient("foo");
-
             assertSelectionReverted();
         }
 
         @Test
         void deselect_selectionRevertedWithoutEvent() {
             model.deselect("foo");
-
             assertSelectionReverted();
         }
 

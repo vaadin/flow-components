@@ -146,14 +146,12 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
         @Test
         void selectFromClient_selectionRevertedWithoutEvent() {
             model.selectFromClient("bar");
-
             assertSelectionReverted();
         }
 
         @Test
         void select_selectionRevertedWithoutEvent() {
             model.select("bar");
-
             assertSelectionReverted();
         }
 
@@ -163,35 +161,30 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
             events.clear();
 
             model.deselect("foo");
-
             assertSelectionReverted(Set.of("foo", "bar", "baz"), true, false);
         }
 
         @Test
         void selectAll_selectionAndCheckboxReverted() {
             model.selectAll();
-
             assertSelectionReverted();
         }
 
         @Test
         void clientSelectAll_selectionAndCheckboxReverted() {
             model.clientSelectAll();
-
             assertSelectionReverted();
         }
 
         @Test
         void deselectAll_selectionAndCheckboxReverted() {
             model.deselectAll();
-
             assertSelectionReverted();
         }
 
         @Test
         void clientDeselectAll_selectionAndCheckboxReverted() {
             model.clientDeselectAll();
-
             assertSelectionReverted();
         }
 
