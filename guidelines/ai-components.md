@@ -98,8 +98,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   instead of in a builder setting the application might also use. The session
   context goes into the user text before the service call, as with
   `SpringAILLMProvider`, so retrieval and input guardrails see it. The proxy
-  does not pass a cancelled turn's model response on to the service, which
-  would otherwise run the tools it requests, including the customizer's. A
+  does not pass on to the service the model response of a cancelled turn, nor
+  one with a tool call past a limit: the service would otherwise run the tools
+  the response requests, including the customizer's. A
   model call and a memory access do not say which turn they belong to, so the
   provider binds the turn to the thread that starts it and to each streaming
   callback, where the follow-up model calls happen. That keeps a cancelled
@@ -242,13 +243,15 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
   against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
   the same as Spring AI's) and fails the turn with the public
-  `ToolCallLimitExceededException`. A response is screened before its tools
-  run: in a round that exceeds a limit the provider leaves the tools it
-  supplies unexecuted and fails the turn before the next model call. Tools an
-  application configured in the customizer count against the limits too,
-  but the provider cannot hold them back, so those of that last round still
-  run; when they return immediately, LangChain4j makes no next model call
-  and the turn fails as it ends. The tool traffic of the failed turn is
+  `ToolCallLimitExceededException`. A response is screened in the model
+  proxy, before the service receives it: one with a tool call past a limit
+  is not passed on and fails the turn, so none of the tools of that round
+  run, whether the provider or the customizer supplied them. A listener
+  could count the calls as well, but not keep the service from running the
+  tools. The exception is `executeToolsConcurrently()` with a streaming
+  model, where LangChain4j starts a tool before the response that requests
+  it is complete, so the tools of that last round still run. The tool
+  traffic of the failed turn is
   discarded with it, so the next
   turn continues from the chat memory as the last completed turn left it; a
   cancelled turn likewise stops calling the model and runs no tool for a

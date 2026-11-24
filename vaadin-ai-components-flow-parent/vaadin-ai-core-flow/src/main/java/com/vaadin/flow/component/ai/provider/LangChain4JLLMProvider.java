@@ -66,8 +66,6 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
-import dev.langchain4j.observability.api.event.AiServiceResponseReceivedEvent;
-import dev.langchain4j.observability.api.listener.AiServiceListener;
 import dev.langchain4j.observability.api.listener.OutputGuardrailExecutedListener;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
@@ -466,20 +464,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * Adds what the provider needs on the service whatever the application
-     * configured: the tools of the turn, the observers of the responses and of
-     * the output guardrails, and the model. The guardrail observer marks a turn
-     * whose answer the output guardrails checked, see
-     * {@link Turn#partialResponse(String)}. None of them replaces a setting of
-     * the customizer: tool providers and listeners add up, and the model is the
-     * application's own, given to the constructor. It is set after the
-     * customizer ran, so that the checks in front of it cannot be configured
-     * away, and the slot of the other kind of model is cleared, since the
-     * service takes only one of them.
+     * configured: the tools of the turn, the observer of the output guardrails,
+     * and the model. The guardrail observer marks a turn whose answer the
+     * output guardrails checked, see {@link Turn#partialResponse(String)}. None
+     * of them replaces a setting of the customizer: tool providers and
+     * listeners add up, and the model is the application's own, given to the
+     * constructor. It is set after the customizer ran, so that the checks in
+     * front of it cannot be configured away, and the slot of the other kind of
+     * model is cleared, since the service takes only one of them.
      */
     private void complete(AiServices<ChatService> builder, ChatModel chatModel,
             StreamingChatModel streamingChatModel) {
         builder.toolProvider(new TurnToolProvider());
-        builder.registerListener(new ResponseObserver());
         builder.registerListener((OutputGuardrailExecutedListener) event -> {
             Turn turn = event.invocationContext().invocationParameters()
                     .get(TURN_PARAMETER);
@@ -553,7 +549,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
     /**
      * Returns a model that passes every call on to the given one, and runs the
      * checks of the turn bound to the current thread on the request of a call
-     * first, see {@link Turn#beforeModelCall(ChatRequest)}.
+     * first, see {@link Turn#beforeModelCall(ChatRequest)}, and on its response
+     * before the service receives it, see
+     * {@link Turn#observeResponse(ChatResponse)}.
      * <p>
      * The checks sit in front of the model, rather than in the request
      * transformer or the tool error handler of the service, because the model
@@ -570,11 +568,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
     /**
      * The calls on the model the service is given: each is passed on to the
      * model of the application. A call that carries a {@link ChatRequest} is
-     * checked against the turn bound to the current thread first. The response
-     * handler of a streaming call is wrapped to bind the turn again on the
-     * thread that delivers the response, where the service makes its next model
-     * call: a model call does not tell which turn it belongs to, and a
-     * cancelled turn may still be running when the next one starts.
+     * checked against the turn bound to the current thread first, and so is its
+     * response. The response handler of a streaming call is wrapped to bind the
+     * turn again on the thread that delivers the response, where the service
+     * makes its next model call: a model call does not tell which turn it
+     * belongs to, and a cancelled turn may still be running when the next one
+     * starts.
      */
     private final class TurnCheckingModel implements InvocationHandler {
         private final Object model;
@@ -618,12 +617,19 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 }
             }
             var response = invokeModel(method, passedOn);
-            if (handler.isEmpty() && turn.isCancelled()) {
+            if (handler.isEmpty()) {
                 // Returned to the service, the response would run the tools
-                // it requests, also those the provider does not guard.
-                LOGGER.debug("The turn was cancelled, discarding the model "
-                        + "response");
-                throw new TurnCancelledException();
+                // it requests, also those the provider does not guard. The
+                // response of a cancelled turn ends the turn here instead, and
+                // so does one with a tool call past a limit.
+                if (turn.isCancelled()) {
+                    LOGGER.debug("The turn was cancelled, discarding the "
+                            + "model response");
+                    throw new TurnCancelledException();
+                }
+                if (response instanceof ChatResponse chatResponse) {
+                    turn.observeResponse(chatResponse);
+                }
             }
             return response;
         }
@@ -642,25 +648,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * Returns a handler that passes every call on to the given one with the
      * turn bound to the thread that makes the call. All methods are passed on,
      * so the service receives every event the model reports, except the two
-     * that run tools once the turn is cancelled: a complete tool call, where
-     * LangChain4j starts a tool when it executes tools concurrently, is
-     * dropped, and the complete response is replaced with an error that ends
-     * the turn.
+     * that run tools when those must not run, see
+     * {@link #holdBack(Turn, String, Object[], StreamingChatResponseHandler)}.
      */
     private StreamingChatResponseHandler bindTurn(Turn turn,
             StreamingChatResponseHandler handler) {
         InvocationHandler invocationHandler = (proxy, method,
                 arguments) -> runInTurn(turn, () -> {
-                    if (turn.isCancelled()) {
-                        if ("onCompleteResponse".equals(method.getName())) {
-                            LOGGER.debug("The turn was cancelled, discarding "
-                                    + "the model response");
-                            handler.onError(new TurnCancelledException());
-                            return null;
-                        }
-                        if ("onCompleteToolCall".equals(method.getName())) {
-                            return null;
-                        }
+                    if (holdBack(turn, method.getName(), arguments, handler)) {
+                        return null;
                     }
                     try {
                         return method.invoke(handler, arguments);
@@ -675,6 +671,37 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 StreamingChatResponseHandler.class.getClassLoader(),
                 new Class<?>[] { StreamingChatResponseHandler.class },
                 invocationHandler);
+    }
+
+    /**
+     * Holds back a call on the response handler of a streaming model that would
+     * run tools which must not run, and returns whether it did. A complete tool
+     * call, where LangChain4j starts a tool when it executes tools
+     * concurrently, is dropped once the turn is cancelled. A complete response
+     * is replaced with an error that ends the turn when the turn is cancelled,
+     * or when a tool call of the response exceeds a limit.
+     */
+    private static boolean holdBack(Turn turn, String call, Object[] arguments,
+            StreamingChatResponseHandler handler) {
+        if ("onCompleteToolCall".equals(call)) {
+            return turn.isCancelled();
+        }
+        if (!"onCompleteResponse".equals(call)) {
+            return false;
+        }
+        if (turn.isCancelled()) {
+            LOGGER.debug("The turn was cancelled, discarding the model "
+                    + "response");
+            handler.onError(new TurnCancelledException());
+            return true;
+        }
+        try {
+            turn.observeResponse((ChatResponse) arguments[0]);
+            return false;
+        } catch (ToolCallLimitExceededException e) {
+            handler.onError(e);
+            return true;
+        }
     }
 
     /**
@@ -838,12 +865,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * provider's chat memory, and the next prompt continues from there.
      * <p>
      * Calls to the tools you configured in the customizer count against the
-     * limit as well, but the provider cannot hold those tools back: the ones
-     * the model requested in that last round still run before the turn fails.
-     * The same goes for every tool when you enable
-     * {@code executeToolsConcurrently()} in the customizer with a
-     * {@link StreamingChatModel}, as LangChain4j then starts a tool before the
-     * response that requests it is complete.
+     * limit as well, and those tools are held back with the others. The
+     * exception is {@code executeToolsConcurrently()} in the customizer with a
+     * {@link StreamingChatModel}: LangChain4j then starts a tool before the
+     * response that requests it is complete, so the tool calls of that last
+     * round still run before the turn fails.
      * <p>
      * The limit applies to each tool separately. See
      * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
@@ -890,8 +916,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * failed turn leaves only its prompt in the provider's chat memory, and the
      * next prompt continues from there. As with
      * {@link #setMaxCallsPerTool(int)}, the tools you configured in the
-     * customizer count against the limit, and those requested in that last
-     * round still run.
+     * customizer count against the limit and are held back with the others.
      * <p>
      * The value is read when a turn starts, so a change applies from the next
      * prompt on.
@@ -1022,10 +1047,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * objects and the controller's {@link LLMProvider.ToolSpec} tools of the
      * request the turn was started with, read from the invocation parameters.
      * Every executor checks the state of the turn before it runs, so no tool of
-     * a round executes once a tool call limit is exceeded or the turn is
-     * cancelled. A tool replaces an earlier one of the same name in the
-     * request, as the orchestrator warns when it finds such tools; LangChain4j
-     * would reject the turn instead.
+     * a round executes once the turn is cancelled. A tool replaces an earlier
+     * one of the same name in the request, as the orchestrator warns when it
+     * finds such tools; LangChain4j would reject the turn instead.
      */
     private static final class TurnToolProvider implements ToolProvider {
 
@@ -1193,28 +1217,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Receives every model response of a turn, in both modes and before the
-     * tools of the response run, and hands it to the turn.
-     */
-    private static final class ResponseObserver
-            implements AiServiceListener<AiServiceResponseReceivedEvent> {
-
-        @Override
-        public Class<AiServiceResponseReceivedEvent> getEventClass() {
-            return AiServiceResponseReceivedEvent.class;
-        }
-
-        @Override
-        public void onEvent(AiServiceResponseReceivedEvent event) {
-            Turn turn = event.invocationContext().invocationParameters()
-                    .get(TURN_PARAMETER);
-            if (turn != null) {
-                turn.observeResponse(event.response());
-            }
-        }
-    }
-
-    /**
      * Ends the loop of a turn whose subscriber has cancelled.
      */
     private static final class TurnCancelledException extends RuntimeException {
@@ -1312,7 +1314,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private FinishReason lastFinishReason;
         private boolean lastResponseHadFinishReason;
         private TokenUsage accumulatedUsage;
-        private ToolCallLimitExceededException limitBreach;
         /**
          * Whether output guardrails checked the answer of this turn. Set on the
          * thread that then completes the turn.
@@ -1333,10 +1334,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         /**
-         * Wraps a tool executor so that the tool does not run once the turn is
-         * over: the subscriber has cancelled, or a tool call of the round
-         * exceeded a limit. The round was screened when the model's response
-         * arrived, so none of the tools of a refused round runs.
+         * Wraps a tool executor so that the tool does not run once the
+         * subscriber of the turn has cancelled, which can happen while an
+         * earlier tool of the same round runs.
          * <p>
          * The executor answers such a call instead of throwing. An exception
          * from a tool goes to the tool execution error handler of the service,
@@ -1350,19 +1350,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
                             + "calls the model requested");
                     return TOOL_NOT_EXECUTED;
                 }
-                if (limitBreach != null) {
-                    return TOOL_NOT_EXECUTED;
-                }
                 return executor.execute(toolRequest, memoryId);
             };
         }
 
         /**
          * Runs before each model call of the turn: ends the turn instead of
-         * calling the model when its subscriber has cancelled or a tool call
-         * exceeded a limit, and puts the system prompt of the request on the
-         * model request. The limit check also bounds a loop over tools the
-         * provider does not wrap, those configured in the customizer.
+         * calling the model when its subscriber has cancelled, and puts the
+         * system prompt of the request on the model request.
          * <p>
          * The system prompt the orchestrator sends takes the place of any
          * system message of the service, such as one set in the customizer. It
@@ -1372,8 +1367,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * @return the request to send to the model
          * @throws TurnCancelledException
          *             if the subscriber of the turn has cancelled
-         * @throws ToolCallLimitExceededException
-         *             if a tool call of the turn exceeded a limit
          */
         ChatRequest beforeModelCall(ChatRequest chatRequest) {
             if (isCancelled()) {
@@ -1382,9 +1375,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 // cost money for a result nobody receives.
                 LOGGER.debug("The turn was cancelled, skipping the model call");
                 throw new TurnCancelledException();
-            }
-            if (limitBreach != null) {
-                throw limitBreach;
             }
             var messages = chatRequest.messages();
             var prompt = request.systemPrompt();
@@ -1400,29 +1390,32 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         /**
-         * Records one model response: whether the tool calls it requests stay
-         * within the limits of the turn, and its metadata.
+         * Runs on each model response of the turn, before the service receives
+         * it: records the metadata of the response, and counts the tool calls
+         * it requests against the limits of the turn. A response with a call
+         * past a limit ends the turn here. Given to the service, it would run
+         * the tools of the round, also those the provider does not supply. The
+         * metadata comes first, as the round trip was made whether or not the
+         * turn goes on.
+         *
+         * @throws ToolCallLimitExceededException
+         *             if a tool call the response requests exceeds a limit
          */
         void observeResponse(ChatResponse response) {
-            // The limits come first: LangChain4j drops what a listener
-            // throws, and a metadata sink that fails must not leave the tool
-            // calls of the response unscreened.
-            screenToolCalls(response);
             observeMetadata(response);
+            screenToolCalls(response);
         }
 
         private void screenToolCalls(ChatResponse response) {
             var aiMessage = response.aiMessage();
-            if (aiMessage == null || !aiMessage.hasToolExecutionRequests()
-                    || limitBreach != null) {
+            if (aiMessage == null || !aiMessage.hasToolExecutionRequests()) {
                 return;
             }
             for (var toolRequest : aiMessage.toolExecutionRequests()) {
                 var exceededLimit = toolCallLimits
                         .countAndCheck(toolRequest.name());
                 if (exceededLimit.isPresent()) {
-                    limitBreach = exceededLimit.get();
-                    return;
+                    throw exceededLimit.get();
                 }
             }
         }
@@ -1446,7 +1439,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * on as partial responses, unless output guardrails checked it.
          */
         void complete(ChatResponse response) {
-            if (failOnLimitBreach() || !ended.compareAndSet(false, true)) {
+            if (!ended.compareAndSet(false, true)) {
                 return;
             }
             warnOnMissingFinishReason();
@@ -1467,7 +1460,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * before the output guardrails could run.
          */
         void complete(Result<String> result) {
-            if (failOnLimitBreach() || !ended.compareAndSet(false, true)) {
+            if (!ended.compareAndSet(false, true)) {
                 return;
             }
             warnOnMissingFinishReason();
@@ -1499,20 +1492,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             if (!isCancelled()) {
                 chatMemory.replaceAnswer(turnMessages, answer);
             }
-        }
-
-        /**
-         * Fails the turn when a tool call of its last round exceeded a limit,
-         * and returns whether it did. A turn with such a round otherwise fails
-         * before its next model call, but a tool of the customizer that returns
-         * immediately ends the turn without one.
-         */
-        private boolean failOnLimitBreach() {
-            if (limitBreach == null) {
-                return false;
-            }
-            fail(limitBreach);
-            return true;
         }
 
         private void emit(String text) {
@@ -1576,8 +1555,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
                             accumulatedUsage.inputTokenCount(),
                             accumulatedUsage.outputTokenCount(),
                             accumulatedUsage.totalTokenCount());
-            request.metadataSink()
-                    .accept(new ResponseMetadata(finishReason, tokenUsage));
+            try {
+                request.metadataSink()
+                        .accept(new ResponseMetadata(finishReason, tokenUsage));
+            } catch (RuntimeException e) {
+                // The turn goes on without its metadata, and the tool calls
+                // of the response are still counted
+                LOGGER.warn("The metadata sink of the request failed", e);
+            }
         }
 
         /**

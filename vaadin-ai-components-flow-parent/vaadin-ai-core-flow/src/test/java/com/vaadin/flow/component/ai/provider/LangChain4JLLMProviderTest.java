@@ -3489,6 +3489,53 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void customizer_roundWithCallPastTheLimit_executesNoneOfItsCalls() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(tools));
+        customized.setMaxCallsPerTool(2);
+        var toolResponse = mockResponseWithToolRequests("count", "count",
+                "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The tools of the customizer must not run in a round past "
+                        + "the limit");
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_streamingRoundWithCallPastTheLimit_executesNoneOfItsCalls() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4JLLMProvider(mockStreamingChatModel,
+                service -> service.tools(tools));
+        customized.setMaxCallsPerTool(2);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockResponseWithToolRequests("count", "count", "count"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The tools of the customizer must not run in a round past "
+                        + "the limit");
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
     void customizer_immediateToolPastMaxTotalToolCalls_failsTurn() {
         var customized = new LangChain4JLLMProvider(mockChatModel,
                 service -> service.tools(new SampleToolsClass(),
@@ -3499,8 +3546,8 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(temperature, finish);
 
-        // The immediate tool ends the turn without another model call,
-        // before which a limit is otherwise reported
+        // The immediate tool would end the turn without another model call,
+        // so the turn has to fail when the response that requests it arrives
         Assertions.assertThrows(ToolCallLimitExceededException.class,
                 () -> customized.stream(createSimpleRequest("Finish"))
                         .collectList().block(TURN_TIMEOUT));
@@ -4230,8 +4277,8 @@ class LangChain4JLLMProviderTest {
 
     @Test
     void stream_metadataSinkThrows_limitStillFailsTurn() {
-        // LangChain4j drops what a listener throws, so a failing sink must
-        // not take the screening of the tool calls down with it
+        // A failing sink does not fail the turn, and it must not take the
+        // screening of the tool calls down with it
         provider.setMaxCallsPerTool(1);
         var tool = createExplicitTool("myTool", "A test tool", null,
                 args -> "result");
