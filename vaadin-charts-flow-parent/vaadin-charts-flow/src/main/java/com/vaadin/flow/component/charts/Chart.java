@@ -64,6 +64,7 @@ import com.vaadin.flow.component.charts.model.DrilldownCallback.DrilldownDetails
 import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.component.charts.util.ChartSerialization.JsonWithFunctions;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
@@ -191,11 +192,18 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final ObjectNode configurationNode = (ObjectNode) StringFunctionReporter
-                .report(ChartSerialization.toJsonTree(configuration));
+        JsonWithFunctions json = StringFunctionReporter
+                .report(ChartSerialization.toJsonWithFunctions(configuration));
+        ObjectNode configurationNode = (ObjectNode) json.json();
 
-        getElement().callJsFunction("updateConfiguration", configurationNode,
-                resetConfiguration);
+        if (json.hasFunctions()) {
+            getElement().executeJs(ChartJs.class).updateConfiguration(
+                    configurationNode, resetConfiguration, json.functionPaths(),
+                    json.functionArray());
+        } else {
+            getElement().callJsFunction("updateConfiguration",
+                    configurationNode, resetConfiguration);
+        }
     }
 
     /**
@@ -735,14 +743,12 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
+            JsonWithFunctions json = StringFunctionReporter
+                    .report(ChartSerialization.toJsonWithFunctions(
+                            (AbstractConfigurationObject) drilldownSeries));
             getElement().executeJs(ChartJs.class).addSeriesAsDrilldown(
-                    seriesIndex, pointIndex,
-                    toJsonValue((AbstractConfigurationObject) drilldownSeries));
-        }
-
-        private ObjectNode toJsonValue(AbstractConfigurationObject series) {
-            return (ObjectNode) StringFunctionReporter
-                    .report(ChartSerialization.toJsonTree(series));
+                    seriesIndex, pointIndex, (ObjectNode) json.json(),
+                    json.functionPaths(), json.functionArray());
         }
 
         private Series resolveSeriesFor(int seriesIndex) {
