@@ -3911,6 +3911,97 @@ class LangChain4JLLMProviderTest {
                 messages.getLast());
     }
 
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_sendsRequestPromptWithFollowUpCall() {
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = new TestLLMRequestWithExplicitTools("Check",
+                "From the request", Collections.emptyList(), new Object[0],
+                List.of(tool));
+        var requests = mockStreamingResponsesOnOtherThreads(
+                mockSimpleResponseWithTool("myTool"),
+                mockSimpleResponse("done"));
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(2, requests.size());
+        var first = Assertions.assertInstanceOf(SystemMessage.class,
+                requests.get(1).messages().getFirst());
+        Assertions.assertEquals("From the request", first.text());
+    }
+
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_keepsToolTrafficOutOfTheNextTurn() {
+        var requests = mockStreamingResponsesOnOtherThreads(
+                mockSimpleResponseWithTool("myTool"),
+                mockSimpleResponse("First answer"),
+                mockSimpleResponse("Second answer"));
+        streamingProvider
+                .stream(requestWithCountingTool("myTool", new AtomicInteger()))
+                .collectList().block(TURN_TIMEOUT);
+
+        streamingProvider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(3, requests.size());
+        // The first question, its answer and the second question
+        var messages = requests.get(2).messages();
+        Assertions.assertEquals(3, messages.size(), messages.toString());
+        Assertions.assertEquals(List.of(),
+                getToolExecutionResults(requests.get(2)));
+    }
+
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_toolCalledPastTheLimit_failsTurn() {
+        streamingProvider.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var requests = mockStreamingResponsesOnOtherThreads(toolResponse,
+                toolResponse, toolResponse, mockSimpleResponse("done"));
+        var turn = streamingProvider
+                .stream(requestWithCountingTool("myTool", toolCalls))
+                .collectList();
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> turn.block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Assertions.assertEquals(2, requests.size(),
+                "The model must not be called again past the limit");
+    }
+
+    /**
+     * Makes the streaming model answer its calls with the given responses, in
+     * order, each on a thread of its own. A model delivers its response on a
+     * thread of its HTTP client, not on the thread that called it, as the other
+     * streaming mocks of this class do.
+     *
+     * @return the requests of the model calls, in order
+     */
+    private List<ChatRequest> mockStreamingResponsesOnOtherThreads(
+            ChatResponse... responses) {
+        var requests = Collections
+                .synchronizedList(new ArrayList<ChatRequest>());
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            var call = requests.size();
+            requests.add(invocation.getArgument(0));
+            new Thread(() -> {
+                if (call < responses.length) {
+                    handler.onCompleteResponse(responses[call]);
+                } else {
+                    handler.onError(new IllegalStateException(
+                            "No response left for model call " + (call + 1)));
+                }
+            }).start();
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        return requests;
+    }
+
     // --- Tool call limit tests ---
 
     @Test
