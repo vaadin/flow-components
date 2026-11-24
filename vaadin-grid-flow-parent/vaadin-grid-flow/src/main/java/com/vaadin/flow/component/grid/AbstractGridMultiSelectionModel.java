@@ -95,8 +95,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     void updateSelectAllCheckBoxVisibility() {
-        selectionColumn
-                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
+        boolean wasVisible = selectionColumn.isSelectAllCheckBoxVisible();
+        boolean visible = isSelectAllCheckboxVisible();
+        selectionColumn.setSelectAllCheckBoxVisibility(visible);
+        if (visible && !wasVisible) {
+            // The state isn't updated while the checkbox is hidden
+            updateSelectAllCheckboxState();
+        }
     }
 
     private void insertSelectionColumn(Grid<T> grid,
@@ -139,12 +144,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
 
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(
-                !isHierarchicalDataProvider() && size == selected.size());
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
+        updateSelectAllCheckboxState();
     }
 
     @Override
@@ -349,8 +349,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public void setSelectAllCheckboxVisibility(
             SelectAllCheckboxVisibility selectAllCheckBoxVisibility) {
         this.selectAllCheckBoxVisibility = selectAllCheckBoxVisibility;
-        selectionColumn
-                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
+        updateSelectAllCheckBoxVisibility();
     }
 
     @Override
@@ -538,6 +537,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
 
+        updateSelectAllCheckboxState();
+    }
+
+    private void updateSelectAllCheckboxState() {
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(
                 !isHierarchicalDataProvider() && size == selected.size());
