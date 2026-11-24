@@ -38,6 +38,9 @@ public class PdfViewerI18n implements Serializable {
     private String goToPage;
     private String externalLink;
     private String download;
+    private String sidebar;
+    private String thumbnails;
+    private String thumbnailLabel;
 
     /**
      * Gets the tooltip of the previous page button.
@@ -386,6 +389,71 @@ public class PdfViewerI18n implements Serializable {
      */
     public PdfViewerI18n setDownload(String download) {
         this.download = download;
+        return this;
+    }
+
+    /**
+     * Gets the tooltip of the button that shows and hides the sidebar.
+     *
+     * @return the tooltip
+     */
+    public String getSidebar() {
+        return sidebar;
+    }
+
+    /**
+     * Sets the tooltip of the button that shows and hides the sidebar.
+     *
+     * @param sidebar
+     *            the tooltip
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setSidebar(String sidebar) {
+        this.sidebar = sidebar;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name of the list of page thumbnails in the sidebar.
+     *
+     * @return the accessible name
+     */
+    public String getThumbnails() {
+        return thumbnails;
+    }
+
+    /**
+     * Sets the accessible name of the list of page thumbnails in the sidebar.
+     *
+     * @param thumbnails
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setThumbnails(String thumbnails) {
+        this.thumbnails = thumbnails;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name of a page thumbnail in the sidebar.
+     *
+     * @return the accessible name
+     */
+    public String getThumbnailLabel() {
+        return thumbnailLabel;
+    }
+
+    /**
+     * Sets the accessible name of a page thumbnail in the sidebar.
+     * {@code {page}} is replaced with the page number, for example
+     * {@code "Page {page}"}.
+     *
+     * @param thumbnailLabel
+     *            the accessible name
+     * @return this instance for method chaining
+     */
+    public PdfViewerI18n setThumbnailLabel(String thumbnailLabel) {
+        this.thumbnailLabel = thumbnailLabel;
         return this;
     }
 }

@@ -38,7 +38,7 @@ import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
-import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -62,7 +62,7 @@ class ChartFunctionTest {
 
     @BeforeEach
     void setup() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         chart = new Chart();
     }
 
@@ -140,7 +140,7 @@ class ChartFunctionTest {
 
     @Test
     void toJsonWithFunctions_cspOff_stringFunctionNotReported() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         chart.getConfiguration().getTooltip().setFormatter("function() {}");
         chart.getConfiguration().setSeries(withFormatter(new ListSeries(1, 2),
                 FORMATTERS.scaled(1000, "k")));

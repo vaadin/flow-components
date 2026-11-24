@@ -11,7 +11,7 @@ package com.vaadin.flow.component.charts;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.charts.util.ChartSerialization.JsonWithFunctions;
-import com.vaadin.flow.internal.CspViolationReporter;
+import com.vaadin.flow.internal.ContentSecurityPolicyViolationReporter;
 
 /**
  * Reports chart configuration that is sent to the browser with a JavaScript
@@ -20,7 +20,8 @@ import com.vaadin.flow.internal.CspViolationReporter;
  * The browser compiles such a function, which a Content Security Policy without
  * <code>unsafe-eval</code> blocks. The report follows the CSP mode: nothing
  * when it is off, a warning in the warn mode and a
- * {@link com.vaadin.flow.server.CspViolationException} in the strict mode.
+ * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException} in the
+ * strict mode.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -40,7 +41,7 @@ final class StringFunctionReporter implements Serializable {
      */
     static JsonWithFunctions report(JsonWithFunctions json) {
         if (json.hasStringFunction()) {
-            CspViolationReporter.reportStringJavaScript();
+            ContentSecurityPolicyViolationReporter.reportStringJavaScript();
         }
         return json;
     }

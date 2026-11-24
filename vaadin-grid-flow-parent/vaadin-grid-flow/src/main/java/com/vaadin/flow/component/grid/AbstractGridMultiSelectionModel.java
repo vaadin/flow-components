@@ -163,6 +163,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                 getGrid(), item, false, selectionColumn.isShiftKeyDown()));
 
+        if (!isSelectAllCheckboxVisible()) {
+            // Skip changing the state of Select All checkbox if it was
+            // meant to be hidden
+            return;
+        }
+
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(

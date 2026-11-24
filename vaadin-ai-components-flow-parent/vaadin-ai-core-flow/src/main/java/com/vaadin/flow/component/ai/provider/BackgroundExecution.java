@@ -58,10 +58,11 @@ final class BackgroundExecution {
     }
 
     /**
-     * Prepares a response whose tokens already arrive on the LLM client's own
-     * threads. Nothing is rescheduled — the subscription is cheap and the work
-     * never occupied the caller's thread to begin with — but the response still
-     * reaches the browser asynchronously, so the delivery check applies.
+     * Prepares a response whose tokens arrive on the LLM client's own threads.
+     * Nothing is rescheduled: what the subscription does before the model call
+     * starts, such as retrieval or input guardrails, runs on the subscribing
+     * thread. The response still reaches the browser asynchronously, so the
+     * delivery check applies.
      *
      * @param response
      *            the provider's response stream
@@ -73,12 +74,12 @@ final class BackgroundExecution {
     }
 
     /**
-     * Prepares a response that performs its blocking LLM call at subscription
-     * time. When background execution is enabled the subscription is moved off
-     * the subscribing thread, so the caller — the UI thread, for a prompt
-     * triggered from the browser — is released as soon as the turn starts.
-     * Otherwise the response is returned unchanged and the call runs on
-     * whichever thread subscribes.
+     * Prepares a response that does blocking work at subscription time, such as
+     * a blocking LLM call. When background execution is enabled the
+     * subscription is moved off the subscribing thread, so the caller — the UI
+     * thread, for a prompt triggered from the browser — is released as soon as
+     * the turn starts. Otherwise the response is returned unchanged and the
+     * call runs on whichever thread subscribes.
      *
      * @param response
      *            the provider's response stream
