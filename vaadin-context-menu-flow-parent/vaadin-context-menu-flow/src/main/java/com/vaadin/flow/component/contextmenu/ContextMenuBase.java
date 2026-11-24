@@ -190,6 +190,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the context menu type
      * @return an unmodifiable snapshot of the matching context menus, empty if
      *         there are none
+     * @since 25.4
      */
     @SuppressWarnings("unchecked")
     protected static <M extends ContextMenuBase<?, ?, ?>> List<M> getContextMenus(

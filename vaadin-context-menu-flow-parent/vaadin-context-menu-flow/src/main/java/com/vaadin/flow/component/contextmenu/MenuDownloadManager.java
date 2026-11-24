@@ -51,6 +51,8 @@ import com.vaadin.flow.shared.Registration;
  * remove it.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
+ * 
+ * @since 25.4
  */
 public class MenuDownloadManager implements Serializable {
 

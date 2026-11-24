@@ -151,6 +151,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      *
      * @return the manager for the download registrations, or {@code null} if
      *         the item does not belong to a menu
+     * @since 25.4
      */
     protected MenuDownloadManager getMenuDownloadManager() {
         return getContextMenu() != null ? getContextMenu().getDownloadManager()

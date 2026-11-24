@@ -28,6 +28,8 @@ import com.vaadin.flow.js.JsInvokers;
  * {@code selectionStart} / {@code selectionEnd}: indices are zero-based, with
  * {@code selectionStart} the index of the first selected character and
  * {@code selectionEnd} the index after the last selected character.
+ * 
+ * @since 25.4
  */
 public interface HasTextSelection extends HasElement {
 
