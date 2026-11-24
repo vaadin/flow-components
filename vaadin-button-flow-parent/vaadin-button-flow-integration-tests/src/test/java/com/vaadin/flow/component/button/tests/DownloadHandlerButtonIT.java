@@ -78,6 +78,13 @@ public class DownloadHandlerButtonIT extends AbstractComponentIT {
                 .id("new-tab-disable-on-click-button").isEnabled());
     }
 
+    @Test
+    public void clickNewTabButtonWithCustomAllowDisabledHandler_opensInlineContentInNewTab() {
+        Assert.assertEquals(
+                "new-tab|200|inline|" + DownloadHandlerButtonPage.DOWNLOAD_BODY,
+                clickAndFetch("new-tab-custom-allow-disabled-button"));
+    }
+
     /**
      * Clicks the button and fetches the URL that the click delivers content
      * from. Returns how the content is delivered ({@code save} or

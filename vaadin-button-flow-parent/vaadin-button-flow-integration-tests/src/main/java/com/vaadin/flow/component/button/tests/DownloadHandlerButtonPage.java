@@ -43,8 +43,7 @@ public class DownloadHandlerButtonPage extends Div {
         disableOnClick.setDisableOnClick(true);
         disableOnClick.setDownloadHandler(handler);
 
-        Button newTab = new Button("View", handler,
-                DownloadTarget.NEW_TAB);
+        Button newTab = new Button("View", handler, DownloadTarget.NEW_TAB);
         newTab.setId("new-tab-button");
 
         Button newTabDisableOnClick = new Button("View, disable on click");
@@ -53,7 +52,19 @@ public class DownloadHandlerButtonPage extends Div {
         newTabDisableOnClick.setDownloadHandler(handler);
         newTabDisableOnClick.setDownloadTarget(DownloadTarget.NEW_TAB);
 
-        add(button, disableOnClick, newTab, newTabDisableOnClick);
+        // A custom handler that leaves inline or attachment to the button,
+        // behind the plain wrapper that allowDisabled() returns
+        DownloadHandler custom = event -> {
+            event.fileName("custom.txt");
+            event.getOutputStream()
+                    .write(DOWNLOAD_BODY.getBytes(StandardCharsets.UTF_8));
+        };
+        Button newTabCustomAllowDisabled = new Button("View, custom handler",
+                custom.allowDisabled(), DownloadTarget.NEW_TAB);
+        newTabCustomAllowDisabled.setId("new-tab-custom-allow-disabled-button");
+
+        add(button, disableOnClick, newTab, newTabDisableOnClick,
+                newTabCustomAllowDisabled);
     }
 
     private static DownloadHandler createDownloadHandler() {

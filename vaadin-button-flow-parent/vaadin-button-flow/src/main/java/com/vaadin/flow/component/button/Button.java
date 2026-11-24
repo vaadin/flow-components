@@ -210,7 +210,6 @@ public class Button extends Component
      * @see #setText(String)
      * @see #setDownloadHandler(DownloadHandler)
      * @see #setDownloadTarget(DownloadTarget)
-     * @since 25.4
      */
     public Button(String text, DownloadHandler downloadHandler,
             DownloadTarget downloadTarget) {
@@ -474,7 +473,6 @@ public class Button extends Component
      * @return the download target, not {@code null}; defaults to
      *         {@link DownloadTarget#SAVE_AS_FILE}
      * @see #setDownloadTarget(DownloadTarget)
-     * @since 25.4
      */
     public DownloadTarget getDownloadTarget() {
         return downloadTarget;
@@ -490,11 +488,16 @@ public class Button extends Component
      * With {@link DownloadTarget#NEW_TAB}, the content is served inline, so the
      * browser shows it when it can, for example a PDF or an image, and saves it
      * as a file otherwise. With {@link DownloadTarget#SAVE_AS_FILE}, it is
-     * served as an attachment. This applies to the file name that the handler
-     * gives, whatever the handler itself asks for, see
-     * {@link com.vaadin.flow.server.streams.DownloadDisposition}. The handler
-     * is not changed, so the same instance can also be used elsewhere, for
-     * example in an {@code Anchor} that downloads the content.
+     * served as an attachment. This overrides
+     * {@link com.vaadin.flow.server.streams.AbstractDownloadHandler#inline()
+     * inline()} on the built-in handlers, such as
+     * {@link DownloadHandler#forFile(java.io.File)}. A custom handler follows
+     * the target when it gives its file name with
+     * {@link DownloadEvent#fileName(String)}; one that calls
+     * {@link DownloadEvent#inline(String)} or
+     * {@link DownloadEvent#attachment(String)} keeps its own choice. The
+     * handler is not changed, so the same instance can also be used elsewhere,
+     * for example in an {@code Anchor} that downloads the content.
      *
      * <pre>{@code
      * Button view = new Button("View invoice");
@@ -505,7 +508,6 @@ public class Button extends Component
      * @param downloadTarget
      *            where the browser puts the content, not {@code null}
      * @see DownloadTarget
-     * @since 25.4
      */
     public void setDownloadTarget(DownloadTarget downloadTarget) {
         this.downloadTarget = Objects.requireNonNull(downloadTarget,
