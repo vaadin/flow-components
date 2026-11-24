@@ -135,24 +135,6 @@ public class ChartSerialization implements Serializable {
     }
 
     /**
-     * Serializes the given configuration object to a JSON tree.
-     * <p>
-     * For internal use only. May be renamed or removed in a future release.
-     *
-     * @param object
-     *            the object to serialize
-     * @return the JSON tree
-     */
-    public static JsonNode toJsonTree(AbstractConfigurationObject object) {
-        try {
-            return jsonWriter.valueToTree(object);
-        } catch (JacksonException e) {
-            throw new RuntimeException("Error while serializing "
-                    + object.getClass().getSimpleName(), e);
-        }
-    }
-
-    /**
      * Serializes the given configuration object to a JSON tree, and gets its
      * {@link ChartFunction} values separately, with the path of each in the
      * tree. The tree does not have the functions.

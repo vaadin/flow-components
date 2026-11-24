@@ -28,6 +28,7 @@ import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.Pane;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -142,6 +143,7 @@ class ChartFunctionTest {
     void toJsonWithFunctions_sameJsonAsToJson() {
         Configuration configuration = chart.getConfiguration();
         configuration.getxAxis().setCategories("a", "b");
+        configuration.addxAxis(new XAxis());
         configuration.addyAxis(new YAxis());
         configuration.addPane(new Pane(0, 90));
         configuration.addPane(new Pane(90, 180));
@@ -156,6 +158,12 @@ class ChartFunctionTest {
         range.setLow(1);
         range.setHigh(2);
         items.add(range);
+        DataSeriesItem xOnly = new DataSeriesItem();
+        xOnly.setX(3);
+        items.add(xOnly);
+        DataSeriesItem yOnly = new DataSeriesItem();
+        yOnly.setY(5);
+        items.add(yOnly);
         items.add(new OhlcItem(1, 2, 3, 0.5, 2.5));
         configuration.addSeries(items);
         configuration.addSeries(new ListSeries(1, 2L, 3.5, null));
