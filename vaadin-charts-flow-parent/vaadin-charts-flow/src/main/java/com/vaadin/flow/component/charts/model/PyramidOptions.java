@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  */
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
+    private ChartFunction pointDescriptionFormatter;
+
     @Override
     public abstract ChartType getChartType();
 
@@ -365,12 +367,54 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
      * {@link com.vaadin.flow.server.CspViolationException}.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, which works
+     * without compiling JavaScript in the browser.
      *
      * @param _fn_pointDescriptionFormatter
      *            the source code of the JavaScript function
      */
     public abstract void setPointDescriptionFormatter(
             String _fn_pointDescriptionFormatter);
+
+    /**
+     * @see #setPointDescriptionFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getPointDescriptionFormatterFunction() {
+        return pointDescriptionFormatter;
+    }
+
+    /**
+     * Sets the function of the <code>pointDescriptionFormatter</code> option,
+     * declared in a {@link com.vaadin.flow.js.JsDefinition JsDefinition}
+     * interface. The browser runs the function from the frontend bundle, so it
+     * works under a Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointDescriptionFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function.
+     *
+     * @param pointDescriptionFormatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setPointDescriptionFormatterFunction(
+            ChartFunction pointDescriptionFormatter) {
+        setPointDescriptionFormatter(null);
+        this.pointDescriptionFormatter = pointDescriptionFormatter;
+    }
+
+    /**
+     * Clears the function set with
+     * {@link #setPointDescriptionFormatterFunction(ChartFunction)}, for the
+     * subclasses that implement {@link #setPointDescriptionFormatter(String)}.
+     */
+    protected void clearPointDescriptionFormatterFunction() {
+        pointDescriptionFormatter = null;
+    }
 
     /**
      * @see #setReversed(Boolean)
