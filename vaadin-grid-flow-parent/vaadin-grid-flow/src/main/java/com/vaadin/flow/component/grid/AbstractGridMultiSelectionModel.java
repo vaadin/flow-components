@@ -169,11 +169,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
 
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(false);
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
+        updateSelectAllCheckboxState();
     }
 
     @Override

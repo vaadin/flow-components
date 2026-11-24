@@ -307,6 +307,27 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void deselectFromClientWhileCheckboxHidden_showCheckbox_updatesCheckboxStates() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.selectAll();
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        selectionModel.deselectFromClient("foo");
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    @Test
     void selectFromClient_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
