@@ -212,20 +212,32 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     private boolean doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;
         selectedItem = item;
-        if (selectionBinding != null) {
-            T signalValue = selectionBinding.writer().apply(item);
-            if (!Objects.equals(getItemId(signalValue), getItemId(item))) {
-                // The write callback didn't accept the item, revert to the
-                // signal value without firing an event
-                selectedItem = signalValue;
-                getGrid().doClientSideSelection(
-                        Collections.singleton(signalValue));
-                return false;
-            }
+        if (!writeSelectionToSignal()) {
+            return false;
         }
         fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
                 getGrid().asSingleSelect(), oldValue, userOriginated));
         return true;
+    }
+
+    /**
+     * Passes the selection to the write callback of the bound signal. If the
+     * signal doesn't accept it, reverts the selection to the signal value
+     * without firing an event and syncs it to the client.
+     *
+     * @return {@code false} if the selection was reverted
+     */
+    private boolean writeSelectionToSignal() {
+        if (selectionBinding == null) {
+            return true;
+        }
+        T signalValue = selectionBinding.writer().apply(selectedItem);
+        if (Objects.equals(getItemId(signalValue), getItemId(selectedItem))) {
+            return true;
+        }
+        selectedItem = signalValue;
+        getGrid().doClientSideSelection(Collections.singleton(signalValue));
+        return false;
     }
 
     private Object getItemId(T item) {
