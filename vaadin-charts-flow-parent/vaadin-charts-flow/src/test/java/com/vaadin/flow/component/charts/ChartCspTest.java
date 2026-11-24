@@ -24,8 +24,8 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.model.style.Theme;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
+import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.tests.MockUIExtension;
 
 /**
@@ -48,7 +48,7 @@ class ChartCspTest {
 
     @Test
     void cspOff_functionInConfiguration_drawChart_updatesConfiguration() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         ui.add(chart);
         ui.dumpPendingJavaScriptInvocations();
         chart.getConfiguration().getTooltip().setFormatter(FUNCTION);
@@ -63,42 +63,42 @@ class ChartCspTest {
 
     @Test
     void strictMode_functionInConfiguration_drawChart_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         ui.add(chart);
         ui.dumpPendingJavaScriptInvocations();
         chart.getConfiguration().getTooltip().setFormatter(FUNCTION);
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> chart.drawChart());
     }
 
     @Test
     void strictMode_functionInSeries_drawChart_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         ui.add(chart);
         ui.dumpPendingJavaScriptInvocations();
         chart.getConfiguration()
                 .setSeries(withFormatter(new ListSeries(1, 2, 3)));
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> chart.drawChart());
     }
 
     @Test
     void strictMode_attached_addSeriesWithFunction_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         ui.add(chart);
         ui.dumpPendingJavaScriptInvocations();
         Configuration configuration = chart.getConfiguration();
         ListSeries series = withFormatter(new ListSeries(1, 2, 3));
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> configuration.addSeries(series));
     }
 
     @Test
     void strictMode_drilldownCallbackReturnsFunction_drilldown_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         chart.getConfiguration().addSeries(new DataSeries());
         DataSeries series = new DataSeries();
         series.setData(1, 2, 3);
@@ -110,18 +110,18 @@ class ChartCspTest {
         DrilldownEvent event = new DrilldownEvent(chart, true, null, null, null,
                 null, 2, null, 1);
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> ComponentUtil.fireEvent(chart, event));
     }
 
     @Test
     void strictMode_setThemeWithFunction_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         ChartOptions options = ChartOptions.get(ui.getUI());
         Theme theme = new Theme();
         theme.getPlotOptions().getLine().setDataLabels(createDataLabels());
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> options.setTheme(theme));
     }
 
