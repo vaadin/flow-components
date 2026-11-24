@@ -16,11 +16,22 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-spreadsheet/sizing")
 public class SizingPage extends Div {
+
+    @JsDefinition
+    interface PanelJs extends JsInvokers {
+
+        @JsExpression("return this.shadowRoot.querySelector('.bottom-right-pane').style.top")
+        PendingJavaScriptResult getPanelPosition();
+    }
 
     private Spreadsheet spreadsheet;
     private Div layout;
@@ -100,9 +111,8 @@ public class SizingPage extends Div {
 
         logList.add(new ListItem(new Span("Panel"),
                 getButton("Panel position", "logPanelPosition", e -> {
-                    spreadsheet.getElement().executeJs(
-                            "return this.shadowRoot.querySelector('.bottom-right-pane').style.top")
-                            .then(message -> {
+                    spreadsheet.getElement().executeJs(PanelJs.class)
+                            .getPanelPosition().then(message -> {
                                 var stringMessage = message.asString();
                                 messageLog.setText(stringMessage);
                             });
