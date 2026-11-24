@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.internal.change.MapPutChange;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
@@ -186,6 +189,56 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
         void clientDeselectAll_selectionAndCheckboxReverted() {
             model.clientDeselectAll();
             assertSelectionReverted();
+        }
+
+        @Test
+        void deselectFromClient_selectAllStateSentToClient() throws Exception {
+            signal.set(Set.of("foo", "bar", "baz"));
+            ui.fakeClientCommunication();
+
+            setSelectAllFromClient(false);
+            model.deselectFromClient("foo");
+            Assertions.assertEquals(true, getSelectAllSentToClient());
+        }
+
+        @Test
+        void clientDeselectAll_selectAllStateSentToClient() throws Exception {
+            signal.set(Set.of("foo", "bar", "baz"));
+            ui.fakeClientCommunication();
+
+            setSelectAllFromClient(false);
+            model.clientDeselectAll();
+            Assertions.assertEquals(true, getSelectAllSentToClient());
+        }
+
+        @Test
+        void clientSelectAll_selectAllStateSentToClient() throws Exception {
+            ui.fakeClientCommunication();
+
+            setSelectAllFromClient(true);
+            model.clientSelectAll();
+            Assertions.assertEquals(false, getSelectAllSentToClient());
+        }
+
+        private void setSelectAllFromClient(boolean selectAll)
+                throws PropertyChangeDeniedException {
+            model.getSelectionColumn().getElement().getNode()
+                    .getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient("selectAll", selectAll).run();
+        }
+
+        private Object getSelectAllSentToClient() {
+            var columnNode = model.getSelectionColumn().getElement().getNode();
+            Object[] sent = { null };
+            UI.getCurrent().getInternals().getStateTree()
+                    .collectChanges(change -> {
+                        if (change instanceof MapPutChange put
+                                && put.getNode() == columnNode
+                                && "selectAll".equals(put.getKey())) {
+                            sent[0] = put.getValue();
+                        }
+                    });
+            return sent[0];
         }
 
         private void assertSelectionReverted() {
