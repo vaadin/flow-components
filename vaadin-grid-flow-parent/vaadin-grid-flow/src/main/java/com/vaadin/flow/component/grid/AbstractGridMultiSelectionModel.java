@@ -128,8 +128,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                     getGrid(), item, true, selectionColumn.isShiftKeyDown()));
         } else {
-            // The browser already selected the item, but the signal didn't
-            // keep it
+            // Revert the change in the browser when the signal binding
+            // rejected selecting the item
             getGrid().doClientSideDeselection(Set.of(item));
         }
     }
@@ -145,8 +145,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                     getGrid(), item, false, selectionColumn.isShiftKeyDown()));
         } else {
-            // The browser already deselected the item, but the signal didn't
-            // keep it
+            // Revert the change in the browser when the signal binding
+            // rejected deselecting the item
             getGrid().doClientSideSelection(Set.of(item));
         }
     }
@@ -510,7 +510,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             requestedSelection.keySet().removeAll(removedItems.keySet());
             requestedSelection.putAll(addedItems);
 
-            // The signal binding can change the selection or refuse it
+            // The signal binding can change the selection or reject it
             Map<Object, T> resultingSelection = mapItemsById(
                     selectionBinding.writer().apply(
                             new LinkedHashSet<>(requestedSelection.values())));

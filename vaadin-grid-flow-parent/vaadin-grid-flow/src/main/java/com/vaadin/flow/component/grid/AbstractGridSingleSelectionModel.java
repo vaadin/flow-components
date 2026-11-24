@@ -209,15 +209,20 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     private void doSelect(T item, boolean userOriginated) {
         if (selectionBinding != null) {
-            // The signal binding can change the selection or refuse it
+            // The signal binding can change the selection or reject it
             item = selectionBinding.writer().apply(item);
         }
+
         if (!isSelected(item)) {
             T oldValue = selectedItem;
             selectedItem = item;
             fireSelectionEvent(new SingleSelectionEvent<>(getGrid(),
                     getGrid().asSingleSelect(), oldValue, userOriginated));
         }
+
+        // Sync the selection to the browser. This sends changes made on the
+        // server and reverts selections made in the browser that the signal
+        // binding rejected.
         getGrid().doClientSideSelection(Collections.singleton(selectedItem));
     }
 
