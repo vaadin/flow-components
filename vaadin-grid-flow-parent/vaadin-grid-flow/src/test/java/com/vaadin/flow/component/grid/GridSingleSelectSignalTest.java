@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,5 +121,48 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         ((GridSingleSelectionModel<String>) grid.getSelectionModel())
                 .selectFromClient("baz");
         Assertions.assertEquals(1, callCount[0]);
+    }
+
+    @Test
+    void bindValue_switchToMulti_bindingCleanedUp() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+
+        // Switch to multi-select; the old binding should be cleaned up
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Switch back to single-select so SingleSelectionEvent is active again
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+        // Track whether a spurious selection event fires from the old effect
+        boolean[] eventFired = { false };
+        grid.asSingleSelect().addValueChangeListener(e -> eventFired[0] = true);
+
+        // Changing the old signal should not trigger the old effect
+        signal.set("bar");
+        Assertions.assertFalse(eventFired[0],
+                "Old signal effect should not fire after model switch");
+        Assertions.assertNull(grid.asSingleSelect().getValue());
+    }
+
+    @Test
+    void bindValue_switchToMulti_canBindNewSignal() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, signal::set);
+        UI.getCurrent().add(grid);
+
+        // Switch to multi-select
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Should be able to bind a new signal without BindingActiveException
+        var multiSignal = new ValueSignal<>(Set.of("bar"));
+        grid.asMultiSelect().bindValue(multiSignal, multiSignal::set);
+
+        Assertions.assertEquals(Set.of("bar"), grid.asMultiSelect().getValue());
     }
 }
