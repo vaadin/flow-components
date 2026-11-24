@@ -67,7 +67,6 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
 
@@ -192,9 +191,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final ObjectNode configurationNode = StringFunctionReporter
-                .report(JacksonUtils
-                        .readTree(ChartSerialization.toJSON(configuration)));
+        final ObjectNode configurationNode = (ObjectNode) StringFunctionReporter
+                .report(ChartSerialization.toJsonTree(configuration));
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
@@ -743,8 +741,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
 
         private ObjectNode toJsonValue(AbstractConfigurationObject series) {
-            return StringFunctionReporter.report(
-                    JacksonUtils.readTree(ChartSerialization.toJSON(series)));
+            return (ObjectNode) StringFunctionReporter
+                    .report(ChartSerialization.toJsonTree(series));
         }
 
         private Series resolveSeriesFor(int seriesIndex) {
