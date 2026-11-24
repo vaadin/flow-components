@@ -510,8 +510,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             requestedSelection.keySet().removeAll(removedItems.keySet());
             requestedSelection.putAll(addedItems);
 
-            // Apply the selection that the signal stores, which can differ
-            // from the requested selection
+            // The signal binding can change the selection or refuse it
             Map<Object, T> resultingSelection = mapItemsById(
                     selectionBinding.writer().apply(
                             new LinkedHashSet<>(requestedSelection.values())));

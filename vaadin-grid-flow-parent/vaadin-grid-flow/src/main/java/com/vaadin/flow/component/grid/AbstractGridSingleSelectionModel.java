@@ -209,6 +209,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     private void doSelect(T item, boolean userOriginated) {
         if (selectionBinding != null) {
+            // The signal binding can change the selection or refuse it
             item = selectionBinding.writer().apply(item);
         }
         if (!isSelected(item)) {
