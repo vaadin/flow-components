@@ -173,7 +173,7 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
         private void assertSelectionReverted() {
             Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
             Assertions.assertEquals("foo", signal.peek());
-            Assertions.assertEquals(List.of(), events);
+            Assertions.assertEquals(0, events.size());
         }
     }
 

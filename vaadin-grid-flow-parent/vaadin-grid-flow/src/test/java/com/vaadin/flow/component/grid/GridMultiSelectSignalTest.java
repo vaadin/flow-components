@@ -196,7 +196,7 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
                 boolean selectAll, boolean indeterminate) {
             Assertions.assertEquals(selection, grid.asMultiSelect().getValue());
             Assertions.assertEquals(selection, signal.peek());
-            Assertions.assertEquals(List.of(), events);
+            Assertions.assertEquals(0, events.size());
 
             var column = model.getSelectionColumn();
             Assertions.assertEquals(selectAll,
