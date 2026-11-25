@@ -64,7 +64,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
-    private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
+    private SelectAllCheckboxVisibility selectAllCheckboxVisibility;
     private GridSelectionSignalHelper.BindResult<Set<T>> selectionBinding;
 
     /**
@@ -79,9 +79,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
         selected = new LinkedHashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
                 this::clientDeselectAll);
-        selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
+        selectAllCheckboxVisibility = SelectAllCheckboxVisibility.DEFAULT;
 
-        updateSelectAllCheckBoxVisibility();
+        updateSelectAllCheckboxVisibility();
 
         if (grid.getElement().getNode().isAttached()) {
             this.insertSelectionColumn(grid, selectionColumn);
@@ -94,7 +94,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
     }
 
-    void updateSelectAllCheckBoxVisibility() {
+    void updateSelectAllCheckboxVisibility() {
         selectionColumn
                 .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
@@ -347,15 +347,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void setSelectAllCheckboxVisibility(
-            SelectAllCheckboxVisibility selectAllCheckBoxVisibility) {
-        this.selectAllCheckBoxVisibility = selectAllCheckBoxVisibility;
+            SelectAllCheckboxVisibility selectAllCheckboxVisibility) {
+        this.selectAllCheckboxVisibility = selectAllCheckboxVisibility;
         selectionColumn
                 .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
 
     @Override
     public SelectAllCheckboxVisibility getSelectAllCheckboxVisibility() {
-        return selectAllCheckBoxVisibility;
+        return selectAllCheckboxVisibility;
     }
 
     @Override
@@ -364,7 +364,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return false;
         }
 
-        switch (selectAllCheckBoxVisibility) {
+        switch (selectAllCheckboxVisibility) {
         case DEFAULT:
             return getGrid().getDataCommunicator().getDataProvider()
                     .isInMemory();
@@ -379,7 +379,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         default:
             throw new IllegalStateException(String.format(
                     "Select all checkbox visibility is set to an unsupported value: %s",
-                    selectAllCheckBoxVisibility));
+                    selectAllCheckboxVisibility));
         }
     }
 
