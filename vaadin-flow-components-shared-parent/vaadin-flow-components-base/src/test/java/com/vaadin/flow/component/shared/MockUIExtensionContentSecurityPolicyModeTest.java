@@ -27,8 +27,8 @@ import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsInvokers;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
+import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.tests.MockUIExtension;
 
@@ -38,7 +38,7 @@ import com.vaadin.tests.MockUIExtension;
  * <code>csp.mode</code> to <code>strict</code>, so every UI starts in the
  * strict mode.
  */
-class MockUIExtensionCspModeTest {
+class MockUIExtensionContentSecurityPolicyModeTest {
 
     @RegisterExtension
     final MockUIExtension ui = new MockUIExtension();
@@ -48,13 +48,13 @@ class MockUIExtensionCspModeTest {
         TestComponent component = new TestComponent();
         ui.add(component);
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> component.getElement().executeJs("this.foo = 1"));
     }
 
     @Test
     void cspModeOff_stringJavaScript_runs() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         TestComponent component = new TestComponent();
         ui.add(component);
 
@@ -63,18 +63,18 @@ class MockUIExtensionCspModeTest {
     }
 
     @Test
-    void strictCspMode_stringJavaScript_throws() {
-        ui.setCspMode(CspMode.STRICT);
+    void strictContentSecurityPolicyMode_stringJavaScript_throws() {
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         TestComponent component = new TestComponent();
         ui.add(component);
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> component.getElement().executeJs("this.foo = 1"));
     }
 
     @Test
-    void strictCspMode_declaredJavaScript_runs() {
-        ui.setCspMode(CspMode.STRICT);
+    void strictContentSecurityPolicyMode_declaredJavaScript_runs() {
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         TestComponent component = new TestComponent();
         ui.add(component);
 
@@ -87,8 +87,8 @@ class MockUIExtensionCspModeTest {
     }
 
     @Test
-    void setCspMode_tearDown_clearsCurrentService() {
-        ui.setCspMode(CspMode.STRICT);
+    void setContentSecurityPolicyMode_tearDown_clearsCurrentService() {
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         Assertions.assertSame(ui.getService(), VaadinService.getCurrent());
 
         ui.tearDown();
