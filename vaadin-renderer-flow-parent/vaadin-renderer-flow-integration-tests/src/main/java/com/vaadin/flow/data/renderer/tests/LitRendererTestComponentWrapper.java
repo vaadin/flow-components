@@ -26,11 +26,22 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 public class LitRendererTestComponentWrapper extends Div
         implements HasDataProvider<String> {
+
+    @JsDefinition
+    interface ItemsJs extends JsInvokers {
+        @JsExpression("this.items = $0")
+        void setItems(ArrayNode items);
+    }
+
     private final DataCommunicator<String> dataCommunicator;
     private final CompositeDataGenerator<String> dataGenerator = new CompositeDataGenerator<>();
 
@@ -46,8 +57,9 @@ public class LitRendererTestComponentWrapper extends Div
                 @Override
                 public void set(int start, List<JsonNode> items) {
                     getChildren().forEach((component) -> {
-                        component.getElement().executeJs("this.items = $0",
-                                items.stream().collect(JacksonUtils.asArray()));
+                        component.getElement().executeJs(ItemsJs.class)
+                                .setItems(items.stream()
+                                        .collect(JacksonUtils.asArray()));
                     });
                 }
 
