@@ -3388,7 +3388,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         refreshViewport();
 
         if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
-            multiSelectionModel.updateSelectAllCheckBoxVisibility();
+            multiSelectionModel.updateSelectAllCheckboxVisibility();
         }
     }
 
