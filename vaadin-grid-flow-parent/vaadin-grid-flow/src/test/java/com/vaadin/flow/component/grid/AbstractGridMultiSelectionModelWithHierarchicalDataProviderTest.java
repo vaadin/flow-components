@@ -189,7 +189,7 @@ class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     }
 
     @Test
-    void selectAll_hideAndShowCheckbox_checkboxStatesUnchanged() {
+    void hideAndShowCheckbox_selectAllStaysChecked() {
         var selectionModel = (GridMultiSelectionModel<String>) treeGrid
                 .getSelectionModel();
         selectionModel.selectAll();

@@ -279,7 +279,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void deselectFromClientWithFilteredDataProvider_selectAllUnchecked() {
+    void deselectFromClientWithListDataProviderFilter_selectAllStaysUnchecked() {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
         ListDataProvider<String> dataProvider = DataProvider.ofItems("foo",
@@ -295,7 +295,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void selectAllWithListDataViewFilter_hideAndShowCheckbox_checkboxStatesUnchanged() {
+    void hideAndShowCheckboxWithListDataViewFilter_selectAllStaysChecked() {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar").setFilter("foo"::equals);
