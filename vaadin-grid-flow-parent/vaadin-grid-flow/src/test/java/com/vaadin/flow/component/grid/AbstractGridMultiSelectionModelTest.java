@@ -231,7 +231,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void hideCheckbox_selectFromClient_skipsSizeQuery() {
+    void checkboxHidden_selectFromClient_skipsSizeQuery() {
         DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
                 false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN,
@@ -245,7 +245,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void hideCheckbox_deselectFromClient_skipsSizeQuery() {
+    void checkboxHidden_deselectFromClient_skipsSizeQuery() {
         DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
                 false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN,
@@ -260,7 +260,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void hideCheckbox_deselectFromClient_selectAllStateSyncedFromClient()
+    void checkboxHidden_deselectFromClient_selectAllStateSyncedFromClient()
             throws PropertyChangeDeniedException {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
@@ -312,7 +312,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void showCheckbox_setItemsWithFetchCallback_doesNotThrow() {
+    void checkboxVisible_setItemsWithFetchCallback_doesNotThrow() {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
         grid.setItems(query -> Stream.of("foo", "bar").skip(query.getOffset())
