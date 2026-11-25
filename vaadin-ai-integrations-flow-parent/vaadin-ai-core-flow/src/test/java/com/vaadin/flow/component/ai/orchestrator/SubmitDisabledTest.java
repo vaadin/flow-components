@@ -41,10 +41,10 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
-import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiInput;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.upload.Upload;
@@ -73,9 +73,9 @@ class SubmitDisabledTest {
     MockUIExtension ui = new MockUIExtension();
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
+            AiComponentsFeatureFlagProvider.AI_COMPONENTS);
 
-    private LLMProvider mockProvider;
+    private LlmProvider mockProvider;
     private Sinks.Many<String> response;
     private MessageInput messageInput;
     private UploadManager uploadManager;
@@ -86,9 +86,9 @@ class SubmitDisabledTest {
     @BeforeEach
     void setup() throws ReflectiveOperationException {
         response = Sinks.many().unicast().onBackpressureBuffer();
-        mockProvider = Mockito.mock(LLMProvider.class);
+        mockProvider = Mockito.mock(LlmProvider.class);
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenAnswer(invocation -> response.asFlux());
 
         messageInput = new MessageInput();
@@ -108,7 +108,7 @@ class SubmitDisabledTest {
 
     @Test
     void inputSubmit_responseStreaming_submitDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
 
         submitFromClient("Hello");
@@ -118,7 +118,7 @@ class SubmitDisabledTest {
 
     @Test
     void inputSubmit_responseCompleted_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         submitFromClient("Hello");
 
@@ -130,7 +130,7 @@ class SubmitDisabledTest {
 
     @Test
     void inputSubmit_responseFailed_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         submitFromClient("Hello");
 
@@ -141,7 +141,7 @@ class SubmitDisabledTest {
 
     @Test
     void inputSubmit_previousResponseCompleted_submitDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         submitFromClient("Hello");
         response.tryEmitComplete();
@@ -155,9 +155,9 @@ class SubmitDisabledTest {
     @Test
     void prompt_responseCompletedImmediately_submitEnabled() {
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.just("Hi"));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).build();
 
         orchestrator.prompt("Hello");
@@ -168,9 +168,9 @@ class SubmitDisabledTest {
     @Test
     void prompt_providerThrows_submitEnabled() {
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenThrow(new IllegalStateException("Failed"));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).build();
 
         Assertions.assertThrows(IllegalStateException.class,
@@ -181,7 +181,7 @@ class SubmitDisabledTest {
 
     @Test
     void prompt_rejectedByInterceptor_submitEnabled() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput)
                 .withRequestInterceptor(
                         RequestInterceptor.RequestInterceptEvent::reject)
@@ -195,7 +195,7 @@ class SubmitDisabledTest {
     @Test
     void prompt_postponed_submitDisabledUntilResponseCompleted() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -214,7 +214,7 @@ class SubmitDisabledTest {
     @Test
     void prompt_postponedAndRejected_submitEnabled() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withRequestInterceptor(event -> {
                     continuation.set(event.postpone(Duration.ofMinutes(1)));
                     event.reject();
@@ -229,7 +229,7 @@ class SubmitDisabledTest {
     @Test
     void prompt_postponedAndFailed_submitEnabled() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -244,7 +244,7 @@ class SubmitDisabledTest {
     @Test
     void prompt_postponedAndFailedWhileUploading_submitStaysDisabledUntilUploadFinished() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(uploadManager)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -261,7 +261,7 @@ class SubmitDisabledTest {
 
     @Test
     void prompt_submitDisabledByApplication_submitStaysDisabled() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).build();
         messageInput.setSubmitDisabled(true);
 
@@ -273,7 +273,7 @@ class SubmitDisabledTest {
 
     @Test
     void fileReceived_submitDisabledByApplication_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         messageInput.setSubmitDisabled(true);
 
@@ -284,7 +284,7 @@ class SubmitDisabledTest {
 
     @Test
     void requestInterceptorRejectsAndDisablesSubmit_submitStaysDisabled() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withRequestInterceptor(event -> {
                     event.reject();
                     messageInput.setSubmitDisabled(true);
@@ -297,7 +297,7 @@ class SubmitDisabledTest {
 
     @Test
     void requestListenerDisablesSubmit_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withRequestListener(
                         event -> messageInput.setSubmitDisabled(true))
                 .build();
@@ -313,9 +313,9 @@ class SubmitDisabledTest {
         var nextResponse = Sinks.many().unicast()
                 .<String> onBackpressureBuffer();
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(response.asFlux(), nextResponse.asFlux());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).build();
         orchestrator.prompt("Hello");
         var uiTasks = queueUiAccessTasks();
@@ -327,13 +327,13 @@ class SubmitDisabledTest {
 
         Assertions.assertTrue(messageInput.isSubmitDisabled());
         Mockito.verify(mockProvider, Mockito.times(2))
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
     void responseReported_submitNotDisabledAgainBeforeStreamEnds() {
         var input = new ComponentInput();
-        AIOrchestrator.builder(mockProvider, null).withInput(input).build();
+        AiOrchestrator.builder(mockProvider, null).withInput(input).build();
         input.submit("Hello");
 
         // The response is reported while the stream still holds the request,
@@ -346,7 +346,7 @@ class SubmitDisabledTest {
 
     @Test
     void inputSubmit_laterSubmitListenerCalled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         var submitted = new AtomicReference<String>();
         messageInput
@@ -359,7 +359,7 @@ class SubmitDisabledTest {
 
     @Test
     void uploadManagerReceivingFile_submitDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         receiveFile(uploadManagerConnector,
@@ -368,7 +368,7 @@ class SubmitDisabledTest {
 
     @Test
     void uploadManagerFileReceived_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         receiveFile(uploadManagerConnector);
@@ -378,7 +378,7 @@ class SubmitDisabledTest {
 
     @Test
     void uploadManagerUploadCanceled_submitEnabledAndPromptAccepted() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(uploadManager)
                 .build();
 
@@ -387,12 +387,12 @@ class SubmitDisabledTest {
 
         orchestrator.prompt("Hello");
         Mockito.verify(mockProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
     void uploadReceivingFile_submitDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(upload).build();
 
         receiveFile(upload.getElement(),
@@ -401,7 +401,7 @@ class SubmitDisabledTest {
 
     @Test
     void uploadFileReceived_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(upload).build();
 
         receiveFile(upload.getElement());
@@ -411,7 +411,7 @@ class SubmitDisabledTest {
 
     @Test
     void uploadUploadCanceled_submitEnabledAndPromptAccepted() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(upload).build();
 
         receiveCanceledFile(upload.getElement());
@@ -419,12 +419,12 @@ class SubmitDisabledTest {
 
         orchestrator.prompt("Hello");
         Mockito.verify(mockProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
     void fileReceivedWhileAnotherReceiving_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         receiveFile(uploadManagerConnector, () -> {
@@ -437,7 +437,7 @@ class SubmitDisabledTest {
 
     @Test
     void fileFailedAfterReceivedWhileAnotherReceiving_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         receiveFile(uploadManagerConnector, () -> {
@@ -457,7 +457,7 @@ class SubmitDisabledTest {
 
     @Test
     void fileReceivedWhileResponseStreaming_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         submitFromClient("Hello");
 
@@ -470,7 +470,7 @@ class SubmitDisabledTest {
 
     @Test
     void responseCompletedWhileUploading_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         submitFromClient("Hello");
 
@@ -484,9 +484,9 @@ class SubmitDisabledTest {
 
     @Test
     void customReceiverUploading_submitNotDisabled() {
-        var receiver = Mockito.mock(AIFileReceiver.class);
+        var receiver = Mockito.mock(AiFileReceiver.class);
         Mockito.when(receiver.isUploading()).thenReturn(true);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(receiver).build();
         orchestrator.prompt("Hello", List.of());
 
@@ -498,8 +498,8 @@ class SubmitDisabledTest {
     @Test
     @SuppressWarnings("unchecked")
     void customInput_responseStreaming_submitDisabledUntilCompleted() {
-        var input = Mockito.mock(AIInput.class);
-        AIOrchestrator.builder(mockProvider, null).withInput(input).build();
+        var input = Mockito.mock(AiInput.class);
+        AiOrchestrator.builder(mockProvider, null).withInput(input).build();
         var listener = ArgumentCaptor.forClass(SerializableConsumer.class);
         Mockito.verify(input).addSubmitListener(listener.capture());
 
@@ -515,18 +515,18 @@ class SubmitDisabledTest {
     void reconnect_afterSerializationWhileStreaming_submitEnabled()
             throws IOException, ClassNotFoundException {
         var detachedInput = new MessageInput();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(detachedInput).build();
         orchestrator.prompt("Hello");
         Assertions.assertTrue(detachedInput.isSubmitDisabled());
 
         var deserialized = serializeAndDeserialize(
                 List.of(orchestrator, detachedInput));
-        var deserializedOrchestrator = (AIOrchestrator) deserialized.get(0);
+        var deserializedOrchestrator = (AiOrchestrator) deserialized.get(0);
         var deserializedInput = (MessageInput) deserialized.get(1);
         Assertions.assertTrue(deserializedInput.isSubmitDisabled());
 
-        deserializedOrchestrator.reconnect(Mockito.mock(LLMProvider.class))
+        deserializedOrchestrator.reconnect(Mockito.mock(LlmProvider.class))
                 .apply();
 
         Assertions.assertFalse(deserializedInput.isSubmitDisabled());
@@ -534,7 +534,7 @@ class SubmitDisabledTest {
 
     @Test
     void preserveOnRefresh_responseCompletedAfterRefresh_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         submitFromClient("Hello");
 
@@ -547,7 +547,7 @@ class SubmitDisabledTest {
 
     @Test
     void preserveOnRefresh_responseCompletedBeforeInputMoved_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .build();
         submitFromClient("Hello");
 
@@ -562,7 +562,7 @@ class SubmitDisabledTest {
     @Test
     void preserveOnRefresh_postponedPromptAbandoned_submitEnabled() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -578,7 +578,7 @@ class SubmitDisabledTest {
     @Test
     void preserveOnRefresh_postponedPromptFailedAfterRefresh_submitEnabled() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -596,7 +596,7 @@ class SubmitDisabledTest {
     void preserveOnRefresh_customComponentInput_responseCompletedAfterRefresh_submitEnabled() {
         var input = new ComponentInput();
         ui.add(input);
-        AIOrchestrator.builder(mockProvider, null).withInput(input).build();
+        AiOrchestrator.builder(mockProvider, null).withInput(input).build();
         input.submit("Hello");
 
         refreshPreservingInput();
@@ -609,7 +609,7 @@ class SubmitDisabledTest {
     @Test
     void preserveOnRefresh_wrappingCustomInput_responseCompletedAfterRefresh_submitEnabled() {
         var input = new WrappingInput(messageInput);
-        AIOrchestrator.builder(mockProvider, null).withInput(input).build();
+        AiOrchestrator.builder(mockProvider, null).withInput(input).build();
         input.submit("Hello");
 
         refreshPreservingInput();
@@ -622,7 +622,7 @@ class SubmitDisabledTest {
     @Test
     void preserveOnRefresh_postponedPromptFailedWhileUploadingAfterRefresh_submitStaysDisabledUntilUploadFinished() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(uploadManager)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -640,7 +640,7 @@ class SubmitDisabledTest {
 
     @Test
     void preserveOnRefresh_uploadCanceledByRefresh_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         // The browser cancels the upload when the page is refreshed
@@ -657,7 +657,7 @@ class SubmitDisabledTest {
 
     @Test
     void preserveOnRefresh_fileReceivedAfterRefresh_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+        AiOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
         receiveFile(uploadManagerConnector, this::refreshPreservingInput);
@@ -765,7 +765,7 @@ class SubmitDisabledTest {
     /**
      * A custom input that is a component.
      */
-    private static class ComponentInput extends Div implements AIInput {
+    private static class ComponentInput extends Div implements AiInput {
         private final List<SerializableConsumer<String>> submitListeners = new ArrayList<>();
         private final List<Boolean> submitDisabledValues = new ArrayList<>();
         private boolean submitDisabled;
@@ -794,7 +794,7 @@ class SubmitDisabledTest {
     /**
      * A custom input that is not a component, but wraps one.
      */
-    private static class WrappingInput implements AIInput {
+    private static class WrappingInput implements AiInput {
         private final List<SerializableConsumer<String>> submitListeners = new ArrayList<>();
         private final MessageInput messageInput;
 

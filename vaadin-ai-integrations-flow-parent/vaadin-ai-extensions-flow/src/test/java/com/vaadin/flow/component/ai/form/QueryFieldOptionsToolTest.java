@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
 
 /**
- * Tests for {@link FormAIController}'s {@code query_field_options} tool —
+ * Tests for {@link FormAiController}'s {@code query_field_options} tool —
  * filtering, default and clamped limits, error surfacing for missing or unknown
  * field ids, output escaping, and the static parameters schema.
  */
@@ -42,7 +42,7 @@ class QueryFieldOptionsToolTest {
         // field id. Pins the wiring from fieldValueOptions registration
         // through ToolCallbacks to the query function.
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("apple", "banana", "cherry")));
         controller.onRequest(requestEvent());
@@ -66,7 +66,7 @@ class QueryFieldOptionsToolTest {
         // itself so the LLM can correlate parallel tool calls and recover.
         var registered = new TestField();
         var unregistered = new TestField();
-        var controller = new FormAIController(
+        var controller = new FormAiController(
                 new Div(registered, unregistered));
         controller.fieldValueOptions(
                 ValueOptions.forField(registered).options(List.of("apple")));
@@ -104,7 +104,7 @@ class QueryFieldOptionsToolTest {
         // query callback. Drive end-to-end via the same path the LLM uses.
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedLimit.set(limit);
@@ -122,7 +122,7 @@ class QueryFieldOptionsToolTest {
 
     @Test
     void queryFieldOptionsReturnsErrorForMissingFieldArgument() {
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
 
         var result = executeQueryFieldOptions(controller,
                 json("{\"filter\":\"\"}"));
@@ -133,7 +133,7 @@ class QueryFieldOptionsToolTest {
 
     @Test
     void queryFieldOptionsReturnsErrorForNullArguments() {
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
 
         var result = executeQueryFieldOptions(controller, null);
 
@@ -145,7 +145,7 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedFilter.set(filter);
@@ -167,7 +167,7 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedFilter.set(filter);
@@ -185,7 +185,7 @@ class QueryFieldOptionsToolTest {
     @Test
     void queryFieldOptionsEmitsOneLinePerLabel() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("Apollo #P-1", "Polaris #P-2")));
         controller.onRequest(requestEvent());
@@ -199,7 +199,7 @@ class QueryFieldOptionsToolTest {
     void queryFieldOptionsClampsLimitToTwoHundred() {
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedLimit.set(limit);
@@ -233,7 +233,7 @@ class QueryFieldOptionsToolTest {
         // result was not actually truncated. The "(truncated to ... items)"
         // message should only appear when items were dropped.
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("only-one")));
         controller.onRequest(requestEvent());
@@ -251,7 +251,7 @@ class QueryFieldOptionsToolTest {
         // When the query returns zero items, the result should carry an
         // explicit signal rather than just "".
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of()));
         controller.onRequest(requestEvent());
@@ -271,7 +271,7 @@ class QueryFieldOptionsToolTest {
         // itself) in labels so a naive split by '\n' yields one entry per
         // original label.
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("first\nsecond", "third")));
         controller.onRequest(requestEvent());
@@ -295,7 +295,7 @@ class QueryFieldOptionsToolTest {
         var sentinel = "jdbc:postgresql://prod-db.internal:5432/secrets "
                 + "TOKEN=abc123";
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     throw new IllegalStateException(sentinel);
@@ -327,7 +327,7 @@ class QueryFieldOptionsToolTest {
         var beta = new Project("P-2", "Beta");
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of(alpha, beta))
                 .itemLabelGenerator(Project::code));
@@ -348,7 +348,7 @@ class QueryFieldOptionsToolTest {
         var alpha = new Project("P-1", "Alpha");
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of(alpha)));
         controller.onRequest(requestEvent());
@@ -362,7 +362,7 @@ class QueryFieldOptionsToolTest {
     void queryFieldOptionsSchemaIsStatic() {
         // The parameters schema is built once and does not enumerate field
         // ids — clients can cache it across requests.
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
         var first = findTool(controller.getTools(), "query_field_options")
                 .getParametersSchema();
         var second = findTool(controller.getTools(), "query_field_options")

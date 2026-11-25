@@ -36,7 +36,7 @@ import com.vaadin.flow.data.renderer.NumberRenderer;
  * {@link CallbackDataProvider}.
  *
  * @author Vaadin Ltd
- * @see GridAIController
+ * @see GridAiController
  * @since 25.3
  */
 public final class GridRenderer implements Serializable {
@@ -64,7 +64,7 @@ public final class GridRenderer implements Serializable {
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
-    public static void renderGrid(Grid<AIDataRow> grid,
+    public static void renderGrid(Grid<AiDataRow> grid,
             DatabaseProvider databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(query,
                 new QueryPage(0, 1, List.of()));
@@ -79,7 +79,7 @@ public final class GridRenderer implements Serializable {
             return;
         }
 
-        var firstRow = new AIDataRow(sampleRows.getFirst());
+        var firstRow = new AiDataRow(sampleRows.getFirst());
         var sortedColumns = new ArrayList<>(firstRow.entries());
         sortedColumns.sort((a, b) -> {
             var prefixA = GridFormatting.groupPrefix(a.getKey());
@@ -95,12 +95,12 @@ public final class GridRenderer implements Serializable {
         LOGGER.info("Grid configured with {} columns", sortedColumns.size());
     }
 
-    private static void addColumn(Grid<AIDataRow> grid, String columnName,
+    private static void addColumn(Grid<AiDataRow> grid, String columnName,
             Object sampleValue) {
         var header = GridFormatting
                 .formatHeader(GridFormatting.stripGroupPrefix(columnName));
 
-        Grid.Column<AIDataRow> column;
+        Grid.Column<AiDataRow> column;
 
         if (sampleValue instanceof LocalDate
                 || sampleValue instanceof java.sql.Date) {
@@ -126,8 +126,8 @@ public final class GridRenderer implements Serializable {
                 .setAutoWidth(true).setResizable(true);
     }
 
-    private static void applyColumnGrouping(Grid<AIDataRow> grid) {
-        var groups = new LinkedHashMap<String, List<Grid.Column<AIDataRow>>>();
+    private static void applyColumnGrouping(Grid<AiDataRow> grid) {
+        var groups = new LinkedHashMap<String, List<Grid.Column<AiDataRow>>>();
         for (var column : grid.getColumns()) {
             var key = column.getKey();
             var dotIndex = key.indexOf('.');
@@ -153,7 +153,7 @@ public final class GridRenderer implements Serializable {
         }
     }
 
-    private static void removeExtraHeaderRows(Grid<AIDataRow> grid) {
+    private static void removeExtraHeaderRows(Grid<AiDataRow> grid) {
         var headerRows = grid.getHeaderRows();
         while (headerRows.size() > 1) {
             grid.removeHeaderRow(headerRows.getFirst());
@@ -161,7 +161,7 @@ public final class GridRenderer implements Serializable {
         }
     }
 
-    private static DataProvider<AIDataRow, Void> createDataProvider(
+    private static DataProvider<AiDataRow, Void> createDataProvider(
             DatabaseProvider databaseProvider, String query) {
         return new CallbackDataProvider<>(fetchQuery -> {
             if (fetchQuery.getLimit() == 0) {
@@ -174,7 +174,7 @@ public final class GridRenderer implements Serializable {
             LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
                     page.limit());
             return databaseProvider.executeQuery(query, page).stream()
-                    .map(AIDataRow::new);
+                    .map(AiDataRow::new);
         }, countFetchQuery -> {
             LOGGER.debug("Counting rows");
             return databaseProvider.count(query);

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
+import com.vaadin.flow.component.ai.form.FormAiTools.FormFieldDescriptor;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
@@ -281,7 +281,7 @@ final class FormValueConverter {
             throw new RejectedValueException(
                     "Selection field has no value options registered — register "
                             + "options via "
-                            + "FormAIController.fieldValueOptions(...) or call "
+                            + "FormAiController.fieldValueOptions(...) or call "
                             + "setItems(...) so the AI knows what to pick.");
         }
         return resolveLabelAgainstItems(field.field(), value.asString(), items);
@@ -369,7 +369,7 @@ final class FormValueConverter {
             throw new RejectedValueException(
                     "Multi-select field has no value options registered — "
                             + "register options via "
-                            + "FormAIController.fieldValueOptions(...) or call "
+                            + "FormAiController.fieldValueOptions(...) or call "
                             + "setItems(...) so the AI knows what to pick.");
         }
         var result = new LinkedHashSet<>();

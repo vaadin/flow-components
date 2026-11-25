@@ -18,19 +18,19 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
- * Wrapper for Flow UploadManager component to implement AIFileReceiver
+ * Wrapper for Flow UploadManager component to implement AiFileReceiver
  * interface. Caches uploaded files in memory until they are consumed via
  * {@link #takeAttachments()}.
  */
 class UploadManagerWrapper implements UploadTrackingReceiver {
 
     final UploadManager uploadManager;
-    private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final List<AiAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
     private final UploadTracker uploadTracker = new UploadTracker();
 
     UploadManagerWrapper(UploadManager uploadManager) {
@@ -42,7 +42,7 @@ class UploadManagerWrapper implements UploadTrackingReceiver {
                 throw new IllegalArgumentException(
                         "Duplicate file name: " + meta.fileName());
             }
-            pendingAttachments.add(new AIAttachment(meta.fileName(),
+            pendingAttachments.add(new AiAttachment(meta.fileName(),
                     meta.contentType(), data));
         });
         uploadManager.setUploadHandler(handler);
@@ -66,7 +66,7 @@ class UploadManagerWrapper implements UploadTrackingReceiver {
     }
 
     @Override
-    public List<AIAttachment> takeAttachments() {
+    public List<AiAttachment> takeAttachments() {
         var result = List.copyOf(pendingAttachments);
         pendingAttachments.clear();
         uploadManager.clearFileList();

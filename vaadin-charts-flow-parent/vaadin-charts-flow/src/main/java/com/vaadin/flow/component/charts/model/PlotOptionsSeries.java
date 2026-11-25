@@ -727,7 +727,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
      * <p>
      * A chart exported to SVG with <code>SVGGenerator</code> does not have the
      * function. Neither does a chart state saved or restored with
-     * <code>ChartAIController</code>.
+     * <code>ChartAiController</code>.
      *
      * @param pointDescriptionFormatter
      *            the function, or <code>null</code> to remove it

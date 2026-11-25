@@ -17,12 +17,12 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.io.Serializable;
 
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
-import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiInput;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
- * Disables submitting on the input of an {@link AIOrchestrator} while a request
+ * Disables submitting on the input of an {@link AiOrchestrator} while a request
  * is being processed or a file is being uploaded, and enables it again when
  * neither is the case.
  * <p>
@@ -39,7 +39,7 @@ import com.vaadin.flow.server.VaadinSession;
 class SubmitDisabler implements Serializable {
 
     private final ProcessingFlag processing;
-    private final AIInput input;
+    private final AiInput input;
     private final UploadTrackingReceiver uploadReceiver;
     /**
      * Whether submitting is disabled by this class, rather than by the
@@ -69,8 +69,8 @@ class SubmitDisabler implements Serializable {
      *            the file receiver of the orchestrator, or {@code null} if
      *            there is none
      */
-    SubmitDisabler(ProcessingFlag processing, AIInput input,
-            AIFileReceiver fileReceiver) {
+    SubmitDisabler(ProcessingFlag processing, AiInput input,
+            AiFileReceiver fileReceiver) {
         this.processing = processing;
         this.input = input;
         processing.setListener(this::processingChanged);

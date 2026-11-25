@@ -19,13 +19,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 /**
  * Listener for request submission events.
  * <p>
  * The listener is called on every prompt, just before the LLM stream opens —
- * the same lifecycle moment as {@link AIController#onRequest(RequestEvent)}.
+ * the same lifecycle moment as {@link AiController#onRequest(RequestEvent)}.
  * Use it to persist the outbound request (the user message, any attachments) or
  * to correlate the assigned {@code messageId} with downstream events such as
  * {@link AttachmentClickListener} and the {@code messageId} stored in
@@ -53,18 +53,18 @@ public interface RequestListener extends Serializable {
      * user message, the assigned {@code messageId} that will be stored on the
      * resulting {@link com.vaadin.flow.component.ai.common.ChatMessage}, and
      * the attachments included with the message (empty list when none). The
-     * same event is passed to {@link AIController#onRequest(RequestEvent)
-     * AIController.onRequest}.
+     * same event is passed to {@link AiController#onRequest(RequestEvent)
+     * AiController.onRequest}.
      */
     class RequestEvent implements Serializable {
         private final String userMessage;
         private final String messageId;
-        private final List<AIAttachment> attachments;
+        private final List<AiAttachment> attachments;
 
         /**
          * Creates a request event. The orchestrator builds this for every turn;
          * it is public so an application can construct one when unit testing an
-         * {@link AIController} implementation.
+         * {@link AiController} implementation.
          *
          * @param userMessage
          *            the user message being submitted, not {@code null}
@@ -82,7 +82,7 @@ public interface RequestListener extends Serializable {
          * @since 25.3
          */
         public RequestEvent(String userMessage, String messageId,
-                List<AIAttachment> attachments) {
+                List<AiAttachment> attachments) {
             this.userMessage = Objects.requireNonNull(userMessage,
                     "userMessage must not be null");
             this.messageId = Objects.requireNonNull(messageId,
@@ -120,7 +120,7 @@ public interface RequestListener extends Serializable {
          * @return unmodifiable list of attachments with full data; empty when
          *         the message has no attachments, never {@code null}
          */
-        public List<AIAttachment> getAttachments() {
+        public List<AiAttachment> getAttachments() {
             return attachments;
         }
     }

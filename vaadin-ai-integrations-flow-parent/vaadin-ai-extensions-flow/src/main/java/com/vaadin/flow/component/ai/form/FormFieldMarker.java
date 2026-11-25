@@ -25,7 +25,7 @@ import com.vaadin.flow.js.JsInvokers;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Bridges the {@link FormAIController}'s marking of the fields the AI filled to
+ * Bridges the {@link FormAiController}'s marking of the fields the AI filled to
  * the {@code vaadin-ai-field-marker} web component, which annotates a field as
  * AI-filled and offers a popover to review and revert the value. It also
  * toggles the field's "AI is working" shimmer ({@link #setWorking}) shown while

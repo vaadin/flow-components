@@ -23,7 +23,7 @@ import java.util.Objects;
  * Represents a chat message in a conversation history.
  * <p>
  * This is a text-only, framework-agnostic representation used with
- * {@code AIOrchestrator.getHistory()} and {@code Builder.withHistory()} to
+ * {@code AiOrchestrator.getHistory()} and {@code Builder.withHistory()} to
  * persist and restore conversation state across sessions. File attachments are
  * not stored in this record; they can be provided separately via
  * {@code Builder.withHistory(List, Map)} using the {@link #messageId()} as the
