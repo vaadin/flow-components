@@ -286,6 +286,22 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void deselectFromClientWithFilteredDataProvider_selectAllUnchecked() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        ListDataProvider<String> dataProvider = DataProvider.ofItems("foo",
+                "bar");
+        grid.setItems(dataProvider);
+        selectionModel.selectAll();
+        dataProvider.setFilter("foo"::equals);
+
+        selectionModel.deselectFromClient("foo");
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertFalse(column.getProperty("selectAll", false));
+    }
+
+    @Test
     void selectFromClient_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");

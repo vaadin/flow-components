@@ -142,6 +142,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
         doUpdateSelection(Collections.emptySet(), Set.of(item), true);
         if (!isSelected(item)) {
+            // Unchecked regardless of the size: with a filter, the remaining
+            // selected items can outnumber the visible ones
+            selectionColumn.setSelectAllCheckboxState(false);
             ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                     getGrid(), item, false, selectionColumn.isShiftKeyDown()));
         } else {
