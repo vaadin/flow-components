@@ -28,7 +28,7 @@ import reactor.core.scheduler.Schedulers;
 
 /**
  * Background execution state and scheduling shared by the built-in
- * {@link LLMProvider} implementations, together with the check that warns when
+ * {@link LlmProvider} implementations, together with the check that warns when
  * a response produced off the request thread cannot reach the browser.
  * <p>
  * Intended only for internal use and can be removed in the future.

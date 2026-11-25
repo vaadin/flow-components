@@ -25,22 +25,22 @@ import java.util.Base64;
 import java.util.List;
 import javax.imageio.ImageIO;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
-import com.vaadin.flow.component.ai.ui.AIMessage;
+import com.vaadin.flow.component.ai.ui.AiMessage;
 import com.vaadin.flow.component.messages.MessageListItem;
 
 /**
- * Wrapper for MessageListItem to implement AIMessage interface.
+ * Wrapper for MessageListItem to implement AiMessage interface.
  */
-class MessageListItemWrapper implements AIMessage {
+class MessageListItemWrapper implements AiMessage {
 
     private static final int THUMBNAIL_MAX_SIZE = 200;
 
     private final MessageListItem item;
 
     MessageListItemWrapper(String text, String userName,
-            List<AIAttachment> attachments) {
+            List<AiAttachment> attachments) {
         item = new MessageListItem(text, Instant.now(), userName);
         if (attachments != null && !attachments.isEmpty()) {
             var messageAttachments = attachments.stream()
@@ -84,7 +84,7 @@ class MessageListItemWrapper implements AIMessage {
     }
 
     private static MessageListItem.Attachment toMessageAttachment(
-            AIAttachment attachment) {
+            AiAttachment attachment) {
         // Only include thumbnail data URL for images to avoid sending
         // large file data (PDFs, videos, etc.) to the client
         var contentType = AttachmentContentType
@@ -108,7 +108,7 @@ class MessageListItemWrapper implements AIMessage {
      * @return a data URL with the thumbnail image, or the original data URL if
      *         scaling fails
      */
-    private static String toThumbnailDataUrl(AIAttachment attachment) {
+    private static String toThumbnailDataUrl(AiAttachment attachment) {
         try {
             var originalImage = ImageIO
                     .read(new ByteArrayInputStream(attachment.data()));
@@ -154,7 +154,7 @@ class MessageListItemWrapper implements AIMessage {
         }
     }
 
-    private static String toDataUrl(AIAttachment attachment) {
+    private static String toDataUrl(AiAttachment attachment) {
         return "data:" + attachment.mimeType() + ";base64,"
                 + Base64.getEncoder().encodeToString(attachment.data());
     }

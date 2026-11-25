@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
  * A file receiver that notifies when a file starts or stops being received, so
  * that the orchestrator can disable submitting on the input meanwhile.
  */
-interface UploadTrackingReceiver extends AIFileReceiver {
+interface UploadTrackingReceiver extends AiFileReceiver {
 
     /**
      * Checks whether a file is being received. Unlike {@link #isUploading()},

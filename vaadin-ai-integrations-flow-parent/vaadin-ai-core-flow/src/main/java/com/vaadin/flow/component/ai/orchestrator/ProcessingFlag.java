@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.vaadin.flow.function.SerializableConsumer;
 
 /**
- * The busy flag of an {@link AIOrchestrator}. Works like an
+ * The busy flag of an {@link AiOrchestrator}. Works like an
  * {@link AtomicBoolean}, and notifies a listener when the value changes, so
  * that the code that claims or releases the flag does not need to.
  * <p>

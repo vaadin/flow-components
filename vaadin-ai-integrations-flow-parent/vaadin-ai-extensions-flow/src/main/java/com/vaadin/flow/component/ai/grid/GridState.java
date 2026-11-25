@@ -12,8 +12,8 @@ import java.io.Serializable;
 
 /**
  * Serializable grid state for persistence across sessions. Captured via
- * {@link GridAIController#getState()} and restored via
- * {@link GridAIController#restoreState(GridState)}.
+ * {@link GridAiController#getState()} and restored via
+ * {@link GridAiController#restoreState(GridState)}.
  *
  * @param query
  *            the SQL query that populates the grid
