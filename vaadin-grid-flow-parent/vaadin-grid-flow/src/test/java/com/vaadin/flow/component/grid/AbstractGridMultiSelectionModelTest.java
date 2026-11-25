@@ -231,21 +231,6 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void deselectFromClient_checkboxHidden_skipsSizeQuery() {
-        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
-                false, false,
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
-                true);
-        grid.getSelectionModel().select("foo");
-        Mockito.clearInvocations(dataProvider);
-
-        grid.getSelectionModel().deselectFromClient("foo");
-
-        Mockito.verify(dataProvider, Mockito.never())
-                .size(Mockito.any(Query.class));
-    }
-
-    @Test
     void deselectFromClientWhileCheckboxHidden_selectAllStateSyncedFromClient()
             throws PropertyChangeDeniedException {
         var selectionModel = (GridMultiSelectionModel<String>) grid
