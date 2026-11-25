@@ -33,6 +33,8 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.tests.MockUIExtension;
 
 class AbstractGridMultiSelectionModelTest {
@@ -226,6 +228,40 @@ class AbstractGridMultiSelectionModelTest {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    void deselectFromClient_checkboxHidden_skipsSizeQuery() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
+                true);
+        grid.getSelectionModel().select("foo");
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().deselectFromClient("foo");
+
+        Mockito.verify(dataProvider, Mockito.never())
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
+    void deselectFromClientWhileCheckboxHidden_selectAllStateSyncedFromClient()
+            throws PropertyChangeDeniedException {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        selectionModel.selectAll();
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // The web component unchecks select all optimistically
+        columnElement.getNode().getFeature(ElementPropertyMap.class)
+                .deferredUpdateFromClient("selectAll", false).run();
+        selectionModel.deselectFromClient("foo");
+
+        Assertions.assertFalse(columnElement.getProperty("selectAll", true));
     }
 
     @Test

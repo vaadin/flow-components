@@ -22,12 +22,27 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-accordion/template-support")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
 public class TemplateSupportView extends LitTemplate {
+
+    @JsDefinition
+    interface AccordionEventsJs extends JsInvokers {
+        @JsExpression("const summary = $0 >= 0 ? "
+                + "this.querySelectorAll('span[slot=\"summary\"]')[$0].textContent + ' opened' : "
+                + "'Accordion closed';"
+                + "const newEvent = document.createElement('span');"
+                + "newEvent.textContent = summary;"
+                + "$1.appendChild(newEvent);")
+        void logOpenedChange(int openedIndex, Element events);
+    }
 
     @Id
     private Accordion accordion;
@@ -40,12 +55,7 @@ public class TemplateSupportView extends LitTemplate {
         super.onAttach(attachEvent);
 
         accordion.addOpenedChangeListener(e -> e.getSource().getElement()
-                .executeJs("const summary = $0 >= 0 ? "
-                        + "this.querySelectorAll('span[slot=\"summary\"]')[$0].textContent + ' opened' : "
-                        + "'Accordion closed';"
-                        + "const newEvent = document.createElement('span');"
-                        + "newEvent.textContent = summary;"
-                        + "$1.appendChild(newEvent);",
+                .executeJs(AccordionEventsJs.class).logOpenedChange(
                         e.getOpenedIndex().orElse(-1), events.getElement()));
     }
 }

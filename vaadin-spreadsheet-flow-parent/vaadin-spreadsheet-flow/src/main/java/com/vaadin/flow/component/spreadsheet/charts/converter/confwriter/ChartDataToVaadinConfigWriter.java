@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -43,6 +42,11 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartDat
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.TextProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.TitleProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.View3dData;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsSnippets;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * @since 24.0
@@ -51,6 +55,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartDat
 public class ChartDataToVaadinConfigWriter {
 
     private static final int DEFAULT_LEGEND_Y_OFFSET = 30;
+
+    private static final TooltipFormatters TOOLTIP_FORMATTERS = JsSnippets
+            .of(TooltipFormatters.class);
 
     private Logger logger = Logger
             .getLogger(ChartDataToVaadinConfigWriter.class.getSimpleName());
@@ -109,62 +116,22 @@ public class ChartDataToVaadinConfigWriter {
     }
 
     private void updateTooltip(ChartData definition, Configuration conf) {
-        StringBuilder formatter = new StringBuilder();
-        formatter.append("function(){");
-        formatter.append("var text='';");
-        Iterator<AbstractSeriesData> seriesIt = definition.plotData.iterator();
+        ArrayNode series = JacksonUtils.createArrayNode();
         int i = 0;
-        while (seriesIt.hasNext()) {
-            AbstractSeriesData series = seriesIt.next();
-
-            String seriesTitle = "'Series'";
-            String pointTitle = "'Point'";
-            String pointData;
-            if (series.is3d) {
-                pointData = "z";
-            } else {
-                pointData = "y";
-            }
-
+        for (AbstractSeriesData seriesData : definition.plotData) {
+            ObjectNode item = series.addObject();
+            item.put("valueKey", seriesData.is3d ? "z" : "y");
             // Excel uses one based numbering
-            String seriesName = series.name == null ? Integer.toString(i + 1)
-                    : "this.series.name";
-
-            String seriesFormatter = """
-                    if(this.series.options.id == '$id'){
-                       var formattedNumber;
-                       var signlessNumer = Math.abs(this.$v);
-                       if ($tooltipDecimals < 0 ) {
-                          //Round numbers to contain only 9 digits if they contain decimals.
-                          var tooltipDecimals = (signlessNumer>1.0 ? 9-Math.floor(Math.log(signlessNumer)/Math.LN10) : 9);
-                          formattedNumber = (Math.round(this.$v) == this.$v ? this.$v : Math.round(this.$v * Math.pow(10,tooltipDecimals))/Math.pow(10,tooltipDecimals));
-                       } else {
-                          //numberFormat can handle numbers 20 digits long.
-                          var tooltipDecimals = (Math.ceil(Math.log(signlessNumer)/Math.LN10) + $tooltipDecimals<= 20 ? $tooltipDecimals : 20);
-                          formattedNumber = this.point.series.chart.numberFormatter(this.$v, tooltipDecimals);
-                       }
-                       text = $seriesTitle + ' ' +
-                          (typeof $seriesName == 'number' ? $seriesName : JSON.stringify($seriesName)) + ' ' + $pointTitle + ' ' +
-                          (('name' in this.point) ? JSON.stringify(this.point.name) : this.x + 1) +
-                          ' <br>' + formattedNumber;
-                    }""";
-
-            formatter.append(seriesFormatter.replace("$v", pointData)
-                    .replace("$id", Integer.toString(i++))
-                    .replace("$seriesTitle", seriesTitle)
-                    .replace("$seriesName", seriesName)
-                    .replace("$pointTitle", pointTitle)
-                    .replace("$tooltipDecimals",
-                            Integer.toString(series.tooltipDecimals)));
-
-            if (seriesIt.hasNext()) {
-                formatter.append(" else \n");
+            if (seriesData.name == null) {
+                item.put("defaultName", i + 1);
+            } else {
+                item.putNull("defaultName");
             }
+            item.put("decimals", seriesData.tooltipDecimals);
+            i++;
         }
-
-        formatter.append("return text; }");
-        conf.getTooltip().setFormatter(formatter.toString());
-
+        conf.getTooltip().setFormatterFunction(
+                TOOLTIP_FORMATTERS.seriesPointValue(series));
     }
 
     private void updateYAxes(Configuration conf,
