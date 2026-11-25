@@ -48,6 +48,47 @@ describe('lit-renderer', () => {
     component.renderer!(root, component, { item, index });
   }
 
+  describe('string template', () => {
+    it('should render the template with the item properties of its namespace', () => {
+      Vaadin.setLitRenderer(
+        component,
+        'renderer',
+        '<span id="item-${index}">${item.name}</span>',
+        returnChannel,
+        [],
+        NAMESPACE,
+        'ROOT'
+      );
+
+      renderItem({ key: '1', [`${NAMESPACE}name`]: 'Jane', lr_other_name: 'Other' }, 2);
+
+      const span = root.querySelector('span')!;
+      expect(span.id).to.equal('item-2');
+      expect(span.textContent).to.equal('Jane');
+    });
+
+    it('should call the server through the client callables', () => {
+      Vaadin.setLitRenderer(
+        component,
+        'renderer',
+        '<button @click=${select}></button><i @click=${() => remove(1, item.name)}></i>',
+        returnChannel,
+        ['select', 'remove'],
+        NAMESPACE,
+        'ROOT'
+      );
+
+      renderItem({ key: '5', [`${NAMESPACE}name`]: 'Jane' });
+      root.querySelector('button')!.click();
+      root.querySelector('i')!.click();
+
+      expect(returnChannel.callCount).to.equal(2);
+      // An event argument is not sent to the server
+      expect(returnChannel.firstCall.args).to.deep.equal(['select', '5', []]);
+      expect(returnChannel.secondCall.args).to.deep.equal(['remove', '5', [1, 'Jane']]);
+    });
+  });
+
   describe('declared template', () => {
     it('should render the template with the item properties of its namespace', () => {
       Vaadin.setCompiledLitRenderer(

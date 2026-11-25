@@ -1,4 +1,4 @@
-# AI components benchmark
+# AI integrations benchmark
 
 JUnit suite that runs the AI controllers (`FormAIController`, `GridAIController`,
 `ChartAIController`) against a real LLM and scores the result. It measures the
@@ -12,7 +12,7 @@ part of normal PR validation.
 
 ```sh
 AI_BENCHMARK_MODEL=gpt-4.1-mini AI_BENCHMARK_API_KEY=sk-... \
-  mvn test -pl vaadin-ai-components-flow-parent/vaadin-ai-components-flow-benchmark
+  mvn test -pl vaadin-ai-integrations-flow-parent/vaadin-ai-integrations-flow-benchmark
 ```
 
 The module tests the `vaadin-ai-core-flow` and `vaadin-ai-extensions-flow`
@@ -23,7 +23,7 @@ depends on, so limit the tests to the benchmark:
 
 ```sh
 AI_BENCHMARK_MODEL=gpt-4.1-mini AI_BENCHMARK_API_KEY=sk-... \
-  mvn test -pl vaadin-ai-components-flow-parent/vaadin-ai-components-flow-benchmark -am \
+  mvn test -pl vaadin-ai-integrations-flow-parent/vaadin-ai-integrations-flow-benchmark -am \
   -Dtest='*Benchmark' -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
@@ -31,7 +31,7 @@ Against a local OpenAI-compatible server such as Ollama:
 
 ```sh
 AI_BENCHMARK_MODEL=qwen3-vl:8b AI_BENCHMARK_BASE_URL=http://localhost:11434/v1 \
-  mvn test -pl vaadin-ai-components-flow-parent/vaadin-ai-components-flow-benchmark
+  mvn test -pl vaadin-ai-integrations-flow-parent/vaadin-ai-integrations-flow-benchmark
 ```
 
 | Variable                    | Meaning                                                        | Default |

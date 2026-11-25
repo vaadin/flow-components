@@ -23,7 +23,6 @@
     </modules>
     <properties>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
-        <csp.mode>strict</csp.mode>
     </properties>
     <dependencies/>
     <profiles>

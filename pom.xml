@@ -66,7 +66,7 @@
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-slider-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
-        <module>vaadin-ai-components-flow-parent</module>
+        <module>vaadin-ai-integrations-flow-parent</module>
     </modules>
     <scm>
         <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
@@ -97,12 +97,13 @@
         <jandex.format.version>13</jandex.format.version>
         <spotless.plugin.version>3.11.0</spotless.plugin.version>
         <forbiddenapis.version>3.11</forbiddenapis.version>
-        <!-- Content Security Policy mode of a module: off or strict. A module
-             sets strict once it no longer sends JavaScript as a string. It
+        <!-- Content Security Policy mode of a module: strict or off. Strict
              turns on the forbidden-apis/csp-strict.txt signatures for the main
              classes, the strict mode in unit tests that use MockUIExtension,
-             and the strict mode of the integration test server. -->
-        <csp.mode>off</csp.mode>
+             and the strict mode of the integration test server, including the
+             merged integration tests WAR. Set it to off only for a module that
+             still sends JavaScript as a string. -->
+        <csp.mode>strict</csp.mode>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>

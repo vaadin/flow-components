@@ -20,12 +20,46 @@ import java.util.Arrays;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer")
 public class LitRendererPage extends Div {
+
+    @JsDefinition
+    interface ConsoleJs extends JsInvokers {
+        @JsExpression("console.warn($0)")
+        void warn(String message);
+    }
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+        @JsExpression("""
+                return html`<div tabindex="0"
+                    id="content-${index}"
+                    @click=${functions.clicked}
+                    draggable="true" @dragstart=${functions.dragged}
+                    @keypress=${(e) => functions.keyPressed(e.key)}>Item: ${item.value}</div>`;
+                """)
+        CompiledLitTemplate content();
+
+        @JsExpression("return html`<div>${index}</div>`;")
+        CompiledLitTemplate index();
+
+        @JsExpression("return html`<input type='checkbox' .checked=${live(item.checked)}>`;")
+        CompiledLitTemplate checkbox();
+
+        @JsExpression("return html`<div id=\"details-${index}\">Details: ${item.value}</div>`;")
+        CompiledLitTemplate details();
+    }
+
+    private static final Templates TEMPLATES = JsSnippets.of(Templates.class);
 
     public LitRendererPage() {
 
@@ -45,16 +79,16 @@ public class LitRendererPage extends Div {
         add(setLitRendererButton);
 
         NativeButton setSimpleLitRendererButton = new NativeButton(
-                "Set simple LitRenderer", e -> component
-                        .setRenderer(LitRenderer.of("<div>${index}</div>")));
+                "Set simple LitRenderer",
+                e -> component.setRenderer(LitRenderer.of(TEMPLATES.index())));
         setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
         add(setSimpleLitRendererButton);
 
         NativeButton setCheckboxRenderer = new NativeButton(
                 "Set LitRenderer with checkbox", e -> {
-                    component.setRenderer(LitRenderer.<String> of(
-                            "<input type='checkbox' .checked='${live(item.checked)}'>")
-                            .withProperty("checked", "2"::equals));
+                    component.setRenderer(
+                            LitRenderer.<String> of(TEMPLATES.checkbox())
+                                    .withProperty("checked", "2"::equals));
                 });
         setCheckboxRenderer.setId("setCheckboxRenderer");
         add(setCheckboxRenderer);
@@ -98,35 +132,27 @@ public class LitRendererPage extends Div {
     }
 
     private void setLitRenderer(LitRendererTestComponentWrapper component) {
-        component.setRenderer(LitRenderer.<String> of(new StringBuilder()
-                .append("<div tabindex=\"0\"")
-                .append("  id=\"content-${index}\"")
-                .append("  @click=\"${clicked}\"")
-                .append("  draggable=\"true\" @dragstart=\"${dragged}\"")
-                .append("  @keypress=\"${(e) => keyPressed(e.key)}\">")
-                .append("  Item: ${item.value}").append("</div>").toString())
+        component.setRenderer(LitRenderer.<String> of(TEMPLATES.content())
                 .withProperty("value", ValueProvider.identity())
                 .withFunction("clicked", item -> {
-                    getElement()
-                            .executeJs("console.warn(`event: clicked, item: "
-                                    + item + "`)");
+                    warn("event: clicked, item: " + item);
                 }).withFunction("keyPressed", (item, args) -> {
-                    getElement()
-                            .executeJs("console.warn(`event: keyPressed, item: "
-                                    + item + ", key: " + args.get(0).asString()
-                                    + "`)");
+                    warn("event: keyPressed, item: " + item + ", key: "
+                            + args.get(0).asString());
                 }).withFunction("dragged", (item, args) -> {
-                    getElement()
-                            .executeJs("console.warn(`event: dragged, item: "
-                                    + item + ", argument count: " + args.size()
-                                    + "`)");
+                    warn("event: dragged, item: " + item + ", argument count: "
+                            + args.size());
                 }));
+    }
+
+    private void warn(String message) {
+        getElement().executeJs(ConsoleJs.class).warn(message);
     }
 
     private void setDetailsLitRenderer(
             LitRendererTestComponentWrapper component) {
-        LitRenderer<String> renderer = LitRenderer.<String> of(
-                "<div id=\"details-${index}\">Details: ${item.value}</div>");
+        LitRenderer<String> renderer = LitRenderer
+                .<String> of(TEMPLATES.details());
         component.setDetailsRenderer(renderer);
         // Even though the properties are typically defined using the fluent
         // API, it should be possible to set them even after the renderer has
