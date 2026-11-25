@@ -189,6 +189,23 @@ class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     }
 
     @Test
+    void selectAll_hideAndShowCheckbox_checkboxStatesUnchanged() {
+        var selectionModel = (GridMultiSelectionModel<String>) treeGrid
+                .getSelectionModel();
+        selectionModel.selectAll();
+
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+
+        Element columnElement = getGridSelectionColumn(treeGrid).getElement();
+        Assertions.assertTrue(columnElement.getProperty("selectAll", false));
+        Assertions.assertFalse(
+                columnElement.getProperty("_indeterminate", false));
+    }
+
+    @Test
     void clientSelectAll_selectsAllItemsIncludingDescendants() {
         ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
                 .clientSelectAll();

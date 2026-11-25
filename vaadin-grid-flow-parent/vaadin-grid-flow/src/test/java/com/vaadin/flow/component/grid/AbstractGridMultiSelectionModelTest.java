@@ -265,6 +265,110 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void selectFromClient_lazyDataProviderRefreshedInSelectionListener_sizeQueriedOnce() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
+                true);
+        grid.addSelectionListener(event -> dataProvider.refreshAll());
+        ui.fakeClientCommunication();
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().selectFromClient("foo");
+        ui.fakeClientCommunication();
+
+        Mockito.verify(dataProvider, Mockito.times(1))
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
+    void deselectFromClient_lazyDataProviderRefreshedInSelectionListener_sizeQueriedOnce() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
+                true);
+        grid.getSelectionModel().select("foo");
+        grid.addSelectionListener(event -> dataProvider.refreshAll());
+        ui.fakeClientCommunication();
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().deselectFromClient("foo");
+        ui.fakeClientCommunication();
+
+        Mockito.verify(dataProvider, Mockito.times(1))
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
+    void selectFromClient_selectionNotSentToClient() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        ui.fakeClientCommunication();
+
+        grid.getSelectionModel().selectFromClient("foo");
+
+        Assertions.assertTrue(selected.isEmpty());
+    }
+
+    @Test
+    void deselectFromClient_deselectionNotSentToClient() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        grid.getSelectionModel().select("foo");
+        ui.fakeClientCommunication();
+
+        grid.getSelectionModel().deselectFromClient("foo");
+
+        Assertions.assertTrue(deselected.isEmpty());
+    }
+
+    @Test
+    void deselectFromClientWithFilteredDataProvider_selectAllUnchecked() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        ListDataProvider<String> dataProvider = DataProvider.ofItems("foo",
+                "bar");
+        grid.setItems(dataProvider);
+        selectionModel.selectAll();
+        dataProvider.setFilter("foo"::equals);
+
+        selectionModel.deselectFromClient("foo");
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertFalse(column.getProperty("selectAll", false));
+    }
+
+    @Test
+    void selectAllWithListDataViewFilter_hideAndShowCheckbox_checkboxStatesUnchanged() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar").setFilter("foo"::equals);
+        selectionModel.selectAll();
+
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertTrue(column.getProperty("selectAll", false));
+        Assertions.assertFalse(column.getProperty("_indeterminate", false));
+    }
+
+    @Test
+    void setItemsWithFetchCallbackWhileSelectAllCheckboxVisible_doesNotThrow() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems(query -> Stream.of("foo", "bar").skip(query.getOffset())
+                .limit(query.getLimit()));
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+        Assertions.assertDoesNotThrow(() -> grid.setItems(query -> Stream
+                .of("baz").skip(query.getOffset()).limit(query.getLimit())));
+    }
+
+    @Test
     void select_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
