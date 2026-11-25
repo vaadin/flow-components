@@ -122,6 +122,11 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         Mockito.when(service.getContext()).thenReturn(vaadinContext);
         var eventBus = new VaadinServiceEventBus(service);
         Mockito.when(service.getEventBus()).thenReturn(eventBus);
+        // Flow reads application resources through the class loader of the
+        // service, for example in string executeJs calls in the strict CSP
+        // mode
+        Mockito.when(service.getClassLoader())
+                .thenReturn(MockUIExtension.class.getClassLoader());
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 

@@ -1,11 +1,11 @@
-# AI components for Vaadin Flow
+# AI integrations for Vaadin Flow
 
 This project provides interfaces for building AI-powered applications with LLM integration
 and [Vaadin Flow](https://github.com/vaadin/flow).
 
-## Using the components in a Flow application
+## Using the AI integrations in a Flow application
 
-To use the components in an application using maven,
+To use the AI integrations in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
