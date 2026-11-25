@@ -133,13 +133,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                 getGrid(), item, true, selectionColumn.isShiftKeyDown()));
 
-        if (!isSelectAllCheckboxVisible()
-                && !getGrid().getDataProvider().isInMemory()) {
-            // Skip the size query for lazy data while the checkbox is
-            // hidden
-            return;
-        }
-
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(
                 !isHierarchicalDataProvider() && size == selected.size());
@@ -163,13 +156,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
                 getGrid(), item, false, selectionColumn.isShiftKeyDown()));
-
-        if (!isSelectAllCheckboxVisible()
-                && !getGrid().getDataProvider().isInMemory()) {
-            // Skip the size query for lazy data while the checkbox is
-            // hidden
-            return;
-        }
 
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);

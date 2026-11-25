@@ -170,9 +170,9 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void selectFromClient_lazyDefinedSizeDataProviderWithDefaultVisibility_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyDefinedSizeDataProviderWithDefaultVisibility_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
-                false, false, false, false,
+                false, false, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
 
     }
@@ -209,16 +209,16 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void selectFromClient_inMemoryDataProviderWithHidden_skipsUpdateCheckboxState() {
+    void selectFromClient_inMemoryDataProviderWithHidden_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
-                true, false, false, false,
+                true, false, true, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
     }
 
     @Test
-    void selectFromClient_lazyDefinedSizeDataProviderWithHidden_skipsUpdateCheckboxState() {
+    void selectFromClient_lazyDefinedSizeDataProviderWithHidden_updatesCheckboxState() {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
-                false, false, false, false,
+                false, false, false, true,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
 
     }
@@ -231,12 +231,13 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void deselectFromClient_checkboxHidden_skipsSizeQuery() {
+    void deselectFromClient_lazyDefinedSizeDataProvider_noSizeQuery() {
         DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
                 false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
                 true);
         grid.getSelectionModel().select("foo");
+        ui.fakeClientCommunication();
         Mockito.clearInvocations(dataProvider);
 
         grid.getSelectionModel().deselectFromClient("foo");
