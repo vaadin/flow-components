@@ -312,7 +312,7 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void setItemsWithFetchCallbackWhileSelectAllCheckboxVisible_doesNotThrow() {
+    void checkboxVisible_setItemsWithFetchCallback_doesNotThrow() {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
         grid.setItems(query -> Stream.of("foo", "bar").skip(query.getOffset())
