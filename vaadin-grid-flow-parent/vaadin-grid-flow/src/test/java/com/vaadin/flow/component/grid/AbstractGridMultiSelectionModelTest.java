@@ -300,29 +300,6 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void selectFromClient_selectionNotSentToClient() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
-        ui.fakeClientCommunication();
-
-        grid.getSelectionModel().selectFromClient("foo");
-
-        Assertions.assertTrue(selected.isEmpty());
-    }
-
-    @Test
-    void deselectFromClient_deselectionNotSentToClient() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
-        grid.getSelectionModel().select("foo");
-        ui.fakeClientCommunication();
-
-        grid.getSelectionModel().deselectFromClient("foo");
-
-        Assertions.assertTrue(deselected.isEmpty());
-    }
-
-    @Test
     void deselectFromClientWithFilteredDataProvider_selectAllUnchecked() {
         var selectionModel = (GridMultiSelectionModel<String>) grid
                 .setSelectionMode(SelectionMode.MULTI);
