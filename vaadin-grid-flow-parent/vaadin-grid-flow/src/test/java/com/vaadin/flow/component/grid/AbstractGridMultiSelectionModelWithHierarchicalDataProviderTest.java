@@ -197,7 +197,7 @@ class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
         selectionModel.setSelectAllCheckboxVisibility(
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
 
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
         Assertions.assertTrue(columnElement.getProperty("selectAll", false));

@@ -304,7 +304,7 @@ class AbstractGridMultiSelectionModelTest {
         selectionModel.setSelectAllCheckboxVisibility(
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
         selectionModel.setSelectAllCheckboxVisibility(
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT);
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
 
         Element column = getGridSelectionColumn(grid).getElement();
         Assertions.assertTrue(column.getProperty("selectAll", false));
