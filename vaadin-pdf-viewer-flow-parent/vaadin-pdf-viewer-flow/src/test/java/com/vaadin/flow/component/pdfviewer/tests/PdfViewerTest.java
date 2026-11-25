@@ -26,6 +26,8 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.SidebarOpenedChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.ThumbnailClickEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ToolbarCollapsedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
@@ -409,6 +411,74 @@ class PdfViewerTest {
     }
 
     @Test
+    void setSidebarOpened_isSidebarOpened() {
+        Assertions.assertFalse(viewer.isSidebarOpened());
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarOpened", true));
+
+        viewer.setSidebarOpened(true);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("sidebarOpened", false));
+        Assertions.assertTrue(viewer.isSidebarOpened());
+
+        viewer.setSidebarOpened(false);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarOpened", true));
+        Assertions.assertFalse(viewer.isSidebarOpened());
+    }
+
+    @Test
+    void setSidebarButtonVisible_isSidebarButtonVisible() {
+        Assertions.assertTrue(viewer.isSidebarButtonVisible());
+        Assertions.assertFalse(
+                viewer.getElement().hasProperty("sidebarButtonHidden"));
+
+        viewer.setSidebarButtonVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("sidebarButtonHidden", false));
+        Assertions.assertFalse(viewer.isSidebarButtonVisible());
+
+        viewer.setSidebarButtonVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("sidebarButtonHidden", true));
+        Assertions.assertTrue(viewer.isSidebarButtonVisible());
+    }
+
+    @Test
+    void setSidebarOpened_sidebarOpenedChangeEventFired() {
+        var events = new ArrayList<SidebarOpenedChangeEvent>();
+        viewer.addSidebarOpenedChangeListener(events::add);
+
+        viewer.setSidebarOpened(true);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isSidebarOpened());
+    }
+
+    @Test
+    void sidebarOpenedOnClient_sidebarOpenedChangeEventFired() {
+        var events = new ArrayList<SidebarOpenedChangeEvent>();
+        viewer.addSidebarOpenedChangeListener(events::add);
+
+        fakeClientPropertyChange("sidebarOpened", true);
+        fakeClientPropertyChange("sidebarOpened", false);
+
+        Assertions.assertEquals(2, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isSidebarOpened());
+        Assertions.assertTrue(events.get(1).isFromClient());
+        Assertions.assertFalse(events.get(1).isSidebarOpened());
+    }
+
+    @Test
+    void sidebarOpenedSynchronizedOnSidebarOpenedChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("sidebar-opened-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                        + "sidebarOpened"));
+    }
+
+    @Test
     void documentLoaded_pageCountUpdatedBeforeDocumentLoadListener() {
         var pageCount = new AtomicReference<Integer>();
         viewer.addDocumentLoadListener(
@@ -487,6 +557,21 @@ class PdfViewerTest {
     }
 
     @Test
+    void thumbnailClickOnClient_thumbnailClickEventFired() {
+        var eventRef = new AtomicReference<ThumbnailClickEvent>();
+        viewer.addThumbnailClickListener(eventRef::set);
+
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.page", 4);
+        fakeClientDomEvent("thumbnail-click", eventData);
+
+        var event = eventRef.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertTrue(event.isFromClient());
+        Assertions.assertEquals(4, event.getPage());
+    }
+
+    @Test
     void documentErrorOnClient_documentErrorEventFired() {
         var eventRef = new AtomicReference<DocumentErrorEvent>();
         viewer.addDocumentErrorListener(eventRef::set);
@@ -515,7 +600,9 @@ class PdfViewerTest {
                 .setPageFit("pageFit").setDocument("document")
                 .setPageLabel("pageLabel").setLoading("loading").setLink("link")
                 .setGoToPage("goToPage").setExternalLink("externalLink")
-                .setDownload("download");
+                .setDownload("download").setSidebar("sidebar")
+                .setThumbnails("thumbnails")
+                .setThumbnailLabel("thumbnailLabel");
         viewer.setI18n(i18n);
 
         Assertions.assertSame(i18n, viewer.getI18n());
@@ -523,7 +610,7 @@ class PdfViewerTest {
         var keys = List.of("previousPage", "nextPage", "page", "pageError",
                 "zoomIn", "zoomOut", "zoom", "pageWidth", "pageFit", "document",
                 "pageLabel", "loading", "link", "goToPage", "externalLink",
-                "download");
+                "download", "sidebar", "thumbnails", "thumbnailLabel");
         Assertions.assertEquals(keys.size(), json.size());
         keys.forEach(
                 key -> Assertions.assertEquals(key, json.get(key).asString()));

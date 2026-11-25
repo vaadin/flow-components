@@ -56,7 +56,7 @@ public class AvatarIT extends AbstractComponentIT {
 
         toggleImg.click();
         getPropsBtn.click();
-        Assert.assertEquals("https://vaadin.com/", imgBlock.getText());
+        Assert.assertEquals(AvatarPage.IMAGE_URL, imgBlock.getText());
 
         toggleResourceHandler.click();
         getPropsBtn.click();

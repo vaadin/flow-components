@@ -14,9 +14,6 @@
         <module>vaadin-popover-flow</module>
         <module>vaadin-popover-testbench</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>

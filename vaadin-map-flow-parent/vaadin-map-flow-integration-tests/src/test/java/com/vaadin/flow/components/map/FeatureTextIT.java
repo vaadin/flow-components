@@ -129,7 +129,9 @@ public class FeatureTextIT extends AbstractComponentIT {
 
         waitUntil(driver -> getUpdateCount() == 1);
 
-        checkLogsForErrors();
+        // The Content Security Policy blocks the background map tiles
+        checkLogsForErrors(
+                message -> message.contains("tile.openstreetmap.org"));
     }
 
     @Test
