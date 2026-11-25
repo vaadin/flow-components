@@ -14,9 +14,6 @@
         <module>vaadin-ordered-layout-flow</module>
         <module>vaadin-ordered-layout-testbench</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>

@@ -14,9 +14,6 @@
         <module>vaadin-menu-bar-flow</module>
         <module>vaadin-menu-bar-testbench</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>
