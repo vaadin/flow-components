@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-ai-components-flow-parent</artifactId>
+        <artifactId>vaadin-ai-integrations-flow-parent</artifactId>
         <version>25.4-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-ai-components-flow-benchmark</artifactId>
+    <artifactId>vaadin-ai-integrations-flow-benchmark</artifactId>
     <packaging>jar</packaging>
-    <name>Vaadin AI Components Benchmark</name>
+    <name>Vaadin AI Integrations Benchmark</name>
     <description>LLM benchmark suite for the Vaadin AI controllers. Not published.</description>
     <properties>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>

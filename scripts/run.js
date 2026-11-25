@@ -40,7 +40,7 @@ const modules = [...pom.matchAll(/module>vaadin-([^<]+)-flow-parent<\/module/g)]
 
 const itModule = (m) => `vaadin-${m}-flow-parent/vaadin-${m}-flow-integration-tests`;
 // all published modules of a component, e.g. vaadin-ai-core-flow and
-// vaadin-ai-extensions-flow for ai-components
+// vaadin-ai-extensions-flow for ai-integrations
 const flowModules = (m) =>
   readComponentPoms(`vaadin-${m}-flow-parent`)
     .map((pomPath) => path.dirname(pomPath))

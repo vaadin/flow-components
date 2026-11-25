@@ -6,14 +6,14 @@
         <artifactId>vaadin-flow-components</artifactId>
         <version>25.4-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-ai-components-flow-parent</artifactId>
+    <artifactId>vaadin-ai-integrations-flow-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Vaadin AI Components Parent</name>
-    <description>Vaadin AI Components Parent</description>
+    <name>Vaadin AI Integrations Parent</name>
+    <description>Vaadin AI Integrations Parent</description>
     <modules>
         <module>vaadin-ai-core-flow</module>
         <module>vaadin-ai-extensions-flow</module>
-        <module>vaadin-ai-components-flow-benchmark</module>
+        <module>vaadin-ai-integrations-flow-benchmark</module>
     </modules>
     <dependencies/>
     <profiles>
@@ -25,7 +25,7 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-ai-components-flow-integration-tests</module>
+                <module>vaadin-ai-integrations-flow-integration-tests</module>
             </modules>
         </profile>
     </profiles>
