@@ -113,7 +113,7 @@ do
   then
     build="$build,$i-flow-parent"
     ## include every published component module, e.g. vaadin-ai-core-flow
-    ## and vaadin-ai-extensions-flow in vaadin-ai-components-flow-parent
+    ## and vaadin-ai-extensions-flow in vaadin-ai-integrations-flow-parent
     for m in "$i-flow-parent"/*-flow
     do
       [ -d "$m" ] && build="$build,$m"

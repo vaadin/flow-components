@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.ai;
 
 /**
- * An exception which is thrown when somebody attempts to use AI component
+ * An exception which is thrown when somebody attempts to use AI integration
  * features without activating the associated feature flag first.
  *
  * @author Vaadin Ltd
@@ -65,7 +65,7 @@ public class AIComponentsExperimentalFeatureException extends RuntimeException {
             String specificFeatureFlagId) {
         String prefix = componentName != null
                 ? "The " + componentName + " feature is"
-                : "AI component features are";
+                : "AI integration features are";
 
         String flagInfo;
         if (specificFeatureFlagId != null) {

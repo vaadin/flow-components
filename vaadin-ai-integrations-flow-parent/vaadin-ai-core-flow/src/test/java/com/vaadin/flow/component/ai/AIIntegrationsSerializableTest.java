@@ -41,7 +41,7 @@ import com.vaadin.tests.MockUIExtension;
 import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
-class AIComponentsSerializableTest extends ClassesSerializableTest {
+class AIIntegrationsSerializableTest extends ClassesSerializableTest {
 
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
