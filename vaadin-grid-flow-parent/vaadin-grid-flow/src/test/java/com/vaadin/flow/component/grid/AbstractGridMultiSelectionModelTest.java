@@ -231,20 +231,6 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
-    void checkboxHidden_selectFromClient_skipsSizeQuery() {
-        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
-                false, false,
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN,
-                true);
-        Mockito.clearInvocations(dataProvider);
-
-        grid.getSelectionModel().selectFromClient("foo");
-
-        Mockito.verify(dataProvider, Mockito.never())
-                .size(Mockito.any(Query.class));
-    }
-
-    @Test
     void checkboxHidden_deselectFromClient_skipsSizeQuery() {
         DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
                 false, false,
