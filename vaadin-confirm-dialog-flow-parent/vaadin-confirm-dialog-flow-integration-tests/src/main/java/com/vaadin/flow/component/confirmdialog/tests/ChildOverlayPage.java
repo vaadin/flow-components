@@ -18,10 +18,20 @@ package com.vaadin.flow.component.confirmdialog.tests;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-confirm-dialog/child-overlay")
 public class ChildOverlayPage extends Div {
+
+    @JsDefinition
+    interface OverlayJs extends JsInvokers {
+        @JsExpression("this.$.overlay.style.top='300px'")
+        void moveOverlayDown();
+    }
+
     public ChildOverlayPage() {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId("parent-dialog");
@@ -30,7 +40,7 @@ public class ChildOverlayPage extends Div {
         ConfirmDialog dialog2 = new ConfirmDialog();
         dialog2.setText("This is a child dialog");
         // Just so the issue is more visible
-        dialog2.getElement().executeJs("this.$.overlay.style.top='300px'");
+        dialog2.getElement().executeJs(OverlayJs.class).moveOverlayDown();
 
         Button openDialog = new Button("Open dialogs", e -> {
             dialog.open();
