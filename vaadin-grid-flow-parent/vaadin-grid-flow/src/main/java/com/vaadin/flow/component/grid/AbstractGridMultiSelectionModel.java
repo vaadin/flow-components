@@ -169,7 +169,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
 
-        updateSelectAllCheckboxState();
+        // Unchecked regardless of the size: with a filter, the remaining
+        // selected items can outnumber the visible ones
+        long size = getDataProviderSize();
+        selectionColumn.setSelectAllCheckboxState(false);
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     @Override
@@ -537,6 +543,14 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     private void updateSelectAllCheckboxState() {
+        if (selected.isEmpty()) {
+            // Avoid a size query, which might not be supported, for example
+            // while the data provider is being replaced
+            selectionColumn.setSelectAllCheckboxState(false);
+            selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+            return;
+        }
+
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(!isHierarchicalDataProvider()
                 && size > 0 && size == selected.size());

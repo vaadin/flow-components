@@ -322,6 +322,35 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void setItemsWithFetchCallbackWhileSelectAllCheckboxVisible_doesNotThrow() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems(query -> Stream.of("foo", "bar").skip(query.getOffset())
+                .limit(query.getLimit()));
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+        Assertions.assertDoesNotThrow(() -> grid.setItems(query -> Stream
+                .of("baz").skip(query.getOffset()).limit(query.getLimit())));
+    }
+
+    @Test
+    void deselectFromClientWithFilteredDataProvider_selectAllUnchecked() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        ListDataProvider<String> dataProvider = DataProvider.ofItems("foo",
+                "bar");
+        grid.setItems(dataProvider);
+        selectionModel.selectAll();
+        dataProvider.setFilter("foo"::equals);
+
+        selectionModel.deselectFromClient("foo");
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertFalse(column.getProperty("selectAll", false));
+    }
+
+    @Test
     void selectFromClient_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
