@@ -24,6 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -32,6 +33,9 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 
@@ -41,6 +45,13 @@ import com.vaadin.flow.server.Command;
  */
 @Route("vaadin-grid/adding-columns")
 public class AddingColumnsPage extends Div {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`<div>${item.age}</div>`;")
+        CompiledLitTemplate age();
+    }
 
     private Grid<Person> grid = new Grid<>();
 
@@ -52,7 +63,7 @@ public class AddingColumnsPage extends Div {
                 () -> grid.addColumn(Person::getFirstName));
 
         addButton("add-template-column",
-                LitRenderer.<Person> of("<div>${item.age}</div>")
+                LitRenderer.<Person> of(JsSnippets.of(Templates.class).age())
                         .withProperty("age", Person::getAge));
 
         addButton("add-component-column", new ComponentRenderer<>(

@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.upload;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that components implementing {@link HasUploadManager} run on
@@ -28,7 +27,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface HasUploadManagerJs extends Serializable {
+interface HasUploadManagerJs extends JsInvokers {
 
     /**
      * Links the element to the client-side manager of an upload manager

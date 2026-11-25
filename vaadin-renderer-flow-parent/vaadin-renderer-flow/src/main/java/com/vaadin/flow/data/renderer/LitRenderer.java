@@ -34,7 +34,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.CspViolationReporter;
+import com.vaadin.flow.internal.ContentSecurityPolicyViolationReporter;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectionCache;
@@ -151,7 +151,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     /**
      * Creates a new LitRenderer based on a template declared by a method of a
-     * {@link com.vaadin.flow.js.JsDefinition} interface. The build collects the
+     * {@link com.vaadin.flow.js.JsSnippets} interface. The build collects the
      * template into the bundle, so it works with a content security policy that
      * does not allow <code>unsafe-eval</code>.
      * <p>
@@ -162,7 +162,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *
      * <pre>
      * &#64;JsDefinition
-     * interface PersonTemplates extends Serializable {
+     * interface PersonTemplates extends JsSnippets {
      *
      *     &#64;JsExpression("return html`&lt;div&gt;Name: ${item.name}&lt;/div&gt;`;")
      *     CompiledLitTemplate name();
@@ -176,8 +176,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *            the type of the input object used inside the template
      * @param template
      *            the template, returned by a method of a
-     *            {@link com.vaadin.flow.js.JsDefinition} interface called on
-     *            the object that {@link JsSnippets#of(Class)} returns, not
+     *            {@link com.vaadin.flow.js.JsSnippets} interface called on the
+     *            object that {@link JsSnippets#of(Class)} returns, not
      *            <code>null</code>
      * @return an initialized LitRenderer
      * @see CompiledLitTemplate
@@ -226,7 +226,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     rendererName, declaredTemplate, returnChannel,
                     clientCallablesArray, propertyNamespace, appId);
         } else {
-            CspViolationReporter.reportStringJavaScript();
+            ContentSecurityPolicyViolationReporter.reportStringJavaScript();
             container.executeJs(LitRendererJs.class).setLitRenderer(
                     rendererName, templateExpression, returnChannel,
                     clientCallablesArray, propertyNamespace, appId);

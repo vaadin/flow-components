@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.markdown;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The JavaScript that {@link Markdown} runs on its element in the browser, for
@@ -28,7 +27,7 @@ import com.vaadin.flow.js.JsExpression;
  * For internal use only. May be renamed or removed in a future release.
  */
 @JsDefinition
-interface MarkdownJs extends Serializable {
+interface MarkdownJs extends JsInvokers {
 
     /**
      * Appends text to the Markdown content, used when the new content starts

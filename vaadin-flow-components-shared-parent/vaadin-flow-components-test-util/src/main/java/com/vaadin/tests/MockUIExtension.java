@@ -36,7 +36,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceEventBus;
@@ -54,9 +54,10 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  * </pre>
  * <p>
  * In a module whose <code>csp.mode</code> Maven property is
- * <code>strict</code>, the UI is set up with {@link CspMode#STRICT}, see
- * {@link #setCspMode(CspMode)}. The mode reaches the tests as the
- * {@value #CSP_MODE_PROPERTY} system property.
+ * <code>strict</code>, the UI is set up with
+ * {@link ContentSecurityPolicyMode#STRICT}, see
+ * {@link #setContentSecurityPolicyMode(ContentSecurityPolicyMode)}. The mode
+ * reaches the tests as the {@value #CSP_MODE_PROPERTY} system property.
  */
 public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
 
@@ -131,7 +132,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         VaadinSession.setCurrent(session);
 
         if ("strict".equalsIgnoreCase(System.getProperty(CSP_MODE_PROPERTY))) {
-            setCspMode(CspMode.STRICT);
+            setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         }
     }
 
@@ -156,21 +157,21 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * {@link VaadinService} reports, and makes it the current service, which is
      * where the mode is read from.
      * <p>
-     * With {@link CspMode#STRICT}, every API that sends JavaScript to the
-     * browser as a string, such as
+     * With {@link ContentSecurityPolicyMode#STRICT}, every API that sends
+     * JavaScript to the browser as a string, such as
      * {@link Element#executeJs(String, Object...)}, throws a
-     * {@link com.vaadin.flow.server.CspViolationException}. A test can use this
-     * to check that a component only runs declared JavaScript, see
-     * {@link Element#executeJs(Class)}. The current service is cleared again
-     * when the UI is torn down.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}. A
+     * test can use this to check that a component only runs declared
+     * JavaScript, see {@link Element#executeJs(Class)}. The current service is
+     * cleared again when the UI is torn down.
      *
      * @param mode
      *            the mode to use, not {@code null}
      */
-    public void setCspMode(CspMode mode) {
+    public void setContentSecurityPolicyMode(ContentSecurityPolicyMode mode) {
         Objects.requireNonNull(mode, "CSP mode cannot be null");
-        Mockito.when(service.getDeploymentConfiguration().getCspMode())
-                .thenReturn(mode);
+        Mockito.when(service.getDeploymentConfiguration()
+                .getContentSecurityPolicyMode()).thenReturn(mode);
         VaadinService.setCurrent(service);
         serviceSetAsCurrent = true;
     }

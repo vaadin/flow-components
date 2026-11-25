@@ -828,9 +828,8 @@ public class Spreadsheet extends Component
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            getElement().executeJs(
-                    "queueMicrotask(() => this.updateFormulaBar($0, $1, $2));",
-                    possibleName, col, row);
+            getElement().executeJs(SpreadsheetJs.class)
+                    .updateFormulaBar(possibleName, col, row);
         }
 
         @Override
@@ -3688,7 +3687,8 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().executeJs("this.resources=$0", resources.keySet());
+            getElement().executeJs(SpreadsheetJs.class)
+                    .setResources(new HashSet<>(resources.keySet()));
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));

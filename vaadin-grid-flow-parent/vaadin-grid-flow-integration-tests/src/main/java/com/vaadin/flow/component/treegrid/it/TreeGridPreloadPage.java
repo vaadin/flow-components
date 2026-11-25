@@ -29,7 +29,11 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Location;
@@ -42,6 +46,13 @@ import com.vaadin.flow.server.VaadinService;
 @Route("vaadin-grid/treegrid-preload")
 public class TreeGridPreloadPage extends VerticalLayout
         implements HasUrlParameter<String> {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+
+        @JsExpression("return html`${index}`;")
+        CompiledLitTemplate index();
+    }
 
     private TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
     private TextField requestCountField = new TextField(
@@ -159,7 +170,8 @@ public class TreeGridPreloadPage extends VerticalLayout
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
         grid.addColumn(HierarchicalTestBean::getIndex)
                 .setHeader("Index on level");
-        grid.addColumn(LitRenderer.of("${index}")).setHeader("Index");
+        grid.addColumn(LitRenderer.of(JsSnippets.of(Templates.class).index()))
+                .setHeader("Index");
         grid.setUniqueKeyDataGenerator("key",
                 item -> item != null ? item.getId() : "null");
 
