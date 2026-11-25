@@ -29,7 +29,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 /**
  * Reflection access to {@link Binder} internals.
  * <p>
- * {@link FormAIController} needs two things {@link Binder} does not expose
+ * {@link FormAiController} needs two things {@link Binder} does not expose
  * publicly: the property name supplied when a binding was created (kept in a
  * private {@code boundProperties} field), and a way to read bean-level
  * validation without modifying the UI (the protected {@code validate(boolean)}

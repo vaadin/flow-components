@@ -28,13 +28,13 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
-import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
-import com.vaadin.flow.component.ai.ui.AIInput;
-import com.vaadin.flow.component.ai.ui.AIMessage;
-import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiInput;
+import com.vaadin.flow.component.ai.ui.AiMessage;
+import com.vaadin.flow.component.ai.ui.AiMessageList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
@@ -53,26 +53,26 @@ class UploadInProgressTest {
     MockUIExtension ui = new MockUIExtension();
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
+            AiComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private final TestLogger logger = TestLoggerFactory
-            .getTestLogger(AIOrchestrator.class);
+            .getTestLogger(AiOrchestrator.class);
 
-    private LLMProvider mockProvider;
-    private AIMessageList mockMessageList;
+    private LlmProvider mockProvider;
+    private AiMessageList mockMessageList;
     private UploadManager uploadManager;
     private Component uploadManagerConnector;
     private Upload upload;
 
     @BeforeEach
     void setup() throws ReflectiveOperationException {
-        mockProvider = Mockito.mock(LLMProvider.class);
-        mockMessageList = Mockito.mock(AIMessageList.class);
-        var message = Mockito.mock(AIMessage.class);
+        mockProvider = Mockito.mock(LlmProvider.class);
+        mockMessageList = Mockito.mock(AiMessageList.class);
+        var message = Mockito.mock(AiMessage.class);
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList())).thenReturn(message);
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
         var owner = new Div();
@@ -89,7 +89,7 @@ class UploadInProgressTest {
 
     @Test
     void prompt_whileUploadManagerUploading_promptIgnored() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(uploadManager).build();
         ui.dumpPendingJavaScriptInvocations();
@@ -102,7 +102,7 @@ class UploadInProgressTest {
 
     @Test
     void prompt_afterUploadManagerUploadCompleted_promptSent() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(uploadManager).build();
         fireUploadStart(uploadManagerConnector);
@@ -116,7 +116,7 @@ class UploadInProgressTest {
 
     @Test
     void prompt_whileUploadUploading_promptIgnored() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(upload)
                 .build();
         ui.dumpPendingJavaScriptInvocations();
@@ -129,7 +129,7 @@ class UploadInProgressTest {
 
     @Test
     void prompt_afterUploadUploadCompleted_promptSent() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(upload)
                 .build();
         fireUploadStart(upload);
@@ -143,9 +143,9 @@ class UploadInProgressTest {
 
     @Test
     void prompt_whileCustomReceiverUploading_promptIgnored() {
-        var receiver = Mockito.mock(AIFileReceiver.class);
+        var receiver = Mockito.mock(AiFileReceiver.class);
         Mockito.when(receiver.isUploading()).thenReturn(true);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(receiver)
                 .build();
 
@@ -158,8 +158,8 @@ class UploadInProgressTest {
     @Test
     @SuppressWarnings("unchecked")
     void inputSubmit_whileUploading_promptIgnored() {
-        var mockInput = Mockito.mock(AIInput.class);
-        AIOrchestrator.builder(mockProvider, null)
+        var mockInput = Mockito.mock(AiInput.class);
+        AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withInput(mockInput)
                 .withFileReceiver(uploadManager).build();
         var listenerCaptor = ArgumentCaptor
@@ -175,13 +175,13 @@ class UploadInProgressTest {
 
     @Test
     void promptWithAttachments_whileUploading_promptSent() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(uploadManager).build();
         fireUploadStart(uploadManagerConnector);
 
         orchestrator.prompt("Hello", List.of(
-                new AIAttachment("file.txt", "text/plain", new byte[] { 1 })));
+                new AiAttachment("file.txt", "text/plain", new byte[] { 1 })));
 
         assertPromptSent("Hello");
     }
@@ -200,7 +200,7 @@ class UploadInProgressTest {
     }
 
     private void assertPromptSent(String userMessage) {
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        var captor = ArgumentCaptor.forClass(LlmProvider.LlmRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
         Assertions.assertEquals(userMessage, captor.getValue().userMessage());
     }

@@ -18,8 +18,8 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 
 /**
- * Metadata about an LLM response, published by an {@link LLMProvider} through
- * {@link LLMProvider.LLMRequest#metadataSink()} when the model reports it.
+ * Metadata about an LLM response, published by an {@link LlmProvider} through
+ * {@link LlmProvider.LlmRequest#metadataSink()} when the model reports it.
  * <p>
  * The metadata describes the turn as far as the provider has observed it: when
  * the turn contains tool-call round trips, the finish reason is the latest one
@@ -37,14 +37,14 @@ import java.io.Serializable;
  * rather than as an error.
  * </p>
  * <p>
- * {@link LangChain4JLLMProvider} is a step further removed, and shows why the
+ * {@link LangChain4jLlmProvider} is a step further removed, and shows why the
  * mapping is left alone: LangChain4j collapses the vendor's word onto its own
  * five-constant {@code FinishReason} enum before Vaadin sees the response, so
  * the value is that constant's name and both examples above arrive as
  * {@code "LENGTH"}. The collapsing is per integration and loses whatever it
  * does not recognize — an unrecognized value reaches this record as
  * {@code null} through its OpenAI integration and as {@code "OTHER"} through
- * its Anthropic one. Use {@link SpringAILLMProvider} where the application
+ * its Anthropic one. Use {@link SpringAiLlmProvider} where the application
  * needs the model's own word.
  * </p>
  *

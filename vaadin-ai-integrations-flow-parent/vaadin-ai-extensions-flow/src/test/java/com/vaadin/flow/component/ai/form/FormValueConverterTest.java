@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
+import com.vaadin.flow.component.ai.form.FormAiTools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;

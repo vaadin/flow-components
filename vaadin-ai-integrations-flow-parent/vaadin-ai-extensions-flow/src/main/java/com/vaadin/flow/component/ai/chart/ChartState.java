@@ -20,8 +20,8 @@ import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Serializable chart state for persistence across sessions. Captured via
- * {@link ChartAIController#getState()} and restored via
- * {@link ChartAIController#restoreState(ChartState)}.
+ * {@link ChartAiController#getState()} and restored via
+ * {@link ChartAiController#restoreState(ChartState)}.
  *
  * @param queries
  *            the SQL queries for the chart's data series

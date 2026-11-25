@@ -34,7 +34,7 @@ class IdStorageTest {
         // ComponentUtil.getData on the field, which is the same place the
         // production code reads it from.
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "X");
 
         Assertions.assertNotNull(idOf(field),
@@ -45,7 +45,7 @@ class IdStorageTest {
     @Test
     void hasValueWithoutComponentBackingRejectsAtRegistration() {
         var detached = new DetachedHasValue();
-        var controller = new FormAIController(new Div());
+        var controller = new FormAiController(new Div());
 
         var ex = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> controller.describeField(detached, "X"));
@@ -61,11 +61,11 @@ class IdStorageTest {
         // same id — pinning the §13.5 reconnect-lifecycle guarantee.
         var field = new TestField();
         var form = new Div(field);
-        var firstController = new FormAIController(form);
+        var firstController = new FormAiController(form);
         firstController.describeField(field, "X");
         var firstId = idOf(field);
 
-        var secondController = new FormAIController(form);
+        var secondController = new FormAiController(form);
         secondController.describeField(field, "Y");
         var secondId = idOf(field);
 
@@ -78,7 +78,7 @@ class IdStorageTest {
     void distinctComponentsProduceDistinctIds() {
         var a = new TestField();
         var b = new TestField();
-        var controller = new FormAIController(new Div(a, b));
+        var controller = new FormAiController(new Div(a, b));
         controller.describeField(a, "A");
         controller.describeField(b, "B");
 
@@ -90,7 +90,7 @@ class IdStorageTest {
     void componentIdIsUsedAsFieldId() {
         var field = new TestField();
         field.setId("first-name");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "X");
 
         Assertions.assertEquals("first-name", idOf(field),
@@ -101,7 +101,7 @@ class IdStorageTest {
     void componentIdIsUsedInFormState() {
         var field = new TestField();
         field.setId("first-name");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var fields = formStateFields(controller);
 
@@ -116,7 +116,7 @@ class IdStorageTest {
         // it; a whitespace-only id is what actually reaches the blank check.
         var field = new TestField();
         field.setId("  ");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "X");
 
         var id = idOf(field);
@@ -128,7 +128,7 @@ class IdStorageTest {
     @Test
     void componentIdSetAfterFirstDiscoveryDoesNotChangeFieldId() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "X");
         var generated = idOf(field);
 

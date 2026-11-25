@@ -39,7 +39,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.AiTurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
@@ -72,7 +72,7 @@ import com.vaadin.tests.MockUIExtension;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Tests for {@link FormAIController}'s {@code fill_form} tool. Per the RFC the
+ * Tests for {@link FormAiController}'s {@code fill_form} tool. Per the RFC the
  * tool returns the same shape as {@code get_form_state} — a {@code fields}
  * block listing every visible field's current state — plus a {@code rejected}
  * block carrying {@code {"id", "value", "reason"}} entries for any value that
@@ -807,7 +807,7 @@ class FillFormToolTest {
         var controller = controllerFor(trigger, dependent);
         fillFormResult(controller, payload(trigger, "\"business\""));
 
-        controller.onResponse(AITurnEvents.success());
+        controller.onResponse(AiTurnEvents.success());
 
         Assertions.assertFalse(isWorking(dependent),
                 "A field locked mid-turn must be released at turn end");
@@ -824,7 +824,7 @@ class FillFormToolTest {
         dependent.setEnabled(false);
         trigger.addValueChangeListener(e -> dependent.setEnabled(true));
         var controller = controllerFor(trigger, dependent);
-        controller.onResponse(AITurnEvents.success());
+        controller.onResponse(AiTurnEvents.success());
 
         fillFormResult(controller, payload(trigger, "\"business\""));
 
@@ -1575,8 +1575,8 @@ class FillFormToolTest {
         // ToolException is the curated, LLM-facing failure channel — its
         // message is allowed to leak into the response (callers must scrub
         // it themselves before throwing). Pins the ToolException catch in
-        // FormAITools.fillForm.execute().
-        var tool = FormAITools.fillForm(throwingCallbacks(
+        // FormAiTools.fillForm.execute().
+        var tool = FormAiTools.fillForm(throwingCallbacks(
                 new ToolException("field 'foo' is no longer addressable")));
 
         var result = tool.execute(wrappedValues());
@@ -1591,7 +1591,7 @@ class FillFormToolTest {
         // the catch must return a generic message so internal exception
         // text (potentially carrying PII or stack-trace detail) does not
         // leak to the LLM.
-        var tool = FormAITools.fillForm(throwingCallbacks(
+        var tool = FormAiTools.fillForm(throwingCallbacks(
                 new RuntimeException("internal-detail-that-must-not-leak")));
 
         var result = tool.execute(wrappedValues());
@@ -1671,7 +1671,7 @@ class FillFormToolTest {
         // already surfaces its items as `enum`. The converter must resolve
         // an LLM-supplied label against those items via
         // FormValueConverter.renderItem so the field is writable without
-        // also requiring FormAIController.fieldValueOptions(...).
+        // also requiring FormAiController.fieldValueOptions(...).
         var field = new SingleSelectField<String>();
         field.setItems("EUR", "USD", "GBP");
         var controller = controllerFor(field);
@@ -2127,7 +2127,7 @@ class FillFormToolTest {
         Assertions.assertTrue(
                 controller.getTools().stream()
                         .anyMatch(t -> "fill_form".equals(t.getName())),
-                "fill_form must be exposed via FormAIController.getTools()");
+                "fill_form must be exposed via FormAiController.getTools()");
     }
 
     @Test
@@ -2141,7 +2141,7 @@ class FillFormToolTest {
         var field = new TestField();
         var detachedForm = new Div(field);
         // No ui.add(detachedForm) — form is intentionally detached.
-        var controller = new FormAIController(detachedForm);
+        var controller = new FormAiController(detachedForm);
         controller.onRequest(requestEvent());
 
         var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
@@ -2460,7 +2460,7 @@ class FillFormToolTest {
 
     // --- helpers ---
 
-    private FormAIController controllerFor(Component... fields) {
+    private FormAiController controllerFor(Component... fields) {
         var controller = newController(fields);
         // Drive onRequest() so each discovered field has its UUID id
         // stamped — payload helpers use idOf() to look the id up.
@@ -2482,17 +2482,17 @@ class FillFormToolTest {
         }
     }
 
-    private FormAIController newController(Component... fields) {
+    private FormAiController newController(Component... fields) {
         var form = new Div(fields);
         ui.add(form);
-        return new FormAIController(form);
+        return new FormAiController(form);
     }
 
-    private FormAIController controllerForBound(Binder<?> binder,
+    private FormAiController controllerForBound(Binder<?> binder,
             Component... fields) {
         var form = new Div(fields);
         ui.add(form);
-        var controller = new FormAIController(form, binder);
+        var controller = new FormAiController(form, binder);
         controller.onRequest(requestEvent());
         return controller;
     }
@@ -2508,7 +2508,7 @@ class FillFormToolTest {
      * the tool's parameter schema requires so individual tests can stay focused
      * on the field map.
      */
-    private static String fillFormPayload(FormAIController controller,
+    private static String fillFormPayload(FormAiController controller,
             JsonNode fieldMap) {
         var wrapped = JacksonUtils.createObjectNode();
         wrapped.set("values", fieldMap);
@@ -2516,11 +2516,11 @@ class FillFormToolTest {
     }
 
     /**
-     * Same as {@link #fillFormPayload(FormAIController, JsonNode)} but parses
+     * Same as {@link #fillFormPayload(FormAiController, JsonNode)} but parses
      * the response as JSON. Use for happy-path tests asserting on the
      * {@code success}/{@code written}/{@code rejected} structure.
      */
-    private static JsonNode fillFormResult(FormAIController controller,
+    private static JsonNode fillFormResult(FormAiController controller,
             JsonNode fieldMap) {
         return parseResult(fillFormPayload(controller, fieldMap));
     }
@@ -2599,16 +2599,16 @@ class FillFormToolTest {
     }
 
     /**
-     * Returns a {@link FormAITools.Callbacks} whose {@code executeFill} throws
+     * Returns a {@link FormAiTools.Callbacks} whose {@code executeFill} throws
      * the given exception — lets a test pin the outer execute() catches in
-     * {@link FormAITools#fillForm(FormAITools.Callbacks)} without going through
+     * {@link FormAiTools#fillForm(FormAiTools.Callbacks)} without going through
      * the controller layer.
      */
-    private static FormAITools.Callbacks throwingCallbacks(
+    private static FormAiTools.Callbacks throwingCallbacks(
             RuntimeException toThrow) {
-        return new FormAITools.Callbacks() {
+        return new FormAiTools.Callbacks() {
             @Override
-            public List<FormAITools.FormFieldDescriptor> visibleFields() {
+            public List<FormAiTools.FormFieldDescriptor> visibleFields() {
                 return List.of();
             }
 

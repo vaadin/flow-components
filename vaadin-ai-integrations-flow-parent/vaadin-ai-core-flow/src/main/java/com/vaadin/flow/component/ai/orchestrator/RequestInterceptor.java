@@ -24,16 +24,16 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * Intercepts the user's input before the orchestrator acts on it. Configured
  * via
- * {@link AIOrchestrator.Builder#withRequestInterceptor(RequestInterceptor)},
+ * {@link AiOrchestrator.Builder#withRequestInterceptor(RequestInterceptor)},
  * the interceptor is invoked for every prompt — a submit through a connected
  * input component as well as the programmatic
- * {@link AIOrchestrator#prompt(String)} entry points — with the user's message
+ * {@link AiOrchestrator#prompt(String)} entry points — with the user's message
  * text and attachments. It can validate the content and
  * {@link RequestInterceptEvent#reject() reject} the prompt, sanitize or replace
  * the {@link RequestInterceptEvent#setUserMessage(String) text}, and replace
@@ -41,7 +41,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  * example to convert an uploaded file to a format the LLM accepts):
  *
  * <pre>
- * AIOrchestrator.builder(provider, systemPrompt)
+ * AiOrchestrator.builder(provider, systemPrompt)
  *         .withRequestInterceptor(event -&gt; {
  *             if (containsBlockedTerms(event.getUserMessage())) {
  *                 event.reject("Please rephrase your message.");
@@ -53,7 +53,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  * <p>
  * The interceptor runs before the prompt has any effect: before the message
  * appears in the message list, before
- * {@link AIController#onRequest(RequestListener.RequestEvent) controller} and
+ * {@link AiController#onRequest(RequestListener.RequestEvent) controller} and
  * {@link RequestListener} hooks, before the conversation history entry, and
  * before the LLM request is built. Everything downstream sees only the
  * processed content. A silently rejected prompt leaves no trace in the UI or
@@ -66,7 +66,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  * <p>
  * Throwing from the interceptor aborts the prompt the same way as a rejection,
  * except that the exception is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(ResponseListener.ResponseEvent)}, and
+ * {@link AiController#onResponse(ResponseListener.ResponseEvent)}, and
  * propagates to the caller of the prompt entry point. Throw only for failures;
  * use {@link RequestInterceptEvent#reject(String) reject} for expected
  * validation outcomes.
@@ -110,14 +110,14 @@ import com.vaadin.flow.function.SerializableConsumer;
  *
  * A failure after postponing — {@link RequestContinuation#fail} or the timeout
  * — is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(ResponseListener.ResponseEvent)} only; it
+ * {@link AiController#onResponse(ResponseListener.ResponseEvent)} only; it
  * cannot propagate to the caller of the prompt entry point, which has long
  * returned.
  * <p>
  * <b>Serialization:</b> the interceptor is stored on the serializable
  * orchestrator and survives session serialization with it — unlike the LLM
  * provider, it needs no
- * {@link AIOrchestrator#reconnect(com.vaadin.flow.component.ai.provider.LLMProvider)
+ * {@link AiOrchestrator#reconnect(com.vaadin.flow.component.ai.provider.LlmProvider)
  * reconnect} step. A lambda implementation must therefore only capture
  * serializable state; reference non-serializable services (e.g. a moderation
  * client) indirectly instead of capturing them. A prompt that is postponed when
@@ -149,9 +149,9 @@ public interface RequestInterceptor extends Serializable {
     class RequestInterceptEvent implements Serializable {
 
         private final String originalUserMessage;
-        private final List<AIAttachment> originalAttachments;
+        private final List<AiAttachment> originalAttachments;
         private String userMessage;
-        private List<AIAttachment> attachments;
+        private List<AiAttachment> attachments;
         private boolean rejected;
         private String rejectionMessage;
         private RequestContinuation continuation;
@@ -172,7 +172,7 @@ public interface RequestInterceptor extends Serializable {
          *             {@code null} elements
          */
         public RequestInterceptEvent(String userMessage,
-                List<AIAttachment> attachments) {
+                List<AiAttachment> attachments) {
             this.originalUserMessage = Objects.requireNonNull(userMessage,
                     "User message must not be null");
             this.originalAttachments = List.copyOf(Objects.requireNonNull(
@@ -195,7 +195,7 @@ public interface RequestInterceptor extends Serializable {
          * {@link #setAttachments(List)}. Consulted by the orchestrator when
          * displaying a prompt rejected with a user-facing message.
          */
-        List<AIAttachment> getOriginalAttachments() {
+        List<AiAttachment> getOriginalAttachments() {
             return originalAttachments;
         }
 
@@ -235,7 +235,7 @@ public interface RequestInterceptor extends Serializable {
          * @return unmodifiable list of attachments with full data; empty when
          *         the message has no attachments, never {@code null}
          */
-        public List<AIAttachment> getAttachments() {
+        public List<AiAttachment> getAttachments() {
             return attachments;
         }
 
@@ -252,7 +252,7 @@ public interface RequestInterceptor extends Serializable {
          * @throws IllegalStateException
          *             if a postponed prompt has already been completed
          */
-        public void setAttachments(List<AIAttachment> attachments) {
+        public void setAttachments(List<AiAttachment> attachments) {
             checkNotCompleted();
             this.attachments = List.copyOf(Objects.requireNonNull(attachments,
                     "Attachments must not be null"));
@@ -262,7 +262,7 @@ public interface RequestInterceptor extends Serializable {
          * Rejects the prompt without user-facing feedback: nothing is sent to
          * the LLM, nothing is added to the message list or the conversation
          * history, and neither
-         * {@link AIController#onRequest(RequestListener.RequestEvent)
+         * {@link AiController#onRequest(RequestListener.RequestEvent)
          * controller} nor {@link RequestListener} hooks fire. Rejection is
          * final — later content changes do not undo it.
          *
@@ -285,7 +285,7 @@ public interface RequestInterceptor extends Serializable {
          * <p>
          * Because both entries live only in the message list component, they
          * survive session serialization together with the rest of the UI, but
-         * are absent from {@link AIOrchestrator#getHistory()} — a UI rebuilt
+         * are absent from {@link AiOrchestrator#getHistory()} — a UI rebuilt
          * from saved history does not show past rejected exchanges.
          *
          * @param userFacingMessage
@@ -419,7 +419,7 @@ public interface RequestInterceptor extends Serializable {
         /**
          * Aborts the postponed prompt: nothing is sent or shown, and the cause
          * is reported to the {@link ResponseListener} and
-         * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Safe
+         * {@link AiController#onResponse(ResponseListener.ResponseEvent)}. Safe
          * to call when the UI is already detached: the {@link ResponseListener}
          * is still notified, only the UI-bound controller hook is skipped. A
          * no-op when the prompt has already been completed or timed out.

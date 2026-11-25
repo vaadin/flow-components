@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * Listener for {@link FieldValueChangeEvent}s fired by a
- * {@link FormAIController} after a successful AI turn. One event is delivered
+ * {@link FormAiController} after a successful AI turn. One event is delivered
  * per changed field, in document order.
  *
  * @since 25.3
