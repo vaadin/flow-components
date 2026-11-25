@@ -7,7 +7,7 @@ const fs = require('fs');
 
 // Collect the published component module poms of a parent module: the main
 // `-flow` module and any additional ones, such as `vaadin-ai-core-flow` and
-// `vaadin-ai-extensions-flow` in `vaadin-ai-components-flow-parent`
+// `vaadin-ai-extensions-flow` in `vaadin-ai-integrations-flow-parent`
 function readComponentPoms(parentModule) {
   return fs
     .readdirSync(parentModule, { withFileTypes: true })

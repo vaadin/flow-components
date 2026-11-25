@@ -18,12 +18,23 @@ package com.vaadin.flow.data.renderer.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer-property-namespace")
 public class LitRendererPropertyNamespacePage extends Div {
+
+    @JsDefinition
+    interface Templates extends JsSnippets {
+        @JsExpression("return html`<span>${item.content}</span>`;")
+        CompiledLitTemplate content();
+    }
+
     public LitRendererPropertyNamespacePage() {
         // Create a wrapper component with two LitRendererTestComponents
         LitRendererTestComponentWrapper wrapper = new LitRendererTestComponentWrapper(
@@ -62,7 +73,7 @@ public class LitRendererPropertyNamespacePage extends Div {
 
     private LitRenderer<String> createLitRenderer(String prefix) {
         LitRenderer<String> renderer = LitRenderer
-                .of("<span>${item.content}</span>");
+                .of(JsSnippets.of(Templates.class).content());
         renderer.withProperty("content", item -> prefix + " : " + item);
         return renderer;
     }

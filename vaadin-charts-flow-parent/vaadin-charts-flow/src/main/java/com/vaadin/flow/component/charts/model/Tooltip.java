@@ -30,12 +30,15 @@ public class Tooltip extends AbstractConfigurationObject {
     private Boolean followTouchMove;
     private String footerFormat;
     private String _fn_formatter;
+    private ChartFunction formatter;
     private String headerFormat;
     private Number hideDelay;
     private Number padding;
     private String pointFormat;
     private String _fn_pointFormatter;
+    private ChartFunction pointFormatter;
     private String _fn_positioner;
+    private ChartFunction positioner;
     private Boolean shadow;
     private Shape shape;
     private Boolean shared;
@@ -296,16 +299,50 @@ public class Tooltip extends AbstractConfigurationObject {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}. Where format
-     * strings are enough, use {@link #setHeaderFormat(String)},
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
+     * Where format strings are enough, use {@link #setHeaderFormat(String)},
      * {@link #setPointFormat(String)} and {@link #setFooterFormat(String)},
      * which need no JavaScript.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_formatter
      *            the source code of the JavaScript function
      */
     public void setFormatter(String _fn_formatter) {
         this._fn_formatter = _fn_formatter;
+        this.formatter = null;
+    }
+
+    /**
+     * @see #setFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getFormatterFunction() {
+        return formatter;
+    }
+
+    /**
+     * Sets the function of the <code>formatter</code> option, declared in a
+     * {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param formatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setFormatterFunction(ChartFunction formatter) {
+        this.formatter = formatter;
+        this._fn_formatter = null;
     }
 
     /**
@@ -409,15 +446,49 @@ public class Tooltip extends AbstractConfigurationObject {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
-     * string is enough, use {@link #setPointFormat(String)}, which needs no
-     * JavaScript.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
+     * Where a format string is enough, use {@link #setPointFormat(String)},
+     * which needs no JavaScript.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_pointFormatter
      *            the source code of the JavaScript function
      */
     public void setPointFormatter(String _fn_pointFormatter) {
         this._fn_pointFormatter = _fn_pointFormatter;
+        this.pointFormatter = null;
+    }
+
+    /**
+     * @see #setPointFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getPointFormatterFunction() {
+        return pointFormatter;
+    }
+
+    /**
+     * Sets the function of the <code>pointFormatter</code> option, declared in
+     * a {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPointFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param pointFormatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setPointFormatterFunction(ChartFunction pointFormatter) {
+        this.pointFormatter = pointFormatter;
+        this._fn_pointFormatter = null;
     }
 
     public String getPositioner() {
@@ -431,13 +502,49 @@ public class Tooltip extends AbstractConfigurationObject {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPositionerFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser.
      *
      * @param _fn_positioner
      *            the source code of the JavaScript function
      */
     public void setPositioner(String _fn_positioner) {
         this._fn_positioner = _fn_positioner;
+        this.positioner = null;
+    }
+
+    /**
+     * @see #setPositionerFunction(ChartFunction)
+     */
+    public ChartFunction getPositionerFunction() {
+        return positioner;
+    }
+
+    /**
+     * Sets the function of the <code>positioner</code> option, declared in a
+     * {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>. Highcharts
+     * calls it with the arguments <code>labelWidth</code>,
+     * <code>labelHeight</code> and <code>point</code>.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setPositioner(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param positioner
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setPositionerFunction(ChartFunction positioner) {
+        this.positioner = positioner;
+        this._fn_positioner = null;
     }
 
     /**

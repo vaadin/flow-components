@@ -19,6 +19,8 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public static final String OVERFLOW_JUSTIFY = "justify";
     public static final String OVERFLOW_NONE = "none";
 
+    private ChartFunction formatter;
+
     /**
      * @see #setClassName(String)
      */
@@ -151,11 +153,58 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The browser compiles the function from this string, which a Content
      * Security Policy without <code>unsafe-eval</code> blocks: in the strict
      * CSP mode, sending a chart configuration that has a function throws a
-     * {@link com.vaadin.flow.server.CspViolationException}. Where a format
-     * string is enough, use {@link #setFormat(String)}, which needs no
-     * JavaScript.
+     * {@link com.vaadin.flow.server.ContentSecurityPolicyViolationException}.
+     * Where a format string is enough, use {@link #setFormat(String)}, which
+     * needs no JavaScript.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setFormatterFunction(ChartFunction)}, which works without
+     * compiling JavaScript in the browser. To do so, an implementation calls
+     * {@link #clearFormatterFunction()}. It also accepts <code>null</code>,
+     * which {@link #setFormatterFunction(ChartFunction)} passes to clear the
+     * string function.
      */
     public abstract void setFormatter(String _fn_formatter);
+
+    /**
+     * @see #setFormatterFunction(ChartFunction)
+     */
+    public ChartFunction getFormatterFunction() {
+        return formatter;
+    }
+
+    /**
+     * Sets the function that formats the data label, declared in a
+     * {@link com.vaadin.flow.js.JsDefinition JsDefinition} interface. The
+     * browser runs the function from the frontend bundle, so it works under a
+     * Content Security Policy without <code>unsafe-eval</code>. Note that if a
+     * <code>format</code> is defined, the format takes precedence and the
+     * formatter is ignored.
+     * <p>
+     * Setting a function this way clears a function set with
+     * {@link #setFormatter(String)}.
+     * <p>
+     * A chart exported to SVG with <code>SVGGenerator</code> does not have the
+     * function. Neither does a chart state saved or restored with
+     * <code>ChartAIController</code>.
+     *
+     * @param formatter
+     *            the function, or <code>null</code> to remove it
+     * @since 25.4
+     */
+    public void setFormatterFunction(ChartFunction formatter) {
+        setFormatter(null);
+        this.formatter = formatter;
+    }
+
+    /**
+     * Clears the function set with
+     * {@link #setFormatterFunction(ChartFunction)}, for the subclasses that
+     * implement {@link #setFormatter(String)}.
+     */
+    protected void clearFormatterFunction() {
+        formatter = null;
+    }
 
     /**
      * @see #setInside(Boolean)
