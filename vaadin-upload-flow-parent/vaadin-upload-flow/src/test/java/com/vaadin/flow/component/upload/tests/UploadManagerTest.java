@@ -631,7 +631,7 @@ class UploadManagerTest {
     }
 
     @Test
-    void setUploadHandler_handlerDisallowsInert_allowsInert() {
+    void setUploadHandler_delegatesIsAllowInert() {
         UploadHandler handler = new UploadHandler() {
             @Override
             public void handleUploadRequest(
@@ -640,13 +640,16 @@ class UploadManagerTest {
 
             @Override
             public boolean isAllowInert() {
-                return false;
+                return true;
             }
         };
 
         manager.setUploadHandler(handler);
-
         Assertions.assertTrue(getRegisteredHandler().isAllowInert());
+
+        manager.setUploadHandler(event -> {
+        });
+        Assertions.assertFalse(getRegisteredHandler().isAllowInert());
     }
 
     @Test
