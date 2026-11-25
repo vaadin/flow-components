@@ -1,0 +1,5193 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.provider;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
+import org.slf4j.event.Level;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.common.ChatMessage;
+import com.vaadin.flow.component.ai.provider.LlmProvider.LlmRequest;
+import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.tests.MockUIExtension;
+
+import dev.langchain4j.agent.tool.CompensateFor;
+import dev.langchain4j.agent.tool.ReturnBehavior;
+import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.Content;
+import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.PdfFileContent;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.TextContent;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailException;
+import dev.langchain4j.guardrail.InputGuardrailResult;
+import dev.langchain4j.guardrail.OutputGuardrail;
+import dev.langchain4j.guardrail.OutputGuardrailException;
+import dev.langchain4j.guardrail.OutputGuardrailResult;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
+import dev.langchain4j.model.chat.response.CompleteToolCall;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.service.tool.ToolErrorHandlerResult;
+import dev.langchain4j.service.tool.ToolProvider;
+import dev.langchain4j.service.tool.ToolProviderResult;
+import reactor.core.publisher.BaseSubscriber;
+import tools.jackson.databind.JsonNode;
+
+class LangChain4jLlmProviderTest {
+    /**
+     * Bound for the blocks of the tool call limit tests. What those tests
+     * assert is that a turn ends, so a turn that stops without a terminal
+     * signal has to fail them rather than hang the suite waiting for one. The
+     * bound does not cover a loop that keeps running inside the subscription,
+     * since the block only starts waiting once the subscription has returned.
+     */
+    private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
+
+    private ChatModel mockChatModel;
+    private StreamingChatModel mockStreamingChatModel;
+
+    private LangChain4jLlmProvider provider;
+    private LangChain4jLlmProvider streamingProvider;
+
+    private TestLogger logger = TestLoggerFactory
+            .getTestLogger(LangChain4jLlmProvider.class);
+
+    @BeforeEach
+    void setup() {
+        mockChatModel = Mockito.mock(ChatModel.class);
+        mockStreamingChatModel = Mockito.mock(StreamingChatModel.class);
+        provider = new LangChain4jLlmProvider(mockChatModel);
+        streamingProvider = new LangChain4jLlmProvider(mockStreamingChatModel);
+        logger.clear();
+    }
+
+    @Test
+    void stream_withNullRequest_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.stream(null).blockFirst());
+    }
+
+    @Test
+    void stream_withNullUserMessage_throwsNullPointerException() {
+        var request = new TestLlmRequest(null, null, Collections.emptyList(),
+                new Object[0]);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.stream(request).blockFirst());
+    }
+
+    @Test
+    void constructor_withNullChatModel_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LangChain4jLlmProvider((ChatModel) null));
+    }
+
+    @Test
+    void constructor_withNullStreamingChatModel_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LangChain4jLlmProvider((StreamingChatModel) null));
+    }
+
+    @Test
+    void chatMemory_retainsHistory() {
+        var response1 = mockSimpleResponse("Response 1");
+        var response2 = mockSimpleResponse("Response 2");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(createSimpleRequest("First message")).blockFirst();
+        provider.stream(createSimpleRequest("Second message")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequestMessages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(3, secondRequestMessages.size());
+    }
+
+    @Test
+    void stream_withStreamingModel_returnsStreamedTokens() {
+        var request = createSimpleRequest("Hello");
+        var tokens = List.of("Hello", " ", "World");
+
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            tokens.forEach(handler::onPartialResponse);
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = mockChatResponse();
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = streamingProvider.stream(request).collectList().block();
+        Assertions.assertEquals(tokens, results);
+    }
+
+    @Test
+    void stream_withNonStreamingModel_returnsResponse() {
+        var request = createSimpleRequest("Hello");
+        mockSimpleChat(request, "Full response");
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertEquals("Full response", results.getFirst());
+    }
+
+    @Test
+    void stream_chatModelThrowsException_propagatesError() {
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenThrow(new RuntimeException("API error"));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).blockFirst());
+    }
+
+    @Test
+    void stream_streamingModelReportsError_propagatesError() {
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("Stream error");
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onError(originalError);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        // Bounded block: a swallowed error would leave the sink open
+        // forever instead of failing the test
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> streamingProvider.stream(request)
+                        .blockFirst(Duration.ofSeconds(5)));
+        Assertions.assertSame(originalError, thrown);
+    }
+
+    @Test
+    void stream_emptyTextResponse_returnsEmpty() {
+        var request = createSimpleRequest("Hello");
+        var response = mockSimpleResponse("");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var results = provider.stream(request).collectList().block();
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void stream_nullTextResponse_returnsEmpty() {
+        var request = createSimpleRequest("Hello");
+        var response = mockSimpleResponse(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var results = provider.stream(request).collectList().block();
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void stream_withSystemPromptInRequest_usesRequestPrompt() {
+        var request = new TestLlmRequest("Hello", "You are a helpful assistant",
+                Collections.emptyList(), new Object[0]);
+
+        mockSimpleChat(request, "Response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var messages = captor.getValue().messages();
+        Assertions.assertTrue(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should contain system message");
+    }
+
+    @Test
+    void stream_withNullSystemPrompt_noSystemMessage() {
+        var request = createSimpleRequest("Hello");
+
+        mockSimpleChat(request, "Response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var messages = captor.getValue().messages();
+        Assertions.assertFalse(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should not contain system message");
+    }
+
+    @Test
+    void stream_withEmptySystemPrompt_noSystemMessage() {
+        var request = new TestLlmRequest("Hello", "   ",
+                Collections.emptyList(), new Object[0]);
+
+        mockSimpleChat(request, "Response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var messages = captor.getValue().messages();
+        Assertions.assertFalse(
+                messages.stream().anyMatch(SystemMessage.class::isInstance),
+                "Should not contain system message");
+    }
+
+    @Test
+    void stream_preservesChatHistoryAcrossRequests() {
+        var request1 = createSimpleRequest("Hello");
+        var response1 = mockSimpleResponse("Hi there");
+        var request2 = createSimpleRequest("How are you?");
+        var response2 = mockSimpleResponse("I'm good");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+        provider.stream(request1).blockFirst();
+        provider.stream(request2).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var allMessages = captor.getAllValues();
+        Assertions.assertEquals(1, allMessages.get(0).messages().size(),
+                "First call should have 1 user message");
+        Assertions.assertEquals(3, allMessages.get(1).messages().size(),
+                "Second call should have 3 messages (user1, ai1, user2)");
+    }
+
+    @Test
+    void stream_withNullAiMessage_failsTurn() {
+        var request = createSimpleRequest("Hello");
+
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var error = new AtomicReference<Throwable>();
+
+        // A turn that hangs instead fails the test with a timeout
+        provider.stream(request).doOnError(error::set).onErrorComplete()
+                .collectList().block(TURN_TIMEOUT);
+
+        // The AI service has no answer to record for a response without an
+        // AI message, so the turn fails instead of ending empty
+        Assertions.assertNotNull(error.get(),
+                "A response without an AI message should fail the turn");
+    }
+
+    @Test
+    void stream_streamingWithNullAiMessage_failsTurn() {
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            // As LangChain4j's streaming models do, a failure of the
+            // completion handler is reported to the error handler
+            try {
+                handler.onCompleteResponse(response);
+            } catch (RuntimeException e) {
+                handler.onError(e);
+            }
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var error = new AtomicReference<Throwable>();
+
+        // A turn that hangs instead fails the test with a timeout
+        streamingProvider.stream(createSimpleRequest("Hello"))
+                .doOnError(error::set).onErrorComplete().collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertNotNull(error.get(),
+                "A response without an AI message should fail the turn");
+    }
+
+    @Test
+    void stream_withNullAiMessage_keepsChatMemoryUsable() {
+        var nullAiResponse = mockChatResponse();
+        Mockito.when(nullAiResponse.aiMessage()).thenReturn(null);
+        var secondResponse = mockSimpleResponse("Second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(nullAiResponse, secondResponse);
+
+        // Bounded blocks: completing the turn is what is under test here, so
+        // a missing terminal signal must fail instead of hanging
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(createSimpleRequest("First"))
+                        .collectList().block(Duration.ofSeconds(5)));
+        var results = provider.stream(createSimpleRequest("Second question"))
+                .collectList().block(Duration.ofSeconds(5));
+
+        Assertions.assertEquals(List.of("Second"), results);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(2, messages.size(),
+                "A response without an AI message must not add that message to "
+                        + "chat memory, but got: " + messages);
+        var memoryTexts = getUserMessageContents(captor.getAllValues().get(1),
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("First", "Second question"),
+                memoryTexts, "Both user turns should still be in chat memory");
+    }
+
+    @Test
+    void stream_withMaxMessagesLimit_dropsOldestMessages() {
+        var requestCount = 20;
+
+        // Each request adds 2 messages: UserMessage and AiMessage
+        IntStream.range(0, requestCount).forEach(i -> {
+            var request = createSimpleRequest("Message " + i);
+            mockSimpleChat(request, "Response " + i);
+        });
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(requestCount))
+                .chat(captor.capture());
+
+        var lastRequest = captor.getAllValues().get(requestCount - 1);
+        var messageCount = lastRequest.messages().size();
+        Assertions.assertTrue(messageCount <= 30,
+                "Message count should not exceed memory limit, got: "
+                        + messageCount);
+
+        var userMessageTextContents = getUserMessageContents(lastRequest,
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertFalse(
+                userMessageTextContents.stream()
+                        .anyMatch(text -> text.contains("Message 0")),
+                "Should not contain very old messages");
+        Assertions
+                .assertTrue(
+                        userMessageTextContents.stream()
+                                .anyMatch(text -> text.contains(
+                                        "Message " + (requestCount - 1))),
+                        "Should contain recent messages");
+    }
+
+    @Test
+    void stream_withImageAttachment_convertsToBase64() {
+        var imageData = "fake-image-data".getBytes();
+        var attachment = new AiAttachment("test.png", "image/png", imageData);
+        var request = new TestLlmRequest("Describe this image", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "It's a test");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var userMessageContents = getUserMessageContents(captor.getValue(),
+                ImageContent.class);
+        Assertions.assertFalse(userMessageContents.isEmpty(),
+                "Should contain image content");
+    }
+
+    @Test
+    void stream_withTextAttachment_usesUTF8Encoding() {
+        var textContent = "Test UTF-8: é à ü";
+        var attachment = new AiAttachment("test.txt", "text/plain",
+                textContent.getBytes(StandardCharsets.UTF_8));
+        var request = new TestLlmRequest("Summarize this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "Summary");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var messages = captor.getValue().messages();
+        var userMessage = (UserMessage) messages.getFirst();
+        var textContentPreserved = userMessage.contents().stream()
+                .filter(TextContent.class::isInstance)
+                .map(TextContent.class::cast).map(TextContent::text)
+                .anyMatch(text -> text.contains(textContent));
+
+        Assertions.assertTrue(textContentPreserved);
+    }
+
+    @Test
+    void stream_withInvalidUtf8TextAttachment_replacesInvalidSequences() {
+        // Lone continuation byte: not decodable as UTF-8. Text attachments
+        // are decoded leniently, so it is replaced instead of rejected.
+        var attachment = new AiAttachment("broken.txt", "text/plain",
+                new byte[] { 0x41, (byte) 0x80, 0x42 });
+        var request = new TestLlmRequest("Summarize this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "Summary");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertTrue(
+                texts.stream().anyMatch(text -> text.contains("A\uFFFDB")),
+                "Invalid UTF-8 should be replaced, but got: " + texts);
+    }
+
+    @Test
+    void stream_withNullAttachments_returnsResponse() {
+        var request = new TestLlmRequest("Hello", null, null, new Object[0]);
+        mockSimpleChat(request, "Hi");
+        var result = provider.stream(request).blockFirst();
+        Assertions.assertEquals("Hi", result);
+    }
+
+    @Test
+    void stream_withNullAttachmentInList_throwsNullPointerException() {
+        var attachment = new AiAttachment("test.txt", "text/plain",
+                "Test".getBytes(StandardCharsets.UTF_8));
+        var attachments = new ArrayList<AiAttachment>();
+        attachments.add(attachment);
+        attachments.add(null);
+
+        var request = new TestLlmRequest("Hello", null, attachments,
+                new Object[0]);
+        var response = mockSimpleResponse("hi");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.stream(request).blockFirst());
+    }
+
+    @Test
+    void stream_withUnsupportedAttachmentType_ignoresAttachment() {
+        var attachment = new AiAttachment("file.bin",
+                "application/octet-stream", "data".getBytes());
+        var request = new TestLlmRequest("Process this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "Done");
+
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_withPdfAttachment_handlesPdf() {
+        var pdfData = "PDF binary content".getBytes(StandardCharsets.UTF_8);
+        var attachment = new AiAttachment("document.pdf", "application/pdf",
+                pdfData);
+        var request = new TestLlmRequest("Summarize this document", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "Summary");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        var pdfContent = userMessage.contents().stream()
+                .filter(PdfFileContent.class::isInstance).findFirst()
+                .orElse(null);
+
+        Assertions.assertNotNull(pdfContent,
+                "Should include PDF content as PdfFileContent");
+    }
+
+    @Test
+    void stream_withBinaryPdfData_handlesBinaryPdf() {
+        // Binary PDF data should be handled correctly with base64 encoding
+        var binaryPdfData = new byte[] { 0x25, 0x50, 0x44, 0x46, (byte) 0xFF,
+                (byte) 0xFE, (byte) 0x00, (byte) 0x80 };
+        var attachment = new AiAttachment("binary.pdf", "application/pdf",
+                binaryPdfData);
+        var request = new TestLlmRequest("Summarize", null, List.of(attachment),
+                new Object[0]);
+
+        mockSimpleChat(request, "Summary");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        var pdfContent = userMessage.contents().stream()
+                .filter(PdfFileContent.class::isInstance).findFirst()
+                .orElse(null);
+
+        Assertions.assertNotNull(pdfContent, "Should handle binary PDF data");
+    }
+
+    @Test
+    void stream_withMultipleAttachmentsOfDifferentTypes_processesAll() {
+        var imageAttachment = new AiAttachment("photo.jpg", "image/jpeg",
+                "fake-image".getBytes());
+        var textAttachment = new AiAttachment("doc.txt", "text/plain",
+                "Hello world".getBytes(StandardCharsets.UTF_8));
+        var pdfAttachment = new AiAttachment("file.pdf", "application/pdf",
+                "PDF content".getBytes(StandardCharsets.UTF_8));
+        var unsupportedBinaryAttachment = new AiAttachment("data.bin",
+                "application/octet-stream", "binary".getBytes());
+        var request = new TestLlmRequest("Process all", null,
+                Arrays.asList(imageAttachment, textAttachment, pdfAttachment,
+                        unsupportedBinaryAttachment),
+                new Object[0]);
+        mockSimpleChat(request, "Processed");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+
+        var messages = captor.getValue().messages();
+        var userMessage = (UserMessage) messages.getFirst();
+
+        Assertions.assertEquals(4, userMessage.contents().size());
+    }
+
+    @Test
+    void stream_withNullToolExecutor_addsToolNotFoundMessageToRequest() {
+        var request = new TestLlmRequest("Call unknown tool", null,
+                Collections.emptyList(), new Object[0]);
+
+        var response1 = mockSimpleResponseWithTool("unknownTool");
+        var response2 = mockSimpleResponse("Tool not available");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertTrue(
+                toolResults.getFirst().text().contains("Tool not found"));
+    }
+
+    @Test
+    void stream_withStreamingModelAndTool_executesTool() {
+        var toolObject = new SampleToolsClass();
+        var request = new TestLlmRequest("Get temperature", null,
+                Collections.emptyList(), new Object[] { toolObject });
+
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            var response = mockSimpleResponseWithTool("getTemperature");
+            handler.onCompleteResponse(response);
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Weather");
+            handler.onPartialResponse(" ");
+            handler.onPartialResponse("updated");
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = mockChatResponse();
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = streamingProvider.stream(request).collectList().block();
+
+        Assertions.assertNotNull(results);
+        Assertions.assertEquals(3, results.size(),
+                "Should have streamed tokens");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
+                captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals(toolResults.getFirst().text(),
+                toolObject.getTemperature());
+    }
+
+    @Test
+    void stream_withMultipleToolCalls_executesTools() {
+        var toolObject = new SampleToolsClass();
+        var request = new TestLlmRequest("Get temperature and humidity", null,
+                Collections.emptyList(), new Object[] { toolObject });
+
+        var aiMessage1 = Mockito.mock(AiMessage.class);
+        Mockito.when(aiMessage1.text()).thenReturn("");
+        Mockito.when(aiMessage1.hasToolExecutionRequests()).thenReturn(true);
+        var toolRequest1 = Mockito.mock(ToolExecutionRequest.class);
+        Mockito.when(toolRequest1.name()).thenReturn("getTemperature");
+        Mockito.when(toolRequest1.arguments()).thenReturn("{}");
+
+        var toolRequest2 = Mockito.mock(ToolExecutionRequest.class);
+        Mockito.when(toolRequest2.name()).thenReturn("getHumidity");
+        Mockito.when(toolRequest2.arguments()).thenReturn("{}");
+        Mockito.when(aiMessage1.toolExecutionRequests())
+                .thenReturn(List.of(toolRequest1, toolRequest2));
+
+        var response1 = mockChatResponse();
+        Mockito.when(response1.aiMessage()).thenReturn(aiMessage1);
+        var response2 = mockSimpleResponse("Final response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResults = getToolExecutionResults(secondRequest);
+
+        Assertions.assertEquals(2, toolResults.size());
+        var resultTexts = toolResults.stream()
+                .map(ToolExecutionResultMessage::text).toList();
+        Assertions
+                .assertTrue(resultTexts.contains(toolObject.getTemperature()));
+        Assertions.assertTrue(resultTexts.contains(toolObject.getHumidity()));
+    }
+
+    @Test
+    void stream_withToolError_addsErrorMessageToRequest() {
+        var toolObject = new ErrorThrowingToolClass();
+        var request = new TestLlmRequest("Call error tool", null,
+                Collections.emptyList(), new Object[] { toolObject });
+
+        var response1 = mockSimpleResponseWithTool("throwError");
+        var response2 = mockSimpleResponse("Handled error");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        var secondRequest = captor.getAllValues().get(1);
+        var toolResultMessages = getToolExecutionResults(secondRequest);
+
+        Assertions.assertEquals(1, toolResultMessages.size());
+        Assertions.assertEquals(toolObject.getErrorMessage(),
+                toolResultMessages.getFirst().text());
+    }
+
+    @Test
+    void stream_withStreamingModelAndPushDisabled_logsWarning() {
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+
+        var request = createSimpleRequest("Hello");
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hi");
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = mockChatResponse();
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).collectList().block();
+
+        Assertions.assertTrue(hasDeliveryWarning(), "Expected push warning");
+    }
+
+    @Test
+    void stream_withNonStreamingModelAndPushDisabled_doesNotLogWarning() {
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+
+        var request = createSimpleRequest("Hello");
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "A synchronous turn completes within the request, so no "
+                        + "warning is expected");
+    }
+
+    @Test
+    void backgroundExecution_isDisabledByDefault() {
+        Assertions.assertFalse(provider.isBackgroundExecution());
+    }
+
+    @Test
+    void setBackgroundExecution_isReflectedByGetter() {
+        provider.setBackgroundExecution(true);
+        Assertions.assertTrue(provider.isBackgroundExecution());
+
+        provider.setBackgroundExecution(false);
+        Assertions.assertFalse(provider.isBackgroundExecution());
+    }
+
+    @Test
+    void stream_nonStreamingByDefault_callsModelOnSubscribingThread() {
+        var callThread = captureChatModelCallThread();
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertSame(Thread.currentThread(), callThread.get(),
+                "Without background execution the blocking call must stay on "
+                        + "the subscribing thread");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_callsModelOffSubscribingThread() {
+        provider.setBackgroundExecution(true);
+        var callThread = captureChatModelCallThread();
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertNotSame(Thread.currentThread(), callThread.get(),
+                "With background execution the blocking call must move off the "
+                        + "subscribing thread");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_returnsResponse() {
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = provider.stream(createSimpleRequest("Hello"))
+                .collectList().block();
+
+        Assertions.assertEquals(List.of("Hi there"), results);
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_subscribeReturnsWhileCallStillRunning()
+            throws Exception {
+        provider.setBackgroundExecution(true);
+        var callStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var completed = new CountDownLatch(1);
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    callStarted.countDown();
+                    // Timed so an implementation that blocks the subscriber
+                    // fails the count assertion below instead of deadlocking:
+                    // the release latch only opens after subscribe() has
+                    // returned.
+                    release.await(5, TimeUnit.SECONDS);
+                    return response;
+                });
+
+        provider.stream(createSimpleRequest("Hello")).subscribe(token -> {
+        }, error -> {
+        }, completed::countDown);
+
+        Assertions.assertTrue(callStarted.await(5, TimeUnit.SECONDS),
+                "The model was never called");
+        Assertions.assertEquals(1, completed.getCount(),
+                "subscribe() must return while the blocking call is still "
+                        + "running");
+
+        release.countDown();
+        Assertions.assertTrue(completed.await(5, TimeUnit.SECONDS),
+                "The response never completed after release");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_pushDisabled_logsWarning() {
+        provider.setBackgroundExecution(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasDeliveryWarning(),
+                "A background turn needs push or polling to reach the browser");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_manualPush_logsWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.MANUAL);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasDeliveryWarning(),
+                "Manual push does not deliver the response on its own, so the "
+                        + "warning is expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_pollingEnabled_doesNotLogWarning() {
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        ui.getUI().setPollInterval(500);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "Polling delivers the response, so no warning is expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_automaticPush_doesNotLogWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "Automatic push delivers the response, so no warning is "
+                        + "expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_noCurrentUi_completesWithoutWarning() {
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        // A programmatic call outside a request has no current UI; the turn
+        // must run normally and the delivery check must skip quietly.
+        ui.clearUI();
+        var results = provider.stream(createSimpleRequest("Hello"))
+                .collectList().block();
+        Assertions.assertEquals(List.of("Hi there"), results);
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "There is no UI whose delivery could be blocked, so no "
+                        + "warning is expected");
+    }
+
+    @Test
+    void stream_withBackgroundExecution_repeatedTurns_logsWarningOnce() {
+        provider.setBackgroundExecution(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+        provider.stream(createSimpleRequest("Hello again")).collectList()
+                .block();
+
+        Assertions.assertEquals(1, deliveryWarningCount(),
+                "Expected exactly one delivery warning across two turns");
+    }
+
+    @Test
+    void stream_streamingByDefault_retrievesOnSubscribingThread() {
+        var retrievalThread = new AtomicReference<Thread>();
+        var customized = streamingProviderRecordingRetrievalThread(
+                retrievalThread);
+
+        customized.stream(createSimpleRequest("What is the codename?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertSame(Thread.currentThread(), retrievalThread.get(),
+                "Without background execution a streaming turn must start on "
+                        + "the subscribing thread");
+    }
+
+    @Test
+    void stream_streamingWithBackgroundExecution_retrievesOffSubscribingThread() {
+        var retrievalThread = new AtomicReference<Thread>();
+        var customized = streamingProviderRecordingRetrievalThread(
+                retrievalThread);
+        customized.setBackgroundExecution(true);
+
+        var results = customized
+                .stream(createSimpleRequest("What is the codename?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Bluefin"), results);
+        Assertions.assertNotNull(retrievalThread.get(),
+                "The retriever was never called");
+        Assertions.assertNotSame(Thread.currentThread(), retrievalThread.get(),
+                "With background execution the retrieval of a streaming turn "
+                        + "must move off the subscribing thread");
+    }
+
+    /**
+     * Creates a streaming provider whose content retriever records the thread
+     * it runs on. The model answers right away.
+     */
+    private LangChain4jLlmProvider streamingProviderRecordingRetrievalThread(
+            AtomicReference<Thread> retrievalThread) {
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Bluefin");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("Bluefin")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        return new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.contentRetriever(query -> {
+                    retrievalThread.set(Thread.currentThread());
+                    return List.of(dev.langchain4j.rag.content.Content
+                            .from("The codename is Bluefin"));
+                }));
+    }
+
+    /**
+     * Records the thread the blocking chat model call runs on and answers with
+     * a simple response.
+     */
+    private AtomicReference<Thread> captureChatModelCallThread() {
+        var callThread = new AtomicReference<Thread>();
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    callThread.set(Thread.currentThread());
+                    return response;
+                });
+        return callThread;
+    }
+
+    private boolean hasDeliveryWarning() {
+        return logger.getLoggingEvents().stream().anyMatch(event -> event
+                .getMessage().contains("neither automatic push nor polling"));
+    }
+
+    private long deliveryWarningCount() {
+        return logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .count();
+    }
+
+    @Test
+    void setHistory_restoresConversation() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Previous question",
+                        null, null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Previous answer",
+                        null, null));
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        // Verify the restored history is used in the next request by checking
+        // that the chat memory contains the restored messages
+        var response = mockSimpleResponse("Follow-up answer");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        // Should contain: Previous question, Previous answer, Follow-up
+        Assertions.assertTrue(messages.stream()
+                .anyMatch(msg -> msg instanceof UserMessage userMsg
+                        && userMsg.singleText().equals("Previous question")));
+        Assertions.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof AiMessage ai
+                        && ai.text().equals("Previous answer")));
+    }
+
+    @Test
+    void setHistory_clearsExistingHistory() {
+        var response = mockSimpleResponse("Old response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Old message")).blockFirst();
+
+        var newHistory = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "New question", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "New answer", null,
+                        null));
+
+        provider.setHistory(newHistory, Collections.emptyMap());
+
+        // Verify the old history is cleared by checking the next request
+        var response2 = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response2);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.atLeast(2))
+                .chat(captor.capture());
+        var lastMessages = captor.getAllValues().getLast().messages();
+        Assertions.assertFalse(lastMessages.stream()
+                .anyMatch(msg -> msg instanceof UserMessage userMsg
+                        && userMsg.singleText().equals("Old message")));
+        Assertions.assertTrue(lastMessages.stream()
+                .anyMatch(msg -> msg instanceof UserMessage userMsg
+                        && userMsg.singleText().equals("New question")));
+    }
+
+    @Test
+    void setHistory_withNullHistory_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+    }
+
+    @Test
+    void setHistory_withNullHistory_keepsExistingHistory() {
+        provider.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER,
+                        "Previous question", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+
+        mockSimpleChat(createSimpleRequest("Follow-up"), "Response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertTrue(texts.contains("Previous question"),
+                "A rejected history must not clear the existing one, but got: "
+                        + texts);
+    }
+
+    @Test
+    void setHistory_exceedingMaxMessages_evictsOldest() {
+        var history = new ArrayList<ChatMessage>();
+        for (int i = 0; i < 20; i++) {
+            history.add(new ChatMessage(ChatMessage.Role.USER, "Question " + i,
+                    null, null));
+            history.add(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                    "Answer " + i, null, null));
+        }
+        Assertions.assertEquals(40, history.size());
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        // Verify eviction by checking the next request's messages
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        // Filter to only user/assistant messages (exclude system)
+        var chatMessages = messages.stream().filter(
+                msg -> msg instanceof UserMessage || msg instanceof AiMessage)
+                .toList();
+        Assertions.assertTrue(chatMessages.size() <= 30);
+        Assertions.assertTrue(chatMessages.stream()
+                .anyMatch(msg -> msg instanceof UserMessage userMsg
+                        && userMsg.singleText().equals("Question 19")));
+        Assertions.assertFalse(chatMessages.stream()
+                .anyMatch(msg -> msg instanceof UserMessage userMsg
+                        && userMsg.singleText().equals("Question 0")));
+    }
+
+    @Test
+    void setHistory_withAttachments_restoresUserMessageWithImageContent() {
+        var imageData = "fake-image-data".getBytes();
+        var attachment = new AiAttachment("photo.png", "image/png", imageData);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Look at this", "msg-1",
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Nice photo!", null,
+                        null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        provider.setHistory(history, attachments);
+
+        var response = mockSimpleResponse("Follow-up answer");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+
+        // Find the restored user message with image content
+        var userMessages = messages.stream()
+                .filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast).toList();
+        var restoredUserMsg = userMessages.stream()
+                .filter(msg -> msg.contents().stream()
+                        .anyMatch(c -> c instanceof TextContent tc
+                                && tc.text().equals("Look at this")))
+                .findFirst().orElseThrow();
+
+        // Should have TextContent + ImageContent
+        Assertions.assertTrue(restoredUserMsg.contents().stream()
+                .anyMatch(ImageContent.class::isInstance));
+    }
+
+    @Test
+    void setHistory_afterTurnWithAttachment_restoresQuestionWithoutThatAttachment() {
+        var response = mockSimpleResponse("A photo");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        provider.stream(new TestLlmRequest("What is this?", null,
+                List.of(image), new Object[0])).blockFirst();
+
+        // Restored on the thread the turn ran on, with the same text as the
+        // question of that turn but without its attachment
+        provider.setHistory(List.of(new ChatMessage(ChatMessage.Role.USER,
+                "What is this?", null, null)), Map.of());
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of(), getUserMessageContents(
+                captor.getAllValues().get(1), ImageContent.class));
+    }
+
+    @Test
+    void setHistory_withAttachments_assistantMessageIgnoresAttachments() {
+        var attachment = new AiAttachment("file.txt", "text/plain",
+                "content".getBytes());
+        var history = List.of(new ChatMessage(ChatMessage.Role.ASSISTANT,
+                "Hello", "msg-1", null));
+        var attachments = Map.of("msg-1", List.of(attachment));
+
+        provider.setHistory(history, attachments);
+
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+
+        // Assistant message should be AiMessage (text-only), not have
+        // attachments
+        Assertions.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof AiMessage ai
+                        && ai.text().equals("Hello")));
+    }
+
+    @Test
+    void setHistory_withAttachments_nullAttachmentMapThrows() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", null, null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(history, null));
+    }
+
+    @Test
+    void setHistory_withEmptyAttachmentMap_behavesLikeTextOnly() {
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Hello", "msg-1", null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Hi", null, null));
+
+        provider.setHistory(history, Collections.emptyMap());
+
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(createSimpleRequest("Check")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+
+        // User message should be text-only (no ImageContent etc.)
+        var userMsg = messages.stream().filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast)
+                .filter(msg -> msg.contents().stream()
+                        .anyMatch(c -> c instanceof TextContent tc
+                                && tc.text().equals("Hello")))
+                .findFirst().orElseThrow();
+        Assertions.assertEquals(1, userMsg.contents().size());
+        Assertions.assertTrue(
+                userMsg.contents().getFirst() instanceof TextContent);
+    }
+
+    private void mockSimpleChat(LlmRequest request, String responseText) {
+        var response = mockSimpleResponse(responseText);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        provider.stream(request).blockFirst();
+    }
+
+    // --- Explicit tools tests ---
+
+    @Test
+    void stream_withExplicitTool_executesTool() {
+        var toolResult = "tool executed";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"}},\"required\":[\"query\"]}",
+                args -> toolResult);
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+
+        // Verify tool spec was included in the first request
+        var firstRequest = captor.getAllValues().get(0);
+        Assertions.assertFalse(firstRequest.toolSpecifications().isEmpty());
+        Assertions.assertEquals("myTool",
+                firstRequest.toolSpecifications().getFirst().name());
+
+        // Verify tool was executed and result was in second request
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals(toolResult, toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolsOfSameName_executesLastTool() {
+        var first = createExplicitTool("myTool", "First tool", null,
+                args -> "first");
+        var second = createExplicitTool("myTool", "Second tool", null,
+                args -> "second");
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(first, second));
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        var result = provider.stream(request).blockFirst();
+
+        Assertions.assertEquals("Done", result);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Second tool"),
+                captor.getAllValues().get(0).toolSpecifications().stream()
+                        .map(ToolSpecification::description).toList());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(List.of("second"), toolResults.stream()
+                .map(ToolExecutionResultMessage::text).toList());
+    }
+
+    @Test
+    void stream_withExplicitTool_passesArgumentsToExecutor() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "result for " + args.get("city").asString();
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool",
+                "{\"city\":\"Helsinki\"}");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size(),
+                "Tool executor should have been called once");
+        Assertions.assertEquals("Helsinki",
+                receivedArgs.getFirst().get("city").asString(),
+                "Tool executor should receive arguments as a JsonNode parsed from the LLM response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("result for Helsinki",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitTool_malformedJsonArguments_returnsError() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "not json");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(0, receivedArgs.size());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertTrue(toolResults.getFirst().text()
+                .startsWith("Error executing tool:"));
+        assertNoJavaInternals(toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_createsToolWithParameters() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertNotNull(parameters,
+                "The declared schema should be passed to the model");
+        Assertions.assertEquals(List.of("city"),
+                List.copyOf(parameters.properties().keySet()));
+    }
+
+    @Test
+    void stream_withExplicitToolSchemaWithRequired_createsToolWithRequiredParameters() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"},"
+                        + "\"unit\":{\"type\":\"string\"}},\"required\":[\"city\"]}",
+                args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertEquals(List.of("city"), parameters.required());
+    }
+
+    @Test
+    void stream_withExplicitTool_nullOrBlankArguments_passesEmptyObject() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", null);
+        var response2 = mockSimpleResponseWithTool("myTool", "  ");
+        var response3 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2, response3);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(2, receivedArgs.size(),
+                "Both missing and blank arguments should reach the executor");
+        var allEmptyObjects = receivedArgs.stream().allMatch(
+                args -> args.isObject() && args.propertyNames().isEmpty());
+        Assertions.assertTrue(allEmptyObjects,
+                "Missing arguments should be parsed as an empty object");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(2));
+        Assertions.assertEquals(2, toolResults.size(),
+                "Both tool calls should have produced a result, but got: "
+                        + toolResults);
+        var allSucceeded = toolResults.stream()
+                .allMatch(result -> "ok".equals(result.text()));
+        Assertions.assertTrue(allSucceeded,
+                "Both tool calls should have succeeded, but got: "
+                        + toolResults);
+    }
+
+    @Test
+    void stream_withExplicitTool_malformedJsonArguments_relaysParserMessage() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "ok");
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "not json");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        var result = toolResults.getFirst().text();
+        Assertions.assertTrue(result
+                .startsWith("Error executing tool: invalid JSON arguments: "));
+        Assertions.assertTrue(result.contains("Unrecognized token"),
+                "The parser diagnostic should be relayed so the model can "
+                        + "repair its next attempt, but got: " + result);
+        assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitTool_nonObjectJsonArguments_reportsExpectedShape() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        // An empty string is valid JSON, so it parses, but it is not the
+        // object a tool with declared parameters expects.
+        var response1 = mockSimpleResponseWithTool("myTool", "\"\"");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(0, receivedArgs.size());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var result = getToolExecutionResults(captor.getAllValues().get(1))
+                .getFirst().text();
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "ok");
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "[1, 2]");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var result = getToolExecutionResults(captor.getAllValues().get(1))
+                .getFirst().text();
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+    }
+
+    /**
+     * Asserts that a tool result carries nothing from the Java runtime. Such a
+     * result goes straight back to the model, so a raw exception message would
+     * both waste tokens and leak internals.
+     */
+    private static void assertNoJavaInternals(String result) {
+        for (var leak : List.of("tools.jackson", "cannot be cast",
+                "ClassLoader", "java.lang.", "[Source:")) {
+            Assertions.assertFalse(result.contains(leak),
+                    "Tool result relayed to the model must not contain '" + leak
+                            + "', but got: " + result);
+        }
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessageToModel() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool.",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_logsError() {
+        var toolFailure = new RuntimeException("internal detail");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw toolFailure;
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        // The generic result hides the failure from the LLM, so the log is
+        // the only place where the actual error is visible.
+        var error = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.ERROR
+                        && event.getThrowable().orElse(null) == toolFailure)
+                .findFirst();
+        Assertions.assertTrue(error.isPresent(),
+                "Expected the tool failure to be logged");
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_substitutesNoParametersSchema() {
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var spec = captor.getValue().toolSpecifications().getFirst();
+        Assertions.assertEquals("simpleTool", spec.name());
+        Assertions.assertEquals("A simple tool", spec.description());
+        assertNoParametersSchema(spec.parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolBlankSchema_substitutesNoParametersSchema() {
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                "   ", args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        assertNoParametersSchema(
+                captor.getValue().toolSpecifications().getFirst().parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_substitutesNoParametersSchema() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        assertNoParametersSchema(
+                captor.getValue().toolSpecifications().getFirst().parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_logsWarningNamingTheTool() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        // The substituted schema hides the tool's parameters from the model,
+        // so the developer has to learn which tool's schema was dropped
+        var warnsAboutTool = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getArguments().contains("myTool"));
+        Assertions.assertTrue(warnsAboutTool,
+                "Expected a warning naming the tool whose schema was replaced");
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_logsParseFailureCause() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        // The warning only names the tool; the parser's own diagnostic is
+        // what tells the developer what is wrong with the schema
+        var logsCause = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.DEBUG
+                        && event.getThrowable().isPresent());
+        Assertions.assertTrue(logsCause,
+                "Expected the schema parse failure to be logged with its cause");
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        // The model may fill the placeholder schema that was substituted for
+        // the missing one; a tool that declared no parameters must not see
+        // that.
+        var response1 = mockSimpleResponseWithTool("simpleTool",
+                "{\"reason\":\"checking the form\"}");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_executeReceivesEmptyArguments() {
+        // A declared schema that fails to parse is replaced with the
+        // placeholder schema, so the model never saw the tool's real
+        // parameters — whatever it sent under the placeholder is not what the
+        // tool declared, and the tool receives no arguments, keeping the
+        // placeholder's property name a provider-internal detail.
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool",
+                "{\"reason\":\"exploring the data\"}");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool whose schema was replaced with the placeholder must "
+                        + "receive an empty arguments object, got: "
+                        + receivedArgs.getFirst());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_malformedArgumentsStillExecute() {
+        // A model that has nothing to fill sometimes sends an empty string —
+        // the very case the placeholder schema works around. A tool that
+        // declared no parameters ignores its arguments by contract, so it
+        // must run rather than bounce an error back to the model.
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("simpleTool", "\"\"");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals("done",
+                getToolExecutionResults(captor.getAllValues().get(1)).getFirst()
+                        .text(),
+                "The tool's real result must go back to the model, not an "
+                        + "argument-parsing error");
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_preservesDeclaredProperties() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":"
+                        + "{\"type\":\"string\"}},\"required\":[\"city\"]}",
+                args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertEquals(Set.of("city"),
+                parameters.properties().keySet(),
+                "A declared schema's properties must reach the tool "
+                        + "specification unmodified");
+        Assertions.assertEquals(List.of("city"), parameters.required());
+    }
+
+    @Test
+    void stream_withExplicitToolEmptyPropertiesSchema_passesSchemaThrough() {
+        // Substitution is limited to null/blank schemas: a syntactically
+        // valid schema authored by the user is passed through as-is, even
+        // when its properties object is empty.
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{}}", args -> "done");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertNotNull(parameters);
+        Assertions.assertTrue(parameters.properties().isEmpty(),
+                "An explicit empty-properties schema must not be rewritten, "
+                        + "got: " + parameters);
+    }
+
+    /**
+     * Asserts the parameters are the non-empty no-parameters shape: at least
+     * one property, all of them optional. A tool without a declared property
+     * makes models disagree on what to send as arguments, and some LLM APIs
+     * reject the request that replays such a tool call.
+     */
+    private static void assertNoParametersSchema(JsonObjectSchema parameters) {
+        Assertions.assertNotNull(parameters);
+        Assertions.assertFalse(parameters.properties().isEmpty(),
+                "Schema must declare at least one property, got: "
+                        + parameters);
+        Assertions.assertTrue(
+                parameters.required() == null
+                        || parameters.required().isEmpty(),
+                "All declared properties must be optional, got: " + parameters);
+    }
+
+    @Test
+    void stream_withBothVendorAndExplicitTools_allConfigured() {
+        var vendorTool = new SampleToolsClass();
+        var explicitTool = createExplicitTool("explicitTool", "Explicit", null,
+                args -> "result");
+
+        var request = new TestLlmRequestWithExplicitTools("Call tools", null,
+                Collections.emptyList(), new Object[] { vendorTool },
+                List.of(explicitTool));
+
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var specs = captor.getValue().toolSpecifications();
+        // 2 from SampleToolsClass + 1 explicit
+        Assertions.assertEquals(3, specs.size());
+        var names = specs.stream()
+                .map(dev.langchain4j.agent.tool.ToolSpecification::name)
+                .toList();
+        Assertions.assertTrue(names.contains("explicitTool"));
+        Assertions.assertTrue(names.contains("getTemperature"));
+        Assertions.assertTrue(names.contains("getHumidity"));
+    }
+
+    @Test
+    void stream_withSessionContext_appendsContextToUserMessageText() {
+        var request = new TestLlmRequestWithSessionContext("Hello",
+                "Tenant: acme");
+        var response = mockSimpleResponse("Hi");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        Assertions.assertEquals(
+                LlmProviderHelpers.withSessionContext("Hello", "Tenant: acme"),
+                userMessage.singleText());
+    }
+
+    @Test
+    void stream_withoutSessionContext_sendsUserMessageTextAsIs() {
+        var response = mockSimpleResponse("Hi");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Hello", userMessage.singleText());
+    }
+
+    @Test
+    void stream_toolCallsAndResults_notReplayedOnLaterTurns() {
+        // Tool traffic is only needed by the round trips of its own turn.
+        // Replaying it later would resend every past tool result on every
+        // request, while the model is told to fetch the state again anyway.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        var secondTurnResponse = mockSimpleResponse("second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, finalResponse, secondTurnResponse);
+
+        provider.stream(request).collectList().block();
+        provider.stream(createSimpleRequest("Next question")).collectList()
+                .block();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var withinTurn = captor.getAllValues().get(1);
+        Assertions.assertEquals(1, getToolExecutionResults(withinTurn).size(),
+                "The follow-up round trip of the same turn sees the tool result");
+        var secondTurnRequest = captor.getAllValues().get(2);
+        var secondTurn = secondTurnRequest.messages();
+        Assertions.assertEquals(3, secondTurn.size(),
+                "Second turn should carry user, final answer, user; got: "
+                        + secondTurn);
+        Assertions.assertTrue(
+                getToolExecutionResults(secondTurnRequest).isEmpty(),
+                "Tool results must not be replayed on a later turn");
+        Assertions.assertTrue(
+                secondTurn.stream().filter(AiMessage.class::isInstance)
+                        .map(AiMessage.class::cast)
+                        .noneMatch(AiMessage::hasToolExecutionRequests),
+                "Tool calls must not be replayed on a later turn");
+    }
+
+    @Test
+    void stream_toolRoundTrip_sendsToolCallBeforeItsResult() {
+        // LLM APIs reject a tool result whose tool call is not in the
+        // conversation, so the follow-up round trip carries both, in order
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var toolCall = toolResponse.aiMessage();
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, finalResponse);
+
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(3, messages.size(),
+                "Expected user message, tool call, tool result; got: "
+                        + messages);
+        Assertions.assertInstanceOf(UserMessage.class, messages.get(0));
+        Assertions.assertSame(toolCall, messages.get(1));
+        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
+                messages.get(2));
+    }
+
+    @Test
+    void stream_toolTurnEndsWithoutText_leavesAnswerOutOfChatMemory() {
+        // A model that has done what was asked with a tool call may have
+        // nothing left to say. LangChain4j hands such an answer over as an
+        // AiMessage without text, and one replayed from the chat memory makes
+        // the OpenAI Chat Completions API reject every later request.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLlmRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponse(null));
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("second");
+            handler.onCompleteResponse(mockSimpleResponse("second"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+        var results = streamingProvider
+                .stream(createSimpleRequest("Next question")).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("second"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
+                captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var secondTurnRequest = captor.getAllValues().get(2);
+        Assertions.assertTrue(
+                secondTurnRequest.messages().stream()
+                        .noneMatch(AiMessage.class::isInstance),
+                "An answer without text must not be replayed on a later "
+                        + "turn, got: " + secondTurnRequest.messages());
+        var userTexts = getUserMessageContents(secondTurnRequest,
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("Call tool", "Next question"),
+                userTexts, "Both user turns should still be in chat memory");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void stream_answerWithoutText_leavesAnswerOutOfChatMemory(String text) {
+        var answerWithoutText = mockSimpleResponse(text);
+        var secondTurnResponse = mockSimpleResponse("second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(answerWithoutText, secondTurnResponse);
+
+        provider.stream(createSimpleRequest("First")).collectList()
+                .block(TURN_TIMEOUT);
+        var results = provider.stream(createSimpleRequest("Next question"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("second"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var secondTurnRequest = captor.getAllValues().get(1);
+        Assertions.assertTrue(
+                secondTurnRequest.messages().stream()
+                        .noneMatch(AiMessage.class::isInstance),
+                "An answer without text must not be replayed on a later "
+                        + "turn, got: " + secondTurnRequest.messages());
+        var userTexts = getUserMessageContents(secondTurnRequest,
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("First", "Next question"), userTexts,
+                "Both user turns should still be in chat memory");
+    }
+
+    private static LlmProvider.ToolSpec createExplicitTool(String name,
+            String description, String parametersSchema,
+            java.util.function.Function<JsonNode, String> executor) {
+        return new LlmProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return parametersSchema;
+            }
+
+            @Override
+            public String execute(JsonNode arguments) {
+                return executor.apply(arguments);
+            }
+        };
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Truncated");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.LENGTH);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(1200, 8, 1208));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Truncated"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("LENGTH", metadata.finishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingToolRoundTrips_accumulatesTokenUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(finalResponse.tokenUsage())
+                .thenReturn(new TokenUsage(200, 20, 220));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(2, collected.size(),
+                "Each round trip publishes the state known so far");
+        Assertions.assertEquals(110,
+                collected.getFirst().tokenUsage().totalTokens(),
+                "The first snapshot carries the first round trip alone");
+        var metadata = collected.getLast();
+        Assertions.assertEquals("STOP", metadata.finishReason(),
+                "The reason that ended the turn wins");
+        Assertions.assertEquals(300, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(330, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_secondToolRoundTripFails_firstRoundMetadataStillPublished() {
+        // The failed turn was still billed for the round trips that ran; the
+        // sink must have received what was observed before the failure.
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse)
+                .thenThrow(new RuntimeException("API down"));
+
+        var response = provider.stream(request).collectList();
+        Assertions.assertThrows(RuntimeException.class, response::block);
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("TOOL_EXECUTION", metadata.finishReason());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Hello World");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hello ");
+            handler.onPartialResponse("World");
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = streamingProvider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hello ", "World"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("STOP", metadata.finishReason());
+        Assertions.assertEquals(55, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("STOP", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutAiMessage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(response.finishReason())
+                .thenReturn(FinishReason.CONTENT_FILTER);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(30, 0, 30));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        // The turn fails for want of an AI message, after the metadata of
+        // the response was observed
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+
+        Assertions.assertEquals(1, collected.size(),
+                "A turn that ends without a message still reports why");
+        Assertions.assertEquals("CONTENT_FILTER",
+                collected.getFirst().finishReason());
+        Assertions.assertEquals(30,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("plain");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    @Test
+    void stream_nonStreamingWithUsageButNoFinishReason_publishesUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "Reported usage is worth publishing on its own");
+        Assertions.assertNull(collected.getFirst().finishReason());
+        Assertions.assertEquals(55,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingLastRoundTripReportsNothingNew_doesNotRepublish() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A round trip that reports neither a reason nor usage must "
+                        + "not re-publish the earlier state");
+    }
+
+    @Test
+    void stream_turnEndsWithoutFinishReason_logsWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "Expected a warning about the missing finish reason");
+    }
+
+    @Test
+    void stream_turnEndsWithFinishReason_noMissingFinishReasonWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "A turn with a reported finish reason must not warn");
+    }
+
+    @Test
+    void stream_finishReasonOnlyOnFinalToolRoundTrip_noMissingFinishReasonWarning() {
+        // Some models report the reason only on the round trip that ends the
+        // turn; earlier tool round trips without one are not abnormal.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "The reason on the final round trip covers the turn");
+    }
+
+    @Test
+    void stream_finalToolRoundTripWithoutFinishReason_logsWarning() {
+        // The turn ended on a round trip the model said nothing about. The
+        // TOOL_EXECUTION reason from the earlier round trip describes that
+        // round trip, not how the turn ended, so it must not silence the
+        // warning.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "A turn ending on a round trip with no finish reason must "
+                        + "warn even when an earlier round trip reported one");
+    }
+
+    private boolean hasMissingFinishReasonWarning() {
+        return logger.getLoggingEvents().stream().anyMatch(
+                event -> event.getMessage().contains("no finish reason"));
+    }
+
+    // --- Customizer tests ---
+
+    @Test
+    void requestPrompt_replacesCustomizerSystemMessage() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.systemMessage("Configured"));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals(1,
+                messages.stream().filter(SystemMessage.class::isInstance)
+                        .count(),
+                "The service's own system message is replaced, not kept");
+    }
+
+    @Test
+    void customizer_systemMessage_isSent() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.systemMessage("Configured"));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Configured", ((SystemMessage) first).text());
+    }
+
+    @Test
+    void customizer_toolObject_isCalled() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        var toolCall = mockSimpleResponseWithTool("getTemperature");
+        var answer = mockSimpleResponse("It is 22°C");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(createSimpleRequest("Get temperature")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = captor.getAllValues().get(1).messages().stream()
+                .filter(ToolExecutionResultMessage.class::isInstance)
+                .map(ToolExecutionResultMessage.class::cast).toList();
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals("22°C", toolResults.getFirst().text());
+    }
+
+    @Test
+    void customizer_toolProvider_isOfferedAndCalledNextToRequestTools() {
+        var lookUps = new AtomicInteger();
+        ToolProvider mcpTools = toolRequest -> ToolProviderResult.builder()
+                .add(ToolSpecification.builder().name("lookUpOrder")
+                        .description("Looks up an order").build(),
+                        (execution, memoryId) -> {
+                            lookUps.incrementAndGet();
+                            return "Order 42 has shipped";
+                        })
+                .build();
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.toolProvider(mcpTools));
+        var toolCall = mockSimpleResponseWithTool("lookUpOrder");
+        var answer = mockSimpleResponse("It has shipped");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized
+                .stream(requestWithCountingTool("myTool", new AtomicInteger()))
+                .collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var offered = captor.getAllValues().get(0).toolSpecifications().stream()
+                .map(ToolSpecification::name).collect(Collectors.toSet());
+        Assertions.assertEquals(Set.of("lookUpOrder", "myTool"), offered);
+        Assertions.assertEquals(1, lookUps.get());
+        Assertions.assertEquals("Order 42 has shipped",
+                getToolExecutionResults(captor.getAllValues().get(1)).getFirst()
+                        .text());
+    }
+
+    @Test
+    void customizer_contentRetrieverAugmentsUserMessage() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.contentRetriever(
+                        query -> List.of(dev.langchain4j.rag.content.Content
+                                .from("The codename is Bluefin"))));
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("What is the codename?"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userText = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text)
+                .collect(Collectors.joining());
+        Assertions.assertTrue(userText.contains("What is the codename?"));
+        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
+                "The retrieved content should reach the model: " + userText);
+    }
+
+    @Test
+    void requestPromptWithBraces_isSentLiterally() {
+        var customized = new LangChain4jLlmProvider(mockChatModel);
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLlmRequest("Hello", "Reply with {{status}}",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Reply with {{status}}",
+                ((SystemMessage) first).text());
+    }
+
+    @Test
+    void customizer_contentRetrieverKeepsAttachments() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.contentRetriever(
+                        query -> List.of(dev.langchain4j.rag.content.Content
+                                .from("The codename is Bluefin"))));
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var attachment = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var request = new TestLlmRequest("What is on the photo?", null,
+                List.of(attachment), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userText = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text)
+                .collect(Collectors.joining());
+        Assertions.assertTrue(userText.contains("What is on the photo?"));
+        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
+                "The retrieved content should reach the model: " + userText);
+        Assertions.assertEquals(1,
+                getUserMessageContents(captor.getValue(), ImageContent.class)
+                        .size(),
+                "The attachment should stay");
+    }
+
+    @Test
+    void customizer_retrievedContentNotStoredInChatMemory_keepsAttachmentInChatMemory() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service
+                        .contentRetriever(query -> List
+                                .of(dev.langchain4j.rag.content.Content
+                                        .from("The codename is Bluefin")))
+                        .storeRetrievedContentInChatMemory(false));
+        var response = mockSimpleResponse("A photo");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+
+        customized.stream(new TestLlmRequest("What is this?", null,
+                List.of(image), new Object[0])).blockFirst();
+        customized.stream(createSimpleRequest("And the colors?")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var firstQuestion = (UserMessage) captor.getAllValues().get(1)
+                .messages().getFirst();
+        Assertions.assertEquals("What is this?",
+                ((TextContent) firstQuestion.contents().getFirst()).text(),
+                "The question should be stored without the retrieved content");
+        Assertions.assertEquals(1,
+                firstQuestion.contents().stream()
+                        .filter(ImageContent.class::isInstance).count(),
+                "The attachment of the first turn should be replayed");
+    }
+
+    @Test
+    void customizer_retrievedContentNotStoredWithSessionContext_keepsAttachmentInChatMemory() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service
+                        .contentRetriever(query -> List
+                                .of(dev.langchain4j.rag.content.Content
+                                        .from("The codename is Bluefin")))
+                        .storeRetrievedContentInChatMemory(false));
+        var response = mockSimpleResponse("A photo");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var withImage = new LlmRequest() {
+            @Override
+            public String userMessage() {
+                return "What is this?";
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public List<AiAttachment> attachments() {
+                return List.of(image);
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public String sessionContext() {
+                return "Tenant: acme";
+            }
+        };
+
+        customized.stream(withImage).blockFirst();
+        customized.stream(createSimpleRequest("And the colors?")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var firstQuestion = (UserMessage) captor.getAllValues().get(1)
+                .messages().getFirst();
+        Assertions.assertEquals(1,
+                firstQuestion.contents().stream()
+                        .filter(ImageContent.class::isInstance).count(),
+                "The attachment of the first turn should be replayed");
+    }
+
+    @Test
+    void customizer_chatMemoryRewrittenDuringTurn_addsAttachmentsToTheTurnQuestionOnly() {
+        // A failure with message removal makes LangChain4j clear the chat
+        // memory and add its messages again while the turn runs.
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("1234")
+                                ? fatalWithMessageRemoval("Leaks the code")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("The code is 1234")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi again")).build());
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+        var withImage = new TestLlmRequest("What is this?", null,
+                List.of(image), new Object[0]);
+        Assertions.assertThrows(OutputGuardrailException.class,
+                () -> customized.stream(withImage).blockFirst());
+        customized.stream(createSimpleRequest("Hello again")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertEquals(UserMessage.from("Hello"), messages.getFirst());
+        Assertions.assertEquals(1,
+                getUserMessageContents(captor.getAllValues().get(2),
+                        ImageContent.class).size());
+    }
+
+    @Test
+    void customizer_inputGuardrailFailsTurnBeforeModelCall() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.inputGuardrails(new InputGuardrail() {
+                    @Override
+                    public InputGuardrailResult validate(
+                            UserMessage userMessage) {
+                        return userMessage.singleText().contains("password")
+                                ? failure("Blocked")
+                                : success();
+                    }
+                }));
+
+        Assertions.assertThrows(InputGuardrailException.class,
+                () -> customized.stream(createSimpleRequest("The password?"))
+                        .collectList().block(TURN_TIMEOUT));
+        Mockito.verify(mockChatModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_sessionContextWithTextAttachment_isAddedToTheUserText() {
+        var request = new LlmRequest() {
+            @Override
+            public String userMessage() {
+                return "Summarize";
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public List<AiAttachment> attachments() {
+                return List.of(new AiAttachment("notes.txt", "text/plain",
+                        "Notes".getBytes(StandardCharsets.UTF_8)));
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public String sessionContext() {
+                return "Tenant: acme";
+            }
+        };
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of(
+                LlmProviderHelpers.withSessionContext("Summarize",
+                        "Tenant: acme"),
+                LlmProviderHelpers.formatTextAttachment("notes.txt", "Notes")),
+                texts);
+    }
+
+    @Test
+    void stream_sessionContext_staysOnTheTurnMessageInToolRounds() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        var toolCall = mockSimpleResponseWithTool("getTemperature");
+        var answer = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(
+                new TestLlmRequestWithSessionContext("Check", "Tenant: acme"))
+                .collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getAllValues().get(1).messages()
+                .getFirst();
+        Assertions.assertEquals(
+                LlmProviderHelpers.withSessionContext("Check", "Tenant: acme"),
+                userMessage.singleText());
+    }
+
+    @Test
+    void customizer_streamingOutputGuardrailRewritesAnswer_emitsOnlyTheRewrittenText() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(redactingGuardrail()));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("The code ");
+            handler.onPartialResponse("is 1234");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("The code is 1234")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = customized.stream(createSimpleRequest("The code?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("[redacted]"), results);
+    }
+
+    @Test
+    void customizer_outputGuardrailRewritesAnswer_chatMemoryKeepsTheRewrittenAnswer() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(redactingGuardrail()));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("The code is 1234")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("The code?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(List.of("The code?", "[redacted]", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(1)));
+    }
+
+    @Test
+    void customizer_streamingOutputGuardrailRewritesAnswer_chatMemoryKeepsTheRewrittenAnswer() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(redactingGuardrail()));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("The code is 1234");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("The code is 1234")).build());
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("You are welcome");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("You are welcome")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        customized.stream(createSimpleRequest("The code?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
+                captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        Assertions.assertEquals(List.of("The code?", "[redacted]", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(1)));
+    }
+
+    @Test
+    void customizer_outputGuardrailReprompt_chatMemoryKeepsTheAcceptedAnswer() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("warm")
+                                ? reprompt("No temperature",
+                                        "Give the temperature")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("Weather?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Weather?", "It is 22°C", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(2)));
+    }
+
+    @Test
+    void customizer_outputGuardrailFailsWithMessageRemoval_chatMemoryDropsTheRejectedAnswer() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("1234")
+                                ? fatalWithMessageRemoval("Contains the code")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hello")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("The code is 1234")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+        customized.stream(createSimpleRequest("Hi")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var failedTurn = customized.stream(createSimpleRequest("The code?"))
+                .collectList();
+        Assertions.assertThrows(OutputGuardrailException.class,
+                () -> failedTurn.block(TURN_TIMEOUT));
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        Assertions.assertEquals(List.of("Hi", "Hello", "The code?", "Thanks"),
+                getMessageTexts(captor.getAllValues().get(2)));
+    }
+
+    @Test
+    void customizer_outputGuardrailKeepsAnswer_chatMemoryKeepsTheModelMessage() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return success();
+                    }
+                }));
+        var answer = AiMessage.builder().text("It is 22°C")
+                .thinking("The sensor says 22").build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder().aiMessage(answer).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+
+        customized.stream(createSimpleRequest("Weather?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(answer,
+                captor.getAllValues().get(1).messages().get(1));
+    }
+
+    private static List<String> getMessageTexts(ChatRequest request) {
+        return request.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+    }
+
+    @Test
+    void customizer_outputGuardrail_textAlongsideToolCallIsNotEmitted() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .outputGuardrails(redactingGuardrail()));
+        var toolCall = ChatResponse.builder().aiMessage(AiMessage.from(
+                "Looking up code 1234",
+                List.of(ToolExecutionRequest.builder().id("1")
+                        .name("getTemperature").arguments("{}").build())))
+                .build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("22°C at 1234")).build());
+
+        var results = customized.stream(createSimpleRequest("Temperature?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("[redacted]"), results);
+    }
+
+    @Test
+    void customizer_streamingOutputGuardrail_textAlongsideToolCallIsNotEmitted() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .outputGuardrails(redactingGuardrail()));
+        var toolCall = ChatResponse.builder().aiMessage(AiMessage.from(
+                "Looking up code 1234",
+                List.of(ToolExecutionRequest.builder().id("1")
+                        .name("getTemperature").arguments("{}").build())))
+                .build();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Looking up ");
+            handler.onPartialResponse("code 1234");
+            handler.onCompleteResponse(toolCall);
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("22°C at 1234");
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("22°C at 1234")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = customized.stream(createSimpleRequest("Temperature?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("[redacted]"), results);
+    }
+
+    @Test
+    void customizer_outputGuardrailAndImmediateToolReturn_textAlongsideToolCallIsNotEmitted() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service
+                        .tools(new SampleToolsClass(), new ImmediateToolClass())
+                        .outputGuardrails(redactingGuardrail()));
+        var lookup = ChatResponse.builder().aiMessage(AiMessage.from(
+                "Looking up code 1234",
+                List.of(ToolExecutionRequest.builder().id("1")
+                        .name("getTemperature").arguments("{}").build())))
+                .build();
+        var finish = ChatResponse.builder()
+                .aiMessage(AiMessage.from(List.of(ToolExecutionRequest.builder()
+                        .id("2").name("finish").arguments("{}").build())))
+                .build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(lookup).thenReturn(finish);
+
+        var results = customized.stream(createSimpleRequest("Temperature?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        // The turn ends without an answer for the guardrails to check
+        Assertions.assertEquals(List.of(), results);
+    }
+
+    @Test
+    void customizer_streamingToolCallPastTheLimitBeforeAnswer_runsNoOutputGuardrail() {
+        var validations = new AtomicInteger();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        validations.incrementAndGet();
+                        return success();
+                    }
+                }));
+        customized.setMaxCallsPerTool(1);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockResponseWithToolRequests("count", "count"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        // The turn failed before the model answered, so the guardrails have
+        // no answer to check
+        Assertions.assertEquals(0, validations.get());
+    }
+
+    @Test
+    void customizer_streamingToolCallPastTheLimitInGuardrailReprompt_failsTurnWithoutBlocking() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(tools)
+                        .outputGuardrails(repromptingGuardrail()));
+        customized.setMaxCallsPerTool(2);
+        var responses = new ArrayList<>(List.of(
+                ChatResponse.builder().aiMessage(AiMessage.from("It is warm"))
+                        .build(),
+                mockResponseWithToolRequests("count", "count", "count")));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(responses.removeFirst());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var error = new AtomicReference<Throwable>();
+
+        // LangChain4j waits for the answer to a reprompt on the thread that
+        // runs the guardrails, here the subscribing one
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(token -> {
+                }, error::set));
+
+        Assertions.assertInstanceOf(ToolCallLimitExceededException.class,
+                error.get());
+        Assertions.assertEquals(0, tools.calls.get());
+        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void customizer_streamingCancelledWhileModelAnswersGuardrailReprompt_doesNotBlock() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(repromptingGuardrail()));
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var modelCalls = new AtomicInteger();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            if (modelCalls.incrementAndGet() == 1) {
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build());
+            } else {
+                subscriber.cancel();
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build());
+            }
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(subscriber));
+
+        Assertions.assertEquals(2, modelCalls.get());
+    }
+
+    @Test
+    void customizer_streamingCancelledBeforeGuardrailReprompt_doesNotCallModelOrBlock() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        if (responseFromLLM.text().contains("warm")) {
+                            subscriber.cancel();
+                            return reprompt("No temperature",
+                                    "Give the temperature");
+                        }
+                        return success();
+                    }
+                }));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from("It is warm")).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(subscriber));
+
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    /**
+     * A guardrail that asks the model again when its answer contains "warm".
+     */
+    private static OutputGuardrail repromptingGuardrail() {
+        return new OutputGuardrail() {
+            @Override
+            public OutputGuardrailResult validate(AiMessage responseFromLLM) {
+                return responseFromLLM.text().contains("warm")
+                        ? reprompt("No temperature", "Give the temperature")
+                        : success();
+            }
+        };
+    }
+
+    private static OutputGuardrail redactingGuardrail() {
+        return new OutputGuardrail() {
+            @Override
+            public OutputGuardrailResult validate(AiMessage responseFromLLM) {
+                return successWith("[redacted]");
+            }
+        };
+    }
+
+    @Test
+    void customizer_outputGuardrailReprompt_keepsToolTrafficOfTheTurn() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .outputGuardrails(new OutputGuardrail() {
+                            @Override
+                            public OutputGuardrailResult validate(
+                                    AiMessage responseFromLLM) {
+                                return responseFromLLM.text().contains("22")
+                                        ? success()
+                                        : reprompt("No temperature",
+                                                "Give the temperature");
+                            }
+                        }));
+        var toolCall = mockSimpleResponseWithTool("getTemperature");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall)
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build());
+
+        var results = customized.stream(createSimpleRequest("Weather?"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("It is 22°C"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The retry still has the tool result the rejected answer was based
+        // on, ahead of that answer
+        var retry = captor.getAllValues().get(2).messages();
+        var toolResult = retry.stream()
+                .filter(ToolExecutionResultMessage.class::isInstance)
+                .findFirst().map(retry::indexOf).orElse(-1);
+        var rejected = retry.indexOf(AiMessage.from("It is warm"));
+        Assertions.assertTrue(toolResult >= 0 && toolResult < rejected,
+                retry.toString());
+    }
+
+    @Test
+    void customizer_compensatedToolError_keepsOrderOfConversation() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new CompensatedToolClass())
+                        .compensateOnToolErrors(true));
+        var toolCalls = ChatResponse.builder()
+                .aiMessage(AiMessage.from(List.of(
+                        ToolExecutionRequest.builder().id("1").name("book")
+                                .arguments("{}").build(),
+                        ToolExecutionRequest.builder().id("2").name("pay")
+                                .arguments("{}").build())))
+                .build();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi")).build())
+                .thenReturn(toolCalls).thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Booking failed")).build());
+
+        customized.stream(createSimpleRequest("Hello")).collectList()
+                .block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Book a flight")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The failed payment rolls the booking back, which rewrites the
+        // chat memory. The answer of the first turn stays ahead of the
+        // question of the second.
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertEquals(
+                List.of(UserMessage.from("Hello"), AiMessage.from("Hi"),
+                        UserMessage.from("Book a flight")),
+                messages.subList(0, 3), messages.toString());
+    }
+
+    @Test
+    void customizer_guardrailRemovesAnswer_keepsEarlierQuestionWithoutAttachments() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.outputGuardrails(new OutputGuardrail() {
+                    @Override
+                    public OutputGuardrailResult validate(
+                            AiMessage responseFromLLM) {
+                        return responseFromLLM.text().contains("secret")
+                                ? fatalWithMessageRemoval("Not allowed")
+                                : success();
+                    }
+                }));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("A cat")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("A secret")).build())
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("You are welcome")).build());
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+
+        customized.stream(createSimpleRequest("What is this?")).collectList()
+                .block(TURN_TIMEOUT);
+        customized
+                .stream(new TestLlmRequest("What is this?", null,
+                        List.of(image), new Object[0]))
+                .onErrorComplete().collectList().block(TURN_TIMEOUT);
+        customized.stream(createSimpleRequest("Thanks")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // Removing the rejected answer rewrites the chat memory. The first
+        // question has the text of the second, but not its attachment.
+        Assertions.assertEquals(UserMessage.from("What is this?"),
+                captor.getAllValues().get(2).messages().getFirst());
+    }
+
+    @Test
+    void constructor_withoutCustomizer_logsNoToolErrorHandlingNotice()
+            throws ReflectiveOperationException {
+        // LangChain4j logs the notice once per JVM, for the first service
+        // built with tools but without explicit tool error handlers. Other
+        // tests build such services with a customizer, so the flag that
+        // remembers the notice is reset first, and restored for the tests
+        // that run after this one.
+        var alreadyLoggedField = Class
+                .forName("dev.langchain4j.service.ToolErrorHandlingNotice")
+                .getDeclaredField("ALREADY_LOGGED");
+        alreadyLoggedField.setAccessible(true);
+        var alreadyLogged = (AtomicBoolean) alreadyLoggedField.get(null);
+        var loggedBefore = alreadyLogged.getAndSet(false);
+        try {
+            var notice = TestLoggerFactory.getTestLogger(
+                    "dev.langchain4j.service.ToolErrorHandlingNotice");
+            notice.clearAll();
+
+            new LangChain4jLlmProvider(mockChatModel);
+            new LangChain4jLlmProvider(mockStreamingChatModel);
+
+            Assertions.assertEquals(List.of(), notice.getAllLoggingEvents());
+        } finally {
+            alreadyLogged.set(loggedBefore);
+        }
+    }
+
+    @Test
+    void customizer_toolArgumentsErrorHandler_handlesInvalidArguments() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass())
+                        .toolArgumentsErrorHandler(
+                                (error, context) -> ToolErrorHandlerResult
+                                        .text("Fix the arguments")));
+        var toolCall = mockSimpleResponseWithTool("getTemperature", "not json");
+        var answer = mockSimpleResponse("Sorry");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(createSimpleRequest("Temperature?")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals("Fix the arguments",
+                getToolExecutionResults(captor.getAllValues().get(1)).getFirst()
+                        .text());
+    }
+
+    @Test
+    void customizer_chatMemory_isUsedInsteadOfTheProviderOwn() {
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.chatMemory(memory));
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var texts = memory.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+        Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
+    }
+
+    @Test
+    void customizer_chatMemoryProvider_isUsedInsteadOfTheProviderOwn() {
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.chatMemoryProvider(memoryId -> memory));
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var texts = memory.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+        Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
+    }
+
+    @Test
+    void setHistory_customizerChatMemory_leavesThatMemoryAsItIs() {
+        // The application owns the memory, which holds more than a restore
+        // writes: here the tool call and its result
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var toolRequest = ToolExecutionRequest.builder().id("1")
+                .name("getTemperature").arguments("{}").build();
+        var stored = List.of(UserMessage.from("Temperature?"),
+                AiMessage.from(List.of(toolRequest)),
+                ToolExecutionResultMessage.from(toolRequest, "22°C"),
+                AiMessage.from("It is 22°C"));
+        stored.forEach(memory::add);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.chatMemory(memory));
+
+        customized.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER, "Temperature?",
+                        null, null),
+                        new ChatMessage(ChatMessage.Role.ASSISTANT,
+                                "It is 22°C", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(stored, memory.messages());
+    }
+
+    @Test
+    void setHistory_customizerChatMemoryProvider_leavesThatMemoryAsItIs() {
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.chatMemoryProvider(memoryId -> memory));
+        var history = List.of(new ChatMessage(ChatMessage.Role.USER,
+                "Previous question", null, null));
+
+        // The memory provider creates the memory on the first turn
+        customized.setHistory(history, Collections.emptyMap());
+        Assertions.assertEquals(List.of(), memory.messages());
+
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi there")).build());
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+        var stored = memory.messages();
+        customized.setHistory(history, Collections.emptyMap());
+
+        Assertions.assertEquals(2, stored.size());
+        Assertions.assertEquals(stored, memory.messages());
+    }
+
+    @Test
+    void customizer_contentRetrieverKeepsTextFileAttachment() {
+        var queries = new ArrayList<String>();
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.contentRetriever(query -> {
+                    queries.add(query.text());
+                    return List.of(dev.langchain4j.rag.content.Content
+                            .from("The codename is Bluefin"));
+                }));
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var attachment = new AiAttachment("notes.txt", "text/plain",
+                "Remember the milk".getBytes(StandardCharsets.UTF_8));
+        var request = new TestLlmRequest("What is the codename?", null,
+                List.of(attachment), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        Assertions.assertEquals(List.of("What is the codename?"), queries,
+                "Retrieval should work on the text of the user message alone");
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertEquals(2, texts.size(), texts.toString());
+        Assertions.assertTrue(
+                texts.get(0).contains("What is the codename?")
+                        && texts.get(0).contains("The codename is Bluefin"),
+                "The retrieved content should join the user text: " + texts);
+        Assertions.assertTrue(texts.get(1).contains("Remember the milk"),
+                "The text file should stay: " + texts);
+    }
+
+    @Test
+    void customizer_chatRequestTransformer_isAppliedNextToTheRequestPrompt() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.systemMessage("Configured")
+                        .chatRequestTransformer(request -> {
+                            var messages = new ArrayList<>(request.messages());
+                            messages.add(
+                                    UserMessage.from("From the transformer"));
+                            return request.toBuilder().messages(messages)
+                                    .build();
+                        }));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals("From the transformer",
+                ((UserMessage) messages.getLast()).singleText());
+    }
+
+    @Test
+    void customizer_toolExecutionErrorHandler_handlesToolFailures() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new ErrorThrowingToolClass())
+                        .toolExecutionErrorHandler(
+                                (error, context) -> ToolErrorHandlerResult
+                                        .text("Handled by the application")));
+        var toolCall = mockSimpleResponseWithTool("throwError");
+        var answer = mockSimpleResponse("Sorry");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(createSimpleRequest("Break")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals("Handled by the application",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void customizer_toolExecutionErrorHandler_limitStillFailsTurn() {
+        var handledErrors = new AtomicInteger();
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service
+                        .toolExecutionErrorHandler((error, context) -> {
+                            handledErrors.incrementAndGet();
+                            return ToolErrorHandlerResult.text("Handled");
+                        }));
+        customized.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Assertions.assertEquals(0, handledErrors.get(),
+                "The limit is not a tool failure for the application to handle");
+        Mockito.verify(mockChatModel, Mockito.times(2))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_toolCalledPastMaxCallsPerTool_failsTurn() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        customized.setMaxCallsPerTool(2);
+        var toolResponse = mockSimpleResponseWithTool("getTemperature");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Loop"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'getTemperature'"),
+                error.getMessage());
+        Mockito.verify(mockChatModel, Mockito.times(3))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_streamingToolCalledPastMaxCallsPerTool_failsTurn() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass()));
+        customized.setMaxCallsPerTool(2);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockSimpleResponseWithTool("getTemperature"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Loop"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void customizer_roundWithCallPastTheLimit_executesNoneOfItsCalls() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(tools));
+        customized.setMaxCallsPerTool(2);
+        var toolResponse = mockResponseWithToolRequests("count", "count",
+                "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The tools of the customizer must not run in a round past "
+                        + "the limit");
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_streamingRoundWithCallPastTheLimit_executesNoneOfItsCalls() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(tools));
+        customized.setMaxCallsPerTool(2);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(
+                    mockResponseWithToolRequests("count", "count", "count"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Count"))
+                        .collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The tools of the customizer must not run in a round past "
+                        + "the limit");
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void customizer_immediateToolPastMaxTotalToolCalls_failsTurn() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass(),
+                        new ImmediateToolClass()));
+        customized.setMaxTotalToolCalls(1);
+        var temperature = mockSimpleResponseWithTool("getTemperature");
+        var finish = mockSimpleResponseWithTool("finish");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(temperature, finish);
+
+        // The immediate tool would end the turn without another model call,
+        // so the turn has to fail when the response that requests it arrives
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Finish"))
+                        .collectList().block(TURN_TIMEOUT));
+    }
+
+    @Test
+    void customizer_streamingImmediateToolPastMaxTotalToolCalls_failsTurn() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(new SampleToolsClass(),
+                        new ImmediateToolClass()));
+        customized.setMaxTotalToolCalls(1);
+        var rounds = new AtomicInteger();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool(
+                    rounds.getAndIncrement() == 0 ? "getTemperature"
+                            : "finish"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> customized.stream(createSimpleRequest("Finish"))
+                        .collectList().block(TURN_TIMEOUT));
+    }
+
+    @Test
+    void customizer_chatModel_constructorModelIsUsed() {
+        var otherModel = Mockito.mock(ChatModel.class);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.chatModel(otherModel));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = customized.stream(createSimpleRequest("Hello"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("ok"), results);
+        Mockito.verify(otherModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_userMessageWithBraces_sendsTextAsIs() {
+        var text = "Explain {{name}} and {\"a\": {{1}}} on {{current_date}}";
+
+        mockSimpleChat(createSimpleRequest(text), "ok");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        Assertions.assertEquals(text, userMessage.singleText());
+    }
+
+    @Test
+    void stream_withAttachments_sendsUserTextBeforeAttachments() {
+        var textFile = new AiAttachment("notes.txt", "text/plain",
+                "Remember the milk".getBytes(StandardCharsets.UTF_8));
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var request = new TestLlmRequest("What is this?", null,
+                List.of(textFile, image), new Object[0]);
+
+        mockSimpleChat(request, "ok");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var contents = ((UserMessage) captor.getValue().messages().getFirst())
+                .contents();
+        Assertions.assertEquals(3, contents.size(), contents.toString());
+        Assertions.assertEquals("What is this?",
+                ((TextContent) contents.get(0)).text());
+        Assertions.assertTrue(((TextContent) contents.get(1)).text()
+                .contains("Remember the milk"));
+        Assertions.assertInstanceOf(ImageContent.class, contents.get(2));
+    }
+
+    @Test
+    void stream_withAttachment_keepsAttachmentInChatMemory() {
+        var image = new AiAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        mockSimpleChat(new TestLlmRequest("What is this?", null, List.of(image),
+                new Object[0]), "A photo");
+
+        provider.stream(createSimpleRequest("And the colors?")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertEquals(1,
+                getUserMessageContents(captor.getAllValues().get(1),
+                        ImageContent.class).size(),
+                "The attachment of the first turn should be replayed");
+    }
+
+    @Test
+    void stream_streamingWithSystemPromptInRequest_usesRequestPrompt() {
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponse("ok"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel).chat(captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) captor.getValue().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_chatModelWithItsOwnChatMethods_usesRequestPrompt() {
+        // Unlike a mock, a model implements doChat and inherits the chat
+        // methods the service calls
+        var requests = new ArrayList<ChatRequest>();
+        var model = new ChatModel() {
+            @Override
+            public ChatResponse doChat(ChatRequest chatRequest) {
+                requests.add(chatRequest);
+                return ChatResponse.builder().aiMessage(AiMessage.from("Hi"))
+                        .build();
+            }
+        };
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        var results = new LangChain4jLlmProvider(model).stream(request)
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Hi"), results);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) requests.getFirst().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_streamingChatModelWithItsOwnChatMethods_usesRequestPrompt() {
+        var requests = new ArrayList<ChatRequest>();
+        var model = new StreamingChatModel() {
+            @Override
+            public void doChat(ChatRequest chatRequest,
+                    StreamingChatResponseHandler handler) {
+                requests.add(chatRequest);
+                handler.onPartialResponse("Hi");
+                handler.onCompleteResponse(ChatResponse.builder()
+                        .aiMessage(AiMessage.from("Hi")).build());
+            }
+        };
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        var results = new LangChain4jLlmProvider(model).stream(request)
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Hi"), results);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) requests.getFirst().messages().getFirst())
+                        .text());
+    }
+
+    @Test
+    void stream_readsRequestDefaultsFromTheModelGiven() {
+        // The service asks the model for more than the chat call, such as
+        // the request parameters it defaults to, and has to reach the model
+        // the application passed in
+        mockSimpleChat(createSimpleRequest("Hello"), "ok");
+
+        Mockito.verify(mockChatModel, Mockito.atLeastOnce())
+                .defaultRequestParameters();
+    }
+
+    @Test
+    void constructor_withNullCustomizer_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LangChain4jLlmProvider(mockChatModel, null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LangChain4jLlmProvider(mockStreamingChatModel, null));
+    }
+
+    @Test
+    void customizer_streamingProviderWithChatModel_chatModelIsNotUsed() {
+        // The service reads its request defaults from a ChatModel before a
+        // streaming one, so a ChatModel left in place would be consulted
+        var otherModel = Mockito.mock(ChatModel.class);
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.chatModel(otherModel));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("ok");
+            handler.onCompleteResponse(mockSimpleResponse("ok"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = customized.stream(createSimpleRequest("Hello"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("ok"), results);
+        Mockito.verifyNoInteractions(otherModel);
+    }
+
+    @Test
+    void customizer_systemMessage_staysFirstAfterHistoryRestore() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.systemMessage("Configured"));
+        customized.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER,
+                        "Previous question", null, null),
+                        new ChatMessage(ChatMessage.Role.ASSISTANT,
+                                "Previous answer", null, null)),
+                Collections.emptyMap());
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals(4, messages.size(), messages.toString());
+        Assertions.assertEquals("Configured",
+                ((SystemMessage) messages.getFirst()).text());
+    }
+
+    @Test
+    void requestPrompt_replacesCustomizerSystemMessageNotKeptFirst() {
+        // A window memory with its defaults adds the system message after
+        // the conversation it holds instead of ahead of it
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.systemMessage("Configured")
+                        .chatMemory(memory));
+        memory.add(UserMessage.from("Previous question"));
+        memory.add(AiMessage.from("Previous answer"));
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLlmRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals(1,
+                messages.stream().filter(SystemMessage.class::isInstance)
+                        .count(),
+                "The service's own system message is replaced, not kept: "
+                        + messages);
+    }
+
+    @Test
+    void stream_nonStreamingTextAlongsideToolCall_isPassedOn() {
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = new TestLlmRequestWithExplicitTools("Check", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.aiMessage().text())
+                .thenReturn("Let me check. ");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse)
+                .thenReturn(mockSimpleResponse("It is done."));
+
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Let me check. ", "It is done."),
+                results);
+    }
+
+    @Test
+    void stream_nonStreamingTextAlongsideRefusedToolCall_isNotPassedOn() {
+        provider.setMaxCallsPerTool(1);
+        var request = requestWithCountingTool("myTool", new AtomicInteger());
+        var first = mockSimpleResponseWithTool("myTool");
+        Mockito.when(first.aiMessage().text()).thenReturn("First round");
+        var second = mockSimpleResponseWithTool("myTool");
+        Mockito.when(second.aiMessage().text()).thenReturn("Refused round");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(first).thenReturn(second);
+        var results = new ArrayList<String>();
+        var error = new AtomicReference<Throwable>();
+
+        provider.stream(request).subscribe(results::add, error::set);
+
+        // The text of the rounds is passed on with the answer, which a
+        // failed turn does not reach
+        Assertions.assertEquals(List.of(), results);
+        Assertions.assertInstanceOf(ToolCallLimitExceededException.class,
+                error.get());
+    }
+
+    @Test
+    void stream_cancelledTurnStillRunningWhenNextTurnStarts_doesNotCallModelAgain() {
+        var handlers = new ArrayList<StreamingChatResponseHandler>();
+        Mockito.doAnswer(invocation -> {
+            // Each response is delivered by the test
+            handlers.add(invocation.getArgument(1));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var toolCalls = new AtomicInteger();
+        var firstTurn = new BaseSubscriber<String>() {
+        };
+        streamingProvider.stream(requestWithCountingTool("myTool", toolCalls))
+                .subscribe(firstTurn);
+        firstTurn.cancel();
+        var secondResults = new ArrayList<String>();
+        streamingProvider.stream(createSimpleRequest("Second"))
+                .subscribe(secondResults::add);
+
+        // The first turn's response arrives while the second turn runs
+        handlers.get(0)
+                .onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+
+        Assertions.assertEquals(0, toolCalls.get());
+        Assertions.assertEquals(2, handlers.size(),
+                "The cancelled turn must not call the model again");
+        handlers.get(1).onPartialResponse("Second answer");
+        handlers.get(1).onCompleteResponse(mockSimpleResponse("Second answer"));
+        Assertions.assertEquals(List.of("Second answer"), secondResults);
+    }
+
+    @Test
+    void stream_cancelledTurnAnswersWhileNextTurnCallsTools_keepsNextTurnToolTraffic() {
+        var handlers = new ArrayList<StreamingChatResponseHandler>();
+        var requests = new ArrayList<ChatRequest>();
+        Mockito.doAnswer(invocation -> {
+            // Each response is delivered by the test
+            requests.add(invocation.getArgument(0));
+            handlers.add(invocation.getArgument(1));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var firstTurn = new BaseSubscriber<String>() {
+        };
+        streamingProvider.stream(createSimpleRequest("First"))
+                .subscribe(firstTurn);
+        firstTurn.cancel();
+        var toolCalls = new AtomicInteger();
+        streamingProvider.stream(requestWithCountingTool("myTool", toolCalls))
+                .subscribe(new BaseSubscriber<>() {
+                });
+        handlers.get(1)
+                .onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+
+        // The first turn's answer arrives between two tool rounds of the
+        // second turn
+        handlers.get(0).onCompleteResponse(mockSimpleResponse("Late answer"));
+        handlers.get(2)
+                .onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+
+        Assertions.assertEquals(2, toolCalls.get());
+        Assertions.assertEquals(4, requests.size());
+        Assertions.assertEquals(2,
+                getToolExecutionResults(requests.get(3)).size(),
+                "Both tool rounds of the second turn should be sent: "
+                        + requests.get(3).messages());
+    }
+
+    @Test
+    void stream_turnStartedFromToolOfAnotherTurn_keepsOuterTurnToolTraffic() {
+        var innerResults = new ArrayList<String>();
+        var askAgain = createExplicitTool("askAgain", "Asks the model again",
+                null, args -> {
+                    innerResults.addAll(provider
+                            .stream(createSimpleRequest("Inner question"))
+                            .collectList().block(TURN_TIMEOUT));
+                    return "asked";
+                });
+        var toolCall = mockSimpleResponseWithTool("askAgain");
+        var innerAnswer = mockSimpleResponse("Inner answer");
+        var outerAnswer = mockSimpleResponse("Outer answer");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolCall, innerAnswer, outerAnswer);
+
+        provider.stream(new TestLlmRequestWithExplicitTools("Outer question",
+                null, List.of(), new Object[0], List.of(askAgain)))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("Inner answer"), innerResults);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The outer turn continues with its own tool call and its result
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertTrue(
+                messages.get(messages.size() - 2) instanceof AiMessage call
+                        && call.hasToolExecutionRequests(),
+                messages.toString());
+        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
+                messages.getLast());
+    }
+
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_sendsRequestPromptWithFollowUpCall() {
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = new TestLlmRequestWithExplicitTools("Check",
+                "From the request", Collections.emptyList(), new Object[0],
+                List.of(tool));
+        var requests = mockStreamingResponsesOnOtherThreads(
+                mockSimpleResponseWithTool("myTool"),
+                mockSimpleResponse("done"));
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(2, requests.size());
+        var first = Assertions.assertInstanceOf(SystemMessage.class,
+                requests.get(1).messages().getFirst());
+        Assertions.assertEquals("From the request", first.text());
+    }
+
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_keepsToolTrafficOutOfTheNextTurn() {
+        var requests = mockStreamingResponsesOnOtherThreads(
+                mockSimpleResponseWithTool("myTool"),
+                mockSimpleResponse("First answer"),
+                mockSimpleResponse("Second answer"));
+        streamingProvider
+                .stream(requestWithCountingTool("myTool", new AtomicInteger()))
+                .collectList().block(TURN_TIMEOUT);
+
+        streamingProvider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(3, requests.size());
+        // The first question, its answer and the second question
+        var messages = requests.get(2).messages();
+        Assertions.assertEquals(3, messages.size(), messages.toString());
+        Assertions.assertEquals(List.of(),
+                getToolExecutionResults(requests.get(2)));
+    }
+
+    @Test
+    void stream_streamingModelAnswersOnAnotherThread_toolCalledPastTheLimit_failsTurn() {
+        streamingProvider.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var requests = mockStreamingResponsesOnOtherThreads(toolResponse,
+                toolResponse, toolResponse, mockSimpleResponse("done"));
+        var turn = streamingProvider
+                .stream(requestWithCountingTool("myTool", toolCalls))
+                .collectList();
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> turn.block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Assertions.assertEquals(2, requests.size(),
+                "The model must not be called again past the limit");
+    }
+
+    /**
+     * Makes the streaming model answer its calls with the given responses, in
+     * order, each on a thread of its own. A model delivers its response on a
+     * thread of its HTTP client, not on the thread that called it, as the other
+     * streaming mocks of this class do.
+     *
+     * @return the requests of the model calls, in order
+     */
+    private List<ChatRequest> mockStreamingResponsesOnOtherThreads(
+            ChatResponse... responses) {
+        var requests = Collections
+                .synchronizedList(new ArrayList<ChatRequest>());
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            var call = requests.size();
+            requests.add(invocation.getArgument(0));
+            new Thread(() -> {
+                if (call < responses.length) {
+                    handler.onCompleteResponse(responses[call]);
+                } else {
+                    handler.onError(new IllegalStateException(
+                            "No response left for model call " + (call + 1)));
+                }
+            }).start();
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        return requests;
+    }
+
+    // --- Tool call limit tests ---
+
+    @Test
+    void toolCallLimits_defaultToTheLimitsSpringAIApplies() {
+        Assertions.assertEquals(40, provider.getMaxCallsPerTool());
+        Assertions.assertEquals(150, provider.getMaxTotalToolCalls());
+    }
+
+    @Test
+    void setMaxCallsPerTool_isReflectedByGetter() {
+        provider.setMaxCallsPerTool(5);
+        Assertions.assertEquals(5, provider.getMaxCallsPerTool());
+        provider.setMaxCallsPerTool(0);
+        Assertions.assertEquals(0, provider.getMaxCallsPerTool());
+    }
+
+    @Test
+    void setMaxCallsPerTool_negative_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> provider.setMaxCallsPerTool(-1));
+        Assertions.assertEquals(40, provider.getMaxCallsPerTool());
+    }
+
+    @Test
+    void setMaxTotalToolCalls_isReflectedByGetter() {
+        provider.setMaxTotalToolCalls(7);
+        Assertions.assertEquals(7, provider.getMaxTotalToolCalls());
+        provider.setMaxTotalToolCalls(0);
+        Assertions.assertEquals(0, provider.getMaxTotalToolCalls());
+    }
+
+    @Test
+    void setMaxTotalToolCalls_negative_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> provider.setMaxTotalToolCalls(-1));
+        Assertions.assertEquals(150, provider.getMaxTotalToolCalls());
+    }
+
+    @Test
+    void stream_toolCalledUpToMaxCallsPerTool_completesNormally() {
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(toolRoundsThenAnswer(
+                        Collections.nCopies(40, "myTool"), "done"));
+
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(40, toolCalls.get());
+        Mockito.verify(mockChatModel, Mockito.times(41))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_toolCalledPastMaxCallsPerTool_failsTurnNamingTheTool() {
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
+                error.getMessage());
+        Assertions.assertTrue(error.getMessage().contains("(40)"),
+                error.getMessage());
+        Assertions.assertEquals(40, toolCalls.get(),
+                "The call that exceeds the limit is not executed");
+        Mockito.verify(mockChatModel, Mockito.times(41))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_toolCallsUpToMaxTotalToolCalls_completesNormally() {
+        // Four tools called in turn keep every per-tool count under the
+        // per-tool limit while the total reaches its limit
+        var toolCalls = new AtomicInteger();
+        var toolNames = List.of("tool0", "tool1", "tool2", "tool3");
+        var request = requestWithCountingTools(toolNames, toolCalls);
+        var rounds = IntStream.range(0, 150)
+                .mapToObj(i -> toolNames.get(i % toolNames.size())).toList();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(toolRoundsThenAnswer(rounds, "done"));
+
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(150, toolCalls.get());
+    }
+
+    @Test
+    void stream_toolCallsPastMaxTotalToolCalls_failsTurnWithoutToolName() {
+        var toolCalls = new AtomicInteger();
+        var toolNames = List.of("tool0", "tool1", "tool2", "tool3");
+        var request = requestWithCountingTools(toolNames, toolCalls);
+        var round = new AtomicInteger();
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> mockSimpleResponseWithTool(toolNames
+                        .get(round.getAndIncrement() % toolNames.size())));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Total tool call limit (150)"),
+                error.getMessage());
+        Assertions.assertEquals(150, toolCalls.get());
+        Mockito.verify(mockChatModel, Mockito.times(151))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_roundWithCallPastTheLimit_executesNoneOfItsCalls() {
+        provider.setMaxCallsPerTool(2);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        var toolResponse = mockResponseWithToolRequests("myTool", "myTool",
+                "myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
+                error.getMessage());
+        Assertions.assertEquals(0, toolCalls.get(),
+                "The calls before the one past the limit are not executed either");
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .chat(Mockito.any(ChatRequest.class));
+
+        // The refused round left nothing behind in memory
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        Assertions.assertTrue(captor.getAllValues().get(1).messages().stream()
+                .allMatch(UserMessage.class::isInstance));
+    }
+
+    @Test
+    void stream_roundWithAnnotatedToolCallPastTheLimit_executesNoneOfItsCalls() {
+        provider.setMaxCallsPerTool(2);
+        var tools = new CountingToolClass();
+        var request = new TestLlmRequest("Count", null, Collections.emptyList(),
+                new Object[] { tools });
+        var toolResponse = mockResponseWithToolRequests("count", "count",
+                "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'count'"),
+                error.getMessage());
+        Assertions.assertEquals(0, tools.calls.get(),
+                "The calls before the one past the limit are not executed either");
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_limitExceeded_nextTurnContinuesFromLastCompletedRound() {
+        provider.setMaxCallsPerTool(1);
+        var request = requestWithCountingTool("myTool", new AtomicInteger());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        // The failed turn left only its user message in memory: neither
+        // the refused request nor the completed round's tool traffic follow
+        // it, and there is no final answer to keep
+        var messages = captor.getAllValues().get(2).messages();
+        Assertions.assertEquals(2, messages.size());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance));
+    }
+
+    @Test
+    void stream_limitExceeded_metadataOfTheTurnStillPublished() {
+        // The refused round trip was still billed, so the sink must have
+        // received the usage of every round trip that ran
+        provider.setMaxCallsPerTool(1);
+        var collected = new ArrayList<ResponseMetadata>();
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = requestWithMetadataSink("Loop", List.of(tool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Assertions.assertEquals(2, collected.size());
+        Assertions.assertEquals(220,
+                collected.getLast().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_metadataSinkThrows_limitStillFailsTurn() {
+        // A failing sink does not fail the turn, and it must not take the
+        // screening of the tool calls down with it
+        provider.setMaxCallsPerTool(1);
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = requestWithMetadataSink("Loop", List.of(tool),
+                (Consumer<ResponseMetadata>) metadata -> {
+                    throw new IllegalStateException("The sink failed");
+                });
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var answer = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, toolResponse, toolResponse, answer);
+
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Mockito.verify(mockChatModel, Mockito.times(2))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_metadataSinkThrows_logsTheFailure() {
+        var sinkFailure = new IllegalStateException("The sink failed");
+        var request = requestWithMetadataSink("Hello", List.of(),
+                (Consumer<ResponseMetadata>) metadata -> {
+                    throw sinkFailure;
+                });
+        var answer = mockSimpleResponse("Hi");
+        Mockito.when(answer.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(answer);
+
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        // The turn goes on without its metadata, so the log is the only
+        // trace of the failure
+        var logged = logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getThrowable().orElse(null) == sinkFailure);
+        Assertions.assertTrue(logged, "Expected the sink failure to be logged");
+    }
+
+    @Test
+    void stream_withLimitsRemoved_toolCallsPastTheDefaultsAreAllowed() {
+        provider.setMaxCallsPerTool(0);
+        provider.setMaxTotalToolCalls(0);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(toolRoundsThenAnswer(
+                        Collections.nCopies(200, "myTool"), "done"));
+
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(200, toolCalls.get());
+    }
+
+    @Test
+    void stream_callPastBothLimits_reportsPerToolLimit() {
+        provider.setMaxCallsPerTool(2);
+        provider.setMaxTotalToolCalls(2);
+        var request = requestWithCountingTool("myTool", new AtomicInteger());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("'myTool'"),
+                "The per-tool limit is checked before the total: "
+                        + error.getMessage());
+    }
+
+    @Test
+    void stream_toolCallCounts_startFromZeroForEachTurn() {
+        provider.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"));
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
+
+        Mockito.doAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"))
+                .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(2, toolCalls.get(),
+                "Each turn may spend its one allowed call");
+    }
+
+    @Test
+    void stream_withPerToolLimitRemoved_totalLimitStillApplies() {
+        provider.setMaxCallsPerTool(0);
+        var request = requestWithCountingTool("myTool", new AtomicInteger());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Total tool call limit (150)"),
+                error.getMessage());
+    }
+
+    @Test
+    void stream_streamingModel_toolCalledPastMaxCallsPerTool_failsTurn() {
+        streamingProvider.setMaxCallsPerTool(2);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Looking");
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> streamingProvider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("'myTool'"),
+                error.getMessage());
+        Assertions.assertEquals(2, toolCalls.get());
+        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void stream_cancelledBeforeFirstModelCall_leavesNoQuestionUnanswered() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        subscriber.cancel();
+        provider.stream(createSimpleRequest("First")).subscribe(subscriber);
+        Mockito.verify(mockChatModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var questions = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("Second"), questions,
+                "The cancelled turn left its question in memory unanswered");
+    }
+
+    @Test
+    void stream_cancelledBeforeFirstModelCall_logsTheSkippedTurn() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        subscriber.cancel();
+
+        provider.stream(createSimpleRequest("First")).subscribe(subscriber);
+
+        // A turn cancelled before it starts ends quietly, without a terminal
+        // signal or an error, so the log is the only record of why the model
+        // was never called. Only this thread's events count: the shared
+        // logger still holds what the other tests logged.
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .anyMatch(event -> event.getLevel() == Level.DEBUG),
+                "Expected the skipped turn to be logged");
+    }
+
+    @Test
+    void stream_cancelledDuringToolExecution_finishesRoundWithoutCallingModelAgain() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            toolCalls.incrementAndGet();
+            subscriber.cancel();
+            return "result";
+        });
+        var request = new TestLlmRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        provider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .chat(Mockito.any(ChatRequest.class));
+
+        // The cancelled turn's tool traffic is discarded with it, so the
+        // next turn follows the user message that started it
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(2, messages.size());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance));
+    }
+
+    @Test
+    void stream_cancelledDuringToolRound_skipsTheRemainingAnnotatedToolCalls() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var tools = new CountingToolClass();
+        var cancel = createExplicitTool("cancel", "Cancels the turn", null,
+                args -> {
+                    subscriber.cancel();
+                    return "cancelled";
+                });
+        var request = new TestLlmRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[] { tools },
+                List.of(cancel));
+        var toolResponse = mockResponseWithToolRequests("cancel", "count");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        provider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "A tool call that follows the cancellation in its round "
+                        + "must not run");
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_cancelledDuringToolExecution_logsTheSkippedModelCall() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            subscriber.cancel();
+            return "result";
+        });
+        var request = new TestLlmRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        provider.stream(request).subscribe(subscriber);
+
+        // A cancelled turn ends quietly, without a terminal signal or an
+        // error, so the log is the only record of why the model was not
+        // called again.
+        Assertions.assertTrue(
+                hasCancellationDebugLog("skipping the model call"),
+                "Expected the skipped model call to be logged");
+    }
+
+    private boolean hasCancellationDebugLog(String phrase) {
+        return logger.getAllLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.DEBUG
+                        && event.getMessage().contains(phrase));
+    }
+
+    @Test
+    void stream_perToolLimit_countsEachToolSeparately() {
+        provider.setMaxCallsPerTool(1);
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTools(List.of("toolA", "toolB"),
+                toolCalls);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(toolRoundsThenAnswer(
+                        List.of("toolA", "toolB", "toolA"), "done"));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'toolA'"),
+                error.getMessage());
+        Assertions.assertEquals(2, toolCalls.get(),
+                "One call to each tool is within the limit");
+    }
+
+    @Test
+    void stream_unknownToolRequestedRepeatedly_countsTowardsTheLimit() {
+        var toolResponse = mockSimpleResponseWithTool("unknownTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(createSimpleRequest("Loop")).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(error.getMessage().contains("'unknownTool'"),
+                error.getMessage());
+        Mockito.verify(mockChatModel, Mockito.times(41))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void setMaxCallsPerTool_changedDuringTurn_appliesFromTheNextTurn() {
+        provider.setMaxCallsPerTool(1);
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            provider.setMaxCallsPerTool(0);
+            return "result";
+        });
+        var request = new TestLlmRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        // The running turn keeps the limit it started with
+        Assertions.assertThrows(ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
+
+        // The next turn runs without the per-tool limit
+        Mockito.doAnswer(
+                toolRoundsThenAnswer(Collections.nCopies(3, "myTool"), "done"))
+                .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
+        Assertions.assertEquals(List.of("done"), results);
+    }
+
+    @Test
+    void stream_cancelledWhileModelResponds_skipsToolCallsAndLeavesNoOpenRequest() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    subscriber.cancel();
+                    return mockSimpleResponseWithTool("myTool");
+                });
+
+        provider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(0, toolCalls.get());
+        Mockito.verify(mockChatModel, Mockito.times(1))
+                .chat(Mockito.any(ChatRequest.class));
+
+        // The request the model never got a result for is not in memory, so
+        // the next turn follows the first turn's user message directly
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(2, messages.size());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance));
+    }
+
+    @Test
+    void stream_streamingCancelledWhileModelResponds_skipsToolCalls() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            subscriber.cancel();
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(0, toolCalls.get(),
+                "A response arriving after the subscriber gave up must not "
+                        + "run its tools");
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void stream_streamingCancelledDuringToolExecution_doesNotCallModelAgain() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            toolCalls.incrementAndGet();
+            subscriber.cancel();
+            return "result";
+        });
+        var request = new TestLlmRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void stream_cancelledWhileModelResponds_skipsCustomizerTools() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.tools(tools));
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    subscriber.cancel();
+                    return mockSimpleResponseWithTool("count");
+                });
+
+        customized.stream(createSimpleRequest("Count")).subscribe(subscriber);
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "A response arriving after the subscriber gave up must not "
+                        + "run the tools of the customizer");
+        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void stream_streamingCancelledWhileModelResponds_skipsCustomizerTools() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(tools));
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            subscriber.cancel();
+            handler.onCompleteResponse(mockSimpleResponseWithTool("count"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        customized.stream(createSimpleRequest("Count")).subscribe(subscriber);
+
+        Assertions.assertEquals(0, tools.calls.get(),
+                "A response arriving after the subscriber gave up must not "
+                        + "run the tools of the customizer");
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void stream_streamingCancelledBeforeConcurrentToolCall_skipsCustomizerTool() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(tools)
+                        .executeToolsConcurrently(Runnable::run));
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolRequest = ToolExecutionRequest.builder().id("1").name("count")
+                .arguments("{}").build();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            subscriber.cancel();
+            // With concurrent execution, LangChain4j starts the tool here
+            handler.onCompleteToolCall(new CompleteToolCall(0, toolRequest));
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from(List.of(toolRequest))).build());
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        customized.stream(createSimpleRequest("Count")).subscribe(subscriber);
+
+        Assertions.assertEquals(0, tools.calls.get());
+    }
+
+    @Test
+    void stream_namelessToolRequestedRepeatedly_reportsThePerToolLimit() {
+        // LangChain4j does not guard the name of a tool execution request, so
+        // a nameless one can reach the counter. It must still report the
+        // per-tool limit: a null tool name means the total limit.
+        provider.setMaxCallsPerTool(2);
+        var toolResponse = mockSimpleResponseWithTool(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(createSimpleRequest("Loop")).collectList()
+                        .block(TURN_TIMEOUT));
+
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("''"),
+                "A nameless tool is reported under an empty name: "
+                        + error.getMessage());
+        Mockito.verify(mockChatModel, Mockito.times(3))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    private static LlmRequest requestWithCountingTool(String toolName,
+            AtomicInteger toolCalls) {
+        return requestWithCountingTools(List.of(toolName), toolCalls);
+    }
+
+    private static LlmRequest requestWithCountingTools(List<String> toolNames,
+            AtomicInteger toolCalls) {
+        var tools = toolNames.stream().map(
+                name -> createExplicitTool(name, "A test tool", null, args -> {
+                    toolCalls.incrementAndGet();
+                    return "result";
+                })).toList();
+        return new TestLlmRequestWithExplicitTools("Call tools", null,
+                Collections.emptyList(), new Object[0], tools);
+    }
+
+    /**
+     * Answers each model call with a request for the next tool in the list,
+     * then with a final text response.
+     */
+    private static Answer<ChatResponse> toolRoundsThenAnswer(
+            List<String> toolNamesPerRound, String finalText) {
+        var round = new AtomicInteger();
+        return invocation -> {
+            var index = round.getAndIncrement();
+            return index < toolNamesPerRound.size()
+                    ? mockSimpleResponseWithTool(toolNamesPerRound.get(index))
+                    : mockSimpleResponse(finalText);
+        };
+    }
+
+    private static ChatResponse mockResponseWithToolRequests(
+            String... toolNames) {
+        var aiMessage = Mockito.mock(AiMessage.class);
+        Mockito.when(aiMessage.text()).thenReturn("");
+        Mockito.when(aiMessage.hasToolExecutionRequests()).thenReturn(true);
+        var requests = Arrays.stream(toolNames).map(name -> {
+            var toolRequest = Mockito.mock(ToolExecutionRequest.class);
+            Mockito.when(toolRequest.name()).thenReturn(name);
+            Mockito.when(toolRequest.arguments()).thenReturn("{}");
+            return toolRequest;
+        }).toList();
+        Mockito.when(aiMessage.toolExecutionRequests()).thenReturn(requests);
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+        return response;
+    }
+
+    private static LlmRequest requestWithMetadataSink(String message,
+            List<LlmProvider.ToolSpec> explicitTools,
+            List<ResponseMetadata> collected) {
+        return requestWithMetadataSink(message, explicitTools,
+                (Consumer<ResponseMetadata>) collected::add);
+    }
+
+    private static LlmRequest requestWithMetadataSink(String message,
+            List<LlmProvider.ToolSpec> explicitTools,
+            Consumer<ResponseMetadata> sink) {
+        return new LlmRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AiAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LlmProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return sink;
+            }
+        };
+    }
+
+    private static List<ToolExecutionResultMessage> getToolExecutionResults(
+            ChatRequest request) {
+        return request.messages().stream()
+                .filter(ToolExecutionResultMessage.class::isInstance)
+                .map(ToolExecutionResultMessage.class::cast).toList();
+    }
+
+    private static <T extends Content> List<T> getUserMessageContents(
+            ChatRequest request, Class<T> contentClass) {
+        return request.messages().stream().filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast).map(UserMessage::contents)
+                .flatMap(List::stream).filter(contentClass::isInstance)
+                .map(contentClass::cast).toList();
+    }
+
+    private static LlmRequest createSimpleRequest(String message) {
+        return new TestLlmRequest(message, null, Collections.emptyList(),
+                new Object[0]);
+    }
+
+    private static ChatResponse mockSimpleResponseWithTool(String toolName) {
+        return mockSimpleResponseWithTool(toolName, "{}");
+    }
+
+    /**
+     * A response requesting one tool call and carrying no text. With text, the
+     * non-streaming provider would emit it, a test consuming the turn with
+     * {@code blockFirst()} would cancel the turn as soon as it arrives, and the
+     * provider would then skip the model calls that follow.
+     */
+    private static ChatResponse mockSimpleResponseWithTool(String toolName,
+            String arguments) {
+        var aiMessage1 = Mockito.mock(AiMessage.class);
+        Mockito.when(aiMessage1.text()).thenReturn("");
+        Mockito.when(aiMessage1.hasToolExecutionRequests()).thenReturn(true);
+        var toolRequest = Mockito.mock(ToolExecutionRequest.class);
+        Mockito.when(toolRequest.name()).thenReturn(toolName);
+        Mockito.when(toolRequest.arguments()).thenReturn(arguments);
+        Mockito.when(aiMessage1.toolExecutionRequests())
+                .thenReturn(List.of(toolRequest));
+        var response1 = mockChatResponse();
+        Mockito.when(response1.aiMessage()).thenReturn(aiMessage1);
+        return response1;
+    }
+
+    /**
+     * A mocked response carrying the metadata object a real response always
+     * has: the AI service reads it even when a test stubs nothing else.
+     */
+    private static ChatResponse mockChatResponse() {
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.metadata())
+                .thenReturn(ChatResponseMetadata.builder().build());
+        return response;
+    }
+
+    private static ChatResponse mockSimpleResponse(String text) {
+        var aiMessage = Mockito.mock(AiMessage.class);
+        Mockito.when(aiMessage.text()).thenReturn(text);
+        Mockito.when(aiMessage.hasToolExecutionRequests()).thenReturn(false);
+        var response = mockChatResponse();
+        Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+        return response;
+    }
+
+    private record TestLlmRequest(String userMessage, String systemPrompt,
+            List<AiAttachment> attachments,
+            Object[] tools) implements LlmRequest {
+    }
+
+    private record TestLlmRequestWithExplicitTools(String userMessage,
+            String systemPrompt, List<AiAttachment> attachments, Object[] tools,
+            List<LlmProvider.ToolSpec> explicitTools) implements LlmRequest {
+    }
+
+    private record TestLlmRequestWithSessionContext(String userMessage,
+            String sessionContext) implements LlmRequest {
+        @Override
+        public List<AiAttachment> attachments() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String systemPrompt() {
+            return null;
+        }
+
+        @Override
+        public Object[] tools() {
+            return new Object[0];
+        }
+    }
+
+    private static class SampleToolsClass {
+        @Tool
+        public String getTemperature() {
+            return "22°C";
+        }
+
+        @Tool
+        public String getHumidity() {
+            return "65%";
+        }
+    }
+
+    private static class CountingToolClass {
+        private final AtomicInteger calls = new AtomicInteger();
+
+        @Tool
+        public String count() {
+            return String.valueOf(calls.incrementAndGet());
+        }
+    }
+
+    private static class CompensatedToolClass {
+        @Tool
+        public String book() {
+            return "Booked";
+        }
+
+        @CompensateFor("book")
+        public void cancelBooking() {
+            // Nothing to undo: the booking above changes no state
+        }
+
+        @Tool
+        public String pay() {
+            throw new IllegalStateException("Payment failed");
+        }
+    }
+
+    private static class ImmediateToolClass {
+        @Tool(returnBehavior = ReturnBehavior.IMMEDIATE)
+        public String finish() {
+            return "finished";
+        }
+    }
+
+    private static class ErrorThrowingToolClass {
+        public String getErrorMessage() {
+            return "Tool execution failed";
+        }
+
+        @Tool
+        public String throwError() {
+            throw new RuntimeException(getErrorMessage());
+        }
+    }
+}

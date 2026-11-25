@@ -16,7 +16,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.common.ValueSource;
 
 /**
- * Fired by {@link FormAIController} once per field whose value changed during a
+ * Fired by {@link FormAiController} once per field whose value changed during a
  * successful AI turn — either written by the LLM or by a cascade. Events fire
  * in document order, after every field's post-turn value has been applied. A
  * field whose post-turn value equals its pre-turn value (by
@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ai.common.ValueSource;
  */
 public final class FieldValueChangeEvent implements Serializable {
 
-    private final transient FormAIController source;
+    private final transient FormAiController source;
     private final HasValue<?, ?> field;
     @SuppressWarnings("java:S1948")
     private final Object oldValue;
@@ -37,7 +37,7 @@ public final class FieldValueChangeEvent implements Serializable {
     private final Object newValue;
     private final ValueSource fieldSource;
 
-    FieldValueChangeEvent(FormAIController source, HasValue<?, ?> field,
+    FieldValueChangeEvent(FormAiController source, HasValue<?, ?> field,
             Object oldValue, Object newValue, ValueSource fieldSource) {
         this.source = Objects.requireNonNull(source, "Source must not be null");
         this.field = Objects.requireNonNull(field, "Field must not be null");
@@ -57,7 +57,7 @@ public final class FieldValueChangeEvent implements Serializable {
      * @return the source controller, or {@code null} if this event was
      *         deserialized
      */
-    public FormAIController getSource() {
+    public FormAiController getSource() {
         return source;
     }
 
@@ -98,7 +98,7 @@ public final class FieldValueChangeEvent implements Serializable {
     /**
      * Returns the source data the LLM reported for the value it wrote to this
      * field: the snippets it read and how sure it was. Present only when
-     * {@link FormAIController#setSourceTrackingEnabled(boolean) source
+     * {@link FormAiController#setSourceTrackingEnabled(boolean) source
      * tracking} is on and the model reported a source for this value; a value
      * with nothing to point at — for example one taken from the chat prompt —
      * carries none.

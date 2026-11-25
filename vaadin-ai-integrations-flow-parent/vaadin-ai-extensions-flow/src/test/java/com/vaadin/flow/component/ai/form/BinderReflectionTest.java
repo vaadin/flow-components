@@ -33,7 +33,7 @@ class BinderReflectionTest {
 
     @Test
     void collectPropertyNamesOnNullBinderReturnsEmptyWithoutWarning() {
-        // FormAIController's single-arg constructor passes a null binder
+        // FormAiController's single-arg constructor passes a null binder
         // through to collectPropertyNames on every get_form_state call; an
         // exception-handled fallback would log a warning on every request.
         var result = BinderReflection.collectPropertyNames(null);
@@ -51,7 +51,7 @@ class BinderReflectionTest {
 
     @Test
     void beanValidationErrorsOnNullBinderReturnsEmptyWithoutWarning() {
-        // FormAIController's single-arg constructor passes a null binder
+        // FormAiController's single-arg constructor passes a null binder
         // through to beanValidationErrors on every fill_form call; an
         // exception-handled fallback would log a warning on every request.
         var result = BinderReflection.beanValidationErrors(null);

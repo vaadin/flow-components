@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.AiTurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
@@ -58,7 +58,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Tests for {@link FormAIController}'s {@code get_form_state} tool. Covers
+ * Tests for {@link FormAiController}'s {@code get_form_state} tool. Covers
  * field classification, schema rendering (types, formats, enum vs. queryable),
  * value serialization, and the end-to-end shape of the tool result.
  */
@@ -71,7 +71,7 @@ class FormStateToolTest {
         var c = new BoolField();
         var nested = new Div(b, c);
         var form = new Div(a, nested);
-        var controller = new FormAIController(form);
+        var controller = new FormAiController(form);
 
         var fields = formStateFields(controller);
 
@@ -85,7 +85,7 @@ class FormStateToolTest {
     void getFormStateOmitsIgnoredFields() {
         var visible = new TestField();
         var hidden = new TestField();
-        var controller = new FormAIController(new Div(visible, hidden));
+        var controller = new FormAiController(new Div(visible, hidden));
         controller.ignoreField(hidden);
 
         var fields = formStateFields(controller);
@@ -105,7 +105,7 @@ class FormStateToolTest {
         var visible = new TestField();
         var hidden = new TestField();
         hidden.setVisible(false);
-        var controller = new FormAIController(new Div(visible, hidden));
+        var controller = new FormAiController(new Div(visible, hidden));
 
         var fields = formStateFields(controller);
 
@@ -125,7 +125,7 @@ class FormStateToolTest {
         var field = new TestField();
         var container = new Div(field);
         container.setVisible(false);
-        var controller = new FormAIController(new Div(container));
+        var controller = new FormAiController(new Div(container));
 
         var fields = formStateFields(controller);
 
@@ -141,7 +141,7 @@ class FormStateToolTest {
         var field = new TestField();
         var hiddenAncestor = new Div(new Div(new Div(field)));
         hiddenAncestor.setVisible(false);
-        var controller = new FormAIController(new Div(hiddenAncestor));
+        var controller = new FormAiController(new Div(hiddenAncestor));
 
         var fields = formStateFields(controller);
 
@@ -158,7 +158,7 @@ class FormStateToolTest {
         var field = new TestField();
         var container = new Div(field);
         container.setEnabled(false);
-        var controller = new FormAIController(new Div(container));
+        var controller = new FormAiController(new Div(container));
 
         var fields = formStateFields(controller);
 
@@ -179,7 +179,7 @@ class FormStateToolTest {
         var enabled = new TestField();
         var disabled = new TestField();
         disabled.setEnabled(false);
-        var controller = new FormAIController(new Div(enabled, disabled));
+        var controller = new FormAiController(new Div(enabled, disabled));
 
         var fields = formStateFields(controller);
 
@@ -205,7 +205,7 @@ class FormStateToolTest {
         var editable = new TestField();
         var readOnly = new TestField();
         readOnly.setReadOnly(true);
-        var controller = new FormAIController(new Div(editable, readOnly));
+        var controller = new FormAiController(new Div(editable, readOnly));
 
         var fields = formStateFields(controller);
 
@@ -232,7 +232,7 @@ class FormStateToolTest {
         var editable = new TestField();
         var readOnly = new TestField();
         readOnly.setReadOnly(true);
-        var controller = new FormAIController(new Div(editable, readOnly));
+        var controller = new FormAiController(new Div(editable, readOnly));
 
         controller.onRequest(requestEvent()); // locks the editable field
                                               // read-only
@@ -251,7 +251,7 @@ class FormStateToolTest {
                     "Application-read-only field must stay flagged, got: "
                             + fields.get(1));
         } finally {
-            controller.onResponse(AITurnEvents.success());
+            controller.onResponse(AiTurnEvents.success());
         }
     }
 
@@ -261,7 +261,7 @@ class FormStateToolTest {
         // one turn appears at the next once the controlling field reveals it.
         var field = new TestField();
         field.setVisible(false);
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         Assertions.assertEquals(0, formStateFields(controller).size(),
                 "Hidden field must be absent while invisible");
@@ -274,7 +274,7 @@ class FormStateToolTest {
 
     @Test
     void getFormStateReturnsEmptyFieldsArrayForEmptyForm() {
-        var controller = new FormAIController(new Div());
+        var controller = new FormAiController(new Div());
 
         var fields = formStateFields(controller);
 
@@ -286,7 +286,7 @@ class FormStateToolTest {
         var field = new BigIntField();
         var huge = new java.math.BigInteger("99999999999999999999");
         field.setValue(huge);
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -298,7 +298,7 @@ class FormStateToolTest {
         var visible = new TestField();
         var password = new PasswordField();
         password.setValue("secret");
-        var controller = new FormAIController(new Div(visible, password));
+        var controller = new FormAiController(new Div(visible, password));
         controller.describeField(password, "Account password");
         controller.fieldValueOptions(
                 ValueOptions.forField(password).options(List.of("hunter2")));
@@ -319,7 +319,7 @@ class FormStateToolTest {
         // include one.
         var visible = new TestField();
         var password = new PasswordField();
-        var controller = new FormAIController(new Div(visible, password));
+        var controller = new FormAiController(new Div(visible, password));
 
         var fields = formStateFields(controller);
 
@@ -336,7 +336,7 @@ class FormStateToolTest {
         // format=email distinction has to come from a class-name exception
         // in the classifier rather than from HasValue's generic parameter.
         var field = new EmailField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -350,7 +350,7 @@ class FormStateToolTest {
         var field = new LabeledStringField();
         field.setLabel("Merchant");
         field.setHelperText("As shown on the receipt");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "The vendor name");
 
         var f = formStateFields(controller).get(0);
@@ -372,7 +372,7 @@ class FormStateToolTest {
         var field = new LabeledStringField();
         field.setLabel("Merchant.");
         field.setHelperText("As shown on the receipt.");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.describeField(field, "The vendor name.");
 
         var f = formStateFields(controller).get(0);
@@ -389,7 +389,7 @@ class FormStateToolTest {
     @Test
     void getFormStateOmitsBlankDescriptionEntirely() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -399,7 +399,7 @@ class FormStateToolTest {
 
     @Test
     void valuesHiddenDefaultsToFalse() {
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
 
         Assertions.assertFalse(controller.isFieldValuesHidden(),
                 "Values must be sent by default");
@@ -415,7 +415,7 @@ class FormStateToolTest {
         var number = new DoubleField();
         number.setValue(58.4);
         var empty = new TestField();
-        var controller = new FormAIController(new Div(text, number, empty));
+        var controller = new FormAiController(new Div(text, number, empty));
         controller.setFieldValuesHidden(true);
 
         var fields = formStateFields(controller);
@@ -443,7 +443,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setItems("EUR", "USD");
         combo.setValue("EUR");
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.setFieldValuesHidden(true);
 
         var f = formStateFields(controller).get(0);
@@ -561,7 +561,7 @@ class FormStateToolTest {
         // that enum block.
         var field = new LazyDataViewField();
         field.supplyItems("alpha", "beta");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -578,7 +578,7 @@ class FormStateToolTest {
     void getFormStateClassifiesHasListDataViewFieldAsSingleSelect() {
         var field = new ListDataViewField();
         field.supplyItems("apple", "banana");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -593,7 +593,7 @@ class FormStateToolTest {
     void getFormStateClassifiesHasDataViewFieldAsSingleSelect() {
         var field = new DataViewField();
         field.supplyItems("x", "y");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -625,7 +625,7 @@ class FormStateToolTest {
         // node-level shape clean: array=true, no node-level type, and
         // queryable/enum sit inside the items block.
         var multi = new MultiSelectField<String>();
-        var controller = new FormAIController(new Div(multi));
+        var controller = new FormAiController(new Div(multi));
         controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("a", "b")));
 
@@ -651,7 +651,7 @@ class FormStateToolTest {
         var multi = new MultiSelectField<String>();
         multi.setItems("a", "b", "c");
         multi.setValue(Set.of("a", "c"));
-        var controller = new FormAIController(new Div(multi));
+        var controller = new FormAiController(new Div(multi));
         controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("a", "b", "c")));
 
@@ -679,7 +679,7 @@ class FormStateToolTest {
         combo.setItems(alpha, beta);
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
         combo.setValue(beta);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of(alpha, beta)));
 
@@ -701,7 +701,7 @@ class FormStateToolTest {
         // so applySelectionOptions runs; a plain STRING field skips that
         // branch entirely and would not exercise this regression.
         var combo = new SingleSelectField<String>();
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.describeField(combo, "Some descriptive text");
 
         var f = formStateFields(controller).get(0);
@@ -721,7 +721,7 @@ class FormStateToolTest {
         // the registration says only one is authoritative.
         var combo = new SingleSelectField<String>();
         combo.setItems("apple", "banana", "cherry");
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of("apple", "banana")));
 
@@ -743,7 +743,7 @@ class FormStateToolTest {
         // regressions don't slip through.
         var field = new DoubleField();
         field.setValue(Double.NaN);
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
 
@@ -765,7 +765,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<Project>();
         combo.setItems(new Project("P-1", "Alpha"), new Project("P-2", "Beta"));
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
 
         var f = formStateFields(controller).get(0);
 
@@ -804,7 +804,7 @@ class FormStateToolTest {
         // a non-selection field would not (LLM uses query_field_options
         // instead).
         var combo = new SingleSelectField<String>();
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of("EUR", "USD", "GBP")));
 
@@ -821,7 +821,7 @@ class FormStateToolTest {
     @Test
     void getFormStateEncodesQueryableForBiFunctionValueOptions() {
         var combo = new SingleSelectField<String>();
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
@@ -837,7 +837,7 @@ class FormStateToolTest {
     @Test
     void getFormStateExposesEnumForFixedValueOptionsOnStringField() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("EUR", "USD", "GBP")));
 
@@ -851,7 +851,7 @@ class FormStateToolTest {
     @Test
     void getFormStateExposesQueryableForBiFunctionValueOptionsOnStringField() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
@@ -866,7 +866,7 @@ class FormStateToolTest {
         combo.setItems("only");
         combo.setItemLabelGenerator(item -> null);
         combo.setValue("only");
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
 
         var f = formStateFields(controller).get(0);
 
@@ -883,7 +883,7 @@ class FormStateToolTest {
         var beta = new Project("P-2", "Beta");
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(
                 ValueOptions.forField(combo).options(List.of(alpha, beta))
                         .itemLabelGenerator(Project::code));
@@ -908,7 +908,7 @@ class FormStateToolTest {
         var beta = new Project("P-2", "Beta");
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(
                 ValueOptions.forField(combo).options(List.of(alpha, beta)));
 
@@ -926,7 +926,7 @@ class FormStateToolTest {
         // String.valueOf(item) so Integer / String / enum-typed items
         // self-label with no developer setup.
         var field = new IntField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(1, 2, 3)));
 
@@ -948,7 +948,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
         combo.setValue(alpha);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of(alpha)).itemLabelGenerator(Project::code));
 
@@ -968,7 +968,7 @@ class FormStateToolTest {
         // sees the entry.
         var alpha = new Project("P-1", "Alpha");
         var combo = new SingleSelectField<Project>();
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of(alpha)).itemLabelGenerator(p -> {
                     throw new RuntimeException("boom");
@@ -990,7 +990,7 @@ class FormStateToolTest {
         // label in the enum block.
         var alpha = new Project("P-1", "Alpha");
         var combo = new SingleSelectField<Project>();
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of(alpha)).itemLabelGenerator(p -> null));
 
@@ -1013,7 +1013,7 @@ class FormStateToolTest {
         var multi = new MultiSelectField<Project>();
         multi.setItemLabelGenerator(Project::name);
         multi.setValue(Set.of(apollo));
-        var controller = new FormAIController(new Div(multi));
+        var controller = new FormAiController(new Div(multi));
         controller.fieldValueOptions(
                 ValueOptions.forField(multi).options(List.of(apollo, vega))
                         .itemLabelGenerator(Project::code));
@@ -1035,7 +1035,7 @@ class FormStateToolTest {
     void getFormStateExposesListDataProviderItemsAsEnum() {
         var combo = new SingleSelectField<String>();
         combo.setItems("alpha", "beta", "gamma");
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
 
         var f = formStateFields(controller).get(0);
 
@@ -1054,7 +1054,7 @@ class FormStateToolTest {
             items.add("item-" + i);
         }
         combo.setItems(items);
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
 
         var f = formStateFields(controller).get(0);
 
@@ -1068,7 +1068,7 @@ class FormStateToolTest {
     void getFormStateBigDecimalValueMatchesPatternForScientificInput() {
         var field = new BigDecField();
         field.setValue(new java.math.BigDecimal("1E2"));
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var f = formStateFields(controller).get(0);
         var rendered = f.get("value").asString();
@@ -1082,7 +1082,7 @@ class FormStateToolTest {
     void getFormStateRendersNumericInfinityAsFiniteJsonNumber() {
         var field = new DoubleField();
         field.setValue(Double.POSITIVE_INFINITY);
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var raw = findTool(controller.getTools(), "get_form_state")
                 .execute(JacksonUtils.createObjectNode());
@@ -1097,7 +1097,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setDataProvider(new CallbackDataProvider<String, String>(
                 q -> List.of("a", "b").stream(), q -> 2));
-        var controller = new FormAIController(new Div(combo));
+        var controller = new FormAiController(new Div(combo));
 
         var f = formStateFields(controller).get(0);
 
@@ -1125,7 +1125,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setItems("Meals", "Travel");
         combo.setValue("Meals");
-        var controller = new FormAIController(
+        var controller = new FormAiController(
                 new Div(text, integer, number, bigDecimal, date, bool, combo));
 
         var fields = formStateFields(controller);
@@ -1149,7 +1149,7 @@ class FormStateToolTest {
         var bad = new ThrowingField();
         var trailing = new TestField();
         trailing.setValue("trailing");
-        var controller = new FormAIController(new Div(good, bad, trailing));
+        var controller = new FormAiController(new Div(good, bad, trailing));
 
         var fields = formStateFields(controller);
 
@@ -1178,7 +1178,7 @@ class FormStateToolTest {
         // type=string against a JSON integer would reject the result.
         var field = new IntField();
         field.setValue(2);
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(1, 2, 3)));
 
@@ -1195,7 +1195,7 @@ class FormStateToolTest {
         var text = new TestField();
         var date = new DateField();
         var multi = new MultiSelectField<String>();
-        var controller = new FormAIController(new Div(text, date, multi));
+        var controller = new FormAiController(new Div(text, date, multi));
 
         var fields = formStateFields(controller);
 
@@ -1212,7 +1212,7 @@ class FormStateToolTest {
         var multi = new MultiSelectField<String>();
         multi.setItems("a", "b", "c");
         multi.setValue(Set.of("a", "c"));
-        var controller = new FormAIController(new Div(multi));
+        var controller = new FormAiController(new Div(multi));
 
         var f = formStateFields(controller).get(0);
 
@@ -1235,7 +1235,7 @@ class FormStateToolTest {
     @Test
     void getFormStateMultiSelectQueryableUsesItemsQueryable() {
         var multi = new MultiSelectField<String>();
-        var controller = new FormAIController(new Div(multi));
+        var controller = new FormAiController(new Div(multi));
         controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("x")));
 
@@ -1256,7 +1256,7 @@ class FormStateToolTest {
         // provider substitutes a static placeholder schema in the LLM
         // request, so providers that cache prompt prefixes hit the cache on
         // every subsequent prompt.
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
 
         Assertions.assertNull(findTool(controller.getTools(), "get_form_state")
                 .getParametersSchema());
@@ -1264,7 +1264,7 @@ class FormStateToolTest {
 
     @Test
     void getFormStateIgnoresUnexpectedArguments() {
-        var controller = new FormAIController(new Div(new TestField()));
+        var controller = new FormAiController(new Div(new TestField()));
         var tool = findTool(controller.getTools(), "get_form_state");
 
         var args = JacksonUtils.createObjectNode();
@@ -1279,7 +1279,7 @@ class FormStateToolTest {
     void getFormStateReflectsLiveLabelChanges() {
         var field = new LabeledStringField();
         field.setLabel("Old");
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         Assertions.assertEquals("Old", formStateFields(controller).get(0)
                 .get("description").asString());
@@ -1296,7 +1296,7 @@ class FormStateToolTest {
     @Test
     void getFormStateAssignsStableIdAcrossCalls() {
         var field = new TestField();
-        var controller = new FormAIController(new Div(field));
+        var controller = new FormAiController(new Div(field));
 
         var firstId = formStateFields(controller).get(0).get("id").asString();
         var secondId = formStateFields(controller).get(0).get("id").asString();
@@ -1326,7 +1326,7 @@ class FormStateToolTest {
         var notes = new TestField();
 
         var form = new Div(merchant, amount, currency, date, category, notes);
-        var controller = new FormAIController(form);
+        var controller = new FormAiController(form);
         controller.describeField(merchant, "The vendor name");
         controller.fieldValueOptions(ValueOptions.forField(currency)
                 .options(List.of("EUR", "USD", "GBP")));
@@ -1392,7 +1392,7 @@ class FormStateToolTest {
     void getToolsAlwaysIncludesFormState() {
         // Unlike query_field_options, the form-state tool is always present
         // — there is no per-field configuration that gates it.
-        var controllerNoHints = new FormAIController(new Div());
+        var controllerNoHints = new FormAiController(new Div());
         Assertions.assertTrue(
                 controllerNoHints.getTools().stream()
                         .anyMatch(t -> t.getName().equals("get_form_state")),
@@ -1400,7 +1400,7 @@ class FormStateToolTest {
                         + "fields");
 
         var field = new TestField();
-        var controllerWithIgnored = new FormAIController(new Div(field));
+        var controllerWithIgnored = new FormAiController(new Div(field));
         controllerWithIgnored.ignoreField(field);
         Assertions.assertTrue(
                 controllerWithIgnored.getTools().stream()
@@ -1410,7 +1410,7 @@ class FormStateToolTest {
     }
 
     private JsonNode typeNodeFor(HasValue<?, ?> field) {
-        var controller = new FormAIController(new Div((Component) field));
+        var controller = new FormAiController(new Div((Component) field));
         return formStateFields(controller).get(0);
     }
 

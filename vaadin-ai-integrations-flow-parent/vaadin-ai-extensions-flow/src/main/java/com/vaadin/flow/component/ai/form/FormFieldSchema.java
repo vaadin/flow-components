@@ -15,7 +15,7 @@ import java.util.Collection;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
+import com.vaadin.flow.component.ai.form.FormAiTools.FormFieldDescriptor;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ObjectNode;
