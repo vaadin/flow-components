@@ -231,6 +231,35 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void selectFromClient_checkboxHidden_skipsSizeQuery() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
+                true);
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().selectFromClient("foo");
+
+        Mockito.verify(dataProvider, Mockito.never())
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
+    void deselectFromClient_checkboxHidden_skipsSizeQuery() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
+                true);
+        grid.getSelectionModel().select("foo");
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().deselectFromClient("foo");
+
+        Mockito.verify(dataProvider, Mockito.never())
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
     void deselectFromClientWhileCheckboxHidden_selectAllStateSyncedFromClient()
             throws PropertyChangeDeniedException {
         var selectionModel = (GridMultiSelectionModel<String>) grid
@@ -247,41 +276,6 @@ class AbstractGridMultiSelectionModelTest {
         selectionModel.deselectFromClient("foo");
 
         Assertions.assertFalse(columnElement.getProperty("selectAll", true));
-    }
-
-    @Test
-    void selectFromClient_lazyDataProviderRefreshedInSelectionListener_sizeQueriedOnce() {
-        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
-                false, false,
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
-                true);
-        grid.addSelectionListener(event -> dataProvider.refreshAll());
-        ui.fakeClientCommunication();
-        Mockito.clearInvocations(dataProvider);
-
-        grid.getSelectionModel().selectFromClient("foo");
-        ui.fakeClientCommunication();
-
-        Mockito.verify(dataProvider, Mockito.times(1))
-                .size(Mockito.any(Query.class));
-    }
-
-    @Test
-    void deselectFromClient_lazyDataProviderRefreshedInSelectionListener_sizeQueriedOnce() {
-        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
-                false, false,
-                GridMultiSelectionModel.SelectAllCheckboxVisibility.DEFAULT,
-                true);
-        grid.getSelectionModel().select("foo");
-        grid.addSelectionListener(event -> dataProvider.refreshAll());
-        ui.fakeClientCommunication();
-        Mockito.clearInvocations(dataProvider);
-
-        grid.getSelectionModel().deselectFromClient("foo");
-        ui.fakeClientCommunication();
-
-        Mockito.verify(dataProvider, Mockito.times(1))
-                .size(Mockito.any(Query.class));
     }
 
     @Test
