@@ -15,9 +15,6 @@
         <module>vaadin-ai-extensions-flow</module>
         <module>vaadin-ai-integrations-flow-benchmark</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>
