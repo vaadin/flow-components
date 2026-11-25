@@ -176,7 +176,10 @@ public class UploadManager implements Serializable {
      * While a modal component makes the owner inert, upload requests are
      * rejected unless the handler's {@link UploadHandler#isAllowInert()}
      * returns {@code true}. This includes files the user selected before the
-     * modal opened but that had not been sent yet.
+     * modal opened but that had not been sent yet. Only the owner's inert state
+     * counts, not that of the upload UI components: if they are placed inside a
+     * modal component while the owner is outside it, uploads are rejected, so
+     * use a component inside the modal as the owner instead.
      * <p>
      * This overload uses the default upload target name {@code "upload"}, which
      * becomes the last segment of the dynamically generated upload URL.
@@ -194,7 +197,10 @@ public class UploadManager implements Serializable {
      * While a modal component makes the owner inert, upload requests are
      * rejected unless the handler's {@link UploadHandler#isAllowInert()}
      * returns {@code true}. This includes files the user selected before the
-     * modal opened but that had not been sent yet.
+     * modal opened but that had not been sent yet. Only the owner's inert state
+     * counts, not that of the upload UI components: if they are placed inside a
+     * modal component while the owner is outside it, uploads are rejected, so
+     * use a component inside the modal as the owner instead.
      *
      * @param handler
      *            the upload handler, not {@code null}
