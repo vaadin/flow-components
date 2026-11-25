@@ -1,6 +1,6 @@
-# AI Components
+# AI Integrations
 
-`vaadin-ai-components-flow-parent` is not a regular component wrapper group:
+`vaadin-ai-integrations-flow-parent` is not a regular component wrapper group:
 it provides server-side support for building AI-powered applications
 (`AIOrchestrator`, LLM provider integrations, AI controllers for existing
 components). The general chapters still apply; this chapter covers only what
@@ -339,7 +339,7 @@ server-side only):
   `AIFieldMarkerIT` vs `FormAIControllerTest` for the established split).
 - Log-output assertions use the `slf4j-test` `TestLogger`.
 - The only place a real LLM is used is the unpublished
-  `vaadin-ai-components-flow-benchmark` module. Its JUnit scenarios drive the
+  `vaadin-ai-integrations-flow-benchmark` module. Its JUnit scenarios drive the
   controllers server-side through `AIOrchestrator` with the Spring AI
   provider, score the resulting state deterministically (field values and the
   sources recorded for them, rows returned by the produced SQL, chart type and

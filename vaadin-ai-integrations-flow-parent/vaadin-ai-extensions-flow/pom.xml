@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-ai-components-flow-parent</artifactId>
+        <artifactId>vaadin-ai-integrations-flow-parent</artifactId>
         <version>25.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-ai-extensions-flow</artifactId>
