@@ -2270,8 +2270,7 @@ class SpringAiLlmProviderTest {
                         ? mockChatResponseWithPendingToolCall()
                         : mockSimpleChatResponse("done"));
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
+        var error = Assertions.assertThrows(IllegalStateException.class,
                 () -> provider.stream(request).collectList().block());
 
         Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
@@ -2297,9 +2296,9 @@ class SpringAiLlmProviderTest {
                                 : mockSimpleChatResponse("done")));
         var emitted = new ArrayList<String>();
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).doOnNext(emitted::add).blockLast());
+        var error = Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).doOnNext(emitted::add)
+                        .blockLast());
 
         Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
                 error.getMessage());
@@ -2329,8 +2328,7 @@ class SpringAiLlmProviderTest {
                             : mockSimpleChatResponse("done");
                 });
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
+        var error = Assertions.assertThrows(IllegalStateException.class,
                 () -> provider.stream(request).collectList().block());
 
         Assertions.assertTrue(error.getMessage().contains("(150)"),
@@ -2347,8 +2345,7 @@ class SpringAiLlmProviderTest {
                 .thenReturn(mockChatResponse("Limits reached, in new words",
                         "toolCallLimitExceeded"));
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
+        var error = Assertions.assertThrows(IllegalStateException.class,
                 () -> provider.stream(createSimpleRequest("Hello"))
                         .collectList().block());
 

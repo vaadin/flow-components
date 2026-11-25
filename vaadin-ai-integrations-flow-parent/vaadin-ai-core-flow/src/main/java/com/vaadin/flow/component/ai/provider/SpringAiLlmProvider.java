@@ -84,17 +84,16 @@ import tools.jackson.databind.JsonNode;
  * bounds it: once the model has requested more than {@code 40} calls to any one
  * tool, or more than {@code 150} tool calls in total, within a turn, Spring AI
  * stops the loop and replies with its own message about the exceeded limit. The
- * provider does not pass that reply on. It fails the turn with a
- * {@link ToolCallLimitExceededException} instead, the same way
- * {@link LangChain4jLlmProvider} does, so you receive the exception as the
- * error of the turn whichever provider runs it. The finish reason
- * {@code toolCallLimitExceeded} is still published in the
- * {@link ResponseMetadata response metadata}, and Spring AI's reply may remain
- * in the chat memory with either constructor, since the provider does not
- * rewrite what Spring AI's advisors stored. The limits belong to the
- * {@code ToolCallingAdvisor} of the {@link ChatClient}: a provider created from
- * a {@link ChatModel} builds its own client and keeps Spring AI's defaults. To
- * change them, build the client yourself, passing {@code ChatClient.builder} a
+ * provider does not pass that reply on as the answer. It fails the turn
+ * instead, and you receive an exception with Spring AI's message as the error
+ * of the turn. The finish reason {@code toolCallLimitExceeded} is still
+ * published in the {@link ResponseMetadata response metadata}, which is how you
+ * tell this error from others. Spring AI's reply may remain in the chat memory
+ * with either constructor, since the provider does not rewrite what Spring AI's
+ * advisors stored. The limits belong to the {@code ToolCallingAdvisor} of the
+ * {@link ChatClient}: a provider created from a {@link ChatModel} builds its
+ * own client and keeps Spring AI's defaults. To change them, build the client
+ * yourself, passing {@code ChatClient.builder} a
  * {@code ToolCallingAdvisor.Builder} that carries a
  * {@code DefaultToolCallingManager} with your limits, and create the provider
  * from that client. Its {@code maxCallsPerTool} and {@code maxTotalToolCalls}
@@ -141,8 +140,7 @@ public class SpringAiLlmProvider implements LlmProvider {
      * catches it and returns the breach as a normal reply carrying this reason.
      * Not a vendor's wording but a constant Spring AI defines for that reply,
      * so comparing against it is the one finish-reason check this provider
-     * makes. Spring AI's exception shares its simple name with ours, hence the
-     * static import of the constant alone.
+     * makes.
      */
     private static final String TOOL_CALL_LIMIT_FINISH_REASON = FINISH_REASON;
 
@@ -557,13 +555,15 @@ public class SpringAiLlmProvider implements LlmProvider {
 
     /**
      * Turns the reply Spring AI synthesized for an exceeded tool call limit
-     * into the exception both providers fail such a turn with. Spring AI's
-     * message names the limit and the tool, so it becomes the exception's.
+     * into the error the turn fails with. A turn that completed with that reply
+     * would show it as the answer, and the controllers would apply what the
+     * model had staged before it ran out of calls. Spring AI's message names
+     * the limit and the tool, so it becomes the exception's.
      */
-    private static ToolCallLimitExceededException toolCallLimitExceeded(
+    private static IllegalStateException toolCallLimitExceeded(
             ChatResponse response) {
         var message = getAssistantText(response);
-        return new ToolCallLimitExceededException(message.isEmpty()
+        return new IllegalStateException(message.isEmpty()
                 ? "Spring AI stopped the turn at its tool call limit"
                 : message);
     }

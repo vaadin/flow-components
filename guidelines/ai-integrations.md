@@ -74,8 +74,8 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   service, and the customizer constructors hand the application the builder so
   it can add RAG, MCP tool providers, guardrails and so on. The builder has
   setters only, so the provider never reads back what the customizer
-  configured: it sets its replaceable defaults (memory, unbounded round trips,
-  the made-up tool result) before the customizer runs, and adds what must not
+  configured: it sets its replaceable defaults (memory, the made-up tool
+  result) before the customizer runs, and adds what must not
   be replaced afterwards (its tool provider and listeners, which add up with
   the customizer's, and the constructor's model). The provider cannot see
   the tools the customizer adds, so it does not resolve a name clash with
@@ -93,14 +93,23 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `ChatClient` given to `SpringAiLlmProvider`. LangChain4j plans to change
   these defaults, which is what the notice announces. A different default is
   a decision for both providers together. The checks of a turn
-  (cancellation, tool call limits, and the orchestrator's system prompt, which
+  (cancellation, and the orchestrator's system prompt, which
   wins over a customizer's `systemMessage`) sit in a proxy around that model
   instead of in a builder setting the application might also use. The session
   context goes into the user text before the service call, as with
   `SpringAiLlmProvider`, so retrieval and input guardrails see it. The proxy
-  does not pass on to the service the model response of a cancelled turn, nor
-  one with a tool call past a limit: the service would otherwise run the tools
-  the response requests, including the customizer's. A
+  does not pass on to the service the model response of a cancelled turn: the
+  service would otherwise run the tools the response requests, including the
+  customizer's. On a streaming model, the held-back response is replaced
+  with an error on the response handler, which ends the turn. That does not
+  work once the service has the answer of the turn: a model call after it
+  belongs to an output guardrail's reprompt, and LangChain4j waits for the
+  response of the reprompt's first call on the thread that runs the
+  guardrails, behind a latch that only a complete response releases
+  (`StreamingToSynchronousChatExecutor`). An error there would end the turn
+  and leave that thread blocked. So from the answer on, the provider ends a
+  cancelled turn itself and gives the handler an answer without text or tool
+  calls, on which the guardrails finish. A
   model call and a memory access do not say which turn they belong to, so the
   provider binds the turn to the thread that starts it and to each streaming
   callback, where the follow-up model calls happen. That keeps a cancelled
@@ -243,42 +252,36 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   are executed by the vendor framework, whose default error handling relays
   the raw message of any exception to the model — they are deliberately out
   of scope, so route error-sensitive tools through `ToolSpec`.
-- The tool-calling loop is bounded where it is driven, never by the
-  orchestrator. `LangChain4jLlmProvider` counts the tool calls of a turn
-  against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
-  the same as Spring AI's) and fails the turn with the public
-  `ToolCallLimitExceededException`. A response is screened in the model
-  proxy, before the service receives it: one with a tool call past a limit
-  is not passed on and fails the turn, so none of the tools of that round
-  run, whether the provider or the customizer supplied them. A listener
-  could count the calls as well, but not keep the service from running the
-  tools. The exception is `executeToolsConcurrently()` with a streaming
-  model, where LangChain4j starts a tool before the response that requests
-  it is complete, so the tools of that last round still run. On a streaming
-  model, a held-back response is replaced with an error on the response
-  handler, which ends the turn. That does not work once the service has the
-  answer of the turn: a model call after it belongs to an output
-  guardrail's reprompt, and LangChain4j waits for the response of the
-  reprompt's first call on the thread that runs the guardrails, behind a
-  latch that only a complete response releases
-  (`StreamingToSynchronousChatExecutor`). An error there would end the turn
-  and leave that thread blocked. So from the answer on, the provider ends a
-  cancelled or failed turn itself and gives the handler an answer without
-  text or tool calls, on which the guardrails finish. The tool
-  traffic of the failed turn is
-  discarded with it, so the next
-  turn continues from the chat memory as the last completed turn left it; a
-  cancelled turn likewise stops calling the model and runs no tool for a
-  response that arrives after the cancellation.
-  `SpringAiLlmProvider` adds no cap of its own: Spring AI bounds the loop
-  itself and hands back a synthesized reply carrying its
+- The tool-calling loop is bounded by the vendor framework that drives it,
+  never by the orchestrator or a provider. A limit in a provider is logic on
+  top of the vendor's default, and it has to stop tools the provider does not
+  own, such as those a customizer adds. `LangChain4jLlmProvider` leaves
+  LangChain4j's `maxToolCallingRoundTrips` at its default, which the
+  application changes in the customizer, and passes LangChain4j's error on as
+  the error of the turn. LangChain4j counts rounds, not calls, and has no
+  limit per tool. With a streaming model it throws the error out of the
+  completion handler, so the turn ends when the model reports that failure
+  to the error handler, as LangChain4j's model integrations do and
+  `mockStreamingResponsesOnOtherThreads` in the provider tests copies. The
+  tool traffic of the failed
+  turn is discarded with it, so the next turn continues from the chat memory
+  as the last completed turn left it; a cancelled turn likewise stops calling
+  the model and runs no tool for a response that arrives after the
+  cancellation. `SpringAiLlmProvider` adds no cap either: Spring AI bounds the
+  loop itself and hands back a synthesized reply carrying its
   `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
-  into the same exception with Spring AI's message, so both providers fail
-  such a turn the same way. The exception carries no structured detail on
-  purpose: Spring AI's tool name and limit only exist in its message wording,
-  which is not ours to depend on. Spring AI's reply may remain in the chat
-  memory with either constructor; the provider does not rewrite what Spring
-  AI's advisors stored.
+  into a failed turn, an `IllegalStateException` with Spring AI's message. A
+  turn that completed with that reply would show it as the answer, and the
+  controllers would apply what the model had staged before it ran out of
+  calls. There is no Vaadin exception type for an exceeded limit, for the
+  reason finish reasons are not mapped: the limit is the vendor's, and Vaadin
+  gives a type only to a condition it enforces itself. The application
+  recognizes the case with the vendor's own means, such as Spring AI's finish
+  reason in the response metadata. LangChain4j's error is a plain
+  `RuntimeException` that only its message identifies, and the provider does
+  not match that message to give it a type. Spring AI's
+  reply may remain in the chat memory with either constructor; the provider
+  does not rewrite what Spring AI's advisors stored.
 - Never send secrets to the LLM — `FormAiController` auto-ignores password
   fields; preserve that property for new field handling.
 
