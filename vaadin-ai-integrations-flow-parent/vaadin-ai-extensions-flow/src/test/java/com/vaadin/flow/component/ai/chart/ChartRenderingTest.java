@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -50,7 +50,7 @@ class ChartRenderingTest {
     MockUIExtension ui = new MockUIExtension();
 
     private Chart chart;
-    private TestDatabaseProvider databaseProvider;
+    private TestQueryExecutor queryExecutor;
     private ChartAiController controller;
     private List<LlmProvider.ToolSpec> tools;
 
@@ -58,8 +58,8 @@ class ChartRenderingTest {
     void setUp() {
         chart = new Chart();
         ui.add(chart);
-        databaseProvider = new TestDatabaseProvider();
-        controller = new ChartAiController(chart, databaseProvider);
+        queryExecutor = new TestQueryExecutor();
+        controller = new ChartAiController(chart, queryExecutor);
         tools = controller.getTools();
     }
 
@@ -91,8 +91,7 @@ class ChartRenderingTest {
 
         @Test
         void pendingDataAndConfigRendersChart() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Sales\"}}");
@@ -114,7 +113,7 @@ class ChartRenderingTest {
             controller.onResponse(AiTurnEvents.success());
 
             // Second request: data only
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(row("category", "Q1", "value", 100));
             updateData("SELECT category, value FROM t");
             controller.onResponse(AiTurnEvents.success());
@@ -129,16 +128,14 @@ class ChartRenderingTest {
         @Test
         void pendingDataOnlyUsesExistingConfig() {
             // First render: establish config and data
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Existing Title\"}}");
             updateData("SELECT category, value FROM t");
             controller.onResponse(AiTurnEvents.success());
 
             // Second update: only data, no config change
-            databaseProvider.results = List
-                    .of(row("category", "B", "value", 20));
+            queryExecutor.results = List.of(row("category", "B", "value", 20));
             updateData("SELECT category, value FROM t");
             controller.onResponse(AiTurnEvents.success());
 
@@ -150,8 +147,7 @@ class ChartRenderingTest {
 
         @Test
         void sameChartTypeMergesConfigIntoExisting() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             // First render: line chart with title
             updateConfiguration(
@@ -176,7 +172,7 @@ class ChartRenderingTest {
         @Test
         void configOnlyAfterGaugeResetsPane() {
             // First: full render as gauge
-            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+            queryExecutor.results = List.of(row(ColumnNames.Y, 78));
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
                     + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
                     + "\"yAxis\":{\"min\":0,\"max\":100}}");
@@ -202,11 +198,11 @@ class ChartRenderingTest {
         @Test
         void clearsPendingStateEvenOnError() {
             // Set up data successfully (eager validation passes)
-            databaseProvider.results = List.of(row("x", 1));
+            queryExecutor.results = List.of(row("x", 1));
             updateData("SELECT 1");
 
             // Make DB throw for the render phase
-            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            queryExecutor.throwOnExecute = new RuntimeException("DB error");
 
             // Exception propagates so the orchestrator can surface it to
             // the user, but pending state must still be cleared.
@@ -217,15 +213,14 @@ class ChartRenderingTest {
             // Pending state should be cleared despite the error: a
             // subsequent call with no pending state is a no-op and
             // must not re-trigger the DB (which would still throw).
-            databaseProvider.throwOnExecute = null;
+            queryExecutor.throwOnExecute = null;
             Assertions.assertDoesNotThrow(
                     () -> controller.onResponse(AiTurnEvents.success()));
         }
 
         @Test
         void sameChartTypePlotOptionsUpdateKeepsEarlierPlotOptions() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             updateConfiguration("{\"chart\":{\"type\":\"column\"},"
                     + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
             updateData("SELECT category, value FROM t");
@@ -246,7 +241,7 @@ class ChartRenderingTest {
 
         @Test
         void multipleQueriesCreatesMultipleSeries() {
-            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            queryExecutor.results = List.of(row("x", 1, "y", 10));
 
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
             updateData("SELECT x, y FROM t1", "SELECT x, y FROM t2");
@@ -259,17 +254,15 @@ class ChartRenderingTest {
         @Test
         void drawFailure_keepsPreviousConfiguration() {
             chart.setTimeline(true);
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             var converter = new DefaultDataConverter();
             var queries = List.of("SELECT 1");
-            ChartRenderer.renderChart(chart, databaseProvider, converter,
-                    queries,
+            ChartRenderer.renderChart(chart, queryExecutor, converter, queries,
                     "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
 
             var pie = "{\"chart\":{\"type\":\"pie\"}}";
             Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                    () -> ChartRenderer.renderChart(chart, queryExecutor,
                             converter, queries, pie));
 
             Assertions.assertEquals(ChartType.LINE,
@@ -281,12 +274,10 @@ class ChartRenderingTest {
         @Test
         void drawFailure_dropsTheMergesOfTheSameCall() {
             chart.setTimeline(true);
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             var converter = new DefaultDataConverter();
             var queries = List.of("SELECT 1");
-            ChartRenderer.renderChart(chart, databaseProvider, converter,
-                    queries,
+            ChartRenderer.renderChart(chart, queryExecutor, converter, queries,
                     "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
 
             // The subtitle merges into the live configuration before the
@@ -294,7 +285,7 @@ class ChartRenderingTest {
             var configJsons = List.of("{\"subtitle\":{\"text\":\"Q1\"}}",
                     "{\"chart\":{\"type\":\"pie\"}}");
             Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                    () -> ChartRenderer.renderChart(chart, queryExecutor,
                             converter, queries, configJsons));
 
             Assertions.assertEquals(ChartType.LINE,
@@ -306,8 +297,7 @@ class ChartRenderingTest {
 
         @Test
         void drawsWithFullReset() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             // Drop the draw the chart schedules on attach
             ui.dumpPendingJavaScriptInvocations();
 
@@ -326,10 +316,9 @@ class ChartRenderingTest {
 
         @Test
         void singleConfigJsonIsApplied() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
-            ChartRenderer.renderChart(chart, databaseProvider,
+            ChartRenderer.renderChart(chart, queryExecutor,
                     new DefaultDataConverter(),
                     List.of("SELECT category, value FROM t"),
                     "{\"title\":{\"text\":\"Sales\"}}");
@@ -344,7 +333,7 @@ class ChartRenderingTest {
 
         @Test
         void itemsWithNamesSetsCategoriesOnXAxis() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
@@ -362,7 +351,7 @@ class ChartRenderingTest {
         @Test
         void itemsWithoutNamesDoesNotSetCategories() {
             // Items with X/Y numeric data (no names) should not set categories
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
 
@@ -379,7 +368,7 @@ class ChartRenderingTest {
         void multiSeriesCategoriesCollectsFromAllSeries() {
             // Multi-series with _series column where each series has
             // different category names — categories should be the union
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
                             100),
                     row(ColumnNames.SERIES, "North", "category", "Feb", "value",
@@ -406,7 +395,7 @@ class ChartRenderingTest {
 
         @Test
         void multiSeriesItemsAreDrawnUnderTheirOwnCategories() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
                             100),
                     row(ColumnNames.SERIES, "North", "category", "Feb", "value",
@@ -431,7 +420,7 @@ class ChartRenderingTest {
 
         @Test
         void multiSeriesItemsInOtherCategoryOrderAreDrawnLeftToRight() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Feb", "value",
                             200),
                     row(ColumnNames.SERIES, "North", "category", "Mar", "value",
@@ -455,7 +444,7 @@ class ChartRenderingTest {
 
         @Test
         void multiSeriesWaterfallSumStaysAfterTheItemsItAddsUp() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", ColumnNames.NAME, "Start",
                             ColumnNames.Y, 100, ColumnNames.WATERFALL_TYPE,
                             null),
@@ -489,7 +478,7 @@ class ChartRenderingTest {
 
         @Test
         void repeatedCategoryItemsAreDrawnAtTheirOwnPositions() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row("customer", "Acme", "amount", 10),
                     row("customer", "Globex", "amount", 20),
                     row("customer", "Acme", "amount", 30));
@@ -508,7 +497,7 @@ class ChartRenderingTest {
 
         @Test
         void multiSeriesWithRepeatedCategoryItemsAreDrawnUnderTheirOwnCategories() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
                             100),
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
@@ -534,7 +523,7 @@ class ChartRenderingTest {
 
         @Test
         void namedItemsWithDatetimeXKeepTheirDates() {
-            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            queryExecutor.results = List.of(row("x", 1, "y", 10));
             controller.setDataConverter(data -> {
                 DataSeries series = new DataSeries();
                 DataSeriesItem launch = new DataSeriesItem(1704067200000L, 10);
@@ -559,7 +548,7 @@ class ChartRenderingTest {
 
         @Test
         void seriesWithoutXIsDrawnUnderItsCategoriesNextToSeriesWithX() {
-            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            queryExecutor.results = List.of(row("x", 1, "y", 10));
             controller.setDataConverter(data -> {
                 DataSeries planned = new DataSeries();
                 DataSeriesItem jan = new DataSeriesItem(0, 10);
@@ -614,7 +603,7 @@ class ChartRenderingTest {
         void mixedNamesAndNullDoesNotSetCategories() {
             // When some items have names and some don't, categories should
             // not be set (extractCategories returns null)
-            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            queryExecutor.results = List.of(row("x", 1, "y", 10));
 
             controller.setDataConverter(data -> {
                 DataSeries series = new DataSeries();
@@ -634,8 +623,7 @@ class ChartRenderingTest {
 
         @Test
         void pieChartDoesNotSetCategories() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             updateConfiguration("{\"chart\":{\"type\":\"pie\"}}");
             updateData("SELECT category, value FROM t");
@@ -649,7 +637,7 @@ class ChartRenderingTest {
         @Test
         void reRenderWithoutNamesClearsPreviousCategories() {
             // First render: items with names → categories set
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
@@ -660,7 +648,7 @@ class ChartRenderingTest {
 
             // Second render: numeric X/Y data without names → categories
             // should be cleared
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
@@ -677,7 +665,7 @@ class ChartRenderingTest {
         @Test
         void emptySeriesPreservesAxisType() {
             controller.setDataConverter(data -> List.of(new DataSeries()));
-            databaseProvider.results = List.of();
+            queryExecutor.results = List.of();
 
             // First render: establish a LINEAR axis type via config
             updateConfiguration(
@@ -704,7 +692,7 @@ class ChartRenderingTest {
         void ganttSeriesSetsDatetimeAxis() {
             // Gantt series need datetime X-axis — test via the default
             // converter with Gantt column names
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(row(ColumnNames.NAME, "Task 1", ColumnNames.START,
                             1704067200000L, ColumnNames.END, 1704153600000L));
 
@@ -722,9 +710,9 @@ class ChartRenderingTest {
             // values; categories should NOT be set from names, so the
             // datetime axis can render formatted dates instead of raw epoch
             // strings.
-            databaseProvider.results = List.of(row(ColumnNames.X,
-                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
-                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+            queryExecutor.results = List.of(row(ColumnNames.X, 1704067200000L,
+                    ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                    ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
             updateConfiguration("{\"chart\":{\"type\":\"candlestick\"}}");
             updateData("SELECT trade_date, open, high, low, close");
@@ -743,9 +731,9 @@ class ChartRenderingTest {
         void multipleQueriesWithMixedXValuesDetectsDatetime() {
             // Use a converter that returns both a datetime series and a
             // volume series with row-index X values
-            databaseProvider.results = List.of(row(ColumnNames.X,
-                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
-                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+            queryExecutor.results = List.of(row(ColumnNames.X, 1704067200000L,
+                    ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                    ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
             controller.setDataConverter(data -> {
                 DataSeries ohlcSeries = new DataSeries("OHLC");
@@ -769,7 +757,7 @@ class ChartRenderingTest {
         @Test
         void datetimeXValuesSetsDatetimeAxisType() {
             // Epoch ms for 2024-01-01: 1704067200000
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
                     row(ColumnNames.X, 1704153600000L, ColumnNames.Y, 20));
 
@@ -783,7 +771,7 @@ class ChartRenderingTest {
 
         @Test
         void smallXValuesDoesNotSetDatetimeAxisType() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 10),
                     row(ColumnNames.X, 2, ColumnNames.Y, 20));
 
@@ -797,7 +785,7 @@ class ChartRenderingTest {
 
         @Test
         void nullChartTypeSetsCategoriesFromNames() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
@@ -816,7 +804,7 @@ class ChartRenderingTest {
         void mixedXValuesSmallAndLargeDoesNotSetDatetime() {
             // First value is a timestamp, second is small — should NOT be
             // detected as datetime since not all values qualify
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1704067200000L, ColumnNames.Y, 10),
                     row(ColumnNames.X, 5, ColumnNames.Y, 20));
 
@@ -833,7 +821,7 @@ class ChartRenderingTest {
             // A TIME column has no date part. The converter must still place
             // the values where the datetime detection recognises them, or the
             // axis would stay linear and label 12:00 as raw milliseconds.
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, Time.valueOf("00:00:00"), ColumnNames.Y,
                             10),
                     row(ColumnNames.X, Time.valueOf("12:00:00"), ColumnNames.Y,
@@ -854,8 +842,7 @@ class ChartRenderingTest {
 
         @Test
         void singleUnnamedSeriesUsesChartTitle() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             updateConfiguration(
                     "{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Revenue\"}}");
@@ -869,8 +856,7 @@ class ChartRenderingTest {
 
         @Test
         void singleUnnamedSeriesWithNoTitleKeepsNull() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -883,8 +869,7 @@ class ChartRenderingTest {
 
         @Test
         void perSeriesPlotOptions_appliedToSingleUnnamedSeries() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
 
             updateConfiguration("{\"chart\":{\"type\":\"areaspline\"},"
                     + "\"title\":{\"text\":\"Revenue\"},"
@@ -948,7 +933,7 @@ class ChartRenderingTest {
             // When _SERIES column produces named series but the config
             // also provides explicit series names, the config names
             // should win (the user asked for specific legend labels).
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
                             45000),
                     row(ColumnNames.SERIES, "South", "category", "Jan", "value",
@@ -978,7 +963,7 @@ class ChartRenderingTest {
             // series ("Revenue") is deliberately second in data order so
             // that positional fallback — if it ignored matched tracking —
             // would assign it the wrong template.
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "Other", "category", "Jan", "value",
                             38000),
                     row(ColumnNames.SERIES, "Revenue", "category", "Jan",
@@ -1090,7 +1075,7 @@ class ChartRenderingTest {
 
         @Test
         void multipleSeriesWithSeriesColumnKeepsOriginalNames() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "Series A", "category", "Jan",
                             "value", 100),
                     row(ColumnNames.SERIES, "Series B", "category", "Jan",
@@ -1118,7 +1103,7 @@ class ChartRenderingTest {
          */
         @BeforeEach
         void useOhlcAndVolumeDatabase() {
-            var db = new DatabaseProvider() {
+            var db = new QueryExecutor() {
                 @Override
                 public String getSchema() {
                     return "stock_prices";
@@ -1245,8 +1230,7 @@ class ChartRenderingTest {
 
         @Test
         void typeChangeRepeatedInOneTurn_keepsEarlierUpdate() {
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 10));
+            queryExecutor.results = List.of(row("category", "A", "value", 10));
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
             updateData("SELECT category, value FROM t");
             controller.onResponse(AiTurnEvents.success());
@@ -1270,8 +1254,7 @@ class ChartRenderingTest {
             // null, Highcharts treats the axis as a category axis (creates
             // a tick for every unique data value). Verify via serialization
             // that categories property is not emitted after reset.
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"},"
                     + "\"xAxis\":{\"categories\":[\"A\",\"B\"]}}");
@@ -1283,7 +1266,7 @@ class ChartRenderingTest {
                     .getCategories().length > 0);
 
             // Second render: scatter chart without categories
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.X, 1, ColumnNames.Y, 100),
                     row(ColumnNames.X, 2, ColumnNames.Y, 200));
 
@@ -1303,8 +1286,8 @@ class ChartRenderingTest {
         @Test
         void tooltipFromHeatmapDoesNotLeakToCandlestick() {
             // First render: heatmap with custom tooltip
-            databaseProvider.results = List.of(row(ColumnNames.X, 9,
-                    ColumnNames.Y, 0, ColumnNames.VALUE, 120));
+            queryExecutor.results = List.of(row(ColumnNames.X, 9, ColumnNames.Y,
+                    0, ColumnNames.VALUE, 120));
 
             updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
                     + "\"tooltip\":{\"pointFormat\":\"Day: {point.y}<br>Hour: {point.x}<br>Visitors: {point.value}\"}}");
@@ -1315,9 +1298,9 @@ class ChartRenderingTest {
                     chart.getConfiguration().getTooltip().getPointFormat());
 
             // Second render: candlestick without tooltip config
-            databaseProvider.results = List.of(row(ColumnNames.X,
-                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
-                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+            queryExecutor.results = List.of(row(ColumnNames.X, 1704067200000L,
+                    ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                    ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
             updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
                     + "\"title\":{\"text\":\"Stock Prices\"}}");
@@ -1332,9 +1315,9 @@ class ChartRenderingTest {
         @Test
         void axisTypeFromDatetimeDoesNotLeakToCategory() {
             // First render: candlestick with datetime axis
-            databaseProvider.results = List.of(row(ColumnNames.X,
-                    1704067200000L, ColumnNames.OPEN, 142.5, ColumnNames.HIGH,
-                    148.2, ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+            queryExecutor.results = List.of(row(ColumnNames.X, 1704067200000L,
+                    ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                    ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
 
             updateConfiguration("{\"chart\":{\"type\":\"candlestick\"}}");
             updateData("SELECT trade_date, open, high, low, close");
@@ -1344,7 +1327,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getxAxis().getType());
 
             // Second render: column chart with categories
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row("category", "Jan", "value", 100),
                     row("category", "Feb", "value", 200));
 
@@ -1363,7 +1346,7 @@ class ChartRenderingTest {
         @Test
         void axisMinMaxFromGaugeDoesNotLeakToColumn() {
             // First render: gauge with explicit min/max
-            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+            queryExecutor.results = List.of(row(ColumnNames.Y, 78));
 
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
                     + "\"yAxis\":{\"min\":0,\"max\":100}}");
@@ -1376,8 +1359,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getyAxis().getMax().doubleValue());
 
             // Second render: column chart without min/max
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -1391,8 +1373,7 @@ class ChartRenderingTest {
         @Test
         void plotOptionsFromStackedDoesNotLeakToLine() {
             // First render: stacked column
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"},"
                     + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
@@ -1403,8 +1384,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getPlotOptions(ChartType.COLUMN));
 
             // Second render: plain line
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
             updateData("SELECT category, value FROM t");
@@ -1418,8 +1398,8 @@ class ChartRenderingTest {
         @Test
         void colorAxisFromHeatmapDoesNotLeakToColumn() {
             // First render: heatmap with color axis
-            databaseProvider.results = List.of(row(ColumnNames.X, 0,
-                    ColumnNames.Y, 0, ColumnNames.VALUE, 100));
+            queryExecutor.results = List.of(row(ColumnNames.X, 0, ColumnNames.Y,
+                    0, ColumnNames.VALUE, 100));
 
             updateConfiguration("{\"chart\":{\"type\":\"heatmap\"},"
                     + "\"colorAxis\":{\"min\":0,\"max\":300}}");
@@ -1430,8 +1410,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getNumberOfColorAxes());
 
             // Second render: column chart
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -1445,7 +1424,7 @@ class ChartRenderingTest {
         @Test
         void paneFromGaugeDoesNotLeakToColumn() {
             // First render: gauge with pane config
-            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+            queryExecutor.results = List.of(row(ColumnNames.Y, 78));
 
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
                     + "\"pane\":{\"startAngle\":-150,\"endAngle\":150,"
@@ -1460,8 +1439,7 @@ class ChartRenderingTest {
                     "Gauge should have pane config");
 
             // Second render: column chart without pane
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -1477,8 +1455,7 @@ class ChartRenderingTest {
         @Test
         void legendFromPieChartDoesNotLeakToColumn() {
             // First render: pie chart with legend disabled
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"pie\"},"
                     + "\"legend\":{\"enabled\":false}}");
@@ -1489,8 +1466,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getLegend().getEnabled());
 
             // Second render: column chart without legend config
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -1506,8 +1482,7 @@ class ChartRenderingTest {
         @Test
         void subtitleFromPreviousDoesNotLeak() {
             // First render with subtitle
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"},"
                     + "\"subtitle\":{\"text\":\"Q1 2024\"}}");
@@ -1518,8 +1493,7 @@ class ChartRenderingTest {
                     chart.getConfiguration().getSubTitle().getText());
 
             // Second render without subtitle
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
             updateData("SELECT category, value FROM t");
@@ -1533,8 +1507,7 @@ class ChartRenderingTest {
         @Test
         void polarFromGaugeDoesNotLeakToColumn() {
             // First render: polar chart
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration(
                     "{\"chart\":{\"type\":\"line\",\"polar\":true}}");
@@ -1545,8 +1518,7 @@ class ChartRenderingTest {
                     .assertTrue(chart.getConfiguration().getChart().getPolar());
 
             // Second render: column chart (not polar)
-            databaseProvider.results = List
-                    .of(row("category", "A", "value", 50));
+            queryExecutor.results = List.of(row("category", "A", "value", 50));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
             updateData("SELECT category, value FROM t");
@@ -1558,7 +1530,7 @@ class ChartRenderingTest {
 
         @Test
         void repeatedGaugeRendersDoNotAccumulatePanes() {
-            databaseProvider.results = List.of(row(ColumnNames.Y, 78));
+            queryExecutor.results = List.of(row(ColumnNames.Y, 78));
 
             // First gauge render
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
@@ -1568,7 +1540,7 @@ class ChartRenderingTest {
             controller.onResponse(AiTurnEvents.success());
 
             // Second gauge render (e.g. user changes the gauge value)
-            databaseProvider.results = List.of(row(ColumnNames.Y, 85));
+            queryExecutor.results = List.of(row(ColumnNames.Y, 85));
             updateConfiguration("{\"chart\":{\"type\":\"gauge\"},"
                     + "\"pane\":{\"startAngle\":-150,\"endAngle\":150},"
                     + "\"yAxis\":{\"min\":0,\"max\":100}}");
@@ -1591,7 +1563,7 @@ class ChartRenderingTest {
         @Test
         void secondaryYAxisDoesNotAccumulateOnReRender() {
             // First render: column chart with dual y-axes
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "North", "category", "Jan", "value",
                             45000),
                     row(ColumnNames.SERIES, "South", "category", "Jan", "value",
@@ -1628,7 +1600,7 @@ class ChartRenderingTest {
 
         @Test
         void perSeriesYAxisAppliedToDataSeries() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "Revenue", "category", "Jan",
                             "value", 45000),
                     row(ColumnNames.SERIES, "Volume", "category", "Jan",
@@ -1666,7 +1638,7 @@ class ChartRenderingTest {
         @Test
         void perSeriesTypeWithoutPlotOptions_appliesType() {
             // LLM sends type override without explicit plotOptions
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.SERIES, "Revenue", "category", "Jan",
                             "value", 45000),
                     row(ColumnNames.SERIES, "Count", "category", "Jan", "value",
@@ -1702,7 +1674,7 @@ class ChartRenderingTest {
         void waterfallWithSumItemsCategoriesIncludeSumNames() {
             // Waterfall data with regular items, intermediate sum, and
             // final sum — all should have names used as categories
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     row(ColumnNames.NAME, "Revenue", ColumnNames.Y, 420000,
                             ColumnNames.WATERFALL_TYPE, null),
                     row(ColumnNames.NAME, "Cost of Goods", ColumnNames.Y,
@@ -1737,7 +1709,7 @@ class ChartRenderingTest {
 
         @Test
         void flagsSeriesRendersAsFlagsOnColumnChart() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(row("_title", "Launch", "_text", "Product launch"));
 
             updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
@@ -1756,7 +1728,7 @@ class ChartRenderingTest {
 
         @Test
         void flagsSeriesPreservesExistingPlotOptionsFlags() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(row("_title", "Launch", "_text", "Product launch"));
 
             updateConfiguration("{\"chart\":{\"type\":\"line\"},"
@@ -1788,7 +1760,7 @@ class ChartRenderingTest {
         return map;
     }
 
-    private static class TestDatabaseProvider implements DatabaseProvider {
+    private static class TestQueryExecutor implements QueryExecutor {
 
         List<Map<String, Object>> results = new ArrayList<>();
         RuntimeException throwOnExecute;

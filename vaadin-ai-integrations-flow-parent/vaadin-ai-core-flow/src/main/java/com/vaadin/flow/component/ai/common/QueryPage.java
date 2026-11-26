@@ -22,11 +22,11 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 
 /**
  * The page of a query's result that a lazily loading component asks a
- * {@link com.vaadin.flow.component.ai.provider.DatabaseProvider} for: the rows
+ * {@link com.vaadin.flow.component.ai.provider.QueryExecutor} for: the rows
  * from {@code offset}, at most {@code limit} of them, in the order of
  * {@code sortOrders}.
  * <p>
- * A sort order names a result column the way the rows returned by the provider
+ * A sort order names a result column the way the rows returned by the executor
  * name it; a grid sorts by the column the user clicked, whose key is that name.
  * An empty list of sort orders keeps the order the query itself produces.
  * </p>
