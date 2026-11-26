@@ -37,13 +37,13 @@ public final class QueryExecutorAiTools {
      * Creates a tool that retrieves the database schema from the
      * {@link QueryExecutor}.
      *
-     * @param provider
+     * @param queryExecutor
      *            the query executor, not {@code null}
      * @return the tool definition, never {@code null}
      */
     public static LlmProvider.ToolSpec getDatabaseSchema(
-            QueryExecutor provider) {
-        Objects.requireNonNull(provider, "provider must not be null");
+            QueryExecutor queryExecutor) {
+        Objects.requireNonNull(queryExecutor, "queryExecutor must not be null");
         return new LlmProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -63,7 +63,7 @@ public final class QueryExecutorAiTools {
 
             @Override
             public String execute(JsonNode arguments) {
-                return provider.getSchema();
+                return queryExecutor.getSchema();
             }
         };
     }
@@ -71,11 +71,12 @@ public final class QueryExecutorAiTools {
     /**
      * Creates all query executor tools for the given executor.
      *
-     * @param provider
+     * @param queryExecutor
      *            the query executor, not {@code null}
      * @return a list of all query executor tools, never {@code null}
      */
-    public static List<LlmProvider.ToolSpec> createAll(QueryExecutor provider) {
-        return List.of(getDatabaseSchema(provider));
+    public static List<LlmProvider.ToolSpec> createAll(
+            QueryExecutor queryExecutor) {
+        return List.of(getDatabaseSchema(queryExecutor));
     }
 }

@@ -55,7 +55,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAiController(chart, databaseProvider);
+ * var controller = new ChartAiController(chart, queryExecutor);
  * AiOrchestrator orchestrator = AiOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -95,7 +95,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAiController(chart, databaseProvider);
+ * var controller = new ChartAiController(chart, queryExecutor);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -171,7 +171,7 @@ public class ChartAiController implements AiController {
             """;
 
     private final Chart chart;
-    private final QueryExecutor databaseProvider;
+    private final QueryExecutor queryExecutor;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
 
@@ -180,14 +180,14 @@ public class ChartAiController implements AiController {
      *
      * @param chart
      *            the chart component to update, not {@code null}
-     * @param databaseProvider
+     * @param queryExecutor
      *            the query executor for schema and query execution, not
      *            {@code null}
      */
-    public ChartAiController(Chart chart, QueryExecutor databaseProvider) {
+    public ChartAiController(Chart chart, QueryExecutor queryExecutor) {
         AiExtensionsLicense.check();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
                 "Query executor cannot be null");
         this.dataConverter = new DefaultDataConverter();
     }
@@ -209,7 +209,7 @@ public class ChartAiController implements AiController {
     public List<LlmProvider.ToolSpec> getTools() {
         List<LlmProvider.ToolSpec> tools = new ArrayList<>();
         tools.add(createInstructionsTool());
-        tools.addAll(QueryExecutorAiTools.createAll(databaseProvider));
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
         tools.addAll(ChartAiTools.createAll(new ChartAiTools.Callbacks() {
             @Override
             public String getState(String chartId) {
@@ -243,7 +243,7 @@ public class ChartAiController implements AiController {
                 // ChartRenderer.
                 for (var i = 0; i < queries.size(); i++) {
                     checkPlottable(i + 1,
-                            databaseProvider.executeQuery(queries.get(i)));
+                            queryExecutor.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -448,7 +448,7 @@ public class ChartAiController implements AiController {
             // decided the same way for both.
             entry.getLlmConfiguration().getChart()
                     .setType(chart.getConfiguration().getChart().getType());
-            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
+            ChartRenderer.renderChart(chart, queryExecutor, dataConverter,
                     queries, configJsons);
             configJsons.forEach(entry::applyLlmConfiguration);
             entry.setQueries(queries);

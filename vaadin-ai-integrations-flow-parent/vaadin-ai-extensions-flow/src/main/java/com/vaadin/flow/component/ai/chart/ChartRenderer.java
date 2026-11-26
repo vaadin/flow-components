@@ -51,7 +51,7 @@ public final class ChartRenderer implements Serializable {
      *
      * @param chart
      *            the chart to render, not {@code null}
-     * @param databaseProvider
+     * @param queryExecutor
      *            the query executor, not {@code null}
      * @param dataConverter
      *            the data converter for transforming query results, not
@@ -61,10 +61,10 @@ public final class ChartRenderer implements Serializable {
      * @param configJson
      *            the chart configuration JSON, or {@code null} to keep current
      */
-    public static void renderChart(Chart chart, QueryExecutor databaseProvider,
+    public static void renderChart(Chart chart, QueryExecutor queryExecutor,
             DataConverter dataConverter, List<String> queries,
             String configJson) {
-        renderChart(chart, databaseProvider, dataConverter, queries,
+        renderChart(chart, queryExecutor, dataConverter, queries,
                 configJson == null ? List.of() : List.of(configJson));
     }
 
@@ -73,12 +73,12 @@ public final class ChartRenderer implements Serializable {
      * {@link #renderChart(Chart, QueryExecutor, DataConverter, List, String)},
      * applying each of the configuration JSON strings in order.
      */
-    static void renderChart(Chart chart, QueryExecutor databaseProvider,
+    static void renderChart(Chart chart, QueryExecutor queryExecutor,
             DataConverter dataConverter, List<String> queries,
             List<String> configJsons) {
         List<Series> allSeries = new ArrayList<>();
         for (String query : queries) {
-            var results = databaseProvider.executeQuery(query);
+            var results = queryExecutor.executeQuery(query);
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 

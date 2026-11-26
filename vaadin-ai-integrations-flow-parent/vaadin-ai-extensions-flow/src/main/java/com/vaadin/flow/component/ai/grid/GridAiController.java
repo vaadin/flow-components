@@ -42,7 +42,7 @@ import tools.jackson.databind.JsonNode;
  *
  * <pre>
  * var grid = new Grid&lt;AiDataRow&gt;();
- * var controller = new GridAiController(grid, databaseProvider);
+ * var controller = new GridAiController(grid, queryExecutor);
  * AiOrchestrator orchestrator = AiOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -89,7 +89,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new GridAiController(grid, databaseProvider);
+ * var controller = new GridAiController(grid, queryExecutor);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -144,7 +144,7 @@ public class GridAiController implements AiController {
             """;
 
     private final Grid<AiDataRow> grid;
-    private final QueryExecutor databaseProvider;
+    private final QueryExecutor queryExecutor;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
     /**
@@ -152,15 +152,14 @@ public class GridAiController implements AiController {
      *
      * @param grid
      *            the grid to populate, not {@code null}
-     * @param databaseProvider
+     * @param queryExecutor
      *            the query executor for schema and query execution, not
      *            {@code null}
      */
-    public GridAiController(Grid<AiDataRow> grid,
-            QueryExecutor databaseProvider) {
+    public GridAiController(Grid<AiDataRow> grid, QueryExecutor queryExecutor) {
         AiExtensionsLicense.check();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
                 "QueryExecutor must not be null");
     }
 
@@ -168,7 +167,7 @@ public class GridAiController implements AiController {
     public List<LlmProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LlmProvider.ToolSpec>();
         tools.add(createInstructionsTool());
-        tools.addAll(QueryExecutorAiTools.createAll(databaseProvider));
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
         tools.addAll(GridAiTools.createAll(new GridAiTools.Callbacks() {
             @Override
             public String getState(String gridId) {
@@ -182,7 +181,7 @@ public class GridAiController implements AiController {
                 // that throws ToolException gets its message relayed to
                 // the LLM so it can fix the query; any other exception is
                 // replaced with a generic error.
-                databaseProvider.executeQuery(query,
+                queryExecutor.executeQuery(query,
                         new QueryPage(0, 1, List.of()));
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
@@ -288,7 +287,7 @@ public class GridAiController implements AiController {
 
     private void render(GridEntry entry, String query, boolean fireListeners) {
         try {
-            GridRenderer.renderGrid(grid, databaseProvider, query);
+            GridRenderer.renderGrid(grid, queryExecutor, query);
             entry.setCurrentQuery(query);
             if (fireListeners) {
                 fireStateChangeListeners();
