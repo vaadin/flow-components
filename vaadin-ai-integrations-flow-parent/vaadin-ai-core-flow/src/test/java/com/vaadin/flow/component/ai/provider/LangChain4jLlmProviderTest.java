@@ -4129,6 +4129,32 @@ class LangChain4jLlmProviderTest {
     }
 
     @Test
+    void stream_streamingTurnFailedAtRoundTripLimit_metadataOfEveryRoundTripPublished() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
+        var collected = Collections
+                .synchronizedList(new ArrayList<ResponseMetadata>());
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = requestWithMetadataSink("Loop", List.of(tool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        mockStreamingResponsesOnOtherThreads(toolResponse, toolResponse,
+                toolResponse, mockSimpleResponse("done"));
+
+        Assertions.assertNotNull(getTurnError(customized.stream(request)));
+
+        Assertions.assertEquals(2, collected.size());
+        Assertions.assertEquals(220,
+                collected.getLast().tokenUsage().totalTokens());
+    }
+
+    @Test
     void stream_nonStreamingTextAlongsideToolCallsOfFailedTurn_isNotPassedOn() {
         var customized = new LangChain4jLlmProvider(mockChatModel,
                 service -> service.maxToolCallingRoundTrips(1));
