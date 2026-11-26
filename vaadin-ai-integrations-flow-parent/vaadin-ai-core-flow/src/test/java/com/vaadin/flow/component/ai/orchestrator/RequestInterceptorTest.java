@@ -33,13 +33,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
-import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
-import com.vaadin.flow.component.ai.ui.AIInput;
-import com.vaadin.flow.component.ai.ui.AIMessage;
-import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiInput;
+import com.vaadin.flow.component.ai.ui.AiMessage;
+import com.vaadin.flow.component.ai.ui.AiMessageList;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
@@ -60,18 +60,18 @@ class RequestInterceptorTest {
     MockUIExtension ui = new MockUIExtension();
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
+            AiComponentsFeatureFlagProvider.AI_COMPONENTS);
 
-    private LLMProvider mockProvider;
-    private AIMessageList mockMessageList;
+    private LlmProvider mockProvider;
+    private AiMessageList mockMessageList;
 
     @BeforeEach
     void setup() {
-        mockProvider = Mockito.mock(LLMProvider.class);
-        mockMessageList = Mockito.mock(AIMessageList.class);
+        mockProvider = Mockito.mock(LlmProvider.class);
+        mockMessageList = Mockito.mock(AiMessageList.class);
         stubAddMessage();
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.just("Response"));
     }
 
@@ -92,10 +92,10 @@ class RequestInterceptorTest {
     void interceptor_receivesAttachmentsFromFileReceiver() {
         var seen = new AtomicReference<RequestInterceptor.RequestInterceptEvent>();
         var attachment = createAttachment("upload.png");
-        var fileReceiver = Mockito.mock(AIFileReceiver.class);
+        var fileReceiver = Mockito.mock(AiFileReceiver.class);
         Mockito.when(fileReceiver.takeAttachments())
                 .thenReturn(List.of(attachment));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(fileReceiver)
                 .withRequestInterceptor(seen::set).build();
 
@@ -154,7 +154,7 @@ class RequestInterceptorTest {
     @Test
     void replacedMessage_isReportedToRequestListener() {
         var listener = Mockito.mock(RequestListener.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(
                         event -> event.setUserMessage("sanitized"))
@@ -197,10 +197,10 @@ class RequestInterceptorTest {
 
     @Test
     void rejectedPrompt_stillDrainsFileReceiver() {
-        var fileReceiver = Mockito.mock(AIFileReceiver.class);
+        var fileReceiver = Mockito.mock(AiFileReceiver.class);
         Mockito.when(fileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("upload.png")));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(fileReceiver)
                 .withRequestInterceptor(
                         RequestInterceptor.RequestInterceptEvent::reject)
@@ -225,7 +225,7 @@ class RequestInterceptorTest {
     @Test
     void rejectedPrompt_sendsNothingAndLeavesNoTrace() {
         var listener = Mockito.mock(RequestListener.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(
                         RequestInterceptor.RequestInterceptEvent::reject)
@@ -234,7 +234,7 @@ class RequestInterceptorTest {
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Mockito.verify(mockMessageList, Mockito.never()).addMessage(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
         Mockito.verify(listener, Mockito.never())
@@ -292,12 +292,12 @@ class RequestInterceptorTest {
                 Mockito.eq("sanitized"), Mockito.anyString(),
                 Mockito.anyList());
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
     void rejectWithMessage_usesConfiguredAssistantName() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withAssistantName("Support")
                 .withRequestInterceptor(event -> event.reject("Not allowed."))
                 .build();
@@ -310,14 +310,14 @@ class RequestInterceptorTest {
 
     @Test
     void rejectWithMessage_withoutMessageList_sendsNothing() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withRequestInterceptor(event -> event.reject("Not allowed."))
                 .build();
 
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
@@ -330,7 +330,7 @@ class RequestInterceptorTest {
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
@@ -344,7 +344,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("first");
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Assertions.assertTrue(orchestrator.getHistory().isEmpty());
 
         orchestrator.prompt("second");
@@ -356,7 +356,7 @@ class RequestInterceptorTest {
     void throwingInterceptor_abortsPromptAndReportsError() {
         var thrown = new RuntimeException("validation infrastructure down");
         var responseListener = Mockito.mock(ResponseListener.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     throw thrown;
@@ -367,7 +367,7 @@ class RequestInterceptorTest {
 
         Assertions.assertSame(thrown, caught);
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Assertions.assertTrue(orchestrator.getHistory().isEmpty());
         var captor = ArgumentCaptor
                 .forClass(ResponseListener.ResponseEvent.class);
@@ -379,9 +379,9 @@ class RequestInterceptorTest {
     @Test
     void throwingInterceptor_firesControllerOnResponseWithError() {
         var thrown = new RuntimeException("validation infrastructure down");
-        var controller = Mockito.mock(AIController.class);
+        var controller = Mockito.mock(AiController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     throw thrown;
@@ -414,8 +414,8 @@ class RequestInterceptorTest {
     @SuppressWarnings("unchecked")
     @Test
     void inputSubmit_goesThroughInterceptor() {
-        var mockInput = Mockito.mock(AIInput.class);
-        AIOrchestrator.builder(mockProvider, null)
+        var mockInput = Mockito.mock(AiInput.class);
+        AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withInput(mockInput)
                 .withRequestInterceptor(
                         event -> event.setUserMessage("sanitized"))
@@ -431,9 +431,9 @@ class RequestInterceptorTest {
 
     @Test
     void rejectedPrompt_doesNotInvokeControllerOnRequest() {
-        var controller = Mockito.mock(AIController.class);
+        var controller = Mockito.mock(AiController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(
                         RequestInterceptor.RequestInterceptEvent::reject)
@@ -447,9 +447,9 @@ class RequestInterceptorTest {
     @Test
     void interceptor_runsBeforeControllerOnRequest() {
         var interceptor = Mockito.mock(RequestInterceptor.class);
-        var controller = Mockito.mock(AIController.class);
+        var controller = Mockito.mock(AiController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(interceptor).withController(controller)
                 .build();
@@ -471,7 +471,7 @@ class RequestInterceptorTest {
         orchestrator.prompt("Hello");
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Mockito.verify(mockMessageList, Mockito.never()).addMessage(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
 
@@ -510,7 +510,7 @@ class RequestInterceptorTest {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var postponeFirst = new AtomicReference<>(true);
         var responseListener = Mockito.mock(ResponseListener.class);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     if (postponeFirst.getAndSet(false)) {
@@ -538,7 +538,7 @@ class RequestInterceptorTest {
         var errorReported = new CountDownLatch(1);
         var reportedError = new AtomicReference<Throwable>();
         var postponeFirst = new AtomicReference<>(true);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     if (postponeFirst.getAndSet(false)) {
@@ -556,7 +556,7 @@ class RequestInterceptorTest {
         Assertions.assertInstanceOf(TimeoutException.class,
                 reportedError.get());
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
 
         orchestrator.prompt("second");
         var request = captureRequest();
@@ -567,7 +567,7 @@ class RequestInterceptorTest {
     void proceedAfterTimeout_isIgnored() throws Exception {
         var timedOut = new CountDownLatch(1);
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMillis(50))))
@@ -579,14 +579,14 @@ class RequestInterceptorTest {
         continuation.get().proceed();
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
     void failAfterProceed_isIgnored() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -614,11 +614,11 @@ class RequestInterceptorTest {
         var turnEnded = new CountDownLatch(1);
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.just("Response")
                         .subscribeOn(Schedulers.boundedElastic()));
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
                 .withResponseListener(event -> {
@@ -628,7 +628,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("Hello");
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
 
         continuation.get().proceed();
 
@@ -646,7 +646,7 @@ class RequestInterceptorTest {
         var boom = new RuntimeException("conversion failed");
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -658,7 +658,7 @@ class RequestInterceptorTest {
 
         // The failed turn must not be resurrected by the late proceed().
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Assertions.assertEquals(1, responseEvents.size());
         Assertions.assertSame(boom,
                 responseEvents.getFirst().getError().orElseThrow());
@@ -668,7 +668,7 @@ class RequestInterceptorTest {
     void secondProceed_isIgnored() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMinutes(1))))
@@ -699,7 +699,7 @@ class RequestInterceptorTest {
         continuation.get().proceed();
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
                 Mockito.eq("You"), Mockito.anyList());
         Mockito.verify(mockMessageList).addMessage(
@@ -735,7 +735,7 @@ class RequestInterceptorTest {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var postponeFirst = new AtomicReference<>(true);
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     if (postponeFirst.getAndSet(false)) {
@@ -781,7 +781,7 @@ class RequestInterceptorTest {
         continuation.get().proceed();
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         Mockito.verify(mockMessageList, Mockito.never()).addMessage(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyList());
 
@@ -830,7 +830,7 @@ class RequestInterceptorTest {
         // completing the leftover continuation must not start a turn.
         continuation.get().proceed();
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
 
         orchestrator.prompt("second");
         var request = captureRequest();
@@ -852,7 +852,7 @@ class RequestInterceptorTest {
                 "The failed prompt must release the busy flag, so the next "
                         + "prompt reaches the interceptor again");
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
     }
 
     @Test
@@ -896,7 +896,7 @@ class RequestInterceptorTest {
         }
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         orchestrator.prompt("second");
         var request = captureRequest();
         Assertions.assertEquals("second", request.userMessage());
@@ -942,7 +942,7 @@ class RequestInterceptorTest {
         }
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         orchestrator.prompt("second");
         var request = captureRequest();
         Assertions.assertEquals("second", request.userMessage());
@@ -953,10 +953,10 @@ class RequestInterceptorTest {
         var thrown = new RuntimeException("conversion failed");
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var postponeFirst = new AtomicReference<>(true);
-        var controller = Mockito.mock(AIController.class);
+        var controller = Mockito.mock(AiController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
                 .withRequestInterceptor(event -> {
                     if (postponeFirst.getAndSet(false)) {
@@ -1018,7 +1018,7 @@ class RequestInterceptorTest {
                 () -> orchestrator.prompt("first"));
 
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         orchestrator.prompt("second");
         var request = captureRequest();
         Assertions.assertEquals("second", request.userMessage());
@@ -1037,13 +1037,13 @@ class RequestInterceptorTest {
     @Test
     void postponedPrompt_timeoutReportsErrorToController() throws Exception {
         var controllerNotified = new CountDownLatch(1);
-        var controller = Mockito.mock(AIController.class);
+        var controller = Mockito.mock(AiController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
         Mockito.doAnswer(invocation -> {
             controllerNotified.countDown();
             return null;
         }).when(controller).onResponse(Mockito.any());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
                 .withRequestInterceptor(
                         event -> event.postpone(Duration.ofMillis(50)))
@@ -1093,7 +1093,7 @@ class RequestInterceptorTest {
         // and proceed() cannot beat it, and the observation window below
         // must still contain the timer's firing time — a timer firing
         // after proceed() is what this test watches for.
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> continuation
                         .set(event.postpone(Duration.ofMillis(500))))
@@ -1115,7 +1115,7 @@ class RequestInterceptorTest {
         var seen = new AtomicReference<RequestInterceptor.RequestInterceptEvent>();
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var completed = new CountDownLatch(1);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(event -> {
                     seen.set(event);
@@ -1150,13 +1150,13 @@ class RequestInterceptorTest {
 
     @Test
     void failedPostponedPrompt_doesNotReturnDrainedAttachments() {
-        var fileReceiver = Mockito.mock(AIFileReceiver.class);
+        var fileReceiver = Mockito.mock(AiFileReceiver.class);
         Mockito.when(fileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("upload.png")))
                 .thenReturn(List.of());
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var postponeFirst = new AtomicReference<>(true);
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withFileReceiver(fileReceiver)
                 .withRequestInterceptor(event -> {
                     if (postponeFirst.getAndSet(false)) {
@@ -1170,7 +1170,7 @@ class RequestInterceptorTest {
         // Uploads are consumed at submit time; a failed turn does not put
         // them back, so the next prompt starts without them.
         Mockito.verify(mockProvider, Mockito.never())
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+                .stream(Mockito.any(LlmProvider.LlmRequest.class));
         orchestrator.prompt("second");
         var request = captureRequest();
         Assertions.assertEquals(List.of(), request.attachments());
@@ -1196,7 +1196,7 @@ class RequestInterceptorTest {
                         null));
         Assertions.assertThrows(NullPointerException.class,
                 () -> new RequestInterceptor.RequestInterceptEvent("Hello",
-                        Collections.singletonList((AIAttachment) null)));
+                        Collections.singletonList((AiAttachment) null)));
 
         var event = new RequestInterceptor.RequestInterceptEvent("Hello",
                 List.of());
@@ -1206,7 +1206,7 @@ class RequestInterceptorTest {
                 () -> event.setAttachments(null));
         Assertions.assertThrows(NullPointerException.class,
                 () -> event.setAttachments(
-                        Collections.singletonList((AIAttachment) null)));
+                        Collections.singletonList((AiAttachment) null)));
         Assertions.assertThrows(NullPointerException.class,
                 () -> event.reject((String) null));
     }
@@ -1249,20 +1249,20 @@ class RequestInterceptorTest {
         Assertions.assertEquals("the reason", event.getRejectionMessage());
     }
 
-    private AIOrchestrator orchestratorWith(RequestInterceptor interceptor) {
-        return AIOrchestrator.builder(mockProvider, null)
+    private AiOrchestrator orchestratorWith(RequestInterceptor interceptor) {
+        return AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withRequestInterceptor(interceptor).build();
     }
 
-    private LLMProvider.LLMRequest captureRequest() {
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+    private LlmProvider.LlmRequest captureRequest() {
+        var captor = ArgumentCaptor.forClass(LlmProvider.LlmRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
         return captor.getValue();
     }
 
     private void stubAddMessage() {
-        var message = Mockito.mock(AIMessage.class);
+        var message = Mockito.mock(AiMessage.class);
         Mockito.when(message.getText()).thenReturn("");
         Mockito.when(message.getTime()).thenReturn(Instant.now());
         Mockito.when(message.getUserName()).thenReturn("Test");
@@ -1270,8 +1270,8 @@ class RequestInterceptorTest {
                 Mockito.anyString(), Mockito.anyList())).thenReturn(message);
     }
 
-    private static AIAttachment createAttachment(String fileName) {
-        return new AIAttachment(fileName, "text/plain", "test".getBytes());
+    private static AiAttachment createAttachment(String fileName) {
+        return new AiAttachment(fileName, "text/plain", "test".getBytes());
     }
 
     /** Matches a turn outcome carrying exactly the given error instance. */

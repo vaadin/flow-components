@@ -2,7 +2,7 @@
 
 `vaadin-ai-integrations-flow-parent` is not a regular component wrapper group:
 it provides server-side support for building AI-powered applications
-(`AIOrchestrator`, LLM provider integrations, AI controllers for existing
+(`AiOrchestrator`, LLM provider integrations, AI controllers for existing
 components). The general chapters still apply; this chapter covers only what
 works differently here.
 
@@ -29,7 +29,7 @@ Consequences of the split:
   `com.vaadin.flow.component.ai.common`) live in core even when their only
   consumer is a commercial controller, so the data types stay
   Apache-licensed. Put new shared data types there too.
-- `AIExtensionsLicense.check()` must be called from every public entry point
+- `AiExtensionsLicense.check()` must be called from every public entry point
   of the extensions module — every public controller constructor and public
   tool factory. It only enforces in dev mode; do **not** re-add a `cvdlName`
   manifest entry to the pom — Flow's production-build license validation
@@ -41,11 +41,11 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 
 ## Architecture
 
-- `AIOrchestrator` is a non-visual coordination engine, not a `Component` —
+- `AiOrchestrator` is a non-visual coordination engine, not a `Component` —
   it is never added to a layout. Construction is builder-only
-  (`AIOrchestrator.builder(provider, systemPrompt)`).
+  (`AiOrchestrator.builder(provider, systemPrompt)`).
 - UI components are decoupled through the interfaces in the `.ui` package
-  (`AIInput`, `AIMessageList`, `AIMessage`, `AIFileReceiver`) so
+  (`AiInput`, `AiMessageList`, `AiMessage`, `AiFileReceiver`) so
   applications can plug in non-Vaadin UI. Builder methods accept either the
   interface or the concrete Flow component; concrete components are adapted
   by package-private wrappers — extend that pattern rather than referencing
@@ -59,17 +59,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   error message of a failed turn, are set with `AIOrchestratorI18n`. Unlike
   a component's i18n class it is never sent to the client: it has no Jackson
   annotations, and an unset text falls back to the English default in
-  `AIOrchestrator`. The user and assistant names are not part of it. They
+  `AiOrchestrator`. The user and assistant names are not part of it. They
   name the authors of the messages and stay on `withUserName` and
   `withAssistantName`.
 - The extensions module plugs into core only through core's public API —
-  mainly `AIController`, `LLMProvider.ToolSpec`,
-  `DatabaseProvider`/`DatabaseProviderAITools`, and the shared value types.
+  mainly `AiController`, `LlmProvider.ToolSpec`,
+  `DatabaseProvider`/`DatabaseProviderAiTools`, and the shared value types.
   There is no SPI, registry, or reflection between the modules; keep the
   boundary that narrow.
 - Vendor LLM integrations (Spring AI, LangChain4j) live in core behind
   `optional` dependencies. `reactor-core` is a non-optional dependency
-  because `Flux` is part of the `LLMProvider` API. A new vendor provider
+  because `Flux` is part of the `LlmProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
 - A vendor integration uses the vendor's public API only. Because the
@@ -77,7 +77,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   member that disappears fails at the application's site, not in this
   repository's build. LangChain4j marks such types `@Internal`
   (`AiServiceContext`, `ToolService`, `CapturedContextSupport`).
-- `LangChain4JLLMProvider` runs each turn through a LangChain4j `AiServices`
+- `LangChain4jLlmProvider` runs each turn through a LangChain4j `AiServices`
   service, and the customizer constructors hand the application the builder so
   it can add RAG, MCP tool providers, guardrails and so on. The builder has
   setters only, so the provider never reads back what the customizer
@@ -97,14 +97,14 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   The provider does not set handlers of its own choosing there. Any explicit
   handler decides how the application's tools fail, and that stays with the
   vendor's defaults and the application, as it does for the tools of a
-  `ChatClient` given to `SpringAILLMProvider`. LangChain4j plans to change
+  `ChatClient` given to `SpringAiLlmProvider`. LangChain4j plans to change
   these defaults, which is what the notice announces. A different default is
   a decision for both providers together. The checks of a turn
   (cancellation, tool call limits, and the orchestrator's system prompt, which
   wins over a customizer's `systemMessage`) sit in a proxy around that model
   instead of in a builder setting the application might also use. The session
   context goes into the user text before the service call, as with
-  `SpringAILLMProvider`, so retrieval and input guardrails see it. The proxy
+  `SpringAiLlmProvider`, so retrieval and input guardrails see it. The proxy
   does not pass on to the service the model response of a cancelled turn, nor
   one with a tool call past a limit: the service would otherwise run the tools
   the response requests, including the customizer's. A
@@ -128,7 +128,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   not rely on the model remembering a previous turn's tool result; the
   instruction tools already tell the model to read the state again each
   turn. LangChain4j's loop writes every tool message into the chat memory,
-  so `LangChain4JLLMProvider`'s own memory (`TurnScopedChatMemory`) keeps
+  so `LangChain4jLlmProvider`'s own memory (`TurnScopedChatMemory`) keeps
   them in a list of the running turn instead. The turn's answers go to that
   list too, after its tool messages, because an output guardrail that
   reprompts sends the memory again and the model still needs the tool
@@ -147,24 +147,24 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   it, also when a guardrail rewrote it or accepted a later one after a
   reprompt. The provider replaces it with the answer the turn delivered, so
   that later turns and a history restore show the model the conversation the
-  user saw. `SpringAILLMProvider` gets the same from Spring AI: its memory
+  user saw. `SpringAiLlmProvider` gets the same from Spring AI: its memory
   advisor sees a response after the advisors ordered behind it changed it. A
   turn that a guardrail fails keeps the rejected answer in the memory unless
   the guardrail fails it with message removal. That is LangChain4j's default
   and LangChain4j's option, and both are left as they are. A memory set in
   the customizer replaces the provider's own and gets LangChain4j's behavior.
-  `setHistory` leaves such a memory as it is, as `SpringAILLMProvider` leaves
+  `setHistory` leaves such a memory as it is, as `SpringAiLlmProvider` leaves
   the memory of a `ChatClient` that brings its own. The application owns it,
   and it may hold more than a restore writes back: tool calls, their results
   and retrieved content, in a store that may be persistent.
-  `LangChain4JLLMProvider` also leaves a final answer without text out of the
+  `LangChain4jLlmProvider` also leaves a final answer without text out of the
   memory. A model may answer that way once a tool call has done the work,
   LangChain4j hands the answer over as an `AiMessage` with a `null` text, and
   OpenAI's Chat Completions API rejects a replayed assistant message that has
   neither content nor tool calls, which would fail every later turn of the
   conversation.
 - The response stream carries text only; everything else the model said
-  about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
+  about the turn goes to `LlmRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the
   state of the turn so far and replaces the previous one, so a turn that
   fails midway has still reported what was observed. Finish reasons are
@@ -181,7 +181,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   calls still pending. The one exception is Spring AI's
   `ToolCallLimitExceededException.FINISH_REASON`: not a vendor's word but a
   constant Spring AI defines for the reply it synthesizes itself when its
-  tool call limit is hit, so `SpringAILLMProvider` compares against that
+  tool call limit is hit, so `SpringAiLlmProvider` compares against that
   constant to turn the reply back into a failed turn.
 
 ## Threading
@@ -194,18 +194,18 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 - Interceptor/postponement timers run on `Schedulers.boundedElastic()`,
   never `parallel()`: the end-of-turn hooks may run inline on the timer
   thread and application code in them may block.
-- The end-of-turn hooks, `AIController.onResponse` and then the
+- The end-of-turn hooks, `AiController.onResponse` and then the
   `ResponseListener`, run as one `ui.accessLater` task whether or not a
   controller is attached, so the listener has a single threading contract
   (session locked) and a detached UI still gets the listener.
 - The orchestrator's `isProcessing` busy flag must be released exactly once
-  per prompt. The field comment in `AIOrchestrator` enumerates every release
+  per prompt. The field comment in `AiOrchestrator` enumerates every release
   path; any new way for a prompt to end must be added there and must decide
   who releases the flag.
 
 ## Serialization and reconnect
 
-- `AIOrchestrator` is serializable; the provider, tools, and controller are
+- `AiOrchestrator` is serializable; the provider, tools, and controller are
   `transient` by design. After deserialization the application restores them
   with `orchestrator.reconnect(provider).withController(...).apply()`.
 - The `RequestInterceptor` **is** serialized with the orchestrator —
@@ -219,7 +219,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 - Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`, and a
   declared parameters schema must be a JSON object (both validated on
   registration, so a broken definition fails fast and names the tool).
-- Each controller keeps its tool definitions in a sibling `XxxAITools`
+- Each controller keeps its tool definitions in a sibling `XxxAiTools`
   factory class with a nested `Callbacks` interface implemented by the
   controller, keeping tool JSON and descriptions decoupled from the
   component type.
@@ -231,7 +231,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   to a tool name, description or schema invalidates all of it. Per-turn
   content therefore never goes into a tool description or the system
   prompt: the session context (`Builder.withMetadata`) travels in
-  `LLMRequest.sessionContext()` and the providers append it to the user
+  `LlmRequest.sessionContext()` and the providers append it to the user
   message, at the very end of the prompt.
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
@@ -251,7 +251,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   the raw message of any exception to the model — they are deliberately out
   of scope, so route error-sensitive tools through `ToolSpec`.
 - The tool-calling loop is bounded where it is driven, never by the
-  orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
+  orchestrator. `LangChain4jLlmProvider` counts the tool calls of a turn
   against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
   the same as Spring AI's) and fails the turn with the public
   `ToolCallLimitExceededException`. A response is screened in the model
@@ -277,7 +277,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   turn continues from the chat memory as the last completed turn left it; a
   cancelled turn likewise stops calling the model and runs no tool for a
   response that arrives after the cancellation.
-  `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
+  `SpringAiLlmProvider` adds no cap of its own: Spring AI bounds the loop
   itself and hands back a synthesized reply carrying its
   `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
   into the same exception with Spring AI's message, so both providers fail
@@ -286,13 +286,13 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   which is not ours to depend on. Spring AI's reply may remain in the chat
   memory with either constructor; the provider does not rewrite what Spring
   AI's advisors stored.
-- Never send secrets to the LLM — `FormAIController` auto-ignores password
+- Never send secrets to the LLM — `FormAiController` auto-ignores password
   fields; preserve that property for new field handling.
 
 ## Feature flag
 
 The umbrella flag `aiComponents` gates the whole group. Unlike a component
-flag it is checked in exactly one place — `AIOrchestrator` on the first
+flag it is checked in exactly one place — `AiOrchestrator` on the first
 prompt (the orchestrator has no attach lifecycle) — and the result is
 memoized per instance. The extensions module has no checks of its own: the
 controllers are only reachable through the orchestrator. A new entry point
@@ -334,8 +334,8 @@ server-side only):
   repo. Both published modules need the Mockito java-agent `surefire.argLine`
   (already in the poms) because `EnableFeatureFlagExtension` uses
   `mockStatic`.
-- No unit or integration test uses a real LLM or API key. Unit tests mock `LLMProvider`
-  (`Flux.just(...)` + `ArgumentCaptor<LLMRequest>` to assert the built
+- No unit or integration test uses a real LLM or API key. Unit tests mock `LlmProvider`
+  (`Flux.just(...)` + `ArgumentCaptor<LlmRequest>` to assert the built
   request); provider tests mock the vendor model types and hand-build
   responses; IT views define small provider classes inline — an echo
   provider that splits the reply into tokens to simulate streaming, or a
@@ -343,11 +343,11 @@ server-side only):
   reproduce real tool-call timing.
 - ITs are smoke tests proving the wiring reaches the browser; the scenario
   matrix belongs in unit tests asserting server-side state (see
-  `AIFieldMarkerIT` vs `FormAIControllerTest` for the established split).
+  `AiFieldMarkerIT` vs `FormAiControllerTest` for the established split).
 - Log-output assertions use the `slf4j-test` `TestLogger`.
 - The only place a real LLM is used is the unpublished
   `vaadin-ai-integrations-flow-benchmark` module. Its JUnit scenarios drive the
-  controllers server-side through `AIOrchestrator` with the Spring AI
+  controllers server-side through `AiOrchestrator` with the Spring AI
   provider, score the resulting state deterministically (field values and the
   sources recorded for them, rows returned by the produced SQL, chart type and
   series), and repeat each scenario to absorb nondeterminism. The suite is
@@ -356,8 +356,8 @@ server-side only):
 
 ## Other conventions
 
-- The long implementation comments in `AIOrchestrator`,
-  `FormAIController`, `FormFieldMarker`, and `BinderReflection` explaining
+- The long implementation comments in `AiOrchestrator`,
+  `FormAiController`, `FormFieldMarker`, and `BinderReflection` explaining
   ordering, threading, and catch decisions are load-bearing — keep them,
   and comment new non-obvious code in these files the same way.
 - `@since` tags are reconciled against actual release history — add an

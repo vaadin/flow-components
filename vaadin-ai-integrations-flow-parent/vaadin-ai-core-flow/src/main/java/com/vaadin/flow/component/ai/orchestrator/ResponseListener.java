@@ -18,7 +18,7 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 import java.util.Optional;
 
-import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
 import com.vaadin.flow.component.ai.provider.ResponseMetadata;
 
 /**
@@ -30,33 +30,33 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * a prompt rejected by the {@link RequestInterceptor} and a postponed prompt
  * abandoned because its UI was detached end without firing it. The same
  * lifecycle moment as
- * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Use it to
- * persist conversation state (via {@link AIOrchestrator#getHistory()}), trigger
+ * {@link AiController#onResponse(ResponseListener.ResponseEvent)}. Use it to
+ * persist conversation state (via {@link AiOrchestrator#getHistory()}), trigger
  * follow-up actions, or surface errors to the user.
  * <p>
  * On success the response text may still be empty if the model emitted only
  * tool calls or stopped without producing visible content. Such turns are
  * successful exchanges; check {@code event.getResponse().isEmpty()} if the
  * listener should only react to text-bearing responses. Empty responses are
- * <i>not</i> appended to {@link AIOrchestrator#getHistory()}.
+ * <i>not</i> appended to {@link AiOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
  * stream error, a provider's tool call limit as a
  * {@link com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException},
  * any throw between
- * {@link AIController#onRequest(RequestListener.RequestEvent)} and the start of
+ * {@link AiController#onRequest(RequestListener.RequestEvent)} and the start of
  * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
  * interception timeout); the response text is empty — text received before the
  * failure is not passed on. An interceptor failure fires the listener without a
- * preceding {@link AIController#onRequest(RequestListener.RequestEvent)}, so an
+ * preceding {@link AiController#onRequest(RequestListener.RequestEvent)}, so an
  * error does not imply that per-turn setup has happened.
  * <p>
- * A turn the model completed but the {@link AIController} could not apply is a
- * failure too: when {@link AIController#onResponse(ResponseEvent)} throws on a
+ * A turn the model completed but the {@link AiController} could not apply is a
+ * failure too: when {@link AiController#onResponse(ResponseEvent)} throws on a
  * successful turn, the listener receives that exception as the error, with an
  * empty response text. The assistant's text stays in the message list and in
- * {@link AIOrchestrator#getHistory()}, since the model did produce it. A throw
+ * {@link AiOrchestrator#getHistory()}, since the model did produce it. A throw
  * while the controller handles a turn that had already failed does not replace
  * the original error.
  * <p>
@@ -64,7 +64,7 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * {@code Builder.withHistory()}.
  * <p>
  * <b>Threading:</b> the listener runs as a {@code ui.access()} task, right
- * after {@link AIController#onResponse(ResponseEvent)} when a controller is
+ * after {@link AiController#onResponse(ResponseEvent)} when a controller is
  * attached. The session is locked and the Vaadin thread locals are bound, so UI
  * components can be updated directly; blocking work (e.g. database writes)
  * holds the session lock for its duration, as in any {@code ui.access()} task.
@@ -96,7 +96,7 @@ public interface ResponseListener extends Serializable {
         /**
          * Creates a turn-outcome event. The orchestrator builds this for every
          * turn; it is public so an application can construct one when unit
-         * testing an {@link AIController} implementation.
+         * testing an {@link AiController} implementation.
          *
          * @param response
          *            the assistant's response text, not {@code null}
@@ -140,7 +140,7 @@ public interface ResponseListener extends Serializable {
          * Gets the metadata the provider reported for this turn, such as the
          * finish reason and token usage. On a failed turn this is what was
          * observed before the failure. Returns an empty optional when the
-         * provider reported none — a custom {@link LLMProvider} that does not
+         * provider reported none — a custom {@link LlmProvider} that does not
          * publish metadata, or a turn that failed before any was observed.
          *
          * @return the response metadata, or empty when the provider reported

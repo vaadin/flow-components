@@ -16,14 +16,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.orchestrator.RequestListener;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
 /**
  * Common helpers shared by the form-controller test classes: tool lookup, JSON
- * parsing, and small wrappers that drive {@link FormAIController}'s tools the
+ * parsing, and small wrappers that drive {@link FormAiController}'s tools the
  * way an LLM would.
  */
 final class FormTestSupport {
@@ -31,7 +31,7 @@ final class FormTestSupport {
     private FormTestSupport() {
     }
 
-    static String executeQueryFieldOptions(FormAIController controller,
+    static String executeQueryFieldOptions(FormAiController controller,
             HasValue<?, ?> field, String filter, int limit) {
         var fieldId = idOf(field);
         return executeQueryFieldOptions(controller,
@@ -39,13 +39,13 @@ final class FormTestSupport {
                         + "\",\"limit\":" + limit + "}"));
     }
 
-    static String executeQueryFieldOptions(FormAIController controller,
+    static String executeQueryFieldOptions(FormAiController controller,
             JsonNode arguments) {
         return findTool(controller.getTools(), "query_field_options")
                 .execute(arguments);
     }
 
-    static LLMProvider.ToolSpec findTool(List<LLMProvider.ToolSpec> tools,
+    static LlmProvider.ToolSpec findTool(List<LlmProvider.ToolSpec> tools,
             String name) {
         return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
                 .orElseThrow();
@@ -57,7 +57,7 @@ final class FormTestSupport {
 
     /**
      * Builds the request event a test passes to
-     * {@link FormAIController#onRequest(RequestListener.RequestEvent)} to start
+     * {@link FormAiController#onRequest(RequestListener.RequestEvent)} to start
      * a turn. The form controller does not read the event, so the content is a
      * placeholder.
      */
@@ -67,21 +67,21 @@ final class FormTestSupport {
     }
 
     /**
-     * Returns the opaque id that {@link FormAIController} attached to the field
+     * Returns the opaque id that {@link FormAiController} attached to the field
      * at request start. Tests that need to assert against the id (or inject it
      * into a tool argument) read it from here so the field fixture itself does
      * not have to know about the controller's conventions.
      */
     static String idOf(HasValue<?, ?> field) {
         return (String) ComponentUtil.getData((Component) field,
-                FormAIController.FIELD_ID_KEY);
+                FormAiController.FIELD_ID_KEY);
     }
 
     /**
      * Drives {@code get_form_state} and returns the {@code fields} array
      * exploded into a {@link List}, the shape tests assert against.
      */
-    static List<JsonNode> formStateFields(FormAIController controller) {
+    static List<JsonNode> formStateFields(FormAiController controller) {
         var root = formStateRoot(controller);
         var out = new ArrayList<JsonNode>();
         root.path("fields").forEach(out::add);
@@ -93,7 +93,7 @@ final class FormTestSupport {
      * when a test needs to assert against the {@code rejected} block alongside
      * the {@code fields} array.
      */
-    static JsonNode formStateRoot(FormAIController controller) {
+    static JsonNode formStateRoot(FormAiController controller) {
         var result = findTool(controller.getTools(), "get_form_state")
                 .execute(JacksonUtils.createObjectNode());
         return json(result);

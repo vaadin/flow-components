@@ -13,7 +13,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * The texts shown by the marker the {@link FormAIController} applies to the
+ * The texts shown by the marker the {@link FormAiController} applies to the
  * fields the AI filled: the "AI" badge, its tooltip, the popover that explains
  * the AI fill and offers a revert control, and the confidence indicator. Use to
  * localize the marker; any text left {@code null} falls back to the built-in
@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  *
  * @author Vaadin Ltd
  * @since 25.3
- * @see FormAIController#setFieldMarkerI18n(FieldMarkerI18n)
+ * @see FormAiController#setFieldMarkerI18n(FieldMarkerI18n)
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldMarkerI18n implements Serializable {

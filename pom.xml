@@ -84,7 +84,7 @@
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <jetty.scan>0</jetty.scan>
-        <karaf-maven-plugin.version>4.4.12</karaf-maven-plugin.version>
+        <karaf-maven-plugin.version>4.4.13</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.6.1</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
@@ -95,7 +95,7 @@
             indexes use the same index format as the Flow ones. Do not change
             it on its own. -->
         <jandex.format.version>13</jandex.format.version>
-        <spotless.plugin.version>3.11.0</spotless.plugin.version>
+        <spotless.plugin.version>3.12.0</spotless.plugin.version>
         <forbiddenapis.version>3.11</forbiddenapis.version>
         <!-- Content Security Policy mode of a module: strict or off. Strict
              turns on the forbidden-apis/csp-strict.txt signatures for the main
@@ -775,7 +775,7 @@
                 <!-- Exclude from duplication checks:
                      - I18N files (repetitive getter/setter boilerplate)
                      - AI controllers (share an intentionally parallel instructions-tool shape per component) -->
-                <sonar.cpd.exclusions>**/*I18N.java,**/component/ai/**/*AIController.java</sonar.cpd.exclusions>
+                <sonar.cpd.exclusions>**/*I18N.java,**/component/ai/**/*AiController.java</sonar.cpd.exclusions>
                 <!-- SonarQube rule exclusions for: Integration tests -->
                 <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
                 <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->

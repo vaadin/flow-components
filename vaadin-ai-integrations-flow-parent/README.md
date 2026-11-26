@@ -15,7 +15,7 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-The AI controllers (`ChartAIController`, `FormAIController`, `GridAIController`)
+The AI controllers (`ChartAiController`, `FormAiController`, `GridAiController`)
 are part of the commercial `vaadin-ai-extensions-flow` module:
 ```
 <dependency>

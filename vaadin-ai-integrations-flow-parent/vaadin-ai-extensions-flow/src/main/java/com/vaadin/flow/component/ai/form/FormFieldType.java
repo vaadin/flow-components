@@ -27,7 +27,7 @@ import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.selection.MultiSelect;
 
 /**
- * Classifies a {@link HasValue} field into the {@link FormAIController}'s
+ * Classifies a {@link HasValue} field into the {@link FormAiController}'s
  * internal type taxonomy.
  * <p>
  * Detection is contract-based: the value type is resolved by walking the

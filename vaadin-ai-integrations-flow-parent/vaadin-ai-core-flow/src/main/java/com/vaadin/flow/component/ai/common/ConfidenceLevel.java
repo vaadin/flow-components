@@ -22,7 +22,7 @@ package com.vaadin.flow.component.ai.common;
  * <p>
  * The default meaning of each level is defined in the tool description the LLM
  * sees; an application can replace the wording per level (see
- * {@code FormAIController#describeConfidenceLevel}).
+ * {@code FormAiController#describeConfidenceLevel}).
  *
  * @author Vaadin Ltd
  * @since 25.3

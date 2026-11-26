@@ -27,12 +27,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
-import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
-import com.vaadin.flow.component.ai.ui.AIMessage;
-import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.ai.AiComponentsFeatureFlagProvider;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.ui.AiFileReceiver;
+import com.vaadin.flow.component.ai.ui.AiMessage;
+import com.vaadin.flow.component.ai.ui.AiMessageList;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -43,25 +43,25 @@ class AttachmentListenerTest {
     MockUIExtension ui = new MockUIExtension();
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            AIComponentsFeatureFlagProvider.AI_COMPONENTS);
+            AiComponentsFeatureFlagProvider.AI_COMPONENTS);
 
-    private LLMProvider mockProvider;
-    private AIMessageList mockMessageList;
-    private AIFileReceiver mockFileReceiver;
-    private AIMessage mockMessage;
+    private LlmProvider mockProvider;
+    private AiMessageList mockMessageList;
+    private AiFileReceiver mockFileReceiver;
+    private AiMessage mockMessage;
 
     @BeforeEach
     void setup() {
-        mockProvider = Mockito.mock(LLMProvider.class);
-        mockMessageList = Mockito.mock(AIMessageList.class);
-        mockFileReceiver = Mockito.mock(AIFileReceiver.class);
+        mockProvider = Mockito.mock(LlmProvider.class);
+        mockMessageList = Mockito.mock(AiMessageList.class);
+        mockFileReceiver = Mockito.mock(AiFileReceiver.class);
         mockMessage = createMockMessage();
 
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.just("Response"));
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
@@ -76,7 +76,7 @@ class AttachmentListenerTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(attachment));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(receivedEvent::set).build();
@@ -96,7 +96,7 @@ class AttachmentListenerTest {
                 .thenReturn(List.of(createAttachment("a.txt"),
                         createAttachment("b.txt"), createAttachment("c.txt")));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(receivedEvent::set).build();
@@ -114,7 +114,7 @@ class AttachmentListenerTest {
         // attachments" semantics.
         var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(receivedEvent::set).build();
@@ -137,7 +137,7 @@ class AttachmentListenerTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("file.txt")));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(receivedEvent::set).build();
@@ -162,10 +162,10 @@ class AttachmentListenerTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("file.txt")));
         Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.empty());
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(event -> {
@@ -187,23 +187,23 @@ class AttachmentListenerTest {
 
     @Test
     void clickListener_configured_registersOnMessageList() {
-        AIOrchestrator.builder(mockProvider, null)
+        AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withAttachmentClickListener(event -> {
                 }).build();
 
         Mockito.verify(mockMessageList).addAttachmentClickListener(
-                Mockito.any(AIMessageList.AttachmentClickCallback.class));
+                Mockito.any(AiMessageList.AttachmentClickCallback.class));
     }
 
     @Test
     void clickListener_notConfigured_doesNotRegisterOnMessageList() {
-        AIOrchestrator.builder(mockProvider, null)
+        AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).build();
 
         Mockito.verify(mockMessageList, Mockito.never())
                 .addAttachmentClickListener(Mockito
-                        .any(AIMessageList.AttachmentClickCallback.class));
+                        .any(AiMessageList.AttachmentClickCallback.class));
     }
 
     @Test
@@ -215,9 +215,9 @@ class AttachmentListenerTest {
                 .thenReturn(List.of(createAttachment("file.txt")));
 
         var callbackCaptor = ArgumentCaptor
-                .forClass(AIMessageList.AttachmentClickCallback.class);
+                .forClass(AiMessageList.AttachmentClickCallback.class);
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withRequestListener(receivedSubmitEvent::set)
@@ -246,9 +246,9 @@ class AttachmentListenerTest {
                 List.of(createAttachment("a.txt"), createAttachment("b.txt")));
 
         var callbackCaptor = ArgumentCaptor
-                .forClass(AIMessageList.AttachmentClickCallback.class);
+                .forClass(AiMessageList.AttachmentClickCallback.class);
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+        var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
                 .withAttachmentClickListener(receivedClickEvent::set).build();
@@ -269,9 +269,9 @@ class AttachmentListenerTest {
         var receivedClickEvent = new AtomicReference<AttachmentClickListener.AttachmentClickEvent>();
 
         var callbackCaptor = ArgumentCaptor
-                .forClass(AIMessageList.AttachmentClickCallback.class);
+                .forClass(AiMessageList.AttachmentClickCallback.class);
 
-        AIOrchestrator.builder(mockProvider, null)
+        AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withAttachmentClickListener(receivedClickEvent::set).build();
 
@@ -287,15 +287,15 @@ class AttachmentListenerTest {
 
     // --- Helpers ---
 
-    private static AIMessage createMockMessage() {
-        var message = Mockito.mock(AIMessage.class);
+    private static AiMessage createMockMessage() {
+        var message = Mockito.mock(AiMessage.class);
         Mockito.when(message.getText()).thenReturn("");
         Mockito.when(message.getTime()).thenReturn(Instant.now());
         Mockito.when(message.getUserName()).thenReturn("Test");
         return message;
     }
 
-    private static AIAttachment createAttachment(String fileName) {
-        return new AIAttachment(fileName, "text/plain", "test".getBytes());
+    private static AiAttachment createAttachment(String fileName) {
+        return new AiAttachment(fileName, "text/plain", "test".getBytes());
     }
 }

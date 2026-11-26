@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
-import com.vaadin.flow.component.ai.ui.AIInput;
+import com.vaadin.flow.component.ai.ui.AiInput;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.function.SerializableConsumer;
 
 /**
- * Wrapper for Flow MessageInput component to implement AIInput interface.
+ * Wrapper for Flow MessageInput component to implement AiInput interface.
  */
-record MessageInputWrapper(MessageInput messageInput) implements AIInput {
+record MessageInputWrapper(MessageInput messageInput) implements AiInput {
 
     @Override
     public void addSubmitListener(SerializableConsumer<String> listener) {

@@ -18,18 +18,18 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 
 /**
- * The texts the {@link AIOrchestrator} shows in the message list on its own,
+ * The texts the {@link AiOrchestrator} shows in the message list on its own,
  * such as the message that replaces the assistant's answer when a turn fails.
  * Use to localize them; any text left {@code null} falls back to the built-in
  * English default.
  * <p>
  * The names shown as the authors of the messages are not part of this class.
- * Set them with {@link AIOrchestrator.Builder#withUserName(String)} and
- * {@link AIOrchestrator.Builder#withAssistantName(String)}.
+ * Set them with {@link AiOrchestrator.Builder#withUserName(String)} and
+ * {@link AiOrchestrator.Builder#withAssistantName(String)}.
  *
  * @author Vaadin Ltd
  * @since 25.5
- * @see AIOrchestrator.Builder#withI18n(AIOrchestratorI18n)
+ * @see AiOrchestrator.Builder#withI18n(AIOrchestratorI18n)
  */
 public class AIOrchestratorI18n implements Serializable {
 
@@ -51,7 +51,7 @@ public class AIOrchestratorI18n implements Serializable {
      * Sets the message shown as the assistant's message when a turn fails for a
      * reason other than a timeout. The message replaces any part of the answer
      * that was already shown. When the answer was complete but the
-     * {@link AIController} could not apply it, the message is shown after the
+     * {@link AiController} could not apply it, the message is shown after the
      * answer instead.
      * <p>
      * The default is {@code "An error occurred. Please try again."}.

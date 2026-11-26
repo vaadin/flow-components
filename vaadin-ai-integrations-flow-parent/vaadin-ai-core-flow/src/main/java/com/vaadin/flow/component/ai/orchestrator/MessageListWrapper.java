@@ -23,32 +23,32 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.ui.AIMessage;
-import com.vaadin.flow.component.ai.ui.AIMessageList;
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.ui.AiMessage;
+import com.vaadin.flow.component.ai.ui.AiMessageList;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.signals.BindingActiveException;
 
 /**
- * Wrapper for Flow MessageList component to implement AIMessageList interface.
+ * Wrapper for Flow MessageList component to implement AiMessageList interface.
  */
-class MessageListWrapper implements AIMessageList {
+class MessageListWrapper implements AiMessageList {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MessageListWrapper.class);
 
     final MessageList messageList;
-    private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
+    private final Map<MessageListItem, AiMessage> itemToMessage = new HashMap<>();
 
     MessageListWrapper(MessageList messageList) {
         this.messageList = messageList;
     }
 
     @Override
-    public AIMessage addMessage(String text, String userName,
-            List<AIAttachment> attachments) {
+    public AiMessage addMessage(String text, String userName,
+            List<AiAttachment> attachments) {
         var message = new MessageListItemWrapper(text, userName, attachments);
         itemToMessage.put(message.getItem(), message);
         messageList.addItem(message.getItem());
