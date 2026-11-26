@@ -17,15 +17,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 
 /**
- * {@link DatabaseProvider} backed by an in-memory H2 database, so grid and
- * chart scenarios can be scored by running the query the LLM produced and
- * comparing the rows instead of the SQL text.
+ * {@link QueryExecutor} backed by an in-memory H2 database, so grid and chart
+ * scenarios can be scored by running the query the LLM produced and comparing
+ * the rows instead of the SQL text.
  */
-final class BenchmarkDatabase implements DatabaseProvider {
+final class BenchmarkDatabase implements QueryExecutor {
 
     /**
      * Customers on three continents. Revenue is unique per row so a sorted
