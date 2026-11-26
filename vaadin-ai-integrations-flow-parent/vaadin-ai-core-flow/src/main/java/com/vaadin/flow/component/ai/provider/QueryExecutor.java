@@ -66,9 +66,9 @@ import com.vaadin.flow.data.provider.SortDirection;
  *     }
  *
  *     &#064;Override
- *     public List&lt;Map&lt;String, Object&gt;&gt; executeQuery(String sql) {
+ *     public List&lt;Map&lt;String, Object&gt;&gt; executeQuery(String query) {
  *         try (var connection = readOnlyDataSource.getConnection();
- *                 var statement = connection.prepareStatement(sql);
+ *                 var statement = connection.prepareStatement(query);
  *                 var resultSet = statement.executeQuery()) {
  *             // Convert to List&lt;Map&lt;String, Object&gt;&gt;
  *         }
@@ -146,7 +146,7 @@ public interface QueryExecutor extends Serializable {
      * generic error message before reaching the LLM.
      * </p>
      *
-     * @param sql
+     * @param query
      *            the SQL query to execute, not {@code null}
      * @return the query results as a list of column-name-to-value maps, never
      *         {@code null} but may be empty
@@ -157,15 +157,15 @@ public interface QueryExecutor extends Serializable {
      *             LLM why; any other exception is reported to the LLM as a
      *             generic error
      */
-    List<Map<String, Object>> executeQuery(String sql);
+    List<Map<String, Object>> executeQuery(String query);
 
     /**
      * Executes the given SQL query and returns one page of its rows, for a
      * component that loads rows lazily. The default runs {@code SELECT * FROM
-     * (sql) AS _t ORDER BY "column" ASC LIMIT limit OFFSET offset} through
+     * (query) AS _t ORDER BY "column" ASC LIMIT limit OFFSET offset} through
      * {@link #executeQuery(String)}. Without sort orders, it runs the query
      * followed by {@code LIMIT limit OFFSET offset}, or {@code SELECT * FROM
-     * (sql) AS _limited LIMIT limit OFFSET offset} when the query has a
+     * (query) AS _limited LIMIT limit OFFSET offset} when the query has a
      * {@code LIMIT}, {@code OFFSET}, {@code FETCH} or {@code SELECT TOP} of its
      * own. The sort orders name result columns of the query, written as quoted
      * identifiers. The query may end in a semicolon, which is left out, or in a
@@ -176,7 +176,7 @@ public interface QueryExecutor extends Serializable {
      * efficiently.
      * </p>
      *
-     * @param sql
+     * @param query
      *            the SQL query, not {@code null}
      * @param page
      *            the page to return, not {@code null}
@@ -191,10 +191,11 @@ public interface QueryExecutor extends Serializable {
      *             component loads rows later is not reported to the LLM.
      * @since 25.4
      */
-    default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
-        Objects.requireNonNull(sql, "sql must not be null");
+    default List<Map<String, Object>> executeQuery(String query,
+            QueryPage page) {
+        Objects.requireNonNull(query, "query must not be null");
         Objects.requireNonNull(page, "page must not be null");
-        var ordered = asSubquery(sql);
+        var ordered = asSubquery(query);
         if (!page.sortOrders().isEmpty()) {
             var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
                     + sortOrder.getSorted().replace("\"", "\"\"") + "\" "
@@ -214,7 +215,7 @@ public interface QueryExecutor extends Serializable {
     /**
      * Returns the number of rows the given SQL query returns, for a component
      * that loads rows lazily and needs the size of the result. The default runs
-     * {@code SELECT COUNT(*) FROM (sql) AS _counted} through
+     * {@code SELECT COUNT(*) FROM (query) AS _counted} through
      * {@link #executeQuery(String)} and reads the first value of the first row.
      * The query may end in a semicolon, which is left out, or in a line
      * comment. The count is {@code 0} when that query returns no row, a row
@@ -224,7 +225,7 @@ public interface QueryExecutor extends Serializable {
      * executor can count more efficiently.
      * </p>
      *
-     * @param sql
+     * @param query
      *            the SQL query, not {@code null}
      * @return the number of rows
      * @throws NullPointerException
@@ -237,10 +238,10 @@ public interface QueryExecutor extends Serializable {
      *             component loads rows later is not reported to the LLM.
      * @since 25.4
      */
-    default int count(String sql) {
-        Objects.requireNonNull(sql, "sql must not be null");
+    default int count(String query) {
+        Objects.requireNonNull(query, "query must not be null");
         var result = executeQuery(
-                "SELECT COUNT(*) FROM (" + asSubquery(sql) + ") AS _counted");
+                "SELECT COUNT(*) FROM (" + asSubquery(query) + ") AS _counted");
         if (result.isEmpty() || result.getFirst().isEmpty()) {
             return 0;
         }
@@ -253,12 +254,12 @@ public interface QueryExecutor extends Serializable {
      * subquery. The line break at its end keeps a line comment that ends the
      * query from reaching the closing parenthesis.
      */
-    private static String asSubquery(String sql) {
-        var end = sql.length();
-        while (end > 0 && (sql.charAt(end - 1) == ';'
-                || Character.isWhitespace(sql.charAt(end - 1)))) {
+    private static String asSubquery(String query) {
+        var end = query.length();
+        while (end > 0 && (query.charAt(end - 1) == ';'
+                || Character.isWhitespace(query.charAt(end - 1)))) {
             end--;
         }
-        return sql.substring(0, end) + "\n";
+        return query.substring(0, end) + "\n";
     }
 }
