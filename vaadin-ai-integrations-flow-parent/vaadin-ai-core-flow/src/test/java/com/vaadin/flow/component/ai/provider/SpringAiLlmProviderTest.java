@@ -2391,6 +2391,7 @@ class SpringAiLlmProviderTest {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public Object[] tools() {
                 return new Object[0];
             }
@@ -2658,6 +2659,7 @@ class SpringAiLlmProviderTest {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public Object[] tools() {
                 return new Object[0];
             }
@@ -2977,11 +2979,13 @@ class SpringAiLlmProviderTest {
         return captor;
     }
 
+    @SuppressWarnings("deprecation")
     private record TestLlmRequest(String userMessage, String systemPrompt,
             List<AiAttachment> attachments,
             Object[] tools) implements LlmRequest {
     }
 
+    @SuppressWarnings("deprecation")
     private record TestLlmRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AiAttachment> attachments, Object[] tools,
             List<LlmProvider.ToolSpec> explicitTools) implements LlmRequest {
@@ -3000,6 +3004,7 @@ class SpringAiLlmProviderTest {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public Object[] tools() {
             return new Object[0];
         }
