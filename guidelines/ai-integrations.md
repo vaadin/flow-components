@@ -254,30 +254,22 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   own, such as those a customizer adds. `LangChain4jLlmProvider` leaves
   LangChain4j's `maxToolCallingRoundTrips` at its default, which the
   application changes in the customizer, and passes LangChain4j's error on as
-  the error of the turn. LangChain4j counts rounds, not calls, and has no
-  limit per tool. With a streaming model it throws the error out of the
-  completion handler, so the turn ends when the model reports that failure
-  to the error handler, as LangChain4j's model integrations do and
-  `mockStreamingResponsesOnOtherThreads` in the provider tests copies. The
-  tool traffic of the failed
-  turn is discarded with it, so the next turn continues from the chat memory
-  as the last completed turn left it; a cancelled turn likewise stops calling
-  the model and runs no tool for a response that arrives after the
-  cancellation. `SpringAiLlmProvider` adds no cap either: Spring AI bounds the
-  loop itself and ends the turn with a reply it writes itself, carrying the
-  finish reason `toolCallLimitExceeded`. The provider passes that reply on
-  like any other answer, so the turn completes and the controllers apply what
-  the model staged. The two providers therefore end such a turn differently,
-  each the way its vendor does. Turning Spring AI's reply into a failed turn
-  would be Vaadin deciding what one of the vendor's finish reasons means, and
-  overriding what the application can configure on its own `ChatClient`.
-  There is no Vaadin exception type for an exceeded limit either, for the
-  reason finish reasons are not mapped: the limit is the vendor's, and Vaadin
-  gives a type only to a condition it enforces itself. The application
-  recognizes the case with the vendor's own means, such as Spring AI's finish
-  reason in the response metadata. LangChain4j's error is a plain
-  `RuntimeException` that only its message identifies, and the provider does
-  not match that message to give it a type.
+  the error of the turn. With a streaming model LangChain4j throws that error
+  out of the completion handler, so the turn ends when the model reports it
+  to the error handler, as LangChain4j's model integrations do. The tool
+  traffic of the failed turn is discarded with it, so the next turn continues
+  from the chat memory as the last completed turn left it.
+  `SpringAiLlmProvider` adds no cap either: Spring AI bounds the loop itself
+  and ends the turn with a reply it writes itself, carrying the finish reason
+  `toolCallLimitExceeded`. The provider passes that reply on like any other
+  answer, so the turn completes and the controllers apply what the model
+  staged. Neither provider gives the case a Vaadin exception type or changes
+  how the vendor ends the turn, for the reason finish reasons are not mapped:
+  the limit is the vendor's, and Vaadin gives a meaning only to a condition
+  it enforces itself. The application recognizes the case with the vendor's
+  own means, such as Spring AI's finish reason in the response metadata.
+  LangChain4j's error has no type of its own, and the provider does not match
+  its message to give it one.
 - Never send secrets to the LLM — `FormAiController` auto-ignores password
   fields; preserve that property for new field handling.
 
