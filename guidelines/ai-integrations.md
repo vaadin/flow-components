@@ -180,11 +180,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `OTHER` from its Anthropic one. Framework code therefore never branches on
   the content of a finish reason: checks that must tell a completed turn from
   a truncated one use structure instead — a missing finish reason, or tool
-  calls still pending. The one exception is Spring AI's
-  `ToolCallLimitExceededException.FINISH_REASON`: not a vendor's word but a
-  constant Spring AI defines for the reply it synthesizes itself when its
-  tool call limit is hit, so `SpringAiLlmProvider` compares against that
-  constant to turn the reply back into a failed turn.
+  calls still pending.
 
 ## Threading
 
@@ -268,20 +264,20 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   as the last completed turn left it; a cancelled turn likewise stops calling
   the model and runs no tool for a response that arrives after the
   cancellation. `SpringAiLlmProvider` adds no cap either: Spring AI bounds the
-  loop itself and hands back a synthesized reply carrying its
-  `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
-  into a failed turn, an `IllegalStateException` with Spring AI's message. A
-  turn that completed with that reply would show it as the answer, and the
-  controllers would apply what the model had staged before it ran out of
-  calls. There is no Vaadin exception type for an exceeded limit, for the
+  loop itself and ends the turn with a reply it writes itself, carrying the
+  finish reason `toolCallLimitExceeded`. The provider passes that reply on
+  like any other answer, so the turn completes and the controllers apply what
+  the model staged. The two providers therefore end such a turn differently,
+  each the way its vendor does. Turning Spring AI's reply into a failed turn
+  would be Vaadin deciding what one of the vendor's finish reasons means, and
+  overriding what the application can configure on its own `ChatClient`.
+  There is no Vaadin exception type for an exceeded limit either, for the
   reason finish reasons are not mapped: the limit is the vendor's, and Vaadin
   gives a type only to a condition it enforces itself. The application
   recognizes the case with the vendor's own means, such as Spring AI's finish
   reason in the response metadata. LangChain4j's error is a plain
   `RuntimeException` that only its message identifies, and the provider does
-  not match that message to give it a type. Spring AI's
-  reply may remain in the chat memory with either constructor; the provider
-  does not rewrite what Spring AI's advisors stored.
+  not match that message to give it a type.
 - Never send secrets to the LLM — `FormAiController` auto-ignores password
   fields; preserve that property for new field handling.
 
