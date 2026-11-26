@@ -53,6 +53,13 @@ public class GenericIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void noUnloadHandlerRegistered() {
+        // Chrome reports a permissions policy violation for pages that
+        // register an unload handler
+        Assert.assertNull(executeScript("return window.onunload"));
+    }
+
+    @Test
     public void testDates() {
         setLocale(Locale.US);
         final var a1 = getSpreadsheet().getCellAt("A1");
