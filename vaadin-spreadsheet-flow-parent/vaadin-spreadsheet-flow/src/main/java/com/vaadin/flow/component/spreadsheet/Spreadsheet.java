@@ -86,6 +86,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
+import com.vaadin.flow.component.spreadsheet.charts.converter.DefaultChartCreator;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
@@ -121,9 +122,10 @@ import tools.jackson.databind.JsonNode;
  */
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
-// Need an explicit reference to Chart class, since the DefaultChartCreator
-// class that references it is only accessed through reflection
+// The DefaultChartCreator class is only accessed through reflection, so name
+// it and the Chart class that it creates for the production build
 @Uses(Chart.class)
+@Uses(DefaultChartCreator.class)
 @SuppressWarnings("serial")
 public class Spreadsheet extends Component
         implements HasSize, HasStyle, Action.Container {
