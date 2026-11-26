@@ -85,6 +85,7 @@ import dev.langchain4j.service.tool.ToolErrorHandlerResult;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderResult;
 import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
 class LangChain4jLlmProviderTest {
@@ -96,6 +97,13 @@ class LangChain4jLlmProviderTest {
      * since the block only starts waiting once the subscription has returned.
      */
     private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
+
+    /**
+     * More tool-calling rounds than LangChain4j allows a turn by default. A
+     * model mocked to answer after this many rounds ends a turn that nothing
+     * stopped, so a missing limit fails the test instead of hanging it.
+     */
+    private static final int MORE_ROUNDS_THAN_ALLOWED = 1000;
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
@@ -3096,69 +3104,6 @@ class LangChain4jLlmProviderTest {
     }
 
     @Test
-    void customizer_streamingToolCallPastTheLimitBeforeAnswer_runsNoOutputGuardrail() {
-        var validations = new AtomicInteger();
-        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
-                service -> service.outputGuardrails(new OutputGuardrail() {
-                    @Override
-                    public OutputGuardrailResult validate(
-                            AiMessage responseFromLLM) {
-                        validations.incrementAndGet();
-                        return success();
-                    }
-                }));
-        customized.setMaxCallsPerTool(1);
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onCompleteResponse(
-                    mockResponseWithToolRequests("count", "count"));
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Count"))
-                        .collectList().block(TURN_TIMEOUT));
-
-        // The turn failed before the model answered, so the guardrails have
-        // no answer to check
-        Assertions.assertEquals(0, validations.get());
-    }
-
-    @Test
-    void customizer_streamingToolCallPastTheLimitInGuardrailReprompt_failsTurnWithoutBlocking() {
-        var tools = new CountingToolClass();
-        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
-                service -> service.tools(tools)
-                        .outputGuardrails(repromptingGuardrail()));
-        customized.setMaxCallsPerTool(2);
-        var responses = new ArrayList<>(List.of(
-                ChatResponse.builder().aiMessage(AiMessage.from("It is warm"))
-                        .build(),
-                mockResponseWithToolRequests("count", "count", "count")));
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onCompleteResponse(responses.removeFirst());
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-        var error = new AtomicReference<Throwable>();
-
-        // LangChain4j waits for the answer to a reprompt on the thread that
-        // runs the guardrails, here the subscribing one
-        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
-                .stream(createSimpleRequest("Weather?")).subscribe(token -> {
-                }, error::set));
-
-        Assertions.assertInstanceOf(ToolCallLimitExceededException.class,
-                error.get());
-        Assertions.assertEquals(0, tools.calls.get());
-        Mockito.verify(mockStreamingChatModel, Mockito.times(2)).chat(
-                Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-    }
-
-    @Test
     void customizer_streamingCancelledWhileModelAnswersGuardrailReprompt_doesNotBlock() {
         var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
                 service -> service.outputGuardrails(repromptingGuardrail()));
@@ -3575,161 +3520,6 @@ class LangChain4jLlmProviderTest {
     }
 
     @Test
-    void customizer_toolExecutionErrorHandler_limitStillFailsTurn() {
-        var handledErrors = new AtomicInteger();
-        var customized = new LangChain4jLlmProvider(mockChatModel,
-                service -> service
-                        .toolExecutionErrorHandler((error, context) -> {
-                            handledErrors.incrementAndGet();
-                            return ToolErrorHandlerResult.text("Handled");
-                        }));
-        customized.setMaxCallsPerTool(1);
-        var toolCalls = new AtomicInteger();
-        var request = requestWithCountingTool("myTool", toolCalls);
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(request).collectList()
-                        .block(TURN_TIMEOUT));
-
-        Assertions.assertEquals(1, toolCalls.get());
-        Assertions.assertEquals(0, handledErrors.get(),
-                "The limit is not a tool failure for the application to handle");
-        Mockito.verify(mockChatModel, Mockito.times(2))
-                .chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void customizer_toolCalledPastMaxCallsPerTool_failsTurn() {
-        var customized = new LangChain4jLlmProvider(mockChatModel,
-                service -> service.tools(new SampleToolsClass()));
-        customized.setMaxCallsPerTool(2);
-        var toolResponse = mockSimpleResponseWithTool("getTemperature");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Loop"))
-                        .collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(error.getMessage().contains("'getTemperature'"),
-                error.getMessage());
-        Mockito.verify(mockChatModel, Mockito.times(3))
-                .chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void customizer_streamingToolCalledPastMaxCallsPerTool_failsTurn() {
-        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
-                service -> service.tools(new SampleToolsClass()));
-        customized.setMaxCallsPerTool(2);
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onCompleteResponse(
-                    mockSimpleResponseWithTool("getTemperature"));
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Loop"))
-                        .collectList().block(TURN_TIMEOUT));
-
-        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
-                Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-    }
-
-    @Test
-    void customizer_roundWithCallPastTheLimit_executesNoneOfItsCalls() {
-        var tools = new CountingToolClass();
-        var customized = new LangChain4jLlmProvider(mockChatModel,
-                service -> service.tools(tools));
-        customized.setMaxCallsPerTool(2);
-        var toolResponse = mockResponseWithToolRequests("count", "count",
-                "count");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Count"))
-                        .collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertEquals(0, tools.calls.get(),
-                "The tools of the customizer must not run in a round past "
-                        + "the limit");
-        Mockito.verify(mockChatModel).chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void customizer_streamingRoundWithCallPastTheLimit_executesNoneOfItsCalls() {
-        var tools = new CountingToolClass();
-        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
-                service -> service.tools(tools));
-        customized.setMaxCallsPerTool(2);
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onCompleteResponse(
-                    mockResponseWithToolRequests("count", "count", "count"));
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Count"))
-                        .collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertEquals(0, tools.calls.get(),
-                "The tools of the customizer must not run in a round past "
-                        + "the limit");
-        Mockito.verify(mockStreamingChatModel).chat(
-                Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-    }
-
-    @Test
-    void customizer_immediateToolPastMaxTotalToolCalls_failsTurn() {
-        var customized = new LangChain4jLlmProvider(mockChatModel,
-                service -> service.tools(new SampleToolsClass(),
-                        new ImmediateToolClass()));
-        customized.setMaxTotalToolCalls(1);
-        var temperature = mockSimpleResponseWithTool("getTemperature");
-        var finish = mockSimpleResponseWithTool("finish");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(temperature, finish);
-
-        // The immediate tool would end the turn without another model call,
-        // so the turn has to fail when the response that requests it arrives
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Finish"))
-                        .collectList().block(TURN_TIMEOUT));
-    }
-
-    @Test
-    void customizer_streamingImmediateToolPastMaxTotalToolCalls_failsTurn() {
-        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
-                service -> service.tools(new SampleToolsClass(),
-                        new ImmediateToolClass()));
-        customized.setMaxTotalToolCalls(1);
-        var rounds = new AtomicInteger();
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onCompleteResponse(mockSimpleResponseWithTool(
-                    rounds.getAndIncrement() == 0 ? "getTemperature"
-                            : "finish"));
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> customized.stream(createSimpleRequest("Finish"))
-                        .collectList().block(TURN_TIMEOUT));
-    }
-
-    @Test
     void customizer_chatModel_constructorModelIsUsed() {
         var otherModel = Mockito.mock(ChatModel.class);
         var customized = new LangChain4jLlmProvider(mockChatModel,
@@ -3987,28 +3777,6 @@ class LangChain4jLlmProviderTest {
     }
 
     @Test
-    void stream_nonStreamingTextAlongsideRefusedToolCall_isNotPassedOn() {
-        provider.setMaxCallsPerTool(1);
-        var request = requestWithCountingTool("myTool", new AtomicInteger());
-        var first = mockSimpleResponseWithTool("myTool");
-        Mockito.when(first.aiMessage().text()).thenReturn("First round");
-        var second = mockSimpleResponseWithTool("myTool");
-        Mockito.when(second.aiMessage().text()).thenReturn("Refused round");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(first).thenReturn(second);
-        var results = new ArrayList<String>();
-        var error = new AtomicReference<Throwable>();
-
-        provider.stream(request).subscribe(results::add, error::set);
-
-        // The text of the rounds is passed on with the answer, which a
-        // failed turn does not reach
-        Assertions.assertEquals(List.of(), results);
-        Assertions.assertInstanceOf(ToolCallLimitExceededException.class,
-                error.get());
-    }
-
-    @Test
     void stream_cancelledTurnStillRunningWhenNextTurnStarts_doesNotCallModelAgain() {
         var handlers = new ArrayList<StreamingChatResponseHandler>();
         Mockito.doAnswer(invocation -> {
@@ -4149,27 +3917,6 @@ class LangChain4jLlmProviderTest {
                 getToolExecutionResults(requests.get(2)));
     }
 
-    @Test
-    void stream_streamingModelAnswersOnAnotherThread_toolCalledPastTheLimit_failsTurn() {
-        streamingProvider.setMaxCallsPerTool(1);
-        var toolCalls = new AtomicInteger();
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        // Ends with an answer, so that a turn the limit does not stop
-        // completes instead of looping
-        var requests = mockStreamingResponsesOnOtherThreads(toolResponse,
-                toolResponse, toolResponse, mockSimpleResponse("done"));
-        var turn = streamingProvider
-                .stream(requestWithCountingTool("myTool", toolCalls))
-                .collectList();
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> turn.block(TURN_TIMEOUT));
-
-        Assertions.assertEquals(1, toolCalls.get());
-        Assertions.assertEquals(2, requests.size(),
-                "The model must not be called again past the limit");
-    }
-
     /**
      * Makes the streaming model answer its calls with the given responses, in
      * order, each on a thread of its own. A model delivers its response on a
@@ -4188,7 +3935,13 @@ class LangChain4jLlmProviderTest {
             requests.add(invocation.getArgument(0));
             new Thread(() -> {
                 if (call < responses.length) {
-                    handler.onCompleteResponse(responses[call]);
+                    // As LangChain4j's streaming models do, a failure of the
+                    // completion handler is reported to the error handler
+                    try {
+                        handler.onCompleteResponse(responses[call]);
+                    } catch (RuntimeException e) {
+                        handler.onError(e);
+                    }
                 } else {
                     handler.onError(new IllegalStateException(
                             "No response left for model call " + (call + 1)));
@@ -4203,240 +3956,160 @@ class LangChain4jLlmProviderTest {
     // --- Tool call limit tests ---
 
     @Test
-    void toolCallLimits_defaultToTheLimitsSpringAIApplies() {
-        Assertions.assertEquals(40, provider.getMaxCallsPerTool());
-        Assertions.assertEquals(150, provider.getMaxTotalToolCalls());
-    }
-
-    @Test
-    void setMaxCallsPerTool_isReflectedByGetter() {
-        provider.setMaxCallsPerTool(5);
-        Assertions.assertEquals(5, provider.getMaxCallsPerTool());
-        provider.setMaxCallsPerTool(0);
-        Assertions.assertEquals(0, provider.getMaxCallsPerTool());
-    }
-
-    @Test
-    void setMaxCallsPerTool_negative_throws() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> provider.setMaxCallsPerTool(-1));
-        Assertions.assertEquals(40, provider.getMaxCallsPerTool());
-    }
-
-    @Test
-    void setMaxTotalToolCalls_isReflectedByGetter() {
-        provider.setMaxTotalToolCalls(7);
-        Assertions.assertEquals(7, provider.getMaxTotalToolCalls());
-        provider.setMaxTotalToolCalls(0);
-        Assertions.assertEquals(0, provider.getMaxTotalToolCalls());
-    }
-
-    @Test
-    void setMaxTotalToolCalls_negative_throws() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> provider.setMaxTotalToolCalls(-1));
-        Assertions.assertEquals(150, provider.getMaxTotalToolCalls());
-    }
-
-    @Test
-    void stream_toolCalledUpToMaxCallsPerTool_completesNormally() {
+    void stream_modelKeepsRequestingToolCalls_failsTurn() {
         var toolCalls = new AtomicInteger();
         var request = requestWithCountingTool("myTool", toolCalls);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenAnswer(toolRoundsThenAnswer(
-                        Collections.nCopies(40, "myTool"), "done"));
+                        Collections.nCopies(MORE_ROUNDS_THAN_ALLOWED, "myTool"),
+                        "done"));
 
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
+        var error = getTurnError(provider.stream(request));
 
-        Assertions.assertEquals(List.of("done"), results);
-        Assertions.assertEquals(40, toolCalls.get());
-        Mockito.verify(mockChatModel, Mockito.times(41))
-                .chat(Mockito.any(ChatRequest.class));
+        // LangChain4j bounds the loop without any setting of the application
+        Assertions.assertNotNull(error,
+                "A turn whose model keeps requesting tool calls should fail");
+        Assertions.assertTrue(toolCalls.get() > 1,
+                "The tool should run until the loop is stopped");
     }
 
     @Test
-    void stream_toolCalledPastMaxCallsPerTool_failsTurnNamingTheTool() {
+    void stream_streamingModelKeepsRequestingToolCalls_failsTurn() {
         var toolCalls = new AtomicInteger();
         var request = requestWithCountingTool("myTool", toolCalls);
-        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var responses = new ArrayList<>(
+                Collections.nCopies(MORE_ROUNDS_THAN_ALLOWED,
+                        mockSimpleResponseWithTool("myTool")));
+        responses.add(mockSimpleResponse("done"));
+        mockStreamingResponsesOnOtherThreads(
+                responses.toArray(ChatResponse[]::new));
+
+        var error = getTurnError(streamingProvider.stream(request));
+
+        Assertions.assertNotNull(error,
+                "A turn whose model keeps requesting tool calls should fail");
+        Assertions.assertTrue(toolCalls.get() > 1,
+                "The tool should run until the loop is stopped");
+    }
+
+    @Test
+    void stream_unknownToolRequestedRepeatedly_failsTurn() {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
+                .thenAnswer(toolRoundsThenAnswer(Collections.nCopies(
+                        MORE_ROUNDS_THAN_ALLOWED, "unknownTool"), "done"));
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
+        var error = getTurnError(provider.stream(createSimpleRequest("Loop")));
 
-        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
-                error.getMessage());
-        Assertions.assertTrue(error.getMessage().contains("(40)"),
-                error.getMessage());
-        Assertions.assertEquals(40, toolCalls.get(),
-                "The call that exceeds the limit is not executed");
-        Mockito.verify(mockChatModel, Mockito.times(41))
+        // Each round tells the model that the tool does not exist, which
+        // does not keep a model that asks again from running into the limit
+        Assertions.assertNotNull(error,
+                "A turn whose model keeps requesting a made-up tool should "
+                        + "fail");
+        Mockito.verify(mockChatModel, Mockito.atLeast(2))
                 .chat(Mockito.any(ChatRequest.class));
     }
 
     @Test
-    void stream_toolCallsUpToMaxTotalToolCalls_completesNormally() {
-        // Four tools called in turn keep every per-tool count under the
-        // per-tool limit while the total reaches its limit
-        var toolCalls = new AtomicInteger();
-        var toolNames = List.of("tool0", "tool1", "tool2", "tool3");
-        var request = requestWithCountingTools(toolNames, toolCalls);
-        var rounds = IntStream.range(0, 150)
-                .mapToObj(i -> toolNames.get(i % toolNames.size())).toList();
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenAnswer(toolRoundsThenAnswer(rounds, "done"));
-
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
-
-        Assertions.assertEquals(List.of("done"), results);
-        Assertions.assertEquals(150, toolCalls.get());
-    }
-
-    @Test
-    void stream_toolCallsPastMaxTotalToolCalls_failsTurnWithoutToolName() {
-        var toolCalls = new AtomicInteger();
-        var toolNames = List.of("tool0", "tool1", "tool2", "tool3");
-        var request = requestWithCountingTools(toolNames, toolCalls);
-        var round = new AtomicInteger();
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenAnswer(invocation -> mockSimpleResponseWithTool(toolNames
-                        .get(round.getAndIncrement() % toolNames.size())));
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(
-                error.getMessage().startsWith("Total tool call limit (150)"),
-                error.getMessage());
-        Assertions.assertEquals(150, toolCalls.get());
-        Mockito.verify(mockChatModel, Mockito.times(151))
-                .chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void stream_roundWithCallPastTheLimit_executesNoneOfItsCalls() {
-        provider.setMaxCallsPerTool(2);
+    void customizer_maxToolCallingRoundTrips_failsTurnPastThatLimit() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.maxToolCallingRoundTrips(3));
         var toolCalls = new AtomicInteger();
         var request = requestWithCountingTool("myTool", toolCalls);
-        var toolResponse = mockResponseWithToolRequests("myTool", "myTool",
-                "myTool");
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
+                .thenAnswer(toolRoundsThenAnswer(
+                        Collections.nCopies(10, "myTool"), "done"));
 
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
+        var error = getTurnError(customized.stream(request));
 
-        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
-                error.getMessage());
-        Assertions.assertEquals(0, toolCalls.get(),
-                "The calls before the one past the limit are not executed either");
-        Mockito.verify(mockChatModel, Mockito.times(1))
-                .chat(Mockito.any(ChatRequest.class));
-
-        // The refused round left nothing behind in memory
-        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
-                .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList()
-                .block(TURN_TIMEOUT);
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
-        Assertions.assertTrue(captor.getAllValues().get(1).messages().stream()
-                .allMatch(UserMessage.class::isInstance));
-    }
-
-    @Test
-    void stream_roundWithAnnotatedToolCallPastTheLimit_executesNoneOfItsCalls() {
-        provider.setMaxCallsPerTool(2);
-        var tools = new CountingToolClass();
-        var request = new TestLlmRequest("Count", null, Collections.emptyList(),
-                new Object[] { tools });
-        var toolResponse = mockResponseWithToolRequests("count", "count",
-                "count");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(error.getMessage().contains("'count'"),
-                error.getMessage());
-        Assertions.assertEquals(0, tools.calls.get(),
-                "The calls before the one past the limit are not executed either");
-        Mockito.verify(mockChatModel, Mockito.times(1))
+        Assertions.assertNotNull(error,
+                "The turn should fail at the limit set in the customizer");
+        Assertions.assertEquals(3, toolCalls.get());
+        Mockito.verify(mockChatModel, Mockito.times(4))
                 .chat(Mockito.any(ChatRequest.class));
     }
 
     @Test
-    void stream_limitExceeded_nextTurnContinuesFromLastCompletedRound() {
-        provider.setMaxCallsPerTool(1);
-        var request = requestWithCountingTool("myTool", new AtomicInteger());
+    void customizer_streamingMaxToolCallingRoundTrips_failsTurnPastThatLimit() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.maxToolCallingRoundTrips(3));
+        var toolCalls = new AtomicInteger();
         var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList()
-                        .block(TURN_TIMEOUT));
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var requests = mockStreamingResponsesOnOtherThreads(toolResponse,
+                toolResponse, toolResponse, toolResponse, toolResponse,
+                mockSimpleResponse("done"));
 
-        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
-                .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList()
+        var error = getTurnError(customized
+                .stream(requestWithCountingTool("myTool", toolCalls)));
+
+        Assertions.assertNotNull(error,
+                "The turn should fail at the limit set in the customizer");
+        Assertions.assertEquals(3, toolCalls.get());
+        Assertions.assertEquals(4, requests.size(),
+                "The model must not be called again past the limit");
+    }
+
+    @Test
+    void stream_turnFailedAtRoundTripLimit_nextTurnContinuesFromItsPrompt() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var answer = mockSimpleResponse("Hello");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, toolResponse, answer);
+        Assertions.assertNotNull(getTurnError(customized.stream(
+                requestWithCountingTool("myTool", new AtomicInteger()))));
+
+        customized.stream(createSimpleRequest("Second")).collectList()
                 .block(TURN_TIMEOUT);
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
-        // The failed turn left only its user message in memory: neither
-        // the refused request nor the completed round's tool traffic follow
-        // it, and there is no final answer to keep
+        // The failed turn left only its user message in the memory: neither
+        // its tool calls nor their results follow it, and there is no final
+        // answer to keep
         var messages = captor.getAllValues().get(2).messages();
-        Assertions.assertEquals(2, messages.size());
+        Assertions.assertEquals(2, messages.size(), messages.toString());
         Assertions.assertTrue(
-                messages.stream().allMatch(UserMessage.class::isInstance));
+                messages.stream().allMatch(UserMessage.class::isInstance),
+                messages.toString());
     }
 
     @Test
-    void stream_limitExceeded_metadataOfTheTurnStillPublished() {
-        // The refused round trip was still billed, so the sink must have
-        // received the usage of every round trip that ran
-        provider.setMaxCallsPerTool(1);
+    void stream_streamingTurnFailedAtRoundTripLimit_nextTurnContinuesFromItsPrompt() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var requests = mockStreamingResponsesOnOtherThreads(toolResponse,
+                toolResponse, mockSimpleResponse("Hello"));
+        Assertions.assertNotNull(getTurnError(customized.stream(
+                requestWithCountingTool("myTool", new AtomicInteger()))));
+
+        customized.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(3, requests.size());
+        // The failed turn left only its user message in the memory
+        var messages = requests.get(2).messages();
+        Assertions.assertEquals(2, messages.size(), messages.toString());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance),
+                messages.toString());
+    }
+
+    @Test
+    void stream_turnFailedAtRoundTripLimit_metadataOfEveryRoundTripPublished() {
+        // The round trip whose response is refused was still billed, so the
+        // sink must have received the usage of every round trip that ran
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
         var collected = new ArrayList<ResponseMetadata>();
         var tool = createExplicitTool("myTool", "A test tool", null,
                 args -> "result");
         var request = requestWithMetadataSink("Loop", List.of(tool), collected);
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(toolResponse.finishReason())
-                .thenReturn(FinishReason.TOOL_EXECUTION);
-        Mockito.when(toolResponse.tokenUsage())
-                .thenReturn(new TokenUsage(100, 10, 110));
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList()
-                        .block(TURN_TIMEOUT));
-
-        Assertions.assertEquals(2, collected.size());
-        Assertions.assertEquals(220,
-                collected.getLast().tokenUsage().totalTokens());
-    }
-
-    @Test
-    void stream_metadataSinkThrows_limitStillFailsTurn() {
-        // A failing sink does not fail the turn, and it must not take the
-        // screening of the tool calls down with it
-        provider.setMaxCallsPerTool(1);
-        var tool = createExplicitTool("myTool", "A test tool", null,
-                args -> "result");
-        var request = requestWithMetadataSink("Loop", List.of(tool),
-                (Consumer<ResponseMetadata>) metadata -> {
-                    throw new IllegalStateException("The sink failed");
-                });
         var toolResponse = mockSimpleResponseWithTool("myTool");
         Mockito.when(toolResponse.finishReason())
                 .thenReturn(FinishReason.TOOL_EXECUTION);
@@ -4448,12 +4121,123 @@ class LangChain4jLlmProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(toolResponse, toolResponse, toolResponse, answer);
 
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList()
-                        .block(TURN_TIMEOUT));
+        Assertions.assertNotNull(getTurnError(customized.stream(request)));
 
+        Assertions.assertEquals(2, collected.size());
+        Assertions.assertEquals(220,
+                collected.getLast().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingTurnFailedAtRoundTripLimit_metadataOfEveryRoundTripPublished() {
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
+        var collected = Collections
+                .synchronizedList(new ArrayList<ResponseMetadata>());
+        var tool = createExplicitTool("myTool", "A test tool", null,
+                args -> "result");
+        var request = requestWithMetadataSink("Loop", List.of(tool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        mockStreamingResponsesOnOtherThreads(toolResponse, toolResponse,
+                toolResponse, mockSimpleResponse("done"));
+
+        Assertions.assertNotNull(getTurnError(customized.stream(request)));
+
+        Assertions.assertEquals(2, collected.size());
+        Assertions.assertEquals(220,
+                collected.getLast().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingTextAlongsideToolCallsOfFailedTurn_isNotPassedOn() {
+        var customized = new LangChain4jLlmProvider(mockChatModel,
+                service -> service.maxToolCallingRoundTrips(1));
+        var request = requestWithCountingTool("myTool", new AtomicInteger());
+        var first = mockSimpleResponseWithTool("myTool");
+        Mockito.when(first.aiMessage().text()).thenReturn("First round");
+        var second = mockSimpleResponseWithTool("myTool");
+        Mockito.when(second.aiMessage().text()).thenReturn("Refused round");
+        // Ends with an answer, so that a turn the limit does not stop
+        // completes instead of looping
+        var answer = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(first, second, answer);
+        var results = new ArrayList<String>();
+        var error = new AtomicReference<Throwable>();
+
+        customized.stream(request).subscribe(results::add, error::set);
+
+        // The text of the rounds is passed on with the answer, which a
+        // failed turn does not reach
+        Assertions.assertEquals(List.of(), results);
+        Assertions.assertNotNull(error.get());
         Mockito.verify(mockChatModel, Mockito.times(2))
                 .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void customizer_streamingModelKeepsRequestingToolCallsInGuardrailReprompt_failsTurnWithoutBlocking() {
+        var tools = new CountingToolClass();
+        var customized = new LangChain4jLlmProvider(mockStreamingChatModel,
+                service -> service.tools(tools)
+                        .outputGuardrails(repromptingGuardrail())
+                        .maxToolCallingRoundTrips(2));
+        var modelCalls = new AtomicInteger();
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            var call = modelCalls.incrementAndGet();
+            // An answer the guardrail rejects, then tool calls until an
+            // answer ends a turn that the limit did not stop
+            ChatResponse response;
+            if (call == 1) {
+                response = ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is warm")).build();
+            } else if (call <= 10) {
+                response = mockSimpleResponseWithTool("count");
+            } else {
+                response = ChatResponse.builder()
+                        .aiMessage(AiMessage.from("It is 22°C")).build();
+            }
+            try {
+                handler.onCompleteResponse(response);
+            } catch (RuntimeException e) {
+                handler.onError(e);
+            }
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var error = new AtomicReference<Throwable>();
+
+        // LangChain4j waits for the answer to a reprompt on the thread that
+        // runs the guardrails, here the subscribing one
+        Assertions.assertTimeoutPreemptively(TURN_TIMEOUT, () -> customized
+                .stream(createSimpleRequest("Weather?")).subscribe(token -> {
+                }, error::set));
+
+        Assertions.assertNotNull(error.get(),
+                "The turn should fail at the limit set in the customizer");
+        Assertions.assertEquals(2, tools.calls.get());
+        // The rejected answer and three responses with a tool call
+        Assertions.assertEquals(4, modelCalls.get());
+    }
+
+    /**
+     * Runs the turn to its end and returns the error it failed with, or
+     * {@code null} when it completed. A turn that is still running when the
+     * subscription returns fails the test with a timeout when it does not end,
+     * see {@link #TURN_TIMEOUT}.
+     */
+    private static Throwable getTurnError(Flux<String> turn) {
+        var error = new AtomicReference<Throwable>();
+        turn.doOnError(error::set).onErrorComplete().collectList()
+                .block(TURN_TIMEOUT);
+        return error.get();
     }
 
     @Test
@@ -4476,106 +4260,6 @@ class LangChain4jLlmProviderTest {
                 .anyMatch(event -> event.getLevel() == Level.WARN
                         && event.getThrowable().orElse(null) == sinkFailure);
         Assertions.assertTrue(logged, "Expected the sink failure to be logged");
-    }
-
-    @Test
-    void stream_withLimitsRemoved_toolCallsPastTheDefaultsAreAllowed() {
-        provider.setMaxCallsPerTool(0);
-        provider.setMaxTotalToolCalls(0);
-        var toolCalls = new AtomicInteger();
-        var request = requestWithCountingTool("myTool", toolCalls);
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenAnswer(toolRoundsThenAnswer(
-                        Collections.nCopies(200, "myTool"), "done"));
-
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
-
-        Assertions.assertEquals(List.of("done"), results);
-        Assertions.assertEquals(200, toolCalls.get());
-    }
-
-    @Test
-    void stream_callPastBothLimits_reportsPerToolLimit() {
-        provider.setMaxCallsPerTool(2);
-        provider.setMaxTotalToolCalls(2);
-        var request = requestWithCountingTool("myTool", new AtomicInteger());
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(
-                error.getMessage().startsWith("Tool call limit (2)")
-                        && error.getMessage().contains("'myTool'"),
-                "The per-tool limit is checked before the total: "
-                        + error.getMessage());
-    }
-
-    @Test
-    void stream_toolCallCounts_startFromZeroForEachTurn() {
-        provider.setMaxCallsPerTool(1);
-        var toolCalls = new AtomicInteger();
-        var request = requestWithCountingTool("myTool", toolCalls);
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"));
-        provider.stream(request).collectList().block(TURN_TIMEOUT);
-
-        Mockito.doAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"))
-                .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
-
-        Assertions.assertEquals(List.of("done"), results);
-        Assertions.assertEquals(2, toolCalls.get(),
-                "Each turn may spend its one allowed call");
-    }
-
-    @Test
-    void stream_withPerToolLimitRemoved_totalLimitStillApplies() {
-        provider.setMaxCallsPerTool(0);
-        var request = requestWithCountingTool("myTool", new AtomicInteger());
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(
-                error.getMessage().startsWith("Total tool call limit (150)"),
-                error.getMessage());
-    }
-
-    @Test
-    void stream_streamingModel_toolCalledPastMaxCallsPerTool_failsTurn() {
-        streamingProvider.setMaxCallsPerTool(2);
-        var toolCalls = new AtomicInteger();
-        var request = requestWithCountingTool("myTool", toolCalls);
-        Mockito.doAnswer(invocation -> {
-            StreamingChatResponseHandler handler = invocation.getArgument(1);
-            handler.onPartialResponse("Looking");
-            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
-            return null;
-        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> streamingProvider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(
-                error.getMessage().startsWith("Tool call limit (2)")
-                        && error.getMessage().contains("'myTool'"),
-                error.getMessage());
-        Assertions.assertEquals(2, toolCalls.get());
-        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
-                Mockito.any(ChatRequest.class),
-                Mockito.any(StreamingChatResponseHandler.class));
     }
 
     @Test
@@ -4707,70 +4391,6 @@ class LangChain4jLlmProviderTest {
         return logger.getAllLoggingEvents().stream()
                 .anyMatch(event -> event.getLevel() == Level.DEBUG
                         && event.getMessage().contains(phrase));
-    }
-
-    @Test
-    void stream_perToolLimit_countsEachToolSeparately() {
-        provider.setMaxCallsPerTool(1);
-        var toolCalls = new AtomicInteger();
-        var request = requestWithCountingTools(List.of("toolA", "toolB"),
-                toolCalls);
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenAnswer(toolRoundsThenAnswer(
-                        List.of("toolA", "toolB", "toolA"), "done"));
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class, () -> provider
-                        .stream(request).collectList().block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(error.getMessage().contains("'toolA'"),
-                error.getMessage());
-        Assertions.assertEquals(2, toolCalls.get(),
-                "One call to each tool is within the limit");
-    }
-
-    @Test
-    void stream_unknownToolRequestedRepeatedly_countsTowardsTheLimit() {
-        var toolResponse = mockSimpleResponseWithTool("unknownTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(createSimpleRequest("Loop")).collectList()
-                        .block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(error.getMessage().contains("'unknownTool'"),
-                error.getMessage());
-        Mockito.verify(mockChatModel, Mockito.times(41))
-                .chat(Mockito.any(ChatRequest.class));
-    }
-
-    @Test
-    void setMaxCallsPerTool_changedDuringTurn_appliesFromTheNextTurn() {
-        provider.setMaxCallsPerTool(1);
-        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
-            provider.setMaxCallsPerTool(0);
-            return "result";
-        });
-        var request = new TestLlmRequestWithExplicitTools("Loop", null,
-                Collections.emptyList(), new Object[0], List.of(tool));
-        var toolResponse = mockSimpleResponseWithTool("myTool");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        // The running turn keeps the limit it started with
-        Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList()
-                        .block(TURN_TIMEOUT));
-
-        // The next turn runs without the per-tool limit
-        Mockito.doAnswer(
-                toolRoundsThenAnswer(Collections.nCopies(3, "myTool"), "done"))
-                .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
-        Assertions.assertEquals(List.of("done"), results);
     }
 
     @Test
@@ -4929,44 +4549,14 @@ class LangChain4jLlmProviderTest {
         Assertions.assertEquals(0, tools.calls.get());
     }
 
-    @Test
-    void stream_namelessToolRequestedRepeatedly_reportsThePerToolLimit() {
-        // LangChain4j does not guard the name of a tool execution request, so
-        // a nameless one can reach the counter. It must still report the
-        // per-tool limit: a null tool name means the total limit.
-        provider.setMaxCallsPerTool(2);
-        var toolResponse = mockSimpleResponseWithTool(null);
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(toolResponse);
-
-        var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(createSimpleRequest("Loop")).collectList()
-                        .block(TURN_TIMEOUT));
-
-        Assertions.assertTrue(
-                error.getMessage().startsWith("Tool call limit (2)")
-                        && error.getMessage().contains("''"),
-                "A nameless tool is reported under an empty name: "
-                        + error.getMessage());
-        Mockito.verify(mockChatModel, Mockito.times(3))
-                .chat(Mockito.any(ChatRequest.class));
-    }
-
     private static LlmRequest requestWithCountingTool(String toolName,
             AtomicInteger toolCalls) {
-        return requestWithCountingTools(List.of(toolName), toolCalls);
-    }
-
-    private static LlmRequest requestWithCountingTools(List<String> toolNames,
-            AtomicInteger toolCalls) {
-        var tools = toolNames.stream().map(
-                name -> createExplicitTool(name, "A test tool", null, args -> {
-                    toolCalls.incrementAndGet();
-                    return "result";
-                })).toList();
+        var tool = createExplicitTool(toolName, "A test tool", null, args -> {
+            toolCalls.incrementAndGet();
+            return "result";
+        });
         return new TestLlmRequestWithExplicitTools("Call tools", null,
-                Collections.emptyList(), new Object[0], tools);
+                Collections.emptyList(), new Object[0], List.of(tool));
     }
 
     /**

@@ -41,9 +41,7 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * <i>not</i> appended to {@link AiOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
- * stream error, a provider's tool call limit as a
- * {@link com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException},
- * any throw between
+ * stream error, any throw between
  * {@link AiController#onRequest(RequestListener.RequestEvent)} and the start of
  * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
@@ -51,6 +49,11 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * failure is not passed on. An interceptor failure fires the listener without a
  * preceding {@link AiController#onRequest(RequestListener.RequestEvent)}, so an
  * error does not imply that per-turn setup has happened.
+ * <p>
+ * A turn can also end abnormally without an error, for example when it was cut
+ * off at the model's output limit, or when Spring AI stopped it at its tool
+ * call limit. {@link ResponseEvent#getMetadata()} carries the finish reason of
+ * such a turn; see {@link AiController#onResponse(ResponseEvent)}.
  * <p>
  * A turn the model completed but the {@link AiController} could not apply is a
  * failure too: when {@link AiController#onResponse(ResponseEvent)} throws on a
