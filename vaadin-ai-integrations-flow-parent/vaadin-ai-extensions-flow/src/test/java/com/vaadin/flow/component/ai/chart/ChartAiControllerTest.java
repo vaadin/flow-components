@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -51,15 +51,15 @@ class ChartAiControllerTest {
     MockUIExtension ui = new MockUIExtension();
 
     private Chart chart;
-    private TestDatabaseProvider databaseProvider;
+    private TestQueryExecutor queryExecutor;
     private ChartAiController controller;
 
     @BeforeEach
     void setUp() {
         chart = new Chart();
         ui.add(chart);
-        databaseProvider = new TestDatabaseProvider();
-        controller = new ChartAiController(chart, databaseProvider);
+        queryExecutor = new TestQueryExecutor();
+        controller = new ChartAiController(chart, queryExecutor);
     }
 
     @Nested
@@ -68,11 +68,11 @@ class ChartAiControllerTest {
         @Test
         void nullChart_throws() {
             Assertions.assertThrows(NullPointerException.class,
-                    () -> new ChartAiController(null, databaseProvider));
+                    () -> new ChartAiController(null, queryExecutor));
         }
 
         @Test
-        void nullDatabaseProvider_throws() {
+        void nullQueryExecutor_throws() {
             Assertions.assertThrows(NullPointerException.class,
                     () -> new ChartAiController(chart, null));
         }
@@ -149,7 +149,7 @@ class ChartAiControllerTest {
 
         @Test
         void getChartState_excludesSeriesDataFromConfiguration() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -170,7 +170,7 @@ class ChartAiControllerTest {
 
         @Test
         void getOrCreate_withMismatchedChartId_throws() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -213,7 +213,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_validatesQueriesEagerly() {
-            databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
+            queryExecutor.throwOnExecute = new RuntimeException("Bad SQL");
 
             var tool = controller.getTools().stream()
                     .filter(t -> t.getName().equals("update_chart_data_source"))
@@ -226,7 +226,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_providerThrowsToolException_relaysMessage() {
-            databaseProvider.throwOnExecute = new ToolException(
+            queryExecutor.throwOnExecute = new ToolException(
                     "Unknown column 'foo'");
 
             var tool = findTool(controller.getTools(),
@@ -240,7 +240,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_providerThrowsUnexpectedException_returnsGenericError() {
-            databaseProvider.throwOnExecute = new RuntimeException(
+            queryExecutor.throwOnExecute = new RuntimeException(
                     "internal detail");
 
             var tool = findTool(controller.getTools(),
@@ -255,7 +255,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_heatmapRowsWithTextCoordinates_rejected() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_x", "Monday", "_y", 9, "_value", 120),
                     Map.of("_x", "Tuesday", "_y", 9, "_value", 80));
 
@@ -272,7 +272,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_ohlcRowsWithTextPrices_rejected() {
-            databaseProvider.results = List.of(Map.of("_open", "n/a", "_high",
+            queryExecutor.results = List.of(Map.of("_open", "n/a", "_high",
                     "n/a", "_low", "n/a", "_close", "n/a"));
 
             var result = updateData();
@@ -286,7 +286,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_unplottableRowsWithoutAliases_columnNamesNotRelayed() {
-            databaseProvider.results = List.of(Map.of("salary_band", "high"));
+            queryExecutor.results = List.of(Map.of("salary_band", "high"));
 
             var result = updateData();
 
@@ -301,7 +301,7 @@ class ChartAiControllerTest {
             row.put("_id", null);
             row.put("_parent", null);
             row.put("_value", "n/a");
-            databaseProvider.results = List.of(row);
+            queryExecutor.results = List.of(row);
 
             var result = updateData();
 
@@ -311,7 +311,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_emptyGanttSeriesFromCustomConverter_rejected() {
-            databaseProvider.results = List.of(Map.of("_name", "Design"));
+            queryExecutor.results = List.of(Map.of("_name", "Design"));
             controller.setDataConverter(data -> List.of(new GanttSeries()));
 
             var result = updateData();
@@ -322,7 +322,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_heatmapRowsWithNumericCoordinates_rendered() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_x", 0, "_y", 9, "_value", 120),
                     Map.of("_x", 1, "_y", 9, "_value", 80));
 
@@ -340,7 +340,7 @@ class ChartAiControllerTest {
             root.put("_name", "Ada");
             root.put("_parent", null);
             root.put("_title", "CEO");
-            databaseProvider.results = List.of(root);
+            queryExecutor.results = List.of(root);
 
             var result = updateData();
 
@@ -349,7 +349,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_rowsPlottedByCustomConverter_accepted() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("_x", "Monday", "_y", 9, "_value", 120));
             controller.setDataConverter(data -> List
                     .of(new HeatSeries("visits", new Number[] { 0, 9, 120 })));
@@ -361,14 +361,14 @@ class ChartAiControllerTest {
 
         @Test
         void onResponse_renderFails_propagates() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            databaseProvider.throwOnExecute = new RuntimeException(
+            queryExecutor.throwOnExecute = new RuntimeException(
                     "Render failure");
 
             var event = AiTurnEvents.success();
@@ -411,7 +411,7 @@ class ChartAiControllerTest {
 
         @Test
         void configurationUpdatesInOneTurn_allApply() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_series", "North", "category", "Jan", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"}}");
 
@@ -438,7 +438,7 @@ class ChartAiControllerTest {
 
         @Test
         void updateData_stagesQueriesAppliedOnResponseComplete() {
-            databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
+            queryExecutor.results = List.of(Map.of("x", 1, "y", 2));
 
             var tools = controller.getTools();
             String result = findTool(tools, "update_chart_data_source")
@@ -460,7 +460,7 @@ class ChartAiControllerTest {
 
         @Test
         void excludesCategoriesFromQueryResults() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "Secret Customer", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"bar\"},"
@@ -475,7 +475,7 @@ class ChartAiControllerTest {
 
         @Test
         void excludesSeriesNamesFromQueryResults() {
-            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+            queryExecutor.results = List.of(Map.of("_series", "Secret Rep",
                     "category", "Q1", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"line\"}}");
@@ -487,7 +487,7 @@ class ChartAiControllerTest {
 
         @Test
         void excludesOrganizationNodesFromQueryResults() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_id", "1", "_name", "Secret Boss", "_parent", "0",
                             "_title", "Secret Title"),
                     Map.of("_id", "2", "_name", "Secret Report", "_parent", "1",
@@ -503,7 +503,7 @@ class ChartAiControllerTest {
 
         @Test
         void keepsConfigurationFromEarlierTurns() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"column\"},"
@@ -518,7 +518,7 @@ class ChartAiControllerTest {
 
         @Test
         void chartTypeChange_startsOverLikeTheChart() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"column\"},"
@@ -535,7 +535,7 @@ class ChartAiControllerTest {
         @Test
         void chartTypeSetByApplication_keepsEarlierLlmConfiguration() {
             chart.getConfiguration().getChart().setType(ChartType.COLUMN);
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             completeTurn("{\"title\": {\"text\": \"Revenue\"}}");
@@ -551,7 +551,7 @@ class ChartAiControllerTest {
 
         @Test
         void plotOptionsUpdateForSameType_keepsEarlierOptionsInState() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"column\"},"
@@ -570,7 +570,7 @@ class ChartAiControllerTest {
 
         @Test
         void seriesSettingsSentTwice_keepsTheLatest() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_series", "North", "category", "Jan", "value", 10));
 
             completeTurn("{\"chart\": {\"type\": \"column\"},"
@@ -589,7 +589,7 @@ class ChartAiControllerTest {
 
         @Test
         void seriesEntryWithoutAxis_keepsTheAxisSetBefore() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_series", "North", "category", "Jan", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
                     + " [{\"name\": \"North\", \"type\": \"area\", \"yAxis\": 1}]}");
@@ -609,7 +609,7 @@ class ChartAiControllerTest {
 
         @Test
         void failedRender_keepsPreviousConfiguration() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"},"
                     + " \"title\": {\"text\": \"Kept\"}}");
@@ -621,7 +621,7 @@ class ChartAiControllerTest {
                             + " \"title\": {\"text\": \"Dropped\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 2\"]}"));
-            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            queryExecutor.throwOnExecute = new RuntimeException("DB error");
             var event = AiTurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
                     () -> controller.onResponse(event));
@@ -637,7 +637,7 @@ class ChartAiControllerTest {
 
         @Test
         void customConverter_isUsedDuringRendering() {
-            databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
+            queryExecutor.results = List.of(Map.of("x", 1, "y", 2));
 
             controller.setDataConverter(data -> {
                 DataSeries series = new DataSeries("custom");
@@ -680,7 +680,7 @@ class ChartAiControllerTest {
 
         @Test
         void afterRender_returnsQueriesAndConfiguration() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -703,13 +703,13 @@ class ChartAiControllerTest {
 
         @Test
         void afterFailedRender_returnsNull() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            queryExecutor.throwOnExecute = new RuntimeException("DB error");
             var event = AiTurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
                     () -> controller.onResponse(event));
@@ -721,7 +721,7 @@ class ChartAiControllerTest {
 
         @Test
         void configurationIsIsolatedFromChartMutations() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -778,7 +778,7 @@ class ChartAiControllerTest {
             config.getChart().setType(ChartType.COLUMN);
             ChartState state = new ChartState(List.of("SELECT 1"), config);
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             controller.restoreState(state);
@@ -795,7 +795,7 @@ class ChartAiControllerTest {
 
         @Test
         void savedState_keepsWhatTheLlmSees() {
-            databaseProvider.results = List.of(Map.of("_series", "North",
+            queryExecutor.results = List.of(Map.of("_series", "North",
                     "category", "Secret Customer", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"},"
                     + " \"title\": {\"text\": \"Revenue\"}, \"series\":"
@@ -804,7 +804,7 @@ class ChartAiControllerTest {
 
             chart = new Chart();
             ui.add(chart);
-            controller = new ChartAiController(chart, databaseProvider);
+            controller = new ChartAiController(chart, queryExecutor);
             controller.restoreState(saved);
 
             var state = chartState();
@@ -815,7 +815,7 @@ class ChartAiControllerTest {
 
         @Test
         void stateWithoutLlmConfiguration_hidesSeriesNamesAndCategoriesFromLlm() {
-            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+            queryExecutor.results = List.of(Map.of("_series", "Secret Rep",
                     "category", "Secret Customer", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"},"
                     + " \"title\": {\"text\": \"Revenue\"}}");
@@ -823,7 +823,7 @@ class ChartAiControllerTest {
 
             chart = new Chart();
             ui.add(chart);
-            controller = new ChartAiController(chart, databaseProvider);
+            controller = new ChartAiController(chart, queryExecutor);
             controller.restoreState(
                     new ChartState(saved.queries(), saved.configuration()));
 
@@ -839,7 +839,7 @@ class ChartAiControllerTest {
 
         @Test
         void perSeriesSettings_surviveRepeatedSaveAndRestore() {
-            databaseProvider.results = List.of(
+            queryExecutor.results = List.of(
                     Map.of("_series", "North", "category", "Jan", "value", 10));
             completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
                     + " [{\"name\": \"North\", \"type\": \"spline\","
@@ -871,7 +871,7 @@ class ChartAiControllerTest {
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             controller
@@ -882,7 +882,7 @@ class ChartAiControllerTest {
 
         @Test
         void rendersChart() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             Configuration config = new Configuration();
@@ -898,7 +898,7 @@ class ChartAiControllerTest {
 
         @Test
         void doesNotMutateInputConfiguration() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             Configuration config = new Configuration();
@@ -916,7 +916,7 @@ class ChartAiControllerTest {
 
         @Test
         void clearsPendingState() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             // Create pending state via tool calls
@@ -949,7 +949,7 @@ class ChartAiControllerTest {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -975,14 +975,14 @@ class ChartAiControllerTest {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            databaseProvider.throwOnExecute = new RuntimeException(
+            queryExecutor.throwOnExecute = new RuntimeException(
                     "Render failure");
             var event = AiTurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
@@ -997,7 +997,7 @@ class ChartAiControllerTest {
             var registration = controller.addStateChangeListener(captured::set);
             registration.remove();
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -1012,7 +1012,7 @@ class ChartAiControllerTest {
 
         @Test
         void doesNotFireOnSecondCall() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -1041,7 +1041,7 @@ class ChartAiControllerTest {
             });
             controller.addStateChangeListener(secondListenerState::set);
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -1075,7 +1075,7 @@ class ChartAiControllerTest {
 
         @Test
         void failedFirstTurnDoesNotEstablishState() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
             var tools = controller.getTools();
 
@@ -1095,7 +1095,7 @@ class ChartAiControllerTest {
 
         @Test
         void failedTurnStagedConfigurationDoesNotLeakIntoNextTurn() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
             var tools = controller.getTools();
             findTool(tools, "update_chart_configuration").execute(json(
@@ -1121,7 +1121,7 @@ class ChartAiControllerTest {
 
         @Test
         void failedTurnDoesNotLeakPendingQueriesIntoNextOnResponse() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
             var tools = controller.getTools();
 
@@ -1158,7 +1158,7 @@ class ChartAiControllerTest {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
@@ -1179,14 +1179,14 @@ class ChartAiControllerTest {
 
         @Test
         void onResponse_renderFails_propagates() {
-            databaseProvider.results = List
+            queryExecutor.results = List
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            queryExecutor.throwOnExecute = new RuntimeException("DB error");
 
             // Errors propagate regardless of attach state so the
             // orchestrator can still surface them in the chat UI.
@@ -1197,7 +1197,7 @@ class ChartAiControllerTest {
 
         @Test
         void restoreState_renderFailure_doesNotThrow() {
-            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            queryExecutor.throwOnExecute = new RuntimeException("DB error");
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
@@ -1242,7 +1242,7 @@ class ChartAiControllerTest {
         return JacksonUtils.readTree(json);
     }
 
-    private static class TestDatabaseProvider implements DatabaseProvider {
+    private static class TestQueryExecutor implements QueryExecutor {
 
         List<Map<String, Object>> results = new ArrayList<>();
         RuntimeException throwOnExecute;

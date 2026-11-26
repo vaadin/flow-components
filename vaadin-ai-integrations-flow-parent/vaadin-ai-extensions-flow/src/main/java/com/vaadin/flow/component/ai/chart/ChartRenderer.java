@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -51,8 +51,8 @@ public final class ChartRenderer implements Serializable {
      *
      * @param chart
      *            the chart to render, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
+     * @param queryExecutor
+     *            the query executor, not {@code null}
      * @param dataConverter
      *            the data converter for transforming query results, not
      *            {@code null}
@@ -61,24 +61,24 @@ public final class ChartRenderer implements Serializable {
      * @param configJson
      *            the chart configuration JSON, or {@code null} to keep current
      */
-    public static void renderChart(Chart chart,
-            DatabaseProvider databaseProvider, DataConverter dataConverter,
-            List<String> queries, String configJson) {
-        renderChart(chart, databaseProvider, dataConverter, queries,
+    public static void renderChart(Chart chart, QueryExecutor queryExecutor,
+            DataConverter dataConverter, List<String> queries,
+            String configJson) {
+        renderChart(chart, queryExecutor, dataConverter, queries,
                 configJson == null ? List.of() : List.of(configJson));
     }
 
     /**
      * Renders a chart like
-     * {@link #renderChart(Chart, DatabaseProvider, DataConverter, List, String)},
+     * {@link #renderChart(Chart, QueryExecutor, DataConverter, List, String)},
      * applying each of the configuration JSON strings in order.
      */
-    static void renderChart(Chart chart, DatabaseProvider databaseProvider,
+    static void renderChart(Chart chart, QueryExecutor queryExecutor,
             DataConverter dataConverter, List<String> queries,
             List<String> configJsons) {
         List<Series> allSeries = new ArrayList<>();
         for (String query : queries) {
-            var results = databaseProvider.executeQuery(query);
+            var results = queryExecutor.executeQuery(query);
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
