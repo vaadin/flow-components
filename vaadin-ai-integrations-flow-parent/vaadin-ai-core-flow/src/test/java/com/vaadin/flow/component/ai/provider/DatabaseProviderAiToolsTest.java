@@ -28,11 +28,11 @@ class DatabaseProviderAiToolsTest {
 
     private static final String SCHEMA = "Tables: users(id INT, name VARCHAR)";
 
-    private DatabaseProvider provider;
+    private QueryExecutor provider;
 
     @BeforeEach
     void setUp() {
-        provider = new DatabaseProvider() {
+        provider = new QueryExecutor() {
             @Override
             public String getSchema() {
                 return SCHEMA;

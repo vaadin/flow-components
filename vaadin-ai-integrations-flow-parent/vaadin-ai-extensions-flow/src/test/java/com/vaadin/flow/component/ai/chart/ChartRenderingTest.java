@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -1118,7 +1118,7 @@ class ChartRenderingTest {
          */
         @BeforeEach
         void useOhlcAndVolumeDatabase() {
-            var db = new DatabaseProvider() {
+            var db = new QueryExecutor() {
                 @Override
                 public String getSchema() {
                     return "stock_prices";
@@ -1788,7 +1788,7 @@ class ChartRenderingTest {
         return map;
     }
 
-    private static class TestDatabaseProvider implements DatabaseProvider {
+    private static class TestDatabaseProvider implements QueryExecutor {
 
         List<Map<String, Object>> results = new ArrayList<>();
         RuntimeException throwOnExecute;

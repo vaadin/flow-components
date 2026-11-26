@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -1242,7 +1242,7 @@ class ChartAiControllerTest {
         return JacksonUtils.readTree(json);
     }
 
-    private static class TestDatabaseProvider implements DatabaseProvider {
+    private static class TestDatabaseProvider implements QueryExecutor {
 
         List<Map<String, Object>> results = new ArrayList<>();
         RuntimeException throwOnExecute;

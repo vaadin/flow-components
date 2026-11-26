@@ -21,9 +21,9 @@ import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAiTools;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -57,8 +57,8 @@ import tools.jackson.databind.JsonNode;
  * </p>
  * <ul>
  * <li>Lazy loading, one page at a time, through
- * {@link DatabaseProvider#executeQuery(String, QueryPage)} and
- * {@link DatabaseProvider#count(String)}</li>
+ * {@link QueryExecutor#executeQuery(String, QueryPage)} and
+ * {@link QueryExecutor#count(String)}</li>
  * <li>Built-in renderers for dates and numbers</li>
  * <li>Right-alignment for numeric columns</li>
  * <li>Resizable, sortable columns with auto-width</li>
@@ -144,7 +144,7 @@ public class GridAiController implements AiController {
             """;
 
     private final Grid<AiDataRow> grid;
-    private final DatabaseProvider databaseProvider;
+    private final QueryExecutor databaseProvider;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
     /**
@@ -153,15 +153,15 @@ public class GridAiController implements AiController {
      * @param grid
      *            the grid to populate, not {@code null}
      * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     *            the query executor for schema and query execution, not
      *            {@code null}
      */
     public GridAiController(Grid<AiDataRow> grid,
-            DatabaseProvider databaseProvider) {
+            QueryExecutor databaseProvider) {
         AiExtensionsLicense.check();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "DatabaseProvider must not be null");
+                "QueryExecutor must not be null");
     }
 
     @Override
@@ -178,7 +178,7 @@ public class GridAiController implements AiController {
             @Override
             public void updateData(String gridId, String query) {
                 // Validate eagerly by fetching one row, so an invalid
-                // query is rejected within the turn. A DatabaseProvider
+                // query is rejected within the turn. A QueryExecutor
                 // that throws ToolException gets its message relayed to
                 // the LLM so it can fix the query; any other exception is
                 // replaced with a generic error.

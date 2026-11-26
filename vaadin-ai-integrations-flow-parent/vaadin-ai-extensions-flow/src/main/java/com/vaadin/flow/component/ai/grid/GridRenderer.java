@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.common.QueryPage;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -60,12 +60,12 @@ public final class GridRenderer implements Serializable {
      * @param grid
      *            the grid to render, not {@code null}
      * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
+     *            the query executor, not {@code null}
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
     public static void renderGrid(Grid<AiDataRow> grid,
-            DatabaseProvider databaseProvider, String query) {
+            QueryExecutor databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(query,
                 new QueryPage(0, 1, List.of()));
         removeExtraHeaderRows(grid);
@@ -162,7 +162,7 @@ public final class GridRenderer implements Serializable {
     }
 
     private static DataProvider<AiDataRow, Void> createDataProvider(
-            DatabaseProvider databaseProvider, String query) {
+            QueryExecutor databaseProvider, String query) {
         return new CallbackDataProvider<>(fetchQuery -> {
             if (fetchQuery.getLimit() == 0) {
                 // A data view asks for zero rows when it reads the rows of a

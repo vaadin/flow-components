@@ -34,8 +34,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
 import com.vaadin.flow.component.ai.common.QueryPage;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
@@ -952,7 +952,7 @@ class GridAiControllerTest {
             var statements = new ArrayList<String>();
             var pages = new ArrayList<QueryPage>();
             var counts = new ArrayList<String>();
-            controller = new GridAiController(grid, new DatabaseProvider() {
+            controller = new GridAiController(grid, new QueryExecutor() {
                 @Override
                 public String getSchema() {
                     return "test schema";
@@ -1042,10 +1042,10 @@ class GridAiControllerTest {
     }
 
     /**
-     * Stub DatabaseProvider for unit testing. Returns configurable results
-     * without an actual database.
+     * Stub QueryExecutor for unit testing. Returns configurable results without
+     * an actual database.
      */
-    private static class StubDatabaseProvider implements DatabaseProvider {
+    private static class StubDatabaseProvider implements QueryExecutor {
         private String schema = "test schema";
         private List<Map<String, Object>> queryResults = List.of();
         private boolean throwOnExecute = false;

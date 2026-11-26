@@ -23,8 +23,8 @@ import com.vaadin.flow.component.ai.chart.ChartAiController;
 import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
@@ -49,7 +49,7 @@ import reactor.core.publisher.Flux;
 @Route("vaadin-ai/dashboard-chart-controller")
 public class DashboardChartControllerPage extends Div {
 
-    private static final DatabaseProvider DB = createDatabaseProvider();
+    private static final QueryExecutor DB = createDatabaseProvider();
 
     public DashboardChartControllerPage() {
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
@@ -126,12 +126,12 @@ public class DashboardChartControllerPage extends Div {
         }
     }
 
-    private static DatabaseProvider createDatabaseProvider() {
+    private static QueryExecutor createDatabaseProvider() {
         var rows = List.of(
                 Map.<String, Object> of("_NAME", "January", "_Y", 45000),
                 Map.<String, Object> of("_NAME", "February", "_Y", 52000),
                 Map.<String, Object> of("_NAME", "March", "_Y", 48000));
-        return new DatabaseProvider() {
+        return new QueryExecutor() {
             @Override
             public String getSchema() {
                 return "sales(month VARCHAR, revenue INT)";

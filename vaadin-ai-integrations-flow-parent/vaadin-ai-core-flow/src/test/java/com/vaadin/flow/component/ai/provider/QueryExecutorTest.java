@@ -30,14 +30,14 @@ import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 
-class DatabaseProviderTest {
+class QueryExecutorTest {
 
     private static final String QUERY = "SELECT name AS \"Name\", salary AS \"Salary\" FROM employees";
 
     private static final QueryPage FIRST_ROW = new QueryPage(0, 1, List.of());
 
     /** Records the SQL it runs and answers with fixed rows. */
-    private static class RecordingProvider implements DatabaseProvider {
+    private static class RecordingProvider implements QueryExecutor {
 
         final List<String> statements = new ArrayList<>();
         List<Map<String, Object>> rows = List.of();

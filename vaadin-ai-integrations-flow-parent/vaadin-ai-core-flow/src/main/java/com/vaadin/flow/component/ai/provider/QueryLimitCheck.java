@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 /**
  * Checks whether a SQL query has a row limit of its own, for the default paging
- * of {@link DatabaseProvider}.
+ * of {@link QueryExecutor}.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */

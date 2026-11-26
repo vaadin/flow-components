@@ -25,12 +25,12 @@ import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.data.provider.SortDirection;
 
 /**
- * Provider for database schema information and SQL query execution on behalf of
- * an LLM. This interface enables AI-powered components to interact with
- * application databases for features.
+ * Executes SQL queries on behalf of an LLM and provides the database schema
+ * information the LLM needs to write them. This interface enables AI-powered
+ * components to interact with application databases for features.
  * <p>
  * Applications implement this interface with their own database connection. The
- * provider exposes the schema so the LLM can generate valid SQL, and executes
+ * executor exposes the schema so the LLM can generate valid SQL, and executes
  * the resulting queries.
  * </p>
  * <p>
@@ -40,8 +40,8 @@ import com.vaadin.flow.data.provider.SortDirection;
  * the query's SQL with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET}, or
  * with {@code COUNT(*)}, and run it through {@link #executeQuery(String)}.
  * Override them when your SQL dialect pages or counts differently, or when your
- * provider can do it more efficiently. A provider that delegates to another
- * provider should delegate these methods too, so that the other provider's own
+ * executor can do it more efficiently. An executor that delegates to another
+ * executor should delegate these methods too, so that the other executor's own
  * paging is used.
  * </p>
  * <p>
@@ -51,11 +51,11 @@ import com.vaadin.flow.data.provider.SortDirection;
  * </p>
  *
  * <pre>
- * public class MyDatabaseProvider implements DatabaseProvider {
+ * public class MyQueryExecutor implements QueryExecutor {
  *
  *     private final DataSource readOnlyDataSource;
  *
- *     public MyDatabaseProvider(DataSource readOnlyDataSource) {
+ *     public MyQueryExecutor(DataSource readOnlyDataSource) {
  *         this.readOnlyDataSource = readOnlyDataSource;
  *     }
  *
@@ -115,7 +115,7 @@ import com.vaadin.flow.data.provider.SortDirection;
  * @author Vaadin Ltd
  * @since 25.3
  */
-public interface DatabaseProvider extends Serializable {
+public interface QueryExecutor extends Serializable {
 
     /**
      * Returns a text description of the database schema available to the LLM.
@@ -172,7 +172,7 @@ public interface DatabaseProvider extends Serializable {
      * line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
-     * {@code OFFSET ... FETCH}, or when your provider can page more
+     * {@code OFFSET ... FETCH}, or when your executor can page more
      * efficiently.
      * </p>
      *
@@ -221,7 +221,7 @@ public interface DatabaseProvider extends Serializable {
      * without columns, or a value that is not a number.
      * <p>
      * Override this when your SQL dialect counts differently, or when your
-     * provider can count more efficiently.
+     * executor can count more efficiently.
      * </p>
      *
      * @param sql

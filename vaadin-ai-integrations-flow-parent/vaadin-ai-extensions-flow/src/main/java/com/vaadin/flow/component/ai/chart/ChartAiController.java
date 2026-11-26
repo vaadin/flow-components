@@ -21,9 +21,9 @@ import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAiTools;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -76,10 +76,9 @@ import tools.jackson.databind.JsonNode;
  * The controller sends the LLM nothing from the query results: when it reads
  * the chart state, it gets the SQL queries and the configuration it has set
  * itself, not the series, axis categories or other values the chart builds from
- * the rows. Only the schema description your {@link DatabaseProvider} returns
- * from {@link DatabaseProvider#getSchema()} and the message of a
- * {@link ToolException} it throws reach the LLM as is, so keep row values out
- * of both.
+ * the rows. Only the schema description your {@link QueryExecutor} returns from
+ * {@link QueryExecutor#getSchema()} and the message of a {@link ToolException}
+ * it throws reach the LLM as is, so keep row values out of both.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -172,7 +171,7 @@ public class ChartAiController implements AiController {
             """;
 
     private final Chart chart;
-    private final DatabaseProvider databaseProvider;
+    private final QueryExecutor databaseProvider;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
 
@@ -182,14 +181,14 @@ public class ChartAiController implements AiController {
      * @param chart
      *            the chart component to update, not {@code null}
      * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     *            the query executor for schema and query execution, not
      *            {@code null}
      */
-    public ChartAiController(Chart chart, DatabaseProvider databaseProvider) {
+    public ChartAiController(Chart chart, QueryExecutor databaseProvider) {
         AiExtensionsLicense.check();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "Database provider cannot be null");
+                "Query executor cannot be null");
         this.dataConverter = new DefaultDataConverter();
     }
 
@@ -236,7 +235,7 @@ public class ChartAiController implements AiController {
             @Override
             public void updateData(String chartId, List<String> queries) {
                 // Execute queries eagerly so an invalid query is
-                // rejected within the turn. A DatabaseProvider that
+                // rejected within the turn. A QueryExecutor that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
                 // replaced with a generic error. Results are only checked
