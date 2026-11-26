@@ -30,6 +30,11 @@ public class WindowImpl {
     return $wnd.location.search;
   }-*/;
   
+  /**
+   * Hooks the browser events that notify the {@code Window} closing and close
+   * handlers. The close handlers run on {@code pagehide} when the page is not
+   * kept in the back/forward cache.
+   */
   public native void initWindowCloseHandler() /*-{
     var oldOnBeforeUnload = $wnd.onbeforeunload;
     
@@ -77,6 +82,9 @@ public class WindowImpl {
     $wnd.addEventListener('pagehide', onPageHide);
   }-*/;
 
+  /**
+   * Hooks the browser resize event to notify the {@code Window} resize handlers.
+   */
   public native void initWindowResizeHandler() /*-{
     var oldOnResize = $wnd.onresize;
     $wnd.onresize = $entry(function(evt) {
@@ -88,6 +96,9 @@ public class WindowImpl {
     });
   }-*/;
 
+  /**
+   * Hooks the browser scroll event to notify the {@code Window} scroll handlers.
+   */
   public native void initWindowScrollHandler() /*-{
     var oldOnScroll = $wnd.onscroll;
     $wnd.onscroll = $entry(function(evt) {
