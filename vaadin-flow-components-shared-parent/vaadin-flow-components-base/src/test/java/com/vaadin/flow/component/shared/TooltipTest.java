@@ -87,6 +87,23 @@ class TooltipTest {
     }
 
     @Test
+    void addComponent_createTooltip_moveComponentWithinUI_tooltipNodeIdPreserved() {
+        var parent1 = new Element("div");
+        var parent2 = new Element("div");
+        ui.getUI().getElement().appendChild(parent1, parent2);
+        parent1.appendChild(component.getElement());
+        Tooltip.forComponent(component);
+        ui.fakeClientCommunication();
+        var nodeId = getTooltipElement().orElseThrow().getNode().getId();
+
+        parent2.appendChild(component.getElement());
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(nodeId,
+                getTooltipElement().orElseThrow().getNode().getId());
+    }
+
+    @Test
     void createTooltip_setText() {
         var tooltip = Tooltip.forComponent(component);
         tooltip.setText("foo");
