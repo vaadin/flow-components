@@ -34,8 +34,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AiTurnEvents;
 import com.vaadin.flow.component.ai.common.QueryPage;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
@@ -52,15 +52,15 @@ class GridAiControllerTest {
     MockUIExtension ui = new MockUIExtension();
 
     private Grid<AiDataRow> grid;
-    private StubDatabaseProvider dbProvider;
+    private StubQueryExecutor queryExecutor;
     private GridAiController controller;
 
     @BeforeEach
     void setUp() {
         grid = new Grid<>();
         ui.add(grid);
-        dbProvider = new StubDatabaseProvider();
-        controller = new GridAiController(grid, dbProvider);
+        queryExecutor = new StubQueryExecutor();
+        controller = new GridAiController(grid, queryExecutor);
     }
 
     // --- Constructor ---
@@ -68,11 +68,11 @@ class GridAiControllerTest {
     @Test
     void constructor_nullGrid_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new GridAiController(null, dbProvider));
+                () -> new GridAiController(null, queryExecutor));
     }
 
     @Test
-    void constructor_nullDatabaseProvider_throws() {
+    void constructor_nullQueryExecutor_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> new GridAiController(grid, null));
     }
@@ -103,7 +103,7 @@ class GridAiControllerTest {
 
     @Test
     void schemaTool_returnsSchema() {
-        dbProvider.schema = "test schema";
+        queryExecutor.schema = "test schema";
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("get_database_schema"))
                 .findFirst().orElseThrow();
@@ -121,7 +121,7 @@ class GridAiControllerTest {
 
     @Test
     void updateDataTool_validQuery_returnSuccess() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
                 .orElseThrow();
@@ -131,7 +131,7 @@ class GridAiControllerTest {
 
     @Test
     void updateDataTool_invalidQuery_returnsError() {
-        dbProvider.throwOnExecute = true;
+        queryExecutor.throwOnExecute = true;
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
                 .orElseThrow();
@@ -141,7 +141,8 @@ class GridAiControllerTest {
 
     @Test
     void updateDataTool_providerThrowsToolException_relaysMessage() {
-        dbProvider.executeException = new ToolException("Unknown column 'foo'");
+        queryExecutor.executeException = new ToolException(
+                "Unknown column 'foo'");
         var tool = findTool("update_grid_data");
         var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
         Assertions.assertEquals(
@@ -150,7 +151,8 @@ class GridAiControllerTest {
 
     @Test
     void updateDataTool_providerThrowsUnexpectedException_returnsGenericError() {
-        dbProvider.executeException = new RuntimeException("internal detail");
+        queryExecutor.executeException = new RuntimeException(
+                "internal detail");
         var tool = findTool("update_grid_data");
         var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
         Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
@@ -185,7 +187,7 @@ class GridAiControllerTest {
 
     @Test
     void getState_afterUpdate_returnsQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         var state = controller.getState();
@@ -195,11 +197,11 @@ class GridAiControllerTest {
 
     @Test
     void getState_afterFailedRender_returnsNull() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
-        dbProvider.throwOnExecute = true;
+        queryExecutor.throwOnExecute = true;
         var event = AiTurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
                 () -> controller.onResponse(event));
@@ -211,7 +213,7 @@ class GridAiControllerTest {
 
     @Test
     void currentStateTool_afterUpdate_returnsQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         var stateTool = findTool("get_grid_state");
@@ -230,7 +232,7 @@ class GridAiControllerTest {
 
     @Test
     void onResponse_clearsPending_secondCallIsNoOp() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         // Second call — no pending query
@@ -248,7 +250,7 @@ class GridAiControllerTest {
         @Test
         void failedTurnDoesNotLeakPendingQueryIntoNextOnResponse() {
             // Establish a baseline successful turn.
-            dbProvider.queryResults = List.of(row("a", 1));
+            queryExecutor.queryResults = List.of(row("a", 1));
             simulateUpdate("SELECT a FROM good");
 
             // A second turn stages a query, then fails before completion.
@@ -269,7 +271,7 @@ class GridAiControllerTest {
         @Test
         void failedFirstTurnDoesNotEstablishState() {
             // No prior successful turn — the failed turn is the first one.
-            dbProvider.queryResults = List.of(row("a", 1));
+            queryExecutor.queryResults = List.of(row("a", 1));
             findTool("update_grid_data")
                     .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
             controller.onResponse(
@@ -301,7 +303,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_rendersGridAndSetsState() {
-        dbProvider.queryResults = List.of(row("col1", "v1", "col2", 42));
+        queryExecutor.queryResults = List.of(row("col1", "v1", "col2", 42));
         controller.restoreState(new GridState("SELECT col1, col2 FROM t"));
 
         Assertions.assertEquals(2, grid.getColumns().size());
@@ -318,7 +320,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_failedQuery_doesNotUpdateState() {
-        dbProvider.throwOnExecute = true;
+        queryExecutor.throwOnExecute = true;
         controller.restoreState(new GridState("SELECT bad"));
 
         Assertions.assertNull(controller.getState());
@@ -326,7 +328,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_thenLlmUpdate_overridesState() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM old"));
         Assertions.assertEquals("SELECT a FROM old",
                 controller.getState().query());
@@ -347,7 +349,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_calledTwice_secondOverwritesFirst() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM first"));
         Assertions.assertEquals("SELECT a FROM first",
                 controller.getState().query());
@@ -359,7 +361,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_emptyResult_stillSetsQuery() {
-        dbProvider.queryResults = List.of();
+        queryExecutor.queryResults = List.of();
         controller.restoreState(new GridState("SELECT a FROM empty_table"));
 
         var state = controller.getState();
@@ -369,16 +371,16 @@ class GridAiControllerTest {
 
     @Test
     void getState_afterSuccessfulRestore_thenFailedRender_retainsPreviousQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM good"));
         Assertions.assertEquals("SELECT a FROM good",
                 controller.getState().query());
 
         // LLM tries a bad query
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
-        dbProvider.throwOnExecute = true;
+        queryExecutor.throwOnExecute = true;
         var event = AiTurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
                 () -> controller.onResponse(event));
@@ -390,7 +392,7 @@ class GridAiControllerTest {
 
     @Test
     void restoreState_thenGetStateTool_returnsRestoredQuery() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM t"));
 
         var result = findTool("get_grid_state").execute(json("{}"));
@@ -404,7 +406,7 @@ class GridAiControllerTest {
         var captured = new AtomicReference<GridState>();
         controller.addStateChangeListener(captured::set);
 
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         Assertions.assertNotNull(captured.get());
@@ -416,11 +418,11 @@ class GridAiControllerTest {
         var captured = new AtomicReference<GridState>();
         controller.addStateChangeListener(captured::set);
 
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
-        dbProvider.throwOnExecute = true;
+        queryExecutor.throwOnExecute = true;
         var event = AiTurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
                 () -> controller.onResponse(event));
@@ -433,7 +435,7 @@ class GridAiControllerTest {
         var captured = new AtomicReference<GridState>();
         controller.addStateChangeListener(captured::set);
 
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM t"));
 
         Assertions.assertNull(captured.get());
@@ -445,7 +447,7 @@ class GridAiControllerTest {
         var registration = controller.addStateChangeListener(captured::set);
         registration.remove();
 
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         Assertions.assertNull(captured.get());
@@ -453,7 +455,7 @@ class GridAiControllerTest {
 
     @Test
     void stateChangeListener_doesNotFireOnSecondCall() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         var states = new ArrayList<GridState>();
@@ -474,7 +476,7 @@ class GridAiControllerTest {
         });
         controller.addStateChangeListener(capture::set);
 
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         Assertions.assertNotNull(capture.get(),
@@ -483,7 +485,7 @@ class GridAiControllerTest {
 
     @Test
     void stateChangeListener_firesAfterRestoreThenLlmUpdate() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM old"));
 
         var captured = new AtomicReference<GridState>();
@@ -506,7 +508,7 @@ class GridAiControllerTest {
 
     @Test
     void emptyResult_setsDefaultEmptyStateText() {
-        dbProvider.queryResults = List.of();
+        queryExecutor.queryResults = List.of();
         simulateUpdate("SELECT * FROM empty_table");
 
         Assertions.assertEquals("No results", grid.getEmptyStateText());
@@ -515,7 +517,7 @@ class GridAiControllerTest {
     @Test
     void emptyResult_doesNotOverrideCustomEmptyStateText() {
         grid.setEmptyStateText("Custom message");
-        dbProvider.queryResults = List.of();
+        queryExecutor.queryResults = List.of();
         simulateUpdate("SELECT * FROM empty_table");
 
         Assertions.assertEquals("Custom message", grid.getEmptyStateText());
@@ -525,7 +527,7 @@ class GridAiControllerTest {
     void emptyResult_doesNotOverrideCustomEmptyStateComponent() {
         grid.setEmptyStateComponent(
                 new com.vaadin.flow.component.html.Span("Custom"));
-        dbProvider.queryResults = List.of();
+        queryExecutor.queryResults = List.of();
         simulateUpdate("SELECT * FROM empty_table");
 
         Assertions.assertNotNull(grid.getEmptyStateComponent());
@@ -534,7 +536,7 @@ class GridAiControllerTest {
 
     @Test
     void nonEmptyResult_doesNotSetEmptyStateText() {
-        dbProvider.queryResults = List.of(row("a", 1));
+        queryExecutor.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         Assertions.assertNull(grid.getEmptyStateText());
@@ -635,7 +637,7 @@ class GridAiControllerTest {
         void groupedColumnsAreSortedAdjacent() {
             // Columns: Person.Name, Product.Name, Product.Category,
             // Order.Quantity — non-adjacent groups in original order
-            dbProvider.queryResults = List.of(row("Person.Name", "Alice",
+            queryExecutor.queryResults = List.of(row("Person.Name", "Alice",
                     "Product.Name", "Laptop", "Product.Category", "Electronics",
                     "Order.Quantity", 1));
             simulateUpdate("SELECT 1");
@@ -658,7 +660,7 @@ class GridAiControllerTest {
 
         @Test
         void ungroupedColumnsComFirst() {
-            dbProvider.queryResults = List
+            queryExecutor.queryResults = List
                     .of(row("plain", "val", "Group.A", 1, "Group.B", 2));
             simulateUpdate("SELECT 1");
 
@@ -671,7 +673,8 @@ class GridAiControllerTest {
         @Test
         void singleColumnGroup_noGroupHeader() {
             // Only one column with a dot — not enough for a group
-            dbProvider.queryResults = List.of(row("Group.Only", 1, "other", 2));
+            queryExecutor.queryResults = List
+                    .of(row("Group.Only", 1, "other", 2));
             simulateUpdate("SELECT 1");
 
             // Should not throw — single-column groups are skipped
@@ -681,13 +684,13 @@ class GridAiControllerTest {
         @Test
         void groupHeadersClearedOnSubsequentUpdate() {
             // First update: grouped columns
-            dbProvider.queryResults = List.of(row("G.A", 1, "G.B", 2));
+            queryExecutor.queryResults = List.of(row("G.A", 1, "G.B", 2));
             simulateUpdate("SELECT 1");
             Assertions.assertEquals(2, grid.getHeaderRows().size(),
                     "Should have default + group header row");
 
             // Second update: no grouped columns
-            dbProvider.queryResults = List.of(row("plain", 1));
+            queryExecutor.queryResults = List.of(row("plain", 1));
             simulateUpdate("SELECT 2");
             Assertions.assertEquals(1, grid.getHeaderRows().size(),
                     "Group header row should be removed");
@@ -698,7 +701,7 @@ class GridAiControllerTest {
             // Three successive updates with groups — should always
             // have exactly 2 header rows (default + one group row)
             for (int i = 0; i < 3; i++) {
-                dbProvider.queryResults = List.of(row("X.A", 1, "X.B", 2));
+                queryExecutor.queryResults = List.of(row("X.A", 1, "X.B", 2));
                 simulateUpdate("SELECT " + i);
             }
             Assertions.assertEquals(2, grid.getHeaderRows().size(),
@@ -886,22 +889,22 @@ class GridAiControllerTest {
 
         @BeforeEach
         void renderGrid() {
-            dbProvider.queryResults = List.of(row("a", 1));
+            queryExecutor.queryResults = List.of(row("a", 1));
             simulateUpdate("SELECT a FROM t");
-            dbProvider.executedQueries.clear();
+            queryExecutor.executedQueries.clear();
         }
 
         @Test
         void render_executesSampleQueryWithLimit1() {
             // The sample query was already executed in @BeforeEach.
             // Re-render to capture the SQL.
-            dbProvider.executedQueries.clear();
-            dbProvider.queryResults = List.of(row("a", 1));
+            queryExecutor.executedQueries.clear();
+            queryExecutor.queryResults = List.of(row("a", 1));
             simulateUpdate("SELECT a FROM t");
 
             // First query is the validation in updateData, second is
             // the sample row fetch in renderGrid
-            var sampleSql = dbProvider.executedQueries.get(1);
+            var sampleSql = queryExecutor.executedQueries.get(1);
             Assertions.assertEquals("SELECT a FROM t\nLIMIT 1 OFFSET 0",
                     sampleSql);
         }
@@ -911,13 +914,13 @@ class GridAiControllerTest {
             grid.getDataProvider()
                     .fetch(new Query<>(20, 10, List.of(), null, null));
 
-            var sql = dbProvider.executedQueries.getFirst();
+            var sql = queryExecutor.executedQueries.getFirst();
             Assertions.assertEquals("SELECT a FROM t\nLIMIT 10 OFFSET 20", sql);
         }
 
         @Test
         void fetch_returnsRowsFromDatabase() {
-            dbProvider.queryResults = List.of(row("a", 10), row("a", 20));
+            queryExecutor.queryResults = List.of(row("a", 10), row("a", 20));
             var rows = grid.getDataProvider()
                     .fetch(new Query<>(0, 50, List.of(), null, null)).toList();
 
@@ -932,16 +935,16 @@ class GridAiControllerTest {
                     .fetch(new Query<>(0, 0, List.of(), null, null)).toList();
 
             Assertions.assertTrue(rows.isEmpty());
-            Assertions.assertTrue(dbProvider.executedQueries.isEmpty());
+            Assertions.assertTrue(queryExecutor.executedQueries.isEmpty());
         }
 
         @Test
         void count_wrapsQueryWithCount() {
-            dbProvider.queryResults = List.of(row("COUNT(*)", 42));
+            queryExecutor.queryResults = List.of(row("COUNT(*)", 42));
             var size = grid.getDataProvider().size(new Query<>());
 
             Assertions.assertEquals(42, size);
-            var sql = dbProvider.executedQueries.getFirst();
+            var sql = queryExecutor.executedQueries.getFirst();
             Assertions.assertEquals(
                     "SELECT COUNT(*) FROM (SELECT a FROM t\n) AS _counted",
                     sql);
@@ -952,7 +955,7 @@ class GridAiControllerTest {
             var statements = new ArrayList<String>();
             var pages = new ArrayList<QueryPage>();
             var counts = new ArrayList<String>();
-            controller = new GridAiController(grid, new DatabaseProvider() {
+            controller = new GridAiController(grid, new QueryExecutor() {
                 @Override
                 public String getSchema() {
                     return "test schema";
@@ -1042,10 +1045,10 @@ class GridAiControllerTest {
     }
 
     /**
-     * Stub DatabaseProvider for unit testing. Returns configurable results
-     * without an actual database.
+     * Stub QueryExecutor for unit testing. Returns configurable results without
+     * an actual database.
      */
-    private static class StubDatabaseProvider implements DatabaseProvider {
+    private static class StubQueryExecutor implements QueryExecutor {
         private String schema = "test schema";
         private List<Map<String, Object>> queryResults = List.of();
         private boolean throwOnExecute = false;

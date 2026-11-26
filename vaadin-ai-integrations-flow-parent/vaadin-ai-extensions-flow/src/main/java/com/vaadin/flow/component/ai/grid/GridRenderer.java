@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.common.QueryPage;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -59,14 +59,14 @@ public final class GridRenderer implements Serializable {
      *
      * @param grid
      *            the grid to render, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
+     * @param queryExecutor
+     *            the query executor, not {@code null}
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
     public static void renderGrid(Grid<AiDataRow> grid,
-            DatabaseProvider databaseProvider, String query) {
-        var sampleRows = databaseProvider.executeQuery(query,
+            QueryExecutor queryExecutor, String query) {
+        var sampleRows = queryExecutor.executeQuery(query,
                 new QueryPage(0, 1, List.of()));
         removeExtraHeaderRows(grid);
         grid.removeAllColumns();
@@ -90,7 +90,7 @@ public final class GridRenderer implements Serializable {
             addColumn(grid, entry.getKey(), entry.getValue());
         }
         applyColumnGrouping(grid);
-        var dataProvider = createDataProvider(databaseProvider, query);
+        var dataProvider = createDataProvider(queryExecutor, query);
         grid.setItems(dataProvider);
         LOGGER.info("Grid configured with {} columns", sortedColumns.size());
     }
@@ -162,7 +162,7 @@ public final class GridRenderer implements Serializable {
     }
 
     private static DataProvider<AiDataRow, Void> createDataProvider(
-            DatabaseProvider databaseProvider, String query) {
+            QueryExecutor queryExecutor, String query) {
         return new CallbackDataProvider<>(fetchQuery -> {
             if (fetchQuery.getLimit() == 0) {
                 // A data view asks for zero rows when it reads the rows of a
@@ -173,11 +173,11 @@ public final class GridRenderer implements Serializable {
                     fetchQuery.getLimit(), fetchQuery.getSortOrders());
             LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
                     page.limit());
-            return databaseProvider.executeQuery(query, page).stream()
+            return queryExecutor.executeQuery(query, page).stream()
                     .map(AiDataRow::new);
         }, countFetchQuery -> {
             LOGGER.debug("Counting rows");
-            return databaseProvider.count(query);
+            return queryExecutor.count(query);
         }, row -> row);
     }
 
