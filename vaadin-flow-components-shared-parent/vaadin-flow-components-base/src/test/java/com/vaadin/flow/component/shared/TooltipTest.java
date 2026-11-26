@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.change.NodeChange;
+import com.vaadin.flow.internal.change.NodeDetachChange;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
@@ -84,6 +87,37 @@ class TooltipTest {
         ui.add(component);
 
         Assertions.assertTrue(getTooltipElement().isPresent());
+    }
+
+    @Test
+    void moveTargetWithinUI_previousTooltipNodeDetachedOnClient() {
+        Tooltip.forComponent(component);
+        ui.add(component);
+        var tooltipNode = getTooltipElement().orElseThrow().getNode();
+        var nodeId = tooltipNode.getId();
+        collectChanges();
+
+        // Moving the target detaches and re-attaches it in the same request
+        var layout = new Element("div");
+        ui.getUI().getElement().appendChild(layout);
+        layout.appendChild(component.getElement());
+
+        var changes = collectChanges();
+        // Either the node keeps its identity, or the client is told to
+        // release the previous one
+        Assertions.assertTrue(
+                tooltipNode.getId() == nodeId || changes.stream()
+                        .anyMatch(change -> change instanceof NodeDetachChange
+                                && change.getNode() == tooltipNode),
+                "Previous tooltip node was left registered on the client");
+    }
+
+    private List<NodeChange> collectChanges() {
+        var stateTree = ui.getUI().getInternals().getStateTree();
+        stateTree.runExecutionsBeforeClientResponse();
+        var changes = new ArrayList<NodeChange>();
+        stateTree.collectChanges(changes::add);
+        return changes;
     }
 
     @Test
