@@ -53,10 +53,26 @@ public class GenericIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void noUnloadHandlerRegistered() {
+    public void closeHandlers_runOnPageHideInsteadOfUnload() {
+        Assert.assertEquals("function",
+                executeScript("return typeof window.onbeforeunload"));
         // Chrome reports a permissions policy violation for pages that
         // register an unload handler
         Assert.assertNull(executeScript("return window.onunload"));
+
+        // A page kept in the back/forward cache can be restored
+        dispatchPageHide(true);
+        Assert.assertEquals("function",
+                executeScript("return typeof window.onbeforeunload"));
+
+        dispatchPageHide(false);
+        Assert.assertNull(executeScript("return window.onbeforeunload"));
+    }
+
+    private void dispatchPageHide(boolean persisted) {
+        executeScript(
+                "window.dispatchEvent(new PageTransitionEvent('pagehide', {persisted: arguments[0]}))",
+                persisted);
     }
 
     @Test
