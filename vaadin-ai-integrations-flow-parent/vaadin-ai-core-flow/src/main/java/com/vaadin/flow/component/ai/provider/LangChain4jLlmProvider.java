@@ -1083,6 +1083,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
     private static final class TurnToolProvider implements ToolProvider {
 
         @Override
+        @SuppressWarnings("deprecation")
         public ToolProviderResult provideTools(ToolProviderRequest request) {
             Turn turn = request.invocationParameters().get(TURN_PARAMETER);
             var result = ToolProviderResult.builder();
