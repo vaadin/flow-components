@@ -56,7 +56,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   claimed exclusively on `build()` — reusing one in a second orchestrator
   throws `IllegalStateException`.
 - Texts the orchestrator shows in the message list on its own, such as the
-  error message of a failed turn, are set with `AIOrchestratorI18n`. Unlike
+  error message of a failed turn, are set with `AiOrchestratorI18n`. Unlike
   a component's i18n class it is never sent to the client: it has no Jackson
   annotations, and an unset text falls back to the English default in
   `AiOrchestrator`. The user and assistant names are not part of it. They

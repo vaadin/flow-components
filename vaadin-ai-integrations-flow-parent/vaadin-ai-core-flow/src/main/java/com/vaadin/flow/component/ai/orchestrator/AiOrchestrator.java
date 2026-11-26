@@ -149,14 +149,14 @@ public class AiOrchestrator implements Serializable {
     /**
      * Shown in the message list in place of, or after, the assistant's answer
      * when a turn fails for a reason the user cannot act on, unless
-     * {@link AIOrchestratorI18n#getErrorMessage()} is set.
+     * {@link AiOrchestratorI18n#getErrorMessage()} is set.
      */
     private static final String DEFAULT_ERROR_MESSAGE = "An error occurred. Please try again.";
 
     /**
      * Shown in the message list in place of the assistant's answer when the
      * response times out, unless
-     * {@link AIOrchestratorI18n#getTimeoutErrorMessage()} is set.
+     * {@link AiOrchestratorI18n#getTimeoutErrorMessage()} is set.
      */
     private static final String DEFAULT_TIMEOUT_ERROR_MESSAGE = "Request timed out. Please try again.";
 
@@ -203,7 +203,7 @@ public class AiOrchestrator implements Serializable {
     private transient AiController controller;
     private String userName;
     private String assistantName;
-    private AIOrchestratorI18n i18n;
+    private AiOrchestratorI18n i18n;
     private RequestInterceptor requestInterceptor;
     private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
@@ -1211,7 +1211,7 @@ public class AiOrchestrator implements Serializable {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
-     * <li>{@link #withI18n(AIOrchestratorI18n)} – sets the texts the
+     * <li>{@link #withI18n(AiOrchestratorI18n)} – sets the texts the
      * orchestrator shows in the message list on its own, such as the error
      * message of a failed turn, for example to localize them.</li>
      * <li>{@link #withRequestInterceptor(RequestInterceptor)} – sets an
@@ -1254,7 +1254,7 @@ public class AiOrchestrator implements Serializable {
         private AiController controller;
         private String userName;
         private String assistantName;
-        private AIOrchestratorI18n i18n;
+        private AiOrchestratorI18n i18n;
         private RequestInterceptor requestInterceptor;
         private RequestListener requestListener;
         private AttachmentClickListener attachmentClickListener;
@@ -1528,7 +1528,7 @@ public class AiOrchestrator implements Serializable {
          * @return this builder
          * @since 25.5
          */
-        public Builder withI18n(AIOrchestratorI18n i18n) {
+        public Builder withI18n(AiOrchestratorI18n i18n) {
             Objects.requireNonNull(i18n,
                     "The i18n properties object should not be null");
             warnIfAlreadySet(this.i18n, "I18n");

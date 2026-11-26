@@ -1078,7 +1078,7 @@ class AiOrchestratorTest {
                 .thenReturn(Flux.error(new RuntimeException("API Error")));
 
         orchestratorWithI18n(
-                new AIOrchestratorI18n().setErrorMessage("Virhe tapahtui."))
+                new AiOrchestratorI18n().setErrorMessage("Virhe tapahtui."))
                 .prompt("Hello");
 
         Mockito.verify(mockMessage).setText("Virhe tapahtui.");
@@ -1094,7 +1094,7 @@ class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.error(new TimeoutException("Timed out")));
 
-        orchestratorWithI18n(new AIOrchestratorI18n()
+        orchestratorWithI18n(new AiOrchestratorI18n()
                 .setTimeoutErrorMessage("Pyyntö aikakatkaistiin."))
                 .prompt("Hello");
 
@@ -1111,7 +1111,7 @@ class AiOrchestratorTest {
                 mockProvider.stream(Mockito.any(LlmProvider.LlmRequest.class)))
                 .thenReturn(Flux.error(new RuntimeException("API Error")));
 
-        orchestratorWithI18n(new AIOrchestratorI18n()
+        orchestratorWithI18n(new AiOrchestratorI18n()
                 .setTimeoutErrorMessage("Pyyntö aikakatkaistiin."))
                 .prompt("Hello");
 
@@ -1131,7 +1131,7 @@ class AiOrchestratorTest {
 
         var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withI18n(new AIOrchestratorI18n()
+                .withI18n(new AiOrchestratorI18n()
                         .setErrorMessage("Virhe tapahtui."))
                 .build();
         Assertions.assertThrows(RuntimeException.class,
@@ -1152,7 +1152,7 @@ class AiOrchestratorTest {
 
         AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withI18n(new AIOrchestratorI18n()
+                .withI18n(new AiOrchestratorI18n()
                         .setErrorMessage("Virhe tapahtui."))
                 .build().prompt("Hello");
 
@@ -3606,9 +3606,9 @@ class AiOrchestratorTest {
     @Test
     void builder_withI18nCalledTwice_logsWarning() {
         var orchestratorBuilder = AiOrchestrator.builder(mockProvider, null)
-                .withI18n(new AIOrchestratorI18n());
+                .withI18n(new AiOrchestratorI18n());
         assertNoBuilderWarning();
-        orchestratorBuilder.withI18n(new AIOrchestratorI18n()).build();
+        orchestratorBuilder.withI18n(new AiOrchestratorI18n()).build();
         assertBuilderWarning("i18n");
     }
 
@@ -4406,7 +4406,7 @@ class AiOrchestratorTest {
                 .onResponse(Mockito.any());
     }
 
-    private AiOrchestrator orchestratorWithI18n(AIOrchestratorI18n i18n) {
+    private AiOrchestrator orchestratorWithI18n(AiOrchestratorI18n i18n) {
         return AiOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withI18n(i18n).build();
     }

@@ -29,9 +29,9 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd
  * @since 25.5
- * @see AiOrchestrator.Builder#withI18n(AIOrchestratorI18n)
+ * @see AiOrchestrator.Builder#withI18n(AiOrchestratorI18n)
  */
-public class AIOrchestratorI18n implements Serializable {
+public class AiOrchestratorI18n implements Serializable {
 
     private String errorMessage;
     private String timeoutErrorMessage;
@@ -60,7 +60,7 @@ public class AIOrchestratorI18n implements Serializable {
      *            the error message, or {@code null} to use the built-in default
      * @return this instance, for chaining
      */
-    public AIOrchestratorI18n setErrorMessage(String errorMessage) {
+    public AiOrchestratorI18n setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
         return this;
     }
@@ -88,7 +88,7 @@ public class AIOrchestratorI18n implements Serializable {
      *            default
      * @return this instance, for chaining
      */
-    public AIOrchestratorI18n setTimeoutErrorMessage(
+    public AiOrchestratorI18n setTimeoutErrorMessage(
             String timeoutErrorMessage) {
         this.timeoutErrorMessage = timeoutErrorMessage;
         return this;
