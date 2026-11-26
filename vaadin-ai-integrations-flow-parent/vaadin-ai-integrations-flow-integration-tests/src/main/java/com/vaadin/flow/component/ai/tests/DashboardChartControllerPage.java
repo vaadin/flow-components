@@ -49,7 +49,7 @@ import reactor.core.publisher.Flux;
 @Route("vaadin-ai/dashboard-chart-controller")
 public class DashboardChartControllerPage extends Div {
 
-    private static final QueryExecutor DB = createDatabaseProvider();
+    private static final QueryExecutor DB = createQueryExecutor();
 
     public DashboardChartControllerPage() {
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
@@ -126,7 +126,7 @@ public class DashboardChartControllerPage extends Div {
         }
     }
 
-    private static QueryExecutor createDatabaseProvider() {
+    private static QueryExecutor createQueryExecutor() {
         var rows = List.of(
                 Map.<String, Object> of("_NAME", "January", "_Y", 45000),
                 Map.<String, Object> of("_NAME", "February", "_Y", 52000),

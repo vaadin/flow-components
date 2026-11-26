@@ -28,11 +28,11 @@ class QueryExecutorAiToolsTest {
 
     private static final String SCHEMA = "Tables: users(id INT, name VARCHAR)";
 
-    private QueryExecutor provider;
+    private QueryExecutor executor;
 
     @BeforeEach
     void setUp() {
-        provider = new QueryExecutor() {
+        executor = new QueryExecutor() {
             @Override
             public String getSchema() {
                 return SCHEMA;
@@ -46,20 +46,20 @@ class QueryExecutorAiToolsTest {
     }
 
     @Test
-    void getDatabaseSchema_nullProvider_throwsNullPointerException() {
+    void getDatabaseSchema_nullExecutor_throwsNullPointerException() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> QueryExecutorAiTools.getDatabaseSchema(null));
     }
 
     @Test
     void getDatabaseSchema_returnsToolWithCorrectName() {
-        var tool = QueryExecutorAiTools.getDatabaseSchema(provider);
+        var tool = QueryExecutorAiTools.getDatabaseSchema(executor);
         Assertions.assertEquals("get_database_schema", tool.getName());
     }
 
     @Test
     void getDatabaseSchema_returnsToolWithDescription() {
-        var tool = QueryExecutorAiTools.getDatabaseSchema(provider);
+        var tool = QueryExecutorAiTools.getDatabaseSchema(executor);
         Assertions.assertNotNull(tool.getDescription());
         Assertions.assertFalse(tool.getDescription().isEmpty());
     }
@@ -68,20 +68,20 @@ class QueryExecutorAiToolsTest {
     void getDatabaseSchema_declaresNoParameters() {
         // A null schema tells the provider the tool takes no parameters; the
         // provider substitutes its placeholder schema in the LLM request.
-        var tool = QueryExecutorAiTools.getDatabaseSchema(provider);
+        var tool = QueryExecutorAiTools.getDatabaseSchema(executor);
         Assertions.assertNull(tool.getParametersSchema());
     }
 
     @Test
-    void getDatabaseSchema_executeDelegatesToProvider() {
-        var tool = QueryExecutorAiTools.getDatabaseSchema(provider);
+    void getDatabaseSchema_executeDelegatesToExecutor() {
+        var tool = QueryExecutorAiTools.getDatabaseSchema(executor);
         Assertions.assertEquals(SCHEMA,
                 tool.execute(JacksonUtils.createObjectNode()));
     }
 
     @Test
     void getDatabaseSchema_executeIgnoresUnexpectedArguments() {
-        var tool = QueryExecutorAiTools.getDatabaseSchema(provider);
+        var tool = QueryExecutorAiTools.getDatabaseSchema(executor);
         var args = JacksonUtils.createObjectNode();
         args.put("unexpected", "ignored");
         Assertions.assertEquals(SCHEMA, tool.execute(args));
@@ -89,7 +89,7 @@ class QueryExecutorAiToolsTest {
 
     @Test
     void createAll_returnsListContainingDatabaseSchemaTool() {
-        var tools = QueryExecutorAiTools.createAll(provider);
+        var tools = QueryExecutorAiTools.createAll(executor);
         Assertions.assertEquals(1, tools.size());
         Assertions.assertEquals("get_database_schema", tools.get(0).getName());
     }

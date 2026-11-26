@@ -37,7 +37,7 @@ class QueryExecutorTest {
     private static final QueryPage FIRST_ROW = new QueryPage(0, 1, List.of());
 
     /** Records the SQL it runs and answers with fixed rows. */
-    private static class RecordingProvider implements QueryExecutor {
+    private static class RecordingExecutor implements QueryExecutor {
 
         final List<String> statements = new ArrayList<>();
         List<Map<String, Object>> rows = List.of();
@@ -54,19 +54,19 @@ class QueryExecutorTest {
         }
     }
 
-    private RecordingProvider provider;
+    private RecordingExecutor executor;
 
     @BeforeEach
     void setUp() {
-        provider = new RecordingProvider();
+        executor = new RecordingExecutor();
     }
 
     @Test
     void page_withoutSortOrders_appendsTheLimitToTheQuery() {
-        provider.executeQuery(QUERY, new QueryPage(100, 50, List.of()));
+        executor.executeQuery(QUERY, new QueryPage(100, 50, List.of()));
 
         Assertions.assertEquals(List.of(QUERY + "\nLIMIT 50 OFFSET 100"),
-                provider.statements);
+                executor.statements);
     }
 
     @ParameterizedTest
@@ -75,12 +75,12 @@ class QueryExecutorTest {
             "SELECT a FROM (SELECT a FROM t) AS s LIMIT 5",
             "(" + QUERY + " LIMIT 5)", "SELECT TOP 2 a FROM t" })
     void page_withoutSortOrders_wrapsAQueryWithALimit(String query) {
-        provider.executeQuery(query, FIRST_ROW);
+        executor.executeQuery(query, FIRST_ROW);
 
         Assertions.assertEquals(
                 List.of("SELECT * FROM (" + query
                         + "\n) AS _limited LIMIT 1 OFFSET 0"),
-                provider.statements);
+                executor.statements);
     }
 
     @ParameterizedTest
@@ -95,106 +95,106 @@ class QueryExecutorTest {
             "SELECT a FROM t WHERE b <> 'it''s a limit'",
             "SELECT a AS \"a \"\"limit\"\" b\" FROM t" })
     void page_withoutSortOrders_appendsWithoutALimitOfItsOwn(String query) {
-        provider.executeQuery(query, FIRST_ROW);
+        executor.executeQuery(query, FIRST_ROW);
 
         Assertions.assertEquals(List.of(query + "\nLIMIT 1 OFFSET 0"),
-                provider.statements);
+                executor.statements);
     }
 
     @Test
     void page_withSortOrders_ordersByTheResultColumnsFirst() {
-        provider.executeQuery(QUERY,
+        executor.executeQuery(QUERY,
                 new QueryPage(0, 50, List.of(
                         new QuerySortOrder("Salary", SortDirection.DESCENDING),
                         new QuerySortOrder("Name", SortDirection.ASCENDING))));
 
         Assertions.assertEquals(List.of("SELECT * FROM (" + QUERY
                 + "\n) AS _t ORDER BY \"Salary\" DESC, \"Name\" ASC LIMIT 50 OFFSET 0"),
-                provider.statements);
+                executor.statements);
     }
 
     @Test
     void page_quotesADoubleQuoteInAColumnName() {
-        provider.executeQuery(QUERY, new QueryPage(0, 1, List.of(
+        executor.executeQuery(QUERY, new QueryPage(0, 1, List.of(
                 new QuerySortOrder("Say \"hi\"", SortDirection.ASCENDING))));
 
         Assertions.assertTrue(
-                provider.statements.get(0)
+                executor.statements.get(0)
                         .contains("ORDER BY \"Say \"\"hi\"\"\" ASC"),
-                provider.statements.get(0));
+                executor.statements.get(0));
     }
 
     @Test
     void page_ignoresASemicolonAtTheEndOfTheQuery() {
-        provider.executeQuery(QUERY, FIRST_ROW);
-        provider.executeQuery(QUERY + " ;\n", FIRST_ROW);
+        executor.executeQuery(QUERY, FIRST_ROW);
+        executor.executeQuery(QUERY + " ;\n", FIRST_ROW);
 
-        Assertions.assertEquals(provider.statements.get(0),
-                provider.statements.get(1));
+        Assertions.assertEquals(executor.statements.get(0),
+                executor.statements.get(1));
     }
 
     @Test
     void page_endsALineCommentAtTheEndOfTheQuery() {
-        provider.executeQuery(QUERY + " -- everyone", FIRST_ROW);
+        executor.executeQuery(QUERY + " -- everyone", FIRST_ROW);
 
         Assertions.assertEquals(
                 List.of(QUERY + " -- everyone\nLIMIT 1 OFFSET 0"),
-                provider.statements);
+                executor.statements);
     }
 
     @Test
     void page_returnsTheRowsOfThePagedQuery() {
-        provider.rows = List.of(Map.of("Name", "Ann"));
+        executor.rows = List.of(Map.of("Name", "Ann"));
 
-        Assertions.assertEquals(provider.rows,
-                provider.executeQuery(QUERY, FIRST_ROW));
+        Assertions.assertEquals(executor.rows,
+                executor.executeQuery(QUERY, FIRST_ROW));
     }
 
     @Test
     void count_wrapsTheQueryInACountAndReadsTheFirstValue() {
-        provider.rows = List.of(Map.of("EXPR$0", 42L));
+        executor.rows = List.of(Map.of("EXPR$0", 42L));
 
-        Assertions.assertEquals(42, provider.count(QUERY));
+        Assertions.assertEquals(42, executor.count(QUERY));
         Assertions.assertEquals(
                 List.of("SELECT COUNT(*) FROM (" + QUERY + "\n) AS _counted"),
-                provider.statements);
+                executor.statements);
     }
 
     @Test
     void count_ignoresASemicolonAtTheEndOfTheQuery() {
-        provider.count(QUERY);
-        provider.count(QUERY + " ;\n");
+        executor.count(QUERY);
+        executor.count(QUERY + " ;\n");
 
-        Assertions.assertEquals(provider.statements.get(0),
-                provider.statements.get(1));
+        Assertions.assertEquals(executor.statements.get(0),
+                executor.statements.get(1));
     }
 
     @Test
     void count_endsALineCommentAtTheEndOfTheQuery() {
-        provider.count(QUERY + " -- everyone");
+        executor.count(QUERY + " -- everyone");
 
         Assertions
                 .assertEquals(
                         List.of("SELECT COUNT(*) FROM (" + QUERY
                                 + " -- everyone\n) AS _counted"),
-                        provider.statements);
+                        executor.statements);
     }
 
     @Test
     void nullArguments_throw() {
-        assertNullRejected(() -> provider.executeQuery(null, FIRST_ROW));
-        assertNullRejected(() -> provider.executeQuery(QUERY, null));
-        assertNullRejected(() -> provider.count(null));
-        Assertions.assertTrue(provider.statements.isEmpty());
+        assertNullRejected(() -> executor.executeQuery(null, FIRST_ROW));
+        assertNullRejected(() -> executor.executeQuery(QUERY, null));
+        assertNullRejected(() -> executor.count(null));
+        Assertions.assertTrue(executor.statements.isEmpty());
     }
 
     @Test
     void count_isZeroWithoutANumber() {
-        Assertions.assertEquals(0, provider.count(QUERY));
-        provider.rows = List.of(Map.of());
-        Assertions.assertEquals(0, provider.count(QUERY));
-        provider.rows = List.of(Map.of("n", "many"));
-        Assertions.assertEquals(0, provider.count(QUERY));
+        Assertions.assertEquals(0, executor.count(QUERY));
+        executor.rows = List.of(Map.of());
+        Assertions.assertEquals(0, executor.count(QUERY));
+        executor.rows = List.of(Map.of("n", "many"));
+        Assertions.assertEquals(0, executor.count(QUERY));
     }
 
     /**
