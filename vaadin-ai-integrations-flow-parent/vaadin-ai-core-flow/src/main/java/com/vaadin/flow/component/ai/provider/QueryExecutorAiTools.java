@@ -28,9 +28,9 @@ import tools.jackson.databind.JsonNode;
  * @author Vaadin Ltd
  * @since 25.3
  */
-public final class DatabaseProviderAiTools {
+public final class QueryExecutorAiTools {
 
-    private DatabaseProviderAiTools() {
+    private QueryExecutorAiTools() {
     }
 
     /**

@@ -57,7 +57,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   throws `IllegalStateException`.
 - The extensions module plugs into core only through core's public API —
   mainly `AiController`, `LlmProvider.ToolSpec`,
-  `QueryExecutor`/`DatabaseProviderAiTools`, and the shared value types.
+  `QueryExecutor`/`QueryExecutorAiTools`, and the shared value types.
   There is no SPI, registry, or reflection between the modules; keep the
   boundary that narrow.
 - Vendor LLM integrations (Spring AI, LangChain4j) live in core behind

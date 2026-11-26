@@ -21,9 +21,9 @@ import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderAiTools;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
 import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.ai.provider.QueryExecutorAiTools;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -121,7 +121,7 @@ import tools.jackson.databind.JsonNode;
  * @see ChartRenderer
  * @see ChartState
  * @see DataConverter
- * @see DatabaseProviderAiTools
+ * @see QueryExecutorAiTools
  * @since 25.3
  */
 public class ChartAiController implements AiController {
@@ -209,7 +209,7 @@ public class ChartAiController implements AiController {
     public List<LlmProvider.ToolSpec> getTools() {
         List<LlmProvider.ToolSpec> tools = new ArrayList<>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAiTools.createAll(databaseProvider));
+        tools.addAll(QueryExecutorAiTools.createAll(databaseProvider));
         tools.addAll(ChartAiTools.createAll(new ChartAiTools.Callbacks() {
             @Override
             public String getState(String chartId) {
