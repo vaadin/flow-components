@@ -568,6 +568,7 @@ public class SpringAiLlmProvider implements LlmProvider {
                 : message);
     }
 
+    @SuppressWarnings("deprecation")
     private ChatClient.ChatClientRequestSpec getPromptSpec(LlmRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
