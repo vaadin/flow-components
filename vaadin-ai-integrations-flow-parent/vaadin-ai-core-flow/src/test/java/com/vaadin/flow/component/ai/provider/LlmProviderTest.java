@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ai.common.AiAttachment;
 
-class LLMProviderTest {
+class LlmProviderTest {
 
     @Test
     @SuppressWarnings("deprecation")
