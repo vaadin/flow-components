@@ -172,6 +172,7 @@ class AiOrchestratorTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void builder_withToolObjects_setsTools() {
         var tool = new SampleTool();
         var mockMessage = createMockMessage();
@@ -194,6 +195,7 @@ class AiOrchestratorTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void builder_withNullToolObjects_handlesNullGracefully() {
         var orchestrator = AiOrchestrator.builder(mockProvider, null)
                 .withTools((Object[]) null).build();
@@ -477,6 +479,7 @@ class AiOrchestratorTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void prompt_withTools_includesToolsInRequest() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -1238,6 +1241,7 @@ class AiOrchestratorTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void prompt_requestContainsCorrectTools() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -3577,6 +3581,7 @@ class AiOrchestratorTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void builder_withToolsCalledTwice_logsWarning() {
         var orchestratorBuilder = AiOrchestrator.builder(mockProvider, null)
                 .withTools(new SampleTool());

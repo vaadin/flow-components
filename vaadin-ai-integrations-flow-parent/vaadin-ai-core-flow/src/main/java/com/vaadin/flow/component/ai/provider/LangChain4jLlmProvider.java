@@ -22,7 +22,6 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,25 +109,24 @@ import tools.jackson.databind.JsonNode;
  * The provider keeps doing what the orchestrator needs from it, whatever the
  * customizer configured: it supplies the tools of each turn next to the tools
  * of the customizer, adds the session context and the attachments to the user
- * message, reports the response metadata and enforces the tool call limits.
- * Give the tools you add in the customizer names that the tools of the turn do
- * not use: LangChain4j rejects two tools of the same name, and every turn that
- * has both then fails. Once a turn is cancelled, the provider calls the model
- * no more and does not pass a model response that arrives later on to the
- * service, so no tool runs for it, whether the provider or the customizer
- * supplied it. Before the customizer runs, the provider sets defaults that the
- * customizer may replace: its own chat memory, no limit on LangChain4j's tool
- * calling round trips (the provider's own tool call limits bound the loop), and
- * a result that tells the model when it called a tool that does not exist. The
- * model is the one given to the constructor, so a model set in the customizer
- * is not used. Errors of the tools added in the customizer are handled by
- * LangChain4j, with the tool error handlers set in the customizer or with
- * LangChain4j's defaults; see the LangChain4j documentation on how to handle
- * them safely. Unless the customizer sets both handlers, LangChain4j logs a
- * notice that asks for them, once, also when the customizer adds no tools. The
- * notice does not concern the tools of the orchestrator, whose errors never
- * reach these handlers. Setting both handlers in the customizer chooses the
- * behavior for the tools you add, and LangChain4j then logs no notice.
+ * message, and reports the response metadata. Give the tools you add in the
+ * customizer names that the tools of the turn do not use: LangChain4j rejects
+ * two tools of the same name, and every turn that has both then fails. Once a
+ * turn is cancelled, the provider calls the model no more and does not pass a
+ * model response that arrives later on to the service, so no tool runs for it,
+ * whether the provider or the customizer supplied it. Before the customizer
+ * runs, the provider sets defaults that the customizer may replace: its own
+ * chat memory, and a result that tells the model when it called a tool that
+ * does not exist. The model is the one given to the constructor, so a model set
+ * in the customizer is not used. Errors of the tools added in the customizer
+ * are handled by LangChain4j, with the tool error handlers set in the
+ * customizer or with LangChain4j's defaults; see the LangChain4j documentation
+ * on how to handle them safely. Unless the customizer sets both handlers,
+ * LangChain4j logs a notice that asks for them, once, also when the customizer
+ * adds no tools. The notice does not concern the tools of the orchestrator,
+ * whose errors never reach these handlers. Setting both handlers in the
+ * customizer chooses the behavior for the tools you add, and LangChain4j then
+ * logs no notice.
  * </p>
  * <p>
  * <b>System prompt:</b> you can set a system prompt in the customizer with
@@ -166,11 +164,10 @@ import tools.jackson.databind.JsonNode;
  * the chat memory, unless the guardrail asks LangChain4j to remove it with
  * {@code fatalWithMessageRemoval(...)} or
  * {@code failureWithMessageRemoval(...)}. When a turn with a
- * {@link StreamingChatModel} is cancelled, or fails on a tool call limit, while
- * a guardrail has asked the model again, your guardrails check an answer
- * without text once more: LangChain4j needs an answer to finish. The turn has
- * ended by then, so what the guardrails return for that answer is not passed
- * on.
+ * {@link StreamingChatModel} is cancelled while a guardrail has asked the model
+ * again, your guardrails check an answer without text once more: LangChain4j
+ * needs an answer to finish. The turn has ended by then, so what the guardrails
+ * return for that answer is not passed on.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -199,12 +196,14 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * <b>Tool call limits:</b> a model that keeps requesting tool calls instead of
  * answering would never end its turn, and each round costs another model call.
- * The provider ends such a turn with a {@link ToolCallLimitExceededException}
- * once the model has requested more than {@code 40} calls to any one tool, or
- * more than {@code 150} tool calls in total, within the turn. The limits count
- * every tool call the model requests, including calls to the tools configured
- * in the customizer. Adjust or remove them with
- * {@link #setMaxCallsPerTool(int)} and {@link #setMaxTotalToolCalls(int)}.
+ * LangChain4j runs the tool-calling loop and bounds it with its
+ * {@code maxToolCallingRoundTrips} setting. Past that limit it stops the loop
+ * with an exception of its own, which you receive as the error of the turn. The
+ * provider keeps LangChain4j's default for that setting and adds no limit of
+ * its own. To change it, call {@code maxToolCallingRoundTrips(...)} in the
+ * customizer. The conversation stays usable after such a turn: it leaves only
+ * its prompt in the provider's chat memory, and the next prompt continues from
+ * there.
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
@@ -270,8 +269,6 @@ public class LangChain4jLlmProvider implements LlmProvider {
             .getLogger(LangChain4jLlmProvider.class);
 
     private static final int MAX_MESSAGES = 30;
-    private static final int DEFAULT_MAX_CALLS_PER_TOOL = 40;
-    private static final int DEFAULT_MAX_TOTAL_TOOL_CALLS = 150;
 
     /**
      * The invocation parameter under which the turn travels to the hooks the
@@ -319,8 +316,6 @@ public class LangChain4jLlmProvider implements LlmProvider {
     private final transient TurnScopedChatMemory chatMemory = createChatMemory();
     private final BackgroundExecution backgroundExecution = new BackgroundExecution(
             LangChain4jLlmProvider.class);
-    private int maxCallsPerTool = DEFAULT_MAX_CALLS_PER_TOOL;
-    private int maxTotalToolCalls = DEFAULT_MAX_TOTAL_TOOL_CALLS;
 
     /**
      * Constructor with a streaming chat model.
@@ -443,14 +438,11 @@ public class LangChain4jLlmProvider implements LlmProvider {
     /**
      * Applies the defaults the provider wants on the service before the
      * application gets to customize it, so that each can be replaced: the
-     * provider's own chat memory, a tool-calling loop bounded by the provider's
-     * tool call limits rather than by LangChain4j's round trip count, and a
-     * tool the model made up being reported back to it instead of failing the
-     * turn.
+     * provider's own chat memory, and a tool the model made up being reported
+     * back to it instead of failing the turn.
      */
     private void prepare(AiServices<ChatService> builder) {
         builder.chatMemory(chatMemory);
-        builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
         builder.hallucinatedToolNameStrategy(
                 LangChain4jLlmProvider::toolNotFound);
     }
@@ -556,9 +548,10 @@ public class LangChain4jLlmProvider implements LlmProvider {
     /**
      * Returns a model that passes every call on to the given one, and runs the
      * checks of the turn bound to the current thread on the request of a call
-     * first, see {@link Turn#beforeModelCall(ChatRequest)}, and on its response
-     * before the service receives it, see
-     * {@link Turn#observeResponse(ChatResponse)}.
+     * first, see {@link Turn#beforeModelCall(ChatRequest)}. Its response is
+     * recorded before the service receives it, see
+     * {@link Turn#observeResponse(ChatResponse)}, and held back when the turn
+     * was cancelled in the meantime.
      * <p>
      * The checks sit in front of the model, rather than in the request
      * transformer or the tool error handler of the service, because the model
@@ -627,8 +620,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
             if (handler.isEmpty()) {
                 // Returned to the service, the response would run the tools
                 // it requests, also those the provider does not guard. The
-                // response of a cancelled turn ends the turn here instead, and
-                // so does one with a tool call past a limit.
+                // response of a cancelled turn ends the turn here instead.
                 if (turn.isCancelled()) {
                     LOGGER.debug("The turn was cancelled, discarding the "
                             + "model response");
@@ -685,8 +677,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
      * run tools which must not run, and returns whether it did. A complete tool
      * call, where LangChain4j starts a tool when it executes tools
      * concurrently, is dropped once the turn is cancelled. A complete response
-     * ends the turn instead of reaching the service when the turn is cancelled,
-     * or when a tool call of the response exceeds a limit.
+     * ends the turn instead of reaching the service when the turn is cancelled.
      */
     private static boolean holdBack(Turn turn, String call, Object[] arguments,
             StreamingChatResponseHandler handler) {
@@ -702,13 +693,8 @@ public class LangChain4jLlmProvider implements LlmProvider {
             endTurn(turn, handler, new TurnCancelledException());
             return true;
         }
-        try {
-            turn.observeResponse((ChatResponse) arguments[0]);
-            return false;
-        } catch (ToolCallLimitExceededException e) {
-            endTurn(turn, handler, e);
-            return true;
-        }
+        turn.observeResponse((ChatResponse) arguments[0]);
+        return false;
     }
 
     /**
@@ -758,9 +744,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
                 LOGGER.debug("The turn was cancelled before it started");
                 return;
             }
-            var turn = new Turn(request, sink,
-                    new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls),
-                    chatMemory);
+            var turn = new Turn(request, sink, chatMemory);
             try {
                 runInTurn(turn, () -> {
                     startTurn(turn);
@@ -867,103 +851,6 @@ public class LangChain4jLlmProvider implements LlmProvider {
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);
-    }
-
-    /**
-     * Gets the maximum number of times the model may call any one tool during a
-     * turn.
-     *
-     * @return the maximum number of calls per tool, or {@code 0} if there is no
-     *         limit
-     * @since 25.4
-     */
-    public int getMaxCallsPerTool() {
-        return maxCallsPerTool;
-    }
-
-    /**
-     * Sets the maximum number of times the model may call any one tool during a
-     * turn. The default is {@code 40}.
-     * <p>
-     * A model that keeps calling the same tool instead of answering, for
-     * example to look for something the application does not have, would
-     * otherwise never end its turn. Once a call would exceed the limit, the
-     * turn fails with a {@link ToolCallLimitExceededException} that names the
-     * tool: none of the tool calls of that round are executed, the model is not
-     * called again, and you receive the exception as the error of the turn. The
-     * conversation stays usable: the failed turn leaves only its prompt in the
-     * provider's chat memory, and the next prompt continues from there.
-     * <p>
-     * Calls to the tools you configured in the customizer count against the
-     * limit as well, and those tools are held back with the others. The
-     * exception is {@code executeToolsConcurrently()} in the customizer with a
-     * {@link StreamingChatModel}: LangChain4j then starts a tool before the
-     * response that requests it is complete, so the tool calls of that last
-     * round still run before the turn fails.
-     * <p>
-     * The limit applies to each tool separately. See
-     * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
-     * turn together. The value is read when a turn starts, so a change applies
-     * from the next prompt on.
-     *
-     * @param maxCallsPerTool
-     *            the maximum number of calls per tool during a turn, or
-     *            {@code 0} to remove the limit
-     * @throws IllegalArgumentException
-     *             if the value is negative
-     * @since 25.4
-     */
-    public void setMaxCallsPerTool(int maxCallsPerTool) {
-        if (maxCallsPerTool < 0) {
-            throw new IllegalArgumentException(
-                    "maxCallsPerTool must not be negative, 0 removes the limit");
-        }
-        this.maxCallsPerTool = maxCallsPerTool;
-    }
-
-    /**
-     * Gets the maximum number of tool calls the model may make during a turn,
-     * all tools together.
-     *
-     * @return the maximum number of tool calls per turn, or {@code 0} if there
-     *         is no limit
-     * @since 25.4
-     */
-    public int getMaxTotalToolCalls() {
-        return maxTotalToolCalls;
-    }
-
-    /**
-     * Sets the maximum number of tool calls the model may make during a turn,
-     * all tools together. The default is {@code 150}.
-     * <p>
-     * This bounds a turn that {@link #setMaxCallsPerTool(int)} does not catch
-     * because the model spreads its calls over several tools. Once a call would
-     * exceed the limit, the turn fails with a
-     * {@link ToolCallLimitExceededException}: none of the tool calls of that
-     * round are executed, the model is not called again, and you receive the
-     * exception as the error of the turn. The conversation stays usable: the
-     * failed turn leaves only its prompt in the provider's chat memory, and the
-     * next prompt continues from there. As with
-     * {@link #setMaxCallsPerTool(int)}, the tools you configured in the
-     * customizer count against the limit and are held back with the others.
-     * <p>
-     * The value is read when a turn starts, so a change applies from the next
-     * prompt on.
-     *
-     * @param maxTotalToolCalls
-     *            the maximum number of tool calls during a turn, or {@code 0}
-     *            to remove the limit
-     * @throws IllegalArgumentException
-     *             if the value is negative
-     * @since 25.4
-     */
-    public void setMaxTotalToolCalls(int maxTotalToolCalls) {
-        if (maxTotalToolCalls < 0) {
-            throw new IllegalArgumentException(
-                    "maxTotalToolCalls must not be negative, 0 removes the limit");
-        }
-        this.maxTotalToolCalls = maxTotalToolCalls;
     }
 
     @Override
@@ -1083,6 +970,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
     private static final class TurnToolProvider implements ToolProvider {
 
         @Override
+        @SuppressWarnings("deprecation")
         public ToolProviderResult provideTools(ToolProviderRequest request) {
             Turn turn = request.invocationParameters().get(TURN_PARAMETER);
             var result = ToolProviderResult.builder();
@@ -1255,64 +1143,15 @@ public class LangChain4jLlmProvider implements LlmProvider {
     }
 
     /**
-     * The tool call limits of one turn, and the calls counted against them so
-     * far. The per-tool limit is checked before the total, and the call that
-     * takes a count past its limit is the one refused. The whole round is
-     * screened before anything runs, so a round containing a refused call
-     * executes none of its calls.
-     */
-    private static final class ToolCallLimits {
-        private final int maxCallsPerTool;
-        private final int maxTotalToolCalls;
-        private final Map<String, Integer> callsPerTool = new HashMap<>();
-        private int totalToolCalls;
-
-        ToolCallLimits(int maxCallsPerTool, int maxTotalToolCalls) {
-            this.maxCallsPerTool = maxCallsPerTool;
-            this.maxTotalToolCalls = maxTotalToolCalls;
-        }
-
-        /**
-         * Counts one requested tool call against the limits.
-         *
-         * @param requestedToolName
-         *            the name of the tool the model requested, possibly
-         *            {@code null}
-         * @return the exception describing the limit the call exceeds, or empty
-         *         if the call is within the limits
-         */
-        Optional<ToolCallLimitExceededException> countAndCheck(
-                String requestedToolName) {
-            // LangChain4j does not guard the name, so it can be null; such
-            // requests are counted together under "".
-            var toolName = Objects.toString(requestedToolName, "");
-            totalToolCalls++;
-            var callsToTool = callsPerTool.merge(toolName, 1, Integer::sum);
-            if (maxCallsPerTool > 0 && callsToTool > maxCallsPerTool) {
-                return Optional.of(new ToolCallLimitExceededException(
-                        "Tool call limit (" + maxCallsPerTool
-                                + ") exceeded for tool '" + toolName + "'"));
-            }
-            if (maxTotalToolCalls > 0 && totalToolCalls > maxTotalToolCalls) {
-                return Optional.of(new ToolCallLimitExceededException(
-                        "Total tool call limit (" + maxTotalToolCalls
-                                + ") exceeded for this turn"));
-            }
-            return Optional.empty();
-        }
-    }
-
-    /**
      * The state of one turn: the request it answers, the sink its tokens go to,
-     * the limits, its tool traffic and the metadata observed so far. The hooks
-     * the provider registers on the service reach it through the invocation
-     * parameters, the model decorator and the chat memory through the thread
-     * the provider binds it to.
+     * its tool traffic and the metadata observed so far. The hooks the provider
+     * registers on the service reach it through the invocation parameters, the
+     * model decorator and the chat memory through the thread the provider binds
+     * it to.
      */
     private static final class Turn {
         private final LlmRequest request;
         private final FluxSink<String> sink;
-        private final ToolCallLimits toolCallLimits;
         /**
          * The provider's own chat memory, where the turn stores the answer its
          * output guardrails returned.
@@ -1356,11 +1195,9 @@ public class LangChain4jLlmProvider implements LlmProvider {
         private boolean outputGuarded;
 
         Turn(LlmRequest request, FluxSink<String> sink,
-                ToolCallLimits toolCallLimits,
                 TurnScopedChatMemory chatMemory) {
             this.request = request;
             this.sink = sink;
-            this.toolCallLimits = toolCallLimits;
             this.chatMemory = chatMemory;
         }
 
@@ -1426,30 +1263,16 @@ public class LangChain4jLlmProvider implements LlmProvider {
 
         /**
          * Runs on each model response of the turn, before the service receives
-         * it: records the metadata of the response, and counts the tool calls
-         * it requests against the limits of the turn. A response with a call
-         * past a limit ends the turn here. Given to the service, it would run
-         * the tools of the round, also those the provider does not supply. The
-         * metadata comes first, as the round trip was made whether or not the
-         * turn goes on. A response without tool calls is the answer of the
-         * turn.
-         *
-         * @throws ToolCallLimitExceededException
-         *             if a tool call the response requests exceeds a limit
+         * it: records the metadata of the response, and notes the answer of the
+         * turn, which is a response without tool calls. The metadata is
+         * recorded here because the round trip was made whether or not the
+         * service goes on with the turn.
          */
         void observeResponse(ChatResponse response) {
             observeMetadata(response);
             var aiMessage = response.aiMessage();
             if (aiMessage == null || !aiMessage.hasToolExecutionRequests()) {
                 answered = true;
-                return;
-            }
-            for (var toolRequest : aiMessage.toolExecutionRequests()) {
-                var exceededLimit = toolCallLimits
-                        .countAndCheck(toolRequest.name());
-                if (exceededLimit.isPresent()) {
-                    throw exceededLimit.get();
-                }
             }
         }
 
@@ -1592,8 +1415,7 @@ public class LangChain4jLlmProvider implements LlmProvider {
                 request.metadataSink()
                         .accept(new ResponseMetadata(finishReason, tokenUsage));
             } catch (RuntimeException e) {
-                // The turn goes on without its metadata, and the tool calls
-                // of the response are still counted
+                // The turn goes on without its metadata
                 LOGGER.warn("The metadata sink of the request failed", e);
             }
         }
@@ -1609,8 +1431,8 @@ public class LangChain4jLlmProvider implements LlmProvider {
          * {@code SpringAiLlmProvider}, whose terminal-chunk check likewise
          * ignores a reason that arrives with tool calls still pending. Called
          * only where the turn ends with the model's own answer; a turn ended by
-         * a tool call limit or by a cancelled sink does not pass through here,
-         * since neither is a normal completion.
+         * an error or by a cancelled sink does not pass through here, since
+         * neither is a normal completion.
          * <p>
          * A missing finish reason is the one terminal state left that may
          * indicate a silent abnormal termination. It does not prove the model
