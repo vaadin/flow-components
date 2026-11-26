@@ -105,6 +105,7 @@ import tools.jackson.databind.json.JsonMapper;
  *         .withController(controller) // optional
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
+ *         .withI18n(i18n) // optional
  *         .withResponseListener(e -&gt; save(e.getResponse())) // optional
  *         .withHistory(savedHistory, savedAttachments) // optional, for restore
  *         .build();
@@ -148,9 +149,17 @@ public class AiOrchestrator implements Serializable {
 
     /**
      * Shown in the message list in place of, or after, the assistant's answer
-     * when a turn fails for a reason the user cannot act on.
+     * when a turn fails for a reason the user cannot act on, unless
+     * {@link AiOrchestratorI18n#getErrorMessage()} is set.
      */
-    private static final String GENERIC_ERROR_MESSAGE = "An error occurred. Please try again.";
+    private static final String DEFAULT_ERROR_MESSAGE = "An error occurred. Please try again.";
+
+    /**
+     * Shown in the message list in place of the assistant's answer when the
+     * response times out, unless
+     * {@link AiOrchestratorI18n#getTimeoutErrorMessage()} is set.
+     */
+    private static final String DEFAULT_TIMEOUT_ERROR_MESSAGE = "Request timed out. Please try again.";
 
     /**
      * The feature flag ID for AI components.
@@ -195,6 +204,7 @@ public class AiOrchestrator implements Serializable {
     private transient AiController controller;
     private String userName;
     private String assistantName;
+    private AiOrchestratorI18n i18n;
     private RequestInterceptor requestInterceptor;
     private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
@@ -491,11 +501,11 @@ public class AiOrchestrator implements Serializable {
         }, error -> {
             String userMessage;
             if (error instanceof TimeoutException) {
-                userMessage = "Request timed out. Please try again.";
+                userMessage = getTimeoutErrorMessage();
                 LOGGER.warn("LLM request timed out after {} seconds",
                         TIMEOUT_SECONDS);
             } else {
-                userMessage = GENERIC_ERROR_MESSAGE;
+                userMessage = getErrorMessage();
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (messageList != null) {
@@ -651,10 +661,20 @@ public class AiOrchestrator implements Serializable {
             // fireResponseListener (which appends rather than rewrites).
             var message = getOrCreateAssistantMessage(assistantMessage);
             if (message != null) {
-                message.setText(GENERIC_ERROR_MESSAGE);
+                message.setText(getErrorMessage());
             }
             throw t;
         }
+    }
+
+    private String getErrorMessage() {
+        var message = i18n == null ? null : i18n.getErrorMessage();
+        return message == null ? DEFAULT_ERROR_MESSAGE : message;
+    }
+
+    private String getTimeoutErrorMessage() {
+        var message = i18n == null ? null : i18n.getTimeoutErrorMessage();
+        return message == null ? DEFAULT_TIMEOUT_ERROR_MESSAGE : message;
     }
 
     /**
@@ -963,7 +983,7 @@ public class AiOrchestrator implements Serializable {
             // the success path: the failure path already rewrote the
             // assistant message to a generic error message.
             if (messageList != null) {
-                messageList.addMessage(GENERIC_ERROR_MESSAGE, assistantName,
+                messageList.addMessage(getErrorMessage(), assistantName,
                         Collections.emptyList());
             }
             return new ResponseListener.ResponseEvent("", e,
@@ -1227,6 +1247,9 @@ public class AiOrchestrator implements Serializable {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
+     * <li>{@link #withI18n(AiOrchestratorI18n)} – sets the texts the
+     * orchestrator shows in the message list on its own, such as the error
+     * message of a failed turn, for example to localize them.</li>
      * <li>{@link #withRequestInterceptor(RequestInterceptor)} – sets an
      * interceptor that can validate, sanitize, replace, reject, or postpone the
      * user's message and attachments before anything is sent to the LLM.</li>
@@ -1267,6 +1290,7 @@ public class AiOrchestrator implements Serializable {
         private AiController controller;
         private String userName;
         private String assistantName;
+        private AiOrchestratorI18n i18n;
         private RequestInterceptor requestInterceptor;
         private RequestListener requestListener;
         private AttachmentClickListener attachmentClickListener;
@@ -1564,6 +1588,29 @@ public class AiOrchestrator implements Serializable {
         }
 
         /**
+         * Sets the texts the orchestrator shows in the message list on its own,
+         * such as the message that replaces the assistant's answer when a turn
+         * fails. Use to localize them; any text left {@code null} in the given
+         * object falls back to the built-in English default.
+         * <p>
+         * The names shown as the authors of the messages are set with
+         * {@link #withUserName(String)} and {@link #withAssistantName(String)}
+         * instead.
+         *
+         * @param i18n
+         *            the texts to use, not {@code null}
+         * @return this builder
+         * @since 25.5
+         */
+        public Builder withI18n(AiOrchestratorI18n i18n) {
+            Objects.requireNonNull(i18n,
+                    "The i18n properties object should not be null");
+            warnIfAlreadySet(this.i18n, "I18n");
+            this.i18n = i18n;
+            return this;
+        }
+
+        /**
          * Sets the interceptor that is called with the user's message text and
          * attachments before the orchestrator acts on them — before the message
          * appears in the message list, before controller and request listener
@@ -1776,6 +1823,7 @@ public class AiOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
+            orchestrator.i18n = i18n;
             orchestrator.requestInterceptor = requestInterceptor;
             orchestrator.requestListener = requestListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
