@@ -101,9 +101,11 @@ public interface AiController {
      * output limit ends with no error at all, and
      * {@link ResponseListener.ResponseEvent#getMetadata()} carries the finish
      * reason that tells the two apart — committing staged state on such a turn
-     * applies work the model never finished describing. The finish reason is
-     * the underlying framework's own word, so a controller that acts on it
-     * decides which values matter to it; see
+     * applies work the model never finished describing. A turn that the LLM
+     * framework stopped at its tool call limit ends the same way when the
+     * framework reports that with a reply of its own instead of an error, as
+     * Spring AI does. The finish reason is the underlying framework's own word,
+     * so a controller that acts on it decides which values matter to it; see
      * {@link com.vaadin.flow.component.ai.provider.ResponseMetadata}.
      * </p>
      * <p>

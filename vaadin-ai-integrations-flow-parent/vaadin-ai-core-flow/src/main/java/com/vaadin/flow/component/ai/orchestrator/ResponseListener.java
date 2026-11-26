@@ -50,6 +50,11 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * preceding {@link AiController#onRequest(RequestListener.RequestEvent)}, so an
  * error does not imply that per-turn setup has happened.
  * <p>
+ * A turn can also end abnormally without an error, for example when it was cut
+ * off at the model's output limit, or when Spring AI stopped it at its tool
+ * call limit. {@link ResponseEvent#getMetadata()} carries the finish reason of
+ * such a turn; see {@link AiController#onResponse(ResponseEvent)}.
+ * <p>
  * A turn the model completed but the {@link AiController} could not apply is a
  * failure too: when {@link AiController#onResponse(ResponseEvent)} throws on a
  * successful turn, the listener receives that exception as the error, with an
