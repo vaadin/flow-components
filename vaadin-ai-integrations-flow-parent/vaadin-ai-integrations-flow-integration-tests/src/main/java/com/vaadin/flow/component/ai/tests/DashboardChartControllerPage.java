@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.chart.ChartAIController;
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.chart.ChartAiController;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
-import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
@@ -39,7 +39,7 @@ import com.vaadin.flow.shared.communication.PushMode;
 import reactor.core.publisher.Flux;
 
 /**
- * Test page for ChartAIController with Dashboard. Uses an async LLM provider
+ * Test page for ChartAiController with Dashboard. Uses an async LLM provider
  * that streams from a background thread (like a real LLM) and invokes chart
  * tools, so the orchestrator's onResponseComplete() runs via ui.access() from
  * the background thread. This reproduces the real-world timing where the
@@ -59,15 +59,15 @@ public class DashboardChartControllerPage extends Div {
 
         var chart = new Chart();
         chart.setId("test-chart");
-        var chartController = new ChartAIController(chart, DB);
+        var chartController = new ChartAiController(chart, DB);
 
         var messageList = new MessageList();
         messageList.setId("message-list");
         var messageInput = new MessageInput();
         messageInput.setId("message-input");
 
-        var orchestrator = AIOrchestrator
-                .builder(new AsyncChartLLMProvider(), null)
+        var orchestrator = AiOrchestrator
+                .builder(new AsyncChartLlmProvider(), null)
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(chartController).build();
 
@@ -90,9 +90,9 @@ public class DashboardChartControllerPage extends Div {
      * Async LLM provider that streams from a background thread and invokes
      * chart tools, mimicking real LLM behavior.
      */
-    private static class AsyncChartLLMProvider implements LLMProvider {
+    private static class AsyncChartLlmProvider implements LlmProvider {
         @Override
-        public Flux<String> stream(LLMRequest request) {
+        public Flux<String> stream(LlmRequest request) {
             var message = request.userMessage();
             var tools = request.explicitTools();
 
@@ -116,7 +116,7 @@ public class DashboardChartControllerPage extends Div {
 
         @Override
         public void setHistory(List<ChatMessage> history,
-                Map<String, List<AIAttachment>> attachmentsByMessageId) {
+                Map<String, List<AiAttachment>> attachmentsByMessageId) {
         }
 
         private static void executeTool(List<ToolSpec> tools, String name,

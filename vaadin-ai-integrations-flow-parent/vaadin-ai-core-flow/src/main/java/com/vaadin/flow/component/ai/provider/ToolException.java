@@ -19,7 +19,7 @@ package com.vaadin.flow.component.ai.provider;
  * Signals a tool failure whose message is safe to pass back to the LLM.
  * <p>
  * Throw this from tool code — a
- * {@link LLMProvider.ToolSpec#execute(tools.jackson.databind.JsonNode)
+ * {@link LlmProvider.ToolSpec#execute(tools.jackson.databind.JsonNode)
  * ToolSpec.execute} implementation, a controller callback, or a
  * {@link DatabaseProvider} — when the LLM should see why the call failed so it
  * can correct its next attempt instead of retrying blindly. The
@@ -32,8 +32,8 @@ package com.vaadin.flow.component.ai.provider;
  * not leaked.
  * <p>
  * This contract applies only to tools defined through the framework-agnostic
- * {@link LLMProvider.ToolSpec} API — the tools registered by
- * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+ * {@link LlmProvider.ToolSpec} API — the tools registered by
+ * {@link com.vaadin.flow.component.ai.orchestrator.AiController}
  * implementations and by {@link DatabaseProvider}-backed tools. Tools defined
  * with vendor-specific annotations (LangChain4j's or Spring AI's {@code @Tool})
  * are executed by the vendor framework itself, whose own error handling decides

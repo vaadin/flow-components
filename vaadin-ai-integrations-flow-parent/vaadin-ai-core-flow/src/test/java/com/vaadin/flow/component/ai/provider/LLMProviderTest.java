@@ -20,7 +20,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.common.AiAttachment;
 
 class LLMProviderTest {
 
@@ -33,7 +33,7 @@ class LLMProviderTest {
     }
 
     private record MinimalRequest(String userMessage,
-            List<AIAttachment> attachments,
-            String systemPrompt) implements LLMProvider.LLMRequest {
+            List<AiAttachment> attachments,
+            String systemPrompt) implements LlmProvider.LlmRequest {
     }
 }

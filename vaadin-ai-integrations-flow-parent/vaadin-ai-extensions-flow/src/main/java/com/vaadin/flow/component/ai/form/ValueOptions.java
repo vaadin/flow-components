@@ -23,7 +23,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * Per-field registration of the items the LLM may pick from. Items carry the
  * field's value type — a {@code ComboBox<Project>} registration passes
  * {@code Project} items, not pre-rendered strings. Pass the configured
- * registration to {@link FormAIController#fieldValueOptions(ValueOptions)
+ * registration to {@link FormAiController#fieldValueOptions(ValueOptions)
  * controller.fieldValueOptions(...)} to apply it.
  * <p>
  * The item set is either fixed ({@link #options(Collection)}) or supplied on

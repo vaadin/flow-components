@@ -1,7 +1,7 @@
 # AI integrations benchmark
 
-JUnit suite that runs the AI controllers (`FormAIController`, `GridAIController`,
-`ChartAIController`) against a real LLM and scores the result. It measures the
+JUnit suite that runs the AI controllers (`FormAiController`, `GridAiController`,
+`ChartAiController`) against a real LLM and scores the result. It measures the
 parts the unit and integration tests cannot: the built-in instructions, tool
 descriptions and schemas. The module is not published.
 
@@ -43,7 +43,7 @@ AI_BENCHMARK_MODEL=qwen3-vl:8b AI_BENCHMARK_BASE_URL=http://localhost:11434/v1 \
 | `AI_BENCHMARK_RUNS`         | Attempts per scenario.                                         | `3`     |
 | `AI_BENCHMARK_MIN_PASS_RATE`| Fraction of attempts that must pass for a scenario to pass.    | `0.6`   |
 
-The model is driven through `SpringAILLMProvider` and Spring AI's OpenAI
+The model is driven through `SpringAiLlmProvider` and Spring AI's OpenAI
 module, the same path the documentation teaches, so the numbers reflect what
 a Spring application sees. Any OpenAI-compatible endpoint works through
 `AI_BENCHMARK_BASE_URL`.
@@ -61,7 +61,7 @@ running Vaadin application, so the run needs no Vaadin license.
 Each scenario appends one line to `target/ai-benchmark.jsonl`:
 
 ```json
-{"scenario":"GridAIController.findsCustomersWithoutRecentOrders","model":"gpt-4.1-mini","runs":3,"passed":3,"inputTokens":41210,"outputTokens":812,"failures":[]}
+{"scenario":"GridAiController.findsCustomersWithoutRecentOrders","model":"gpt-4.1-mini","runs":3,"passed":3,"inputTokens":41210,"outputTokens":812,"failures":[]}
 ```
 
 The token counts are summed over the scenario's attempts. Priced at the
@@ -83,8 +83,8 @@ prints a build statistic per scenario, per controller and for the run as a
 whole, keyed by name and model, with the pass rate as the value:
 
 ```
-##teamcity[buildStatisticValue key='GridAIController.findsCustomersWithoutRecentOrders.vendor_model-name' value='1.000']
-##teamcity[buildStatisticValue key='GridAIController.vendor_model-name' value='0.667']
+##teamcity[buildStatisticValue key='GridAiController.findsCustomersWithoutRecentOrders.vendor_model-name' value='1.000']
+##teamcity[buildStatisticValue key='GridAiController.vendor_model-name' value='0.667']
 ##teamcity[buildStatisticValue key='AIControllers.vendor_model-name' value='0.917']
 ```
 
@@ -105,7 +105,7 @@ configuration, so that a run that hangs is still stopped.
 
 ## Writing a scenario
 
-A scenario is a plain `@Test` whose body is one attempt: `AIBenchmark`
+A scenario is a plain `@Test` whose body is one attempt: `AiBenchmark`
 invokes the method once per attempt and scores the pass rate. `@BeforeEach`
 and `@AfterEach` methods run around every attempt, so each attempt starts from
 fresh components, controller and conversation set up in a `@BeforeEach`
@@ -118,14 +118,14 @@ has to pick the right tables for each request.
 
 ```java
 private BenchmarkDatabase db;
-private GridAIController controller;
-private AIBenchmark.Conversation conversation;
+private GridAiController controller;
+private AiBenchmark.Conversation conversation;
 
 @BeforeEach
 void startConversation() {
     db = BenchmarkDatabase.create();
-    var grid = new Grid<AIDataRow>();
-    controller = new GridAIController(grid, db);
+    var grid = new Grid<AiDataRow>();
+    controller = new GridAiController(grid, db);
     conversation = bench.conversation(grid, controller);
 }
 
@@ -141,7 +141,7 @@ void findsCustomersWithoutRecentOrders() {
 
 Keep one scenario per capability: every extra scenario costs tokens on every
 run, so a scenario whose checks are a subset of another one should be dropped.
-Keep the system prompt generic (it is fixed in `AIBenchmark`): the point is to
+Keep the system prompt generic (it is fixed in `AiBenchmark`): the point is to
 measure the controllers' own instructions, not to compensate for them. Only a
 scenario about how a controller treats the application's system prompt adds
 instructions to it, through `conversation(root, controller, instructions)`.
