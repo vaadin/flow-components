@@ -685,4 +685,28 @@ class TabSheetTest {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(TabSheet.class));
     }
+
+    @Test
+    void setSelectedTab_selectionReflectedOnTabSheetElement() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
+        Assertions.assertEquals(0,
+                tabSheet.getElement().getProperty("selected", -2));
+
+        tabSheet.setSelectedTab(tab1);
+        Assertions.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", -2));
+
+        tabSheet.setSelectedTab(null);
+        Assertions.assertEquals(-1,
+                tabSheet.getElement().getProperty("selected", -2));
+    }
+
+    @Test
+    void addTabBeforeSelected_selectionReflectedOnTabSheetElement() {
+        tabSheet.add("Tab 1", new Span("Content 1"));
+        tabSheet.add(new Tab("Tab 0"), new Span("Content 0"), 0);
+        Assertions.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", -2));
+    }
 }
