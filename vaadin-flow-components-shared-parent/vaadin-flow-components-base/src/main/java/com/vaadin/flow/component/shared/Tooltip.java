@@ -151,10 +151,11 @@ public class Tooltip implements Serializable {
         // Handle target attach
         SerializableRunnable onTargetAttach = () -> {
             var ui = UI.getCurrentOrThrow();
+            var stateTree = ui.getInternals().getStateTree();
             // Reset the node without a client detach only when it moves to
-            // another UI (@PreserveOnRefresh)
-            if (tooltip.tooltipElement.getNode().getOwner() != ui.getInternals()
-                    .getStateTree()) {
+            // another UI (@PreserveOnRefresh) or the client resyncs
+            if (tooltip.tooltipElement.getNode().getOwner() != stateTree
+                    || stateTree.isPreparingForResync()) {
                 tooltip.tooltipElement.removeFromTree(false);
             }
 

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.change.NodeAttachChange;
+import com.vaadin.flow.internal.change.NodeChange;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
@@ -101,6 +104,23 @@ class TooltipTest {
 
         Assertions.assertEquals(nodeId,
                 getTooltipElement().orElseThrow().getNode().getId());
+    }
+
+    @Test
+    void addComponent_createTooltip_resync_tooltipNodeAttached() {
+        ui.add(component);
+        Tooltip.forComponent(component);
+        ui.fakeClientCommunication();
+
+        var stateTree = ui.getUI().getInternals().getStateTree();
+        stateTree.prepareForResync();
+        var tooltipNode = getTooltipElement().orElseThrow().getNode();
+        var changes = new ArrayList<NodeChange>();
+        stateTree.collectChanges(changes::add);
+
+        Assertions.assertTrue(changes.stream()
+                .anyMatch(change -> change instanceof NodeAttachChange
+                        && change.getNode() == tooltipNode));
     }
 
     @Test
