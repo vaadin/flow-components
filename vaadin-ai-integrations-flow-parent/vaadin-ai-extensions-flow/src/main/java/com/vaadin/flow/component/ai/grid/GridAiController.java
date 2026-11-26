@@ -21,9 +21,9 @@ import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderAiTools;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.ai.provider.QueryExecutorAiTools;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -42,7 +42,7 @@ import tools.jackson.databind.JsonNode;
  *
  * <pre>
  * var grid = new Grid&lt;AiDataRow&gt;();
- * var controller = new GridAiController(grid, databaseProvider);
+ * var controller = new GridAiController(grid, queryExecutor);
  * AiOrchestrator orchestrator = AiOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -57,8 +57,8 @@ import tools.jackson.databind.JsonNode;
  * </p>
  * <ul>
  * <li>Lazy loading, one page at a time, through
- * {@link DatabaseProvider#executeQuery(String, QueryPage)} and
- * {@link DatabaseProvider#count(String)}</li>
+ * {@link QueryExecutor#executeQuery(String, QueryPage)} and
+ * {@link QueryExecutor#count(String)}</li>
  * <li>Built-in renderers for dates and numbers</li>
  * <li>Right-alignment for numeric columns</li>
  * <li>Resizable, sortable columns with auto-width</li>
@@ -89,7 +89,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new GridAiController(grid, databaseProvider);
+ * var controller = new GridAiController(grid, queryExecutor);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -106,7 +106,7 @@ import tools.jackson.databind.JsonNode;
  * @see GridAiTools
  * @see GridRenderer
  * @see GridState
- * @see DatabaseProviderAiTools
+ * @see QueryExecutorAiTools
  * @since 25.3
  */
 public class GridAiController implements AiController {
@@ -144,7 +144,7 @@ public class GridAiController implements AiController {
             """;
 
     private final Grid<AiDataRow> grid;
-    private final DatabaseProvider databaseProvider;
+    private final QueryExecutor queryExecutor;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
     /**
@@ -152,23 +152,22 @@ public class GridAiController implements AiController {
      *
      * @param grid
      *            the grid to populate, not {@code null}
-     * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     * @param queryExecutor
+     *            the query executor for schema and query execution, not
      *            {@code null}
      */
-    public GridAiController(Grid<AiDataRow> grid,
-            DatabaseProvider databaseProvider) {
+    public GridAiController(Grid<AiDataRow> grid, QueryExecutor queryExecutor) {
         AiExtensionsLicense.check();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "DatabaseProvider must not be null");
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
+                "QueryExecutor must not be null");
     }
 
     @Override
     public List<LlmProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LlmProvider.ToolSpec>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAiTools.createAll(databaseProvider));
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
         tools.addAll(GridAiTools.createAll(new GridAiTools.Callbacks() {
             @Override
             public String getState(String gridId) {
@@ -178,11 +177,11 @@ public class GridAiController implements AiController {
             @Override
             public void updateData(String gridId, String query) {
                 // Validate eagerly by fetching one row, so an invalid
-                // query is rejected within the turn. A DatabaseProvider
+                // query is rejected within the turn. A QueryExecutor
                 // that throws ToolException gets its message relayed to
                 // the LLM so it can fix the query; any other exception is
                 // replaced with a generic error.
-                databaseProvider.executeQuery(query,
+                queryExecutor.executeQuery(query,
                         new QueryPage(0, 1, List.of()));
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
@@ -288,7 +287,7 @@ public class GridAiController implements AiController {
 
     private void render(GridEntry entry, String query, boolean fireListeners) {
         try {
-            GridRenderer.renderGrid(grid, databaseProvider, query);
+            GridRenderer.renderGrid(grid, queryExecutor, query);
             entry.setCurrentQuery(query);
             if (fireListeners) {
                 fireStateChangeListeners();

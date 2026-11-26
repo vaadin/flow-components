@@ -23,27 +23,27 @@ import tools.jackson.databind.JsonNode;
 /**
  * Factory for creating reusable database {@link LlmProvider.ToolSpec}
  * instances. These tools can be used by any controller that works with a
- * {@link DatabaseProvider}.
+ * {@link QueryExecutor}.
  *
  * @author Vaadin Ltd
  * @since 25.3
  */
-public final class DatabaseProviderAiTools {
+public final class QueryExecutorAiTools {
 
-    private DatabaseProviderAiTools() {
+    private QueryExecutorAiTools() {
     }
 
     /**
      * Creates a tool that retrieves the database schema from the
-     * {@link DatabaseProvider}.
+     * {@link QueryExecutor}.
      *
-     * @param provider
-     *            the database provider, not {@code null}
+     * @param queryExecutor
+     *            the query executor, not {@code null}
      * @return the tool definition, never {@code null}
      */
     public static LlmProvider.ToolSpec getDatabaseSchema(
-            DatabaseProvider provider) {
-        Objects.requireNonNull(provider, "provider must not be null");
+            QueryExecutor queryExecutor) {
+        Objects.requireNonNull(queryExecutor, "queryExecutor must not be null");
         return new LlmProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -63,20 +63,20 @@ public final class DatabaseProviderAiTools {
 
             @Override
             public String execute(JsonNode arguments) {
-                return provider.getSchema();
+                return queryExecutor.getSchema();
             }
         };
     }
 
     /**
-     * Creates all database provider tools for the given provider.
+     * Creates all query executor tools for the given executor.
      *
-     * @param provider
-     *            the database provider, not {@code null}
-     * @return a list of all database provider tools, never {@code null}
+     * @param queryExecutor
+     *            the query executor, not {@code null}
+     * @return a list of all query executor tools, never {@code null}
      */
     public static List<LlmProvider.ToolSpec> createAll(
-            DatabaseProvider provider) {
-        return List.of(getDatabaseSchema(provider));
+            QueryExecutor queryExecutor) {
+        return List.of(getDatabaseSchema(queryExecutor));
     }
 }

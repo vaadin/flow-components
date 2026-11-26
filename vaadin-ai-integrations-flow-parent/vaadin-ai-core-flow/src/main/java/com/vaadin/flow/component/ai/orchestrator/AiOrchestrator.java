@@ -51,6 +51,7 @@ import com.vaadin.flow.component.ai.common.AiAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
 import com.vaadin.flow.component.ai.provider.ResponseMetadata;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.ai.ui.AiFileReceiver;
 import com.vaadin.flow.component.ai.ui.AiInput;
 import com.vaadin.flow.component.ai.ui.AiMessage;
@@ -101,7 +102,7 @@ import tools.jackson.databind.json.JsonMapper;
  *         .builder(llmProvider, systemPrompt).withInput(messageInput) // optional
  *         .withMessageList(messageList) // optional
  *         .withFileReceiver(uploadManager) // optional
- *         .withTools(toolObj) // optional, for @Tool annotations
+ *         .withController(controller) // optional
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
  *         .withResponseListener(e -&gt; save(e.getResponse())) // optional
@@ -117,13 +118,13 @@ import tools.jackson.databind.json.JsonMapper;
  * {@link Builder#withResponseListener(ResponseListener)}.
  * </p>
  * <p>
- * <b>Serialization:</b> The LLM provider and tool objects are not serialized
- * (they are transient). After deserialization, call
+ * <b>Serialization:</b> The LLM provider, the controller and tool objects are
+ * not serialized (they are transient). After deserialization, call
  * {@link #reconnect(LlmProvider)} to restore transient dependencies and replay
  * the conversation history onto the new provider:
  *
  * <pre>
- * orchestrator.reconnect(provider).withTools(toolObj) // optional
+ * orchestrator.reconnect(provider).withController(controller) // optional
  *         .withAttachments(attachmentsByMsgId) // optional
  *         .apply();
  * </pre>
@@ -343,14 +344,14 @@ public class AiOrchestrator implements Serializable {
 
     /**
      * Returns a {@link Reconnector} to restore transient dependencies after
-     * deserialization. The provider is required; tools and attachments are
-     * optional.
+     * deserialization. The provider is required; the controller and attachments
+     * are optional.
      * <p>
      * Example usage:
      * </p>
      *
      * <pre>
-     * orchestrator.reconnect(provider).withTools(toolObj)
+     * orchestrator.reconnect(provider).withController(controller)
      *         .withAttachments(attachmentsByMsgId).apply();
      * </pre>
      * <p>
@@ -839,6 +840,7 @@ public class AiOrchestrator implements Serializable {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public Object[] tools() {
                 return tools == null ? new Object[0] : tools;
             }
@@ -1047,15 +1049,14 @@ public class AiOrchestrator implements Serializable {
      * {@link AiOrchestrator#reconnect(LlmProvider)}.
      * <p>
      * The provider is specified when the reconnector is created. Optional
-     * transient dependencies (tools, controller, and file attachments) can be
-     * restored via chained methods before calling {@link #apply()}. The
-     * {@code apply()} call replays the existing conversation history onto the
-     * new provider but does not modify the UI.
+     * transient dependencies (controller and file attachments) can be restored
+     * via chained methods before calling {@link #apply()}. The {@code apply()}
+     * call replays the existing conversation history onto the new provider but
+     * does not modify the UI.
      * </p>
      *
      * <pre>
-     * orchestrator.reconnect(provider).withTools(toolObj) // optional
-     *         .withController(controller) // optional
+     * orchestrator.reconnect(provider).withController(controller) // optional
      *         .withAttachments(attachmentsByMsgId) // optional
      *         .apply();
      * </pre>
@@ -1075,11 +1076,49 @@ public class AiOrchestrator implements Serializable {
         /**
          * Sets the objects containing vendor-specific tool-annotated methods
          * that will be available to the LLM.
+         * <p>
+         * The vendor framework runs these tools, so it handles an exception
+         * that a tool throws with its own defaults, not as described in
+         * {@link ToolException}. By default, the raw message of the exception
+         * may be sent to the LLM. See the vendor documentation for how to send
+         * the LLM a message that is safe for it to see, such as LangChain4j's
+         * {@code ToolErrorVisibleToLlmException}.
+         * </p>
+         * <p>
+         * Instead of this method, register the tool objects with the vendor
+         * framework when you create the new provider. For Spring AI, add them
+         * to a {@code ChatClient} and create {@code SpringAiLlmProvider} with
+         * that client:
+         * </p>
+         *
+         * <pre>
+         * var chatClient = ChatClient.builder(chatModel).defaultTools(tools).build();
+         * var provider = new SpringAiLlmProvider(chatClient);
+         * </pre>
+         * <p>
+         * For LangChain4j, add them in the customizer of
+         * {@code LangChain4jLlmProvider}:
+         * </p>
+         *
+         * <pre>
+         * var provider = new LangChain4jLlmProvider(chatModel,
+         *         service -&gt; service.tools(tools));
+         * </pre>
          *
          * @param tools
          *            the objects containing tool methods
          * @return this reconnector
+         * @deprecated Register the tool objects with the vendor framework when
+         *             you create the new provider instead: add them to the
+         *             {@code ChatClient} that you pass to
+         *             {@link com.vaadin.flow.component.ai.provider.SpringAiLlmProvider#SpringAiLlmProvider(org.springframework.ai.chat.client.ChatClient)
+         *             SpringAiLlmProvider(ChatClient)}, or in the customizer of
+         *             {@link com.vaadin.flow.component.ai.provider.LangChain4jLlmProvider
+         *             LangChain4jLlmProvider}. The description of this method
+         *             shows both. There, too, the vendor framework handles
+         *             their errors.
          */
+        @Deprecated(since = "25.4")
         public Reconnector withTools(Object... tools) {
             this.tools = tools;
             return this;
@@ -1182,9 +1221,6 @@ public class AiOrchestrator implements Serializable {
      * {@link #withFileReceiver(Upload) withFileReceiver(Upload)} – enables file
      * upload support. Uploaded files are sent to the LLM as attachments with
      * the next prompt.</li>
-     * <li>{@link #withTools(Object...)} – registers objects containing
-     * vendor-specific tool-annotated methods (e.g. LangChain4j's {@code @Tool}
-     * or Spring AI's {@code @Tool}) that the LLM can invoke.</li>
      * <li>{@link #withController(AiController)} – sets the controller that
      * provides framework-agnostic tools and lifecycle hooks.</li>
      * <li>{@link #withUserName(String)} – sets the display name for user
@@ -1416,11 +1452,49 @@ public class AiOrchestrator implements Serializable {
          * For LangChain4j, use {@code @dev.langchain4j.agent.tool.Tool}. For
          * Spring AI, use {@code @org.springframework.ai.tool.annotation.Tool}.
          * </p>
+         * <p>
+         * The vendor framework runs these tools, so it handles an exception
+         * that a tool throws with its own defaults, not as described in
+         * {@link ToolException}. By default, the raw message of the exception
+         * may be sent to the LLM. See the vendor documentation for how to send
+         * the LLM a message that is safe for it to see, such as LangChain4j's
+         * {@code ToolErrorVisibleToLlmException}.
+         * </p>
+         * <p>
+         * Instead of this method, register the tool objects with the vendor
+         * framework when you create the provider. For Spring AI, add them to a
+         * {@code ChatClient} and create {@code SpringAiLlmProvider} with that
+         * client:
+         * </p>
+         *
+         * <pre>
+         * var chatClient = ChatClient.builder(chatModel).defaultTools(tools).build();
+         * var provider = new SpringAiLlmProvider(chatClient);
+         * </pre>
+         * <p>
+         * For LangChain4j, add them in the customizer of
+         * {@code LangChain4jLlmProvider}:
+         * </p>
+         *
+         * <pre>
+         * var provider = new LangChain4jLlmProvider(chatModel,
+         *         service -&gt; service.tools(tools));
+         * </pre>
          *
          * @param tools
          *            the objects containing tool methods
          * @return this builder
+         * @deprecated Register the tool objects with the vendor framework when
+         *             you create the provider instead: add them to the
+         *             {@code ChatClient} that you pass to
+         *             {@link com.vaadin.flow.component.ai.provider.SpringAiLlmProvider#SpringAiLlmProvider(org.springframework.ai.chat.client.ChatClient)
+         *             SpringAiLlmProvider(ChatClient)}, or in the customizer of
+         *             {@link com.vaadin.flow.component.ai.provider.LangChain4jLlmProvider
+         *             LangChain4jLlmProvider}. The description of this method
+         *             shows both. There, too, the vendor framework handles
+         *             their errors.
          */
+        @Deprecated(since = "25.4")
         public Builder withTools(Object... tools) {
             if (this.tools != null) {
                 warnIfAlreadySet(this.tools, "Tools");

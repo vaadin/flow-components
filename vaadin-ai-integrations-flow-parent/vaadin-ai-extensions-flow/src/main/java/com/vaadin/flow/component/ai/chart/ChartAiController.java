@@ -21,9 +21,9 @@ import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AiController;
 import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderAiTools;
 import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.ai.provider.QueryExecutorAiTools;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -55,7 +55,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAiController(chart, databaseProvider);
+ * var controller = new ChartAiController(chart, queryExecutor);
  * AiOrchestrator orchestrator = AiOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -76,10 +76,9 @@ import tools.jackson.databind.JsonNode;
  * The controller sends the LLM nothing from the query results: when it reads
  * the chart state, it gets the SQL queries and the configuration it has set
  * itself, not the series, axis categories or other values the chart builds from
- * the rows. Only the schema description your {@link DatabaseProvider} returns
- * from {@link DatabaseProvider#getSchema()} and the message of a
- * {@link ToolException} it throws reach the LLM as is, so keep row values out
- * of both.
+ * the rows. Only the schema description your {@link QueryExecutor} returns from
+ * {@link QueryExecutor#getSchema()} and the message of a {@link ToolException}
+ * it throws reach the LLM as is, so keep row values out of both.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -96,7 +95,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAiController(chart, databaseProvider);
+ * var controller = new ChartAiController(chart, queryExecutor);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -122,7 +121,7 @@ import tools.jackson.databind.JsonNode;
  * @see ChartRenderer
  * @see ChartState
  * @see DataConverter
- * @see DatabaseProviderAiTools
+ * @see QueryExecutorAiTools
  * @since 25.3
  */
 public class ChartAiController implements AiController {
@@ -172,7 +171,7 @@ public class ChartAiController implements AiController {
             """;
 
     private final Chart chart;
-    private final DatabaseProvider databaseProvider;
+    private final QueryExecutor queryExecutor;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
 
@@ -181,15 +180,15 @@ public class ChartAiController implements AiController {
      *
      * @param chart
      *            the chart component to update, not {@code null}
-     * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     * @param queryExecutor
+     *            the query executor for schema and query execution, not
      *            {@code null}
      */
-    public ChartAiController(Chart chart, DatabaseProvider databaseProvider) {
+    public ChartAiController(Chart chart, QueryExecutor queryExecutor) {
         AiExtensionsLicense.check();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "Database provider cannot be null");
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
+                "Query executor cannot be null");
         this.dataConverter = new DefaultDataConverter();
     }
 
@@ -210,7 +209,7 @@ public class ChartAiController implements AiController {
     public List<LlmProvider.ToolSpec> getTools() {
         List<LlmProvider.ToolSpec> tools = new ArrayList<>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAiTools.createAll(databaseProvider));
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
         tools.addAll(ChartAiTools.createAll(new ChartAiTools.Callbacks() {
             @Override
             public String getState(String chartId) {
@@ -236,7 +235,7 @@ public class ChartAiController implements AiController {
             @Override
             public void updateData(String chartId, List<String> queries) {
                 // Execute queries eagerly so an invalid query is
-                // rejected within the turn. A DatabaseProvider that
+                // rejected within the turn. A QueryExecutor that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
                 // replaced with a generic error. Results are only checked
@@ -244,7 +243,7 @@ public class ChartAiController implements AiController {
                 // ChartRenderer.
                 for (var i = 0; i < queries.size(); i++) {
                     checkPlottable(i + 1,
-                            databaseProvider.executeQuery(queries.get(i)));
+                            queryExecutor.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -449,7 +448,7 @@ public class ChartAiController implements AiController {
             // decided the same way for both.
             entry.getLlmConfiguration().getChart()
                     .setType(chart.getConfiguration().getChart().getType());
-            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
+            ChartRenderer.renderChart(chart, queryExecutor, dataConverter,
                     queries, configJsons);
             configJsons.forEach(entry::applyLlmConfiguration);
             entry.setQueries(queries);
