@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -65,14 +64,11 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("=A+2", cellB1.getValue());
     }
 
-    @Ignore("flaky")
     @Test
     public void testGenericFormula() {
         createNewSpreadsheet();
-        selectCell("A1");
-        insertColumn(integerColumn);
+        insertColumn("A", integerColumn);
 
-        selectCell("B1");
         setCellValue("B1", "=SUM(A1:A4)");
         setCellValue("B2", "=A1+A2+A3+A4");
         setCellValue("B3", "=PRODUCT(A1:A4)");
@@ -87,9 +83,7 @@ public class FormulaIT extends AbstractSpreadsheetIT {
     @Test
     public void testCount() {
         createNewSpreadsheet();
-        selectCell("A1");
-        insertColumn(mixedColumn);
-        selectCell("B1");
+        insertColumn("A", mixedColumn);
         setCellValue("B1", "=COUNT(A1:A4)");
         setCellValue("B2", "=COUNTA(A1:A6)");
 
