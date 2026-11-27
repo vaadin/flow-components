@@ -15,7 +15,9 @@ type LitRendererApi = {
     returnChannel: (name: string, itemKey: string, args: any[]) => void,
     clientCallables: string[],
     propertyNamespace: string,
-    appId: string
+    appId: string,
+    clientActions?: string[],
+    clientActionFunctions?: ((event: Event | undefined, context: { args: any[] }) => void)[]
   ) => void;
   setLitRenderer: (
     component: Component,
@@ -24,7 +26,9 @@ type LitRendererApi = {
     returnChannel: (name: string, itemKey: string, args: any[]) => void,
     clientCallables: string[],
     propertyNamespace: string,
-    appId: string
+    appId: string,
+    clientActions?: string[],
+    clientActionFunctions?: ((event: Event | undefined, context: { args: any[] }) => void)[]
   ) => void;
   unsetLitRenderer: (component: Component, rendererName: string, rendererId: string) => void;
 };
@@ -149,6 +153,42 @@ describe('lit-renderer', () => {
       expect(returnChannel.secondCall.args).to.deep.equal(['select', '5', [1, 'a']]);
     });
 
+    it('should run client actions through the functions object without calling the server', () => {
+      const copy = sinon.spy();
+      const share = sinon.spy();
+      Vaadin.setCompiledLitRenderer(
+        component,
+        'renderer',
+        (html: any, ...args: any[]) => {
+          const [item, functions] = [args[5], args[7]];
+          return html`<button @click=${(e: Event) => functions.copy(e, item.email)}></button>
+            <a @click=${() => functions.share(item.email)}></a>
+            <i @click=${() => functions.select()}></i>`;
+        },
+        returnChannel,
+        ['select'],
+        NAMESPACE,
+        'ROOT',
+        ['copy', 'share'],
+        [copy, share]
+      );
+
+      renderItem({ key: '5', [`${NAMESPACE}email`]: 'jane@example.com' });
+      root.querySelector('button')!.click();
+      root.querySelector('a')!.click();
+
+      expect(returnChannel.called).to.be.false;
+      expect(copy.calledOnce).to.be.true;
+      const [event, context] = copy.firstCall.args;
+      expect(event).to.be.an.instanceOf(Event);
+      expect(context.args[1]).to.equal('jane@example.com');
+      expect(share.calledOnce).to.be.true;
+      expect(share.firstCall.args).to.deep.equal([undefined, { args: ['jane@example.com'] }]);
+
+      root.querySelector('i')!.click();
+      expect(returnChannel.firstCall.args).to.deep.equal(['select', '5', []]);
+    });
+
     it('should replace the content of another renderer', () => {
       Vaadin.setLitRenderer(component, 'renderer', '<b>old</b>', returnChannel, [], 'lr_old_', 'ROOT');
       renderItem({ key: '1' });
@@ -166,6 +206,39 @@ describe('lit-renderer', () => {
 
       expect(root.querySelector('b')).to.be.null;
       expect(root.querySelector('i')!.textContent).to.equal('new');
+    });
+  });
+
+  describe('string template', () => {
+    it('should run client actions by name without calling the server', () => {
+      const copy = sinon.spy();
+      const share = sinon.spy();
+      Vaadin.setLitRenderer(
+        component,
+        'renderer',
+        '<button @click=${(e) => copy(e, item.email)}></button><a @click=${() => share(item.email)}></a><i @click=${() => select()}></i>',
+        returnChannel,
+        ['select'],
+        NAMESPACE,
+        'ROOT',
+        ['copy', 'share'],
+        [copy, share]
+      );
+
+      renderItem({ key: '5', [`${NAMESPACE}email`]: 'jane@example.com' });
+      root.querySelector('button')!.click();
+      root.querySelector('a')!.click();
+
+      expect(returnChannel.called).to.be.false;
+      expect(copy.calledOnce).to.be.true;
+      const [event, context] = copy.firstCall.args;
+      expect(event).to.be.an.instanceOf(Event);
+      expect(context.args[1]).to.equal('jane@example.com');
+      expect(share.calledOnce).to.be.true;
+      expect(share.firstCall.args).to.deep.equal([undefined, { args: ['jane@example.com'] }]);
+
+      root.querySelector('i')!.click();
+      expect(returnChannel.firstCall.args).to.deep.equal(['select', '5', []]);
     });
   });
 

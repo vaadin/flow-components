@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,9 +29,12 @@ import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.SinkTrigger;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
@@ -89,6 +93,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
     private final Map<String, SerializableBiConsumer<SOURCE, ArrayNode>> clientCallables = new HashMap<>();
+
+    // Ordered: the client receives the action names and the rendered action
+    // functions as two positionally matched lists.
+    private final Map<String, Action> clientActions = new LinkedHashMap<>();
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
@@ -215,7 +223,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
-            ArrayNode clientCallablesArray, String propertyNamespace) {
+            ArrayNode clientCallablesArray, String propertyNamespace,
+            ArrayNode clientActionsArray, JsFunction[] clientActionFunctions) {
         assert container.getNode().isAttached() : "Container must be attached";
 
         String appId = getElementUI(container).getInternals().getAppId();
@@ -224,12 +233,14 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         if (declaredTemplate != null) {
             container.executeJs(LitRendererJs.class).setCompiledLitRenderer(
                     rendererName, declaredTemplate, returnChannel,
-                    clientCallablesArray, propertyNamespace, appId);
+                    clientCallablesArray, propertyNamespace, appId,
+                    clientActionsArray, clientActionFunctions);
         } else {
             ContentSecurityPolicyViolationReporter.reportStringJavaScript();
             container.executeJs(LitRendererJs.class).setLitRenderer(
                     rendererName, templateExpression, returnChannel,
-                    clientCallablesArray, propertyNamespace, appId);
+                    clientCallablesArray, propertyNamespace, appId,
+                    clientActionsArray, clientActionFunctions);
         }
     }
 
@@ -327,8 +338,27 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         ArrayNode clientCallablesArray = JacksonUtils
                 .listToJson(new ArrayList<>(clientCallables.keySet()));
+        ArrayNode clientActionsArray = JacksonUtils
+                .listToJson(new ArrayList<>(clientActions.keySet()));
 
         List<Registration> registrations = new ArrayList<>();
+
+        // Each client action is bound once for the whole renderer: it renders
+        // to a client-side function that the template calls from its own event
+        // binding, so the action runs inside the browser's event handler with
+        // the user gesture still valid. The rows the renderer draws need no
+        // server-side component of their own to fire it.
+        List<JsFunction> actionFunctions = new ArrayList<>();
+        clientActions.forEach((name, action) -> {
+            SinkTrigger trigger = new SinkTrigger(container, actionFunction -> {
+                actionFunctions.add(actionFunction);
+                return () -> actionFunctions.remove(actionFunction);
+            });
+            trigger.triggers(action);
+            registrations.add(trigger::remove);
+        });
+        JsFunction[] clientActionFunctions = actionFunctions
+                .toArray(JsFunction[]::new);
 
         // Since the renderer is set manually on the client-side, an attach
         // listener for the host component is required so that the renderer gets
@@ -340,12 +370,14 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // registration.
         registrations.add(container.addAttachListener(e -> {
             setElementRenderer(container, rendererName, getTemplateExpression(),
-                    returnChannel, clientCallablesArray, propertyNamespace);
+                    returnChannel, clientCallablesArray, propertyNamespace,
+                    clientActionsArray, clientActionFunctions);
         }));
         // Call once initially
         if (container.getNode().isAttached()) {
             setElementRenderer(container, rendererName, getTemplateExpression(),
-                    returnChannel, clientCallablesArray, propertyNamespace);
+                    returnChannel, clientCallablesArray, propertyNamespace,
+                    clientActionsArray, clientActionFunctions);
         }
 
         // Get the renderer function cleared when the LitRenderer is
@@ -506,6 +538,49 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     "Function name must be alphanumeric");
         }
         clientCallables.put(functionName, handler);
+        return this;
+    }
+
+    /**
+     * Adds a client-side action that can be called from within the template
+     * expression, for affordances that must run inside the browser's own event
+     * handler — copying to the clipboard, sharing, entering fullscreen — where
+     * a {@link #withFunction(String, SerializableConsumer) function} cannot
+     * work because it round-trips to the server and the user gesture is gone by
+     * the time the server responds.
+     * <p>
+     * The action is bound once for the whole renderer, however many items it
+     * renders; the template passes it the values it works on:
+     *
+     * <pre>
+     * {@code
+     * LitRenderer.<Person> of(
+     *         "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
+     *         .withProperty("email", Person::getEmail)
+     *         .withClientAction("copy", Clipboard.writeText());
+     * }
+     * </pre>
+     *
+     * @param name
+     *            the name of the action used inside the template expression,
+     *            must be alphanumeric and not <code>null</code>
+     * @param action
+     *            the action to run on the client, not <code>null</code>
+     * @return this instance for method chaining
+     */
+    public LitRenderer<SOURCE> withClientAction(String name, Action action) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(action);
+
+        if (!Pattern.matches(ALPHANUMERIC_REGEX, name)) {
+            throw new IllegalArgumentException(
+                    "Client action name must be alphanumeric");
+        }
+        if (clientCallables.containsKey(name)) {
+            throw new IllegalArgumentException("A function named '" + name
+                    + "' is already defined on this renderer");
+        }
+        clientActions.put(name, action);
         return this;
     }
 

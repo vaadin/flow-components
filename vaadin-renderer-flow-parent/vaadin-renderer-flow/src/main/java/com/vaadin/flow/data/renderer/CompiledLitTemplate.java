@@ -68,7 +68,9 @@ import com.vaadin.flow.js.JsSnippet;
  * {@link LitRenderer#withProperty}, rather than the Java object of the
  * item</li>
  * <li><code>functions</code>: the functions added with
- * {@link LitRenderer#withFunction}, as members, which call the server</li>
+ * {@link LitRenderer#withFunction}, as members, which call the server, and the
+ * actions added with {@link LitRenderer#withClientAction}, which run in the
+ * browser</li>
  * </ul>
  * The arguments of the declaring method are available as <code>$0</code>,
  * <code>$1</code>, &hellip; They are sent to the browser when the renderer is

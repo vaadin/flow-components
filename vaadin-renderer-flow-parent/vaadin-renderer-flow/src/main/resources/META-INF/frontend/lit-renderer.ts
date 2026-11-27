@@ -15,6 +15,8 @@ type ReturnChannel = (name: string, itemKey: string, args: any[]) => void;
 
 type Generate = (root: RenderRoot, model: ItemModel, itemKey: string) => unknown;
 
+type ClientActionFunction = (event: Event | undefined, context: { args: any[] }) => void;
+
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
 
@@ -28,6 +30,24 @@ const createCallables = (returnChannel: ReturnChannel, clientCallables: string[]
       returnChannel(clientCallable, itemKey, args[0] instanceof Event ? [] : [...args]);
     }
   });
+
+/**
+ * Creates the functions that a template calls to run the client-side actions
+ * that the server-side LitRenderer registered with withClientAction. Each
+ * action is one server-side binding for the whole renderer; the template passes
+ * whatever it works on, e.g. copy(item.email), as arguments. The action runs
+ * entirely on the client, inside the browser event handler, so the user gesture
+ * is still valid.
+ */
+const createClientActions = (clientActionFunctions: ClientActionFunction[]) =>
+  clientActionFunctions.map(
+    (action) =>
+      (...args: any[]) =>
+        action(
+          args.find((arg) => arg instanceof Event),
+          { args }
+        )
+  );
 
 /**
  * Assigns the component a renderer function that renders the template
@@ -73,11 +93,13 @@ const assignRenderer = (component: Component, rendererName: string, generate: Ge
  * @param component The host component to which the renderer function is to be set
  * @param rendererName The name of the renderer function
  * @param template The declared template, called with html, root, live, appId,
- * itemKey, model, item, index and an object with the client callables as members.
+ * itemKey, model, item, index and an object with the client callables and client actions as members.
  * @param returnChannel A channel to the server.
  * @param clientCallables A list of function names that can be called from within the template.
  * @param propertyNamespace LitRenderer-specific namespace for properties.
  * @param appId The id of the application.
+ * @param clientActions A list of client-side action names that can be called from within the template.
+ * @param clientActionFunctions The client-side action functions, positionally matching clientActions.
  */
 _window.Vaadin.setCompiledLitRenderer = (
   component: Component,
@@ -86,11 +108,17 @@ _window.Vaadin.setCompiledLitRenderer = (
   returnChannel: ReturnChannel,
   clientCallables: string[],
   propertyNamespace: string,
-  appId: string
+  appId: string,
+  clientActions: string[] = [],
+  clientActionFunctions: ClientActionFunction[] = []
 ) => {
+  const actions = createClientActions(clientActionFunctions);
   const generate: Generate = (root, model, itemKey) => {
     const callables = createCallables(returnChannel, clientCallables, itemKey);
-    const functions = Object.fromEntries(clientCallables.map((name, i) => [name, callables[i]]));
+    const functions = Object.fromEntries([
+      ...clientCallables.map((name, i) => [name, callables[i]]),
+      ...clientActions.map((name, i) => [name, actions[i]])
+    ]);
     return template(html, root, live, appId, itemKey, model, model.item, model.index, functions);
   };
   assignRenderer(component, rendererName, generate, propertyNamespace);
@@ -108,6 +136,10 @@ _window.Vaadin.setCompiledLitRenderer = (
  * @param clientCallables A list of function names that can be called from within the template literal.
  * @param propertyNamespace LitRenderer-specific namespace for properties.
  * Needed to avoid property name collisions between renderers.
+ * @param appId The id of the application.
+ * @param clientActions A list of client-side action names that can be called from within the template literal.
+ * @param clientActionFunctions The client-side action functions, positionally matching clientActions.
+ * Each is called as action(event, context) with the arguments the template passed as context.args.
  */
 _window.Vaadin.setLitRenderer = (
   component: Component,
@@ -116,8 +148,11 @@ _window.Vaadin.setLitRenderer = (
   returnChannel: ReturnChannel,
   clientCallables: string[],
   propertyNamespace: string,
-  appId: string
+  appId: string,
+  clientActions: string[] = [],
+  clientActionFunctions: ClientActionFunction[] = []
 ) => {
+  const actions = createClientActions(clientActionFunctions);
   const fnArgs = [
     'html',
     'root',
@@ -128,6 +163,7 @@ _window.Vaadin.setLitRenderer = (
     'item',
     'index',
     ...clientCallables,
+    ...clientActions,
     `return html\`${templateExpression}\``
   ];
   const htmlGenerator = new Function(...fnArgs);
@@ -142,7 +178,8 @@ _window.Vaadin.setLitRenderer = (
       model,
       item,
       index,
-      ...createCallables(returnChannel, clientCallables, itemKey)
+      ...createCallables(returnChannel, clientCallables, itemKey),
+      ...actions
     );
   };
   assignRenderer(component, rendererName, generate, propertyNamespace);
