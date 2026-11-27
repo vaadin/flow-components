@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -224,6 +225,52 @@ class FilterTableTest {
         Assertions.assertEquals(4, getItemFilter(1).getFilteredRows().size());
         Assertions.assertTrue(getFilterCheckboxGroup(1).getValue().isEmpty());
         Assertions.assertTrue(spreadsheet.isRowHidden(5));
+    }
+
+    @Test
+    void numericColumn_optionsSortedByNumericValue() {
+        spreadsheet.getCell(2, 1).setCellValue(10);
+        spreadsheet.getCell(3, 1).setCellValue(5);
+        spreadsheet.getCell(4, 1).setCellValue(-4);
+        spreadsheet.getCell(5, 1).setCellValue(0);
+
+        Assertions.assertEquals(List.of("-4", "0", "5", "10"),
+                getFilterOptions(1));
+    }
+
+    @Test
+    void dateColumn_optionsSortedChronologically() {
+        var style = spreadsheet.getWorkbook().createCellStyle();
+        style.setDataFormat(spreadsheet.getWorkbook().createDataFormat()
+                .getFormat("dd.mm.yyyy"));
+        var dates = List.of(LocalDate.of(2024, 1, 3), LocalDate.of(2023, 5, 20),
+                LocalDate.of(2025, 2, 1), LocalDate.of(2022, 12, 31));
+        for (int i = 0; i < dates.size(); i++) {
+            var cell = spreadsheet.getCell(i + 2, 1);
+            cell.setCellValue(dates.get(i));
+            cell.setCellStyle(style);
+        }
+
+        Assertions.assertEquals(
+                List.of("31.12.2022", "20.05.2023", "03.01.2024", "01.02.2025"),
+                getFilterOptions(1));
+    }
+
+    @Test
+    void mixedColumn_numbersListedBeforeText() {
+        spreadsheet.getCell(2, 1).setCellValue("beta");
+        spreadsheet.getCell(3, 1).setCellValue(10);
+        spreadsheet.getCell(4, 1).setCellValue("Alpha");
+        spreadsheet.getCell(5, 1).setCellFormula("1+1");
+
+        Assertions.assertEquals(List.of("2", "10", "Alpha", "beta"),
+                getFilterOptions(1));
+    }
+
+    private List<String> getFilterOptions(int column) {
+        getItemFilter(column).updateOptions();
+        return getFilterCheckboxGroup(column).getListDataView().getItems()
+                .toList();
     }
 
     private Checkbox getSelectAllCheckbox(int column) {
