@@ -24,8 +24,14 @@ name: Update @since tags
 # all -- the patches touch disjoint module directories, so they never conflict --
 # and opens a single PR. The artifact list is discovered from the repository layout
 # at run time, so nothing here needs editing when components come or go.
+#
+# The weekly schedule reconciles every branch listed in the schedule job below, on
+# the same day and branches as vaadin/flow's run.
 
 on:
+  schedule:
+    - cron: '0 9 * * 1'
+      timezone: Europe/Helsinki
   workflow_dispatch:
     inputs:
       branch:
@@ -47,10 +53,36 @@ env:
   GROUP_ID: com.vaadin
 
 jobs:
+  # Every job below is keyed on the branch input, which a scheduled run does not
+  # have. So the schedule only dispatches this workflow once per branch, and each of
+  # those runs is an ordinary manual run with its own discovery, shards and PR.
+  schedule:
+    # Scheduled only in vaadin/flow-components: a schedule also fires in forks,
+    # which would open pull requests of their own.
+    if: github.event_name == 'schedule' && github.repository == 'vaadin/flow-components'
+    runs-on: ubuntu-26.04
+    permissions:
+      actions: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # main and the newest maintenance branch; bump the latter
+        # when a new minor branch is cut.
+        branch: [main, '25.4']
+    steps:
+      - name: Dispatch for ${{ matrix.branch }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ matrix.branch }}
+        run: |
+          gh workflow run update-since-tags.yml --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" -f branch="$BRANCH"
+
   # Discover the publishable modules from the repository layout and resolve the
   # target version once, so neither the matrix nor the PR title needs a hardcoded
   # list of components.
   discover:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
