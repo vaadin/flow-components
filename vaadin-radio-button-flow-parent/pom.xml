@@ -14,9 +14,6 @@
         <module>vaadin-radio-button-flow</module>
         <module>vaadin-radio-button-testbench</module>
     </modules>
-    <properties>
-        <csp.mode>strict</csp.mode>
-    </properties>
     <dependencies/>
     <profiles>
         <profile>

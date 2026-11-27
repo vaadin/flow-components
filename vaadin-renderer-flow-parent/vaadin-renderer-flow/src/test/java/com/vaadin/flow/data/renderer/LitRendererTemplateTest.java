@@ -29,8 +29,8 @@ import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
-import com.vaadin.flow.server.CspMode;
-import com.vaadin.flow.server.CspViolationException;
+import com.vaadin.flow.server.ContentSecurityPolicyMode;
+import com.vaadin.flow.server.ContentSecurityPolicyViolationException;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
@@ -75,7 +75,7 @@ class LitRendererTemplateTest {
 
     @Test
     void stringTemplate_setsStringRenderer() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         render(LitRenderer.<String> of("<span>${item.name}</span>"));
 
         JsCall call = getSingleRendererCall();
@@ -86,7 +86,7 @@ class LitRendererTemplateTest {
 
     @Test
     void strictCsp_declaredTemplate_rendered() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         CompiledLitTemplate template = JsSnippets.of(TestTemplates.class)
                 .name("Name");
 
@@ -96,17 +96,17 @@ class LitRendererTemplateTest {
 
     @Test
     void strictCsp_stringTemplate_throws() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
         LitRenderer<String> renderer = LitRenderer
                 .of("<span>${item.name}</span>");
 
-        Assertions.assertThrows(CspViolationException.class,
+        Assertions.assertThrows(ContentSecurityPolicyViolationException.class,
                 () -> render(renderer));
     }
 
     @Test
     void strictCsp_builtInRenderers_useDeclaredTemplates() {
-        ui.setCspMode(CspMode.STRICT);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.STRICT);
 
         List<LitRenderer<String>> renderers = List.of(
                 new ComponentRenderer<>(item -> new TestDiv()),
@@ -124,7 +124,7 @@ class LitRendererTemplateTest {
 
     @Test
     void subclassOverridingTemplateExpression_usesStringTemplate() {
-        ui.setCspMode(CspMode.OFF);
+        ui.setContentSecurityPolicyMode(ContentSecurityPolicyMode.OFF);
         TextRenderer<String> renderer = new TextRenderer<>() {
             @Override
             protected String getTemplateExpression() {

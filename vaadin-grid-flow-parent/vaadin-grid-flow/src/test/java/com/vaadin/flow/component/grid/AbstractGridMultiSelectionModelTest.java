@@ -33,6 +33,8 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.tests.MockUIExtension;
 
 class AbstractGridMultiSelectionModelTest {
@@ -226,6 +228,86 @@ class AbstractGridMultiSelectionModelTest {
         verifyUpdateSelectAllCheckboxStateWhenSelectFromClientInMultiSelectMode(
                 false, true, false, false,
                 GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+    }
+
+    @Test
+    void checkboxHidden_deselectFromClient_skipsSizeQuery() {
+        DataProvider<String, ?> dataProvider = customiseMultiSelectGridAndDataProvider(
+                false, false,
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN,
+                true);
+        grid.getSelectionModel().select("foo");
+        Mockito.clearInvocations(dataProvider);
+
+        grid.getSelectionModel().deselectFromClient("foo");
+
+        Mockito.verify(dataProvider, Mockito.never())
+                .size(Mockito.any(Query.class));
+    }
+
+    @Test
+    void checkboxHidden_deselectFromClient_selectAllStateSyncedFromClient()
+            throws PropertyChangeDeniedException {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+        selectionModel.selectAll();
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // The web component unchecks select all optimistically
+        columnElement.getNode().getFeature(ElementPropertyMap.class)
+                .deferredUpdateFromClient("selectAll", false).run();
+        selectionModel.deselectFromClient("foo");
+
+        Assertions.assertFalse(columnElement.getProperty("selectAll", true));
+    }
+
+    @Test
+    void listDataProviderFilter_deselectFromClient_selectAllStaysUnchecked() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        ListDataProvider<String> dataProvider = DataProvider.ofItems("foo",
+                "bar");
+        grid.setItems(dataProvider);
+        selectionModel.selectAll();
+        dataProvider.setFilter("foo"::equals);
+
+        selectionModel.deselectFromClient("foo");
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertFalse(column.getProperty("selectAll", false));
+    }
+
+    @Test
+    void listDataViewFilter_hideAndShowCheckbox_selectAllStaysChecked() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar").setFilter("foo"::equals);
+        selectionModel.selectAll();
+
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.HIDDEN);
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+        Element column = getGridSelectionColumn(grid).getElement();
+        Assertions.assertTrue(column.getProperty("selectAll", false));
+        Assertions.assertFalse(column.getProperty("_indeterminate", false));
+    }
+
+    @Test
+    void checkboxVisible_setItemsWithFetchCallback_doesNotThrow() {
+        var selectionModel = (GridMultiSelectionModel<String>) grid
+                .setSelectionMode(SelectionMode.MULTI);
+        grid.setItems(query -> Stream.of("foo", "bar").skip(query.getOffset())
+                .limit(query.getLimit()));
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+
+        Assertions.assertDoesNotThrow(() -> grid.setItems(query -> Stream
+                .of("baz").skip(query.getOffset()).limit(query.getLimit())));
     }
 
     @Test

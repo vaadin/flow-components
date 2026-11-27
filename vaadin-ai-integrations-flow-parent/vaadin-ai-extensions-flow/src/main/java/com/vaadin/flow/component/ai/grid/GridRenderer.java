@@ -1,0 +1,251 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.ai.grid;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ai.common.QueryPage;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
+
+/**
+ * Stateless utility for rendering grid data from SQL queries. Handles column
+ * creation, type-based rendering, column grouping, and lazy loading via
+ * {@link CallbackDataProvider}.
+ *
+ * @author Vaadin Ltd
+ * @see GridAiController
+ * @since 25.3
+ */
+public final class GridRenderer implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GridRenderer.class);
+
+    private static final String DEFAULT_EMPTY_STATE_TEXT = "No results";
+
+    // A float holds about seven significant decimal digits
+    private static final int FLOAT_SIGNIFICANT_DIGITS = 7;
+
+    // A double holds 15 significant decimal digits reliably. Sums over many
+    // rows build up rounding error in the last of them, so two are dropped.
+    private static final int DOUBLE_SIGNIFICANT_DIGITS = 13;
+
+    // Smaller fractions of a float or double are rounding residue, such as
+    // a balance that should be zero
+    private static final int MAX_FRACTION_DIGITS = 10;
+
+    private GridRenderer() {
+    }
+
+    /**
+     * Renders the grid with results from the given SQL query. Columns are
+     * created dynamically from the query result, with type-appropriate
+     * renderers, grouping, and lazy loading.
+     * <p>
+     * The caller is responsible for ensuring this method runs on the UI thread
+     * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
+     *
+     * @param grid
+     *            the grid to render, not {@code null}
+     * @param queryExecutor
+     *            the query executor, not {@code null}
+     * @param query
+     *            the SQL SELECT query, not {@code null}
+     */
+    public static void renderGrid(Grid<AiDataRow> grid,
+            QueryExecutor queryExecutor, String query) {
+        var sampleRows = queryExecutor.executeQuery(query,
+                new QueryPage(0, 1, List.of()));
+        removeExtraHeaderRows(grid);
+        grid.removeAllColumns();
+        if (sampleRows.isEmpty()) {
+            if (grid.getEmptyStateText() == null
+                    && grid.getEmptyStateComponent() == null) {
+                grid.setEmptyStateText(DEFAULT_EMPTY_STATE_TEXT);
+            }
+            grid.setItems(List.of());
+            return;
+        }
+
+        var firstRow = new AiDataRow(sampleRows.getFirst());
+        var sortedColumns = new ArrayList<>(firstRow.entries());
+        sortedColumns.sort((a, b) -> {
+            var prefixA = GridFormatting.groupPrefix(a.getKey());
+            var prefixB = GridFormatting.groupPrefix(b.getKey());
+            return prefixA.compareTo(prefixB);
+        });
+        for (var entry : sortedColumns) {
+            addColumn(grid, entry.getKey(), entry.getValue());
+        }
+        applyColumnGrouping(grid);
+        var dataProvider = createDataProvider(queryExecutor, query);
+        grid.setItems(dataProvider);
+        LOGGER.info("Grid configured with {} columns", sortedColumns.size());
+    }
+
+    private static void addColumn(Grid<AiDataRow> grid, String columnName,
+            Object sampleValue) {
+        var header = GridFormatting
+                .formatHeader(GridFormatting.stripGroupPrefix(columnName));
+
+        Grid.Column<AiDataRow> column;
+
+        if (sampleValue instanceof LocalDate
+                || sampleValue instanceof java.sql.Date) {
+            column = grid.addColumn(new LocalDateRenderer<>(
+                    row -> toLocalDate(row.get(columnName))));
+        } else if (sampleValue instanceof LocalDateTime
+                || sampleValue instanceof Timestamp) {
+            column = grid.addColumn(new LocalDateTimeRenderer<>(
+                    row -> toLocalDateTime(row.get(columnName))));
+        } else if (sampleValue instanceof Number) {
+            column = grid.addColumn(new NumberRenderer<>(
+                    row -> toFormattableNumber((Number) row.get(columnName)),
+                    createNumberFormat()));
+            column.setTextAlign(ColumnTextAlign.END);
+        } else {
+            column = grid.addColumn(row -> {
+                var value = row.get(columnName);
+                return value != null ? GridFormatting.formatValue(value) : "";
+            });
+        }
+
+        column.setHeader(header).setKey(columnName).setSortable(true)
+                .setAutoWidth(true).setResizable(true);
+    }
+
+    private static NumberFormat createNumberFormat() {
+        var numberFormat = NumberFormat.getInstance();
+        // The default format rounds to three fraction digits, which would
+        // show values that differ from the query result
+        numberFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+        return numberFormat;
+    }
+
+    private static Number toFormattableNumber(Number value) {
+        // Floats and doubles carry binary rounding digits, such as
+        // 19.989999771118164 for 19.99f or 434.99999999999994 for 435
+        if (value instanceof Float floatValue && Float.isFinite(floatValue)) {
+            return roundFraction(floatValue, FLOAT_SIGNIFICANT_DIGITS);
+        }
+        if (value instanceof Double doubleValue
+                && Double.isFinite(doubleValue)) {
+            return roundFraction(doubleValue, DOUBLE_SIGNIFICANT_DIGITS);
+        }
+        return value;
+    }
+
+    private static BigDecimal roundFraction(double value,
+            int significantDigits) {
+        // Integer digits are kept. Rounding the BigDecimal, not the format,
+        // shows a negative residue as 0 instead of -0.
+        var decimal = BigDecimal.valueOf(value);
+        var integerDigits = decimal.precision() - decimal.scale();
+        var fractionDigits = Math.clamp(significantDigits - integerDigits, 0,
+                MAX_FRACTION_DIGITS);
+        return decimal.setScale(fractionDigits, RoundingMode.HALF_EVEN);
+    }
+
+    private static void applyColumnGrouping(Grid<AiDataRow> grid) {
+        var groups = new LinkedHashMap<String, List<Grid.Column<AiDataRow>>>();
+        for (var column : grid.getColumns()) {
+            var key = column.getKey();
+            var dotIndex = key.indexOf('.');
+            if (dotIndex > 0) {
+                var prefix = key.substring(0, dotIndex);
+                groups.computeIfAbsent(prefix, k -> new ArrayList<>())
+                        .add(column);
+            }
+        }
+
+        var groupsToApply = groups.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1).toList();
+
+        if (groupsToApply.isEmpty()) {
+            return;
+        }
+
+        var groupRow = grid.prependHeaderRow();
+        for (var entry : groupsToApply) {
+            var columns = entry.getValue();
+            var cells = columns.stream().map(groupRow::getCell).toList();
+            groupRow.join(cells).setText(entry.getKey());
+        }
+    }
+
+    private static void removeExtraHeaderRows(Grid<AiDataRow> grid) {
+        var headerRows = grid.getHeaderRows();
+        while (headerRows.size() > 1) {
+            grid.removeHeaderRow(headerRows.getFirst());
+            headerRows = grid.getHeaderRows();
+        }
+    }
+
+    private static DataProvider<AiDataRow, Void> createDataProvider(
+            QueryExecutor queryExecutor, String query) {
+        return new CallbackDataProvider<>(fetchQuery -> {
+            if (fetchQuery.getLimit() == 0) {
+                // A data view asks for zero rows when it reads the rows of a
+                // query that has none. A QueryPage has at least one row.
+                return Stream.empty();
+            }
+            var page = new QueryPage(fetchQuery.getOffset(),
+                    fetchQuery.getLimit(), fetchQuery.getSortOrders());
+            LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
+                    page.limit());
+            return queryExecutor.executeQuery(query, page).stream()
+                    .map(AiDataRow::new);
+        }, countFetchQuery -> {
+            LOGGER.debug("Counting rows");
+            return queryExecutor.count(query);
+        }, row -> row);
+    }
+
+    // --- Type conversion helpers ---
+
+    private static LocalDate toLocalDate(Object value) {
+        if (value instanceof LocalDate ld) {
+            return ld;
+        }
+        if (value instanceof java.sql.Date sd) {
+            return sd.toLocalDate();
+        }
+        return null;
+    }
+
+    private static LocalDateTime toLocalDateTime(Object value) {
+        if (value instanceof LocalDateTime ldt) {
+            return ldt;
+        }
+        if (value instanceof Timestamp ts) {
+            return ts.toLocalDateTime();
+        }
+        return null;
+    }
+}

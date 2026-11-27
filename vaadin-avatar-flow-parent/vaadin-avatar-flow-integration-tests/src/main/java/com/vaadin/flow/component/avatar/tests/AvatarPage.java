@@ -25,12 +25,17 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 @Route("vaadin-avatar/avatar-test")
 public class AvatarPage extends Div {
 
+    /**
+     * A 1x1 GIF image, which the strict Content Security Policy allows.
+     */
+    public static final String IMAGE_URL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
     public AvatarPage() {
         Avatar avatar = new Avatar();
 
         NativeButton toggleImage = new NativeButton("Toggle img", e -> {
             if (avatar.getImage() == null || avatar.getImage().isEmpty()) {
-                avatar.setImage("https://vaadin.com/");
+                avatar.setImage(IMAGE_URL);
             } else {
                 avatar.setImage(null);
             }

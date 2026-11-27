@@ -1,0 +1,157 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.orchestrator;
+
+import java.io.Serializable;
+import java.util.Optional;
+
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.ResponseMetadata;
+
+/**
+ * Listener for LLM response events.
+ * <p>
+ * The listener is called when the turn ends — normally when the assistant's
+ * stream has completed, whether successfully or with an error, but also when
+ * the turn fails before a stream ever opens. It fires at most once per prompt:
+ * a prompt rejected by the {@link RequestInterceptor} and a postponed prompt
+ * abandoned because its UI was detached end without firing it. The same
+ * lifecycle moment as
+ * {@link AiController#onResponse(ResponseListener.ResponseEvent)}. Use it to
+ * persist conversation state (via {@link AiOrchestrator#getHistory()}), trigger
+ * follow-up actions, or surface errors to the user.
+ * <p>
+ * On success the response text may still be empty if the model emitted only
+ * tool calls or stopped without producing visible content. Such turns are
+ * successful exchanges; check {@code event.getResponse().isEmpty()} if the
+ * listener should only react to text-bearing responses. Empty responses are
+ * <i>not</i> appended to {@link AiOrchestrator#getHistory()}.
+ * <p>
+ * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
+ * stream error, any throw between
+ * {@link AiController#onRequest(RequestListener.RequestEvent)} and the start of
+ * the stream, or a {@link RequestInterceptor} failure — a throw, a
+ * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
+ * interception timeout); the response text is empty — text received before the
+ * failure is not passed on. An interceptor failure fires the listener without a
+ * preceding {@link AiController#onRequest(RequestListener.RequestEvent)}, so an
+ * error does not imply that per-turn setup has happened.
+ * <p>
+ * A turn can also end abnormally without an error, for example when it was cut
+ * off at the model's output limit, or when Spring AI stopped it at its tool
+ * call limit. {@link ResponseEvent#getMetadata()} carries the finish reason of
+ * such a turn; see {@link AiController#onResponse(ResponseEvent)}.
+ * <p>
+ * A turn the model completed but the {@link AiController} could not apply is a
+ * failure too: when {@link AiController#onResponse(ResponseEvent)} throws on a
+ * successful turn, the listener receives that exception as the error, with an
+ * empty response text. The assistant's text stays in the message list and in
+ * {@link AiOrchestrator#getHistory()}, since the model did produce it. A throw
+ * while the controller handles a turn that had already failed does not replace
+ * the original error.
+ * <p>
+ * The listener is <b>not</b> called when history is restored via
+ * {@code Builder.withHistory()}.
+ * <p>
+ * <b>Threading:</b> the listener runs as a {@code ui.access()} task, right
+ * after {@link AiController#onResponse(ResponseEvent)} when a controller is
+ * attached. The session is locked and the Vaadin thread locals are bound, so UI
+ * components can be updated directly; blocking work (e.g. database writes)
+ * holds the session lock for its duration, as in any {@code ui.access()} task.
+ * If the UI is detached when the turn ends, the listener still runs, without a
+ * session and without the controller hook.
+ *
+ * @since 25.3
+ */
+@FunctionalInterface
+public interface ResponseListener extends Serializable {
+
+    /**
+     * Called when the turn has ended (see the class documentation for the exact
+     * moments).
+     *
+     * @param event
+     *            the response event
+     */
+    void onResponse(ResponseEvent event);
+
+    /**
+     * Event fired when a turn ends, on success or failure.
+     */
+    class ResponseEvent implements Serializable {
+        private final String response;
+        private final Throwable error;
+        private final ResponseMetadata metadata;
+
+        /**
+         * Creates a turn-outcome event. The orchestrator builds this for every
+         * turn; it is public so an application can construct one when unit
+         * testing an {@link AiController} implementation.
+         *
+         * @param response
+         *            the assistant's response text, not {@code null}
+         * @param error
+         *            the cause of failure, or {@code null} on success
+         * @param metadata
+         *            the provider's metadata for the turn, or {@code null} when
+         *            none was reported
+         * @since 25.3
+         */
+        public ResponseEvent(String response, Throwable error,
+                ResponseMetadata metadata) {
+            this.response = response;
+            this.error = error;
+            this.metadata = metadata;
+        }
+
+        /**
+         * Gets the assistant's response text. On success this is the full text
+         * (may be empty when the model emitted only tool calls); on failure the
+         * orchestrator passes an empty string, even if text was received before
+         * the error.
+         *
+         * @return the response text, never {@code null}
+         */
+        public String getResponse() {
+            return response;
+        }
+
+        /**
+         * Gets the failure cause if the turn ended with an error. Returns an
+         * empty optional on a successful turn.
+         *
+         * @return the failure cause, or empty on success
+         */
+        public Optional<Throwable> getError() {
+            return Optional.ofNullable(error);
+        }
+
+        /**
+         * Gets the metadata the provider reported for this turn, such as the
+         * finish reason and token usage. On a failed turn this is what was
+         * observed before the failure. Returns an empty optional when the
+         * provider reported none — a custom {@link LlmProvider} that does not
+         * publish metadata, or a turn that failed before any was observed.
+         *
+         * @return the response metadata, or empty when the provider reported
+         *         none
+         * @since 25.3
+         */
+        public Optional<ResponseMetadata> getMetadata() {
+            return Optional.ofNullable(metadata);
+        }
+    }
+}

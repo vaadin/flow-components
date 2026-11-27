@@ -1,0 +1,109 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.ai.orchestrator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ai.common.AiAttachment;
+import com.vaadin.flow.component.ai.ui.AiMessage;
+import com.vaadin.flow.component.ai.ui.AiMessageList;
+import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListUser;
+import com.vaadin.flow.signals.BindingActiveException;
+
+/**
+ * Wrapper for Flow MessageList component to implement AiMessageList interface.
+ */
+class MessageListWrapper implements AiMessageList {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MessageListWrapper.class);
+
+    final MessageList messageList;
+    private final Map<MessageListItem, AiMessage> itemToMessage = new HashMap<>();
+
+    MessageListWrapper(MessageList messageList) {
+        this.messageList = messageList;
+    }
+
+    @Override
+    public AiMessage addMessage(String text, String userName,
+            List<AiAttachment> attachments) {
+        var message = new MessageListItemWrapper(text, userName, attachments);
+        itemToMessage.put(message.getItem(), message);
+        messageList.addItem(message.getItem());
+        return message;
+    }
+
+    @Override
+    public void showTypingIndicator(String userName) {
+        // Only the entry of the given participant is touched, so that the
+        // typing users set by the application are kept
+        var typingUsers = messageList.getTypingUsers();
+        if (typingUsers.stream()
+                .anyMatch(user -> userName.equals(user.getName()))) {
+            return;
+        }
+        var users = new ArrayList<>(typingUsers);
+        users.add(new MessageListUser(userName));
+        setTypingUsers(users);
+    }
+
+    @Override
+    public void hideTypingIndicator(String userName) {
+        var typingUsers = messageList.getTypingUsers();
+        var users = typingUsers.stream()
+                .filter(user -> !userName.equals(user.getName())).toList();
+        if (users.size() != typingUsers.size()) {
+            setTypingUsers(users);
+        }
+    }
+
+    /**
+     * Updates the typing users of the message list. When the application has
+     * bound the typing users to a signal, they cannot be set, and the typing
+     * indicator is left to the application.
+     */
+    private void setTypingUsers(List<MessageListUser> users) {
+        try {
+            messageList.setTypingUsers(users);
+        } catch (BindingActiveException e) {
+            LOGGER.debug("Typing users are bound to a signal, leaving the "
+                    + "typing indicator to the application", e);
+        }
+    }
+
+    @Override
+    public void addAttachmentClickListener(AttachmentClickCallback callback) {
+        messageList.addAttachmentClickListener(clickEvent -> {
+            var aiMessage = itemToMessage.get(clickEvent.getItem());
+            if (aiMessage != null) {
+                var attIndex = clickEvent.getItem().getAttachments()
+                        .indexOf(clickEvent.getAttachment());
+                if (attIndex >= 0) {
+                    callback.onAttachmentClick(aiMessage, attIndex);
+                }
+            }
+        });
+    }
+}

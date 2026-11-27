@@ -1,0 +1,336 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.ai.grid;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ai.common.QueryPage;
+import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
+import com.vaadin.flow.component.ai.orchestrator.AiController;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.ai.provider.QueryExecutorAiTools;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.JsonNode;
+
+/**
+ * AI controller for populating a {@link Grid Grid&lt;AiDataRow&gt;} with
+ * database data via LLM tool calls. Attach it to an {@link AiOrchestrator} via
+ * {@link AiOrchestrator.Builder#withController(AiController)} to expose its
+ * tools to the LLM. Workflow instructions are delivered through the description
+ * of the {@code get_grid_instructions} tool, which the LLM reads as part of the
+ * tool manifest. The controller's workflow tells the model that where an
+ * application's system prompt conflicts with it, the system prompt wins, so a
+ * step can be adjusted without subclassing.
+ *
+ * <pre>
+ * var grid = new Grid&lt;AiDataRow&gt;();
+ * var controller = new GridAiController(grid, queryExecutor);
+ * AiOrchestrator orchestrator = AiOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .withMessageList(messageList).build();
+ * </pre>
+ * <p>
+ * The grid uses {@link AiDataRow} as its item type. Row instances are created
+ * internally when query results are rendered and are not intended to be
+ * constructed or inspected by application code.
+ * </p>
+ * <p>
+ * The grid automatically creates columns from query results with:
+ * </p>
+ * <ul>
+ * <li>Lazy loading, one page at a time, through
+ * {@link QueryExecutor#executeQuery(String, QueryPage)} and
+ * {@link QueryExecutor#count(String)}</li>
+ * <li>Built-in renderers for dates and numbers</li>
+ * <li>Right-alignment for numeric columns</li>
+ * <li>Resizable, sortable columns with auto-width</li>
+ * <li>Column grouping from dot-separated aliases</li>
+ * </ul>
+ * <p>
+ * State changes requested by the LLM are deferred and applied in
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * grid state is stored directly on the {@link Grid} component, so it survives
+ * serialization.
+ * </p>
+ * <p>
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the grid keeps its
+ * last successfully-rendered state. If the turn succeeds but the pending query
+ * fails when the grid is rendered, the exception propagates to the
+ * orchestrator, which reports it to the {@link ResponseListener} as the error
+ * of the turn.
+ * </p>
+ * <p>
+ * <b>Serialization:</b> This controller is not serialized with the
+ * orchestrator. After deserialization, create a new controller and restore
+ * transient dependencies via {@link AiOrchestrator#reconnect(LlmProvider)
+ * reconnect(provider)} {@code .withController(controller).apply()}. The grid
+ * data can be captured via {@link #getState()} and re-applied via
+ * {@link #restoreState(GridState)}:
+ * </p>
+ *
+ * <pre>
+ * var controller = new GridAiController(grid, queryExecutor);
+ * orchestrator.reconnect(llmProvider).withController(controller).apply();
+ * if (savedState != null) {
+ *     controller.restoreState(savedState);
+ * }
+ * </pre>
+ * <p>
+ * Register a listener via {@link #addStateChangeListener(SerializableConsumer)}
+ * to be notified when the grid state changes, for example to persist
+ * {@link #getState()} after each successful AI request.
+ * </p>
+ *
+ * @author Vaadin Ltd
+ * @see AiDataRow
+ * @see GridAiTools
+ * @see GridRenderer
+ * @see GridState
+ * @see QueryExecutorAiTools
+ * @since 25.3
+ */
+public class GridAiController implements AiController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GridAiController.class);
+
+    private static final String GRID_ID = "grid";
+
+    private static final String INSTRUCTIONS_TOOL_NAME = "get_grid_instructions";
+
+    private static final String INSTRUCTIONS_TEXT = """
+            Grid data display workflow. Follow this for every grid request:
+
+            TOOLS:
+            1. get_database_schema() - Retrieves database schema (tables, columns, types)
+            2. get_grid_state() - Returns current grid state (query)
+            3. update_grid_data(query) - Updates grid data with SQL SELECT query
+
+            WORKFLOW:
+            Complete the user's request in a SINGLE response by calling all needed tools.
+            1. Call get_database_schema() to learn the exact table and column names
+            2. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+
+            Call get_grid_state() only when the request changes what is already
+            shown (for example "sort by date" or "add a column"). Write the new
+            query from the schema rather than editing the previous one, so every
+            column keeps the table qualifier the schema gives it.
+
+            IMPORTANT:
+            - Always finish the response with update_grid_data()
+            - Do NOT stop after get_grid_state()
+            - If the system prompt carries its own instructions, follow them; where
+              they conflict with this workflow, the system prompt wins
+            """;
+
+    private final Grid<AiDataRow> grid;
+    private final QueryExecutor queryExecutor;
+    private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
+
+    /**
+     * Creates a new grid AI controller.
+     *
+     * @param grid
+     *            the grid to populate, not {@code null}
+     * @param queryExecutor
+     *            the query executor for schema and query execution, not
+     *            {@code null}
+     */
+    public GridAiController(Grid<AiDataRow> grid, QueryExecutor queryExecutor) {
+        AiExtensionsLicense.check();
+        this.grid = Objects.requireNonNull(grid, "Grid must not be null");
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
+                "QueryExecutor must not be null");
+    }
+
+    @Override
+    public List<LlmProvider.ToolSpec> getTools() {
+        var tools = new ArrayList<LlmProvider.ToolSpec>();
+        tools.add(createInstructionsTool());
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
+        tools.addAll(GridAiTools.createAll(new GridAiTools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                return GridEntry.getStateAsJson(grid, gridId);
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+                // Validate eagerly by fetching one row, so an invalid
+                // query is rejected within the turn. A QueryExecutor
+                // that throws ToolException gets its message relayed to
+                // the LLM so it can fix the query; any other exception is
+                // replaced with a generic error.
+                queryExecutor.executeQuery(query,
+                        new QueryPage(0, 1, List.of()));
+                GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of(GRID_ID);
+            }
+        }));
+        return tools;
+    }
+
+    private LlmProvider.ToolSpec createInstructionsTool() {
+        return new LlmProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return INSTRUCTIONS_TOOL_NAME;
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Read this before using any grid or database tool.
+                        Calling this tool returns these same instructions —
+                        normally unnecessary since you are already reading them here.
+
+                        """
+                        + INSTRUCTIONS_TEXT;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(JsonNode arguments) {
+                return INSTRUCTIONS_TEXT;
+            }
+        };
+    }
+
+    @Override
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
+        var entry = GridEntry.get(grid);
+        if (error != null) {
+            if (entry != null) {
+                entry.clearPendingState();
+            }
+            return;
+        }
+        if (entry == null || !entry.hasPendingState()) {
+            LOGGER.debug("onResponse: no pending query");
+            return;
+        }
+        var query = entry.getPendingQuery();
+        LOGGER.info("onResponse: applying query: {}", query);
+        // Render synchronously so exceptions propagate to the orchestrator,
+        // which runs this on the UI thread under session lock. Attachment
+        // is not required: grid state (columns, data provider) is
+        // server-side and syncs to the client on attach.
+        render(entry, query, true);
+        LOGGER.info("Grid updated successfully");
+    }
+
+    /**
+     * Returns the current grid state for persistence, or {@code null} if no
+     * data has been loaded yet.
+     *
+     * @return the current state, or {@code null}
+     */
+    public GridState getState() {
+        var entry = GridEntry.get(grid);
+        if (entry == null || entry.getCurrentQuery() == null) {
+            return null;
+        }
+        return new GridState(entry.getCurrentQuery());
+    }
+
+    /**
+     * Restores a previously saved grid state. Re-executes the stored query and
+     * renders the grid.
+     * <p>
+     * Does not fire state change listeners.
+     * </p>
+     *
+     * @param state
+     *            the state to restore, not {@code null}
+     */
+    public void restoreState(GridState state) {
+        Objects.requireNonNull(state, "State must not be null");
+        if (state.query() == null) {
+            return;
+        }
+        var entry = GridEntry.getOrCreate(grid, GRID_ID);
+        try {
+            render(entry, state.query(), false);
+        } catch (Exception e) {
+            LOGGER.error("Error updating grid during state restore", e);
+        }
+    }
+
+    private void render(GridEntry entry, String query, boolean fireListeners) {
+        try {
+            GridRenderer.renderGrid(grid, queryExecutor, query);
+            entry.setCurrentQuery(query);
+            if (fireListeners) {
+                fireStateChangeListeners();
+            }
+        } finally {
+            entry.clearPendingState();
+        }
+    }
+
+    /**
+     * Adds a listener that is notified when the grid state changes after an AI
+     * request completes successfully. This is typically used to persist the
+     * grid state — for example by calling {@link #getState()} and saving the
+     * result so that it can be reapplied with {@link #restoreState(GridState)}
+     * after deserialization.
+     * <p>
+     * The listener is not fired by {@link #restoreState(GridState)}.
+     * </p>
+     *
+     * @param listener
+     *            the listener, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addStateChangeListener(
+            SerializableConsumer<GridState> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+        return () -> stateChangeListeners.remove(listener);
+    }
+
+    private void fireStateChangeListeners() {
+        if (stateChangeListeners.isEmpty()) {
+            return;
+        }
+        var state = getState();
+        if (state != null) {
+            stateChangeListeners.forEach(listener -> {
+                try {
+                    listener.accept(state);
+                } catch (Exception e) {
+                    LOGGER.error("State change listener failed", e);
+                }
+            });
+        }
+    }
+}

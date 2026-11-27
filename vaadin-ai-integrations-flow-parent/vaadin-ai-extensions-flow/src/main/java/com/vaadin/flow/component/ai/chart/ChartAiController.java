@@ -1,0 +1,485 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.ai.chart;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ai.extensions.AiExtensionsLicense;
+import com.vaadin.flow.component.ai.orchestrator.AiController;
+import com.vaadin.flow.component.ai.orchestrator.AiOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
+import com.vaadin.flow.component.ai.provider.LlmProvider;
+import com.vaadin.flow.component.ai.provider.QueryExecutor;
+import com.vaadin.flow.component.ai.provider.QueryExecutorAiTools;
+import com.vaadin.flow.component.ai.provider.ToolException;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.HeatSeries;
+import com.vaadin.flow.component.charts.model.NodeSeries;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.TreeSeries;
+import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.JsonNode;
+
+/**
+ * AI controller for creating interactive chart visualizations from database
+ * data.
+ * <p>
+ * This controller provides tools that allow the LLM to query database schemas
+ * and create or update chart visualizations based on natural language requests.
+ * Attach it to an {@link AiOrchestrator} via
+ * {@link AiOrchestrator.Builder#withController(AiController)} to expose its
+ * tools to the LLM. Workflow instructions are delivered through the description
+ * of the {@code get_chart_instructions} tool, which the LLM reads as part of
+ * the tool manifest. The controller's workflow tells the model that where an
+ * application's system prompt conflicts with it, the system prompt wins, so a
+ * step can be adjusted without subclassing.
+ * </p>
+ *
+ * <pre>
+ * var controller = new ChartAiController(chart, queryExecutor);
+ * AiOrchestrator orchestrator = AiOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .withMessageList(messageList).build();
+ * </pre>
+ * <p>
+ * State changes requested by the LLM are deferred and applied in
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * chart state is stored directly on the {@link Chart} component, so it survives
+ * serialization.
+ * </p>
+ * <p>
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the chart keeps its
+ * last successfully-rendered state.
+ * </p>
+ * <p>
+ * The controller sends the LLM nothing from the query results: when it reads
+ * the chart state, it gets the SQL queries and the configuration it has set
+ * itself, not the series, axis categories or other values the chart builds from
+ * the rows. Only the schema description your {@link QueryExecutor} returns from
+ * {@link QueryExecutor#getSchema()} and the message of a {@link ToolException}
+ * it throws reach the LLM as is, so keep row values out of both.
+ * </p>
+ * <p>
+ * Data conversion from SQL query results to chart series is handled by a
+ * {@link DataConverter}. A default implementation is used unless overridden via
+ * {@link #setDataConverter(DataConverter)}.
+ * </p>
+ * <p>
+ * <b>Serialization:</b> This controller is not serialized with the
+ * orchestrator. After deserialization, create a new controller and restore
+ * transient dependencies via {@link AiOrchestrator#reconnect(LlmProvider)
+ * reconnect(provider)} {@code .withController(controller).apply()}. The chart
+ * data can be captured via {@link #getState()} and re-applied via
+ * {@link #restoreState(ChartState)}:
+ * </p>
+ *
+ * <pre>
+ * var controller = new ChartAiController(chart, queryExecutor);
+ * orchestrator.reconnect(llmProvider).withController(controller).apply();
+ * if (savedState != null) {
+ *     controller.restoreState(savedState);
+ * }
+ * </pre>
+ * <p>
+ * Register a listener via {@link #addStateChangeListener(SerializableConsumer)}
+ * to be notified when the chart state changes, for example to persist
+ * {@link #getState()} after each successful AI request.
+ * </p>
+ * <p>
+ * <b>Provider compatibility:</b> The chart tools use optional properties in
+ * their parameter schemas, which are incompatible with OpenAI's strict
+ * tool-calling mode (strict mode requires every property listed under
+ * {@code properties} to also appear in {@code required}). Strict tool calling
+ * is off by default in both LangChain4J and Spring AI; only users who
+ * explicitly opt in (e.g. {@code strictTools(true)} on LangChain4J's
+ * {@code OpenAiStreamingChatModel} builder) are affected.
+ * </p>
+ *
+ * @author Vaadin Ltd
+ * @see ChartAiTools
+ * @see ChartRenderer
+ * @see ChartState
+ * @see DataConverter
+ * @see QueryExecutorAiTools
+ * @since 25.3
+ */
+public class ChartAiController implements AiController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ChartAiController.class);
+
+    private static final String CHART_ID = "chart";
+
+    private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
+
+    /**
+     * Aliases the default converter reads as numbers. The error for rows that
+     * cannot be plotted names those the query uses; other column names are part
+     * of the query results, so they never reach the LLM.
+     */
+    private static final List<String> NUMERIC_ALIASES = List.of(ColumnNames.X,
+            ColumnNames.X2, ColumnNames.Y, ColumnNames.Z, ColumnNames.VALUE,
+            ColumnNames.COLOR_VALUE, ColumnNames.OPEN, ColumnNames.HIGH,
+            ColumnNames.LOW, ColumnNames.CLOSE, ColumnNames.Q1,
+            ColumnNames.MEDIAN, ColumnNames.Q3, ColumnNames.WEIGHT,
+            ColumnNames.TARGET, ColumnNames.COMPLETED);
+
+    private static final String INSTRUCTIONS_TEXT = """
+            Chart visualization workflow. Follow this for every chart request:
+
+            1. Call get_chart_state() to see the current chart state
+            2. Call get_database_schema() to understand available data
+            3. Call update_chart_data_source() and update_chart_configuration() \
+            as needed — they can be called independently
+
+            Data and configuration are separate concerns:
+            - update_chart_data_source() populates chart series from SQL queries; each call \
+            replaces all series, so pass every query the chart should keep
+            - update_chart_configuration() controls visual appearance (type, styling, axes, etc.)
+            - NEVER include series data in configuration — data comes only from queries
+            - When changing chart type, ensure the query column aliases match the new type
+
+            Per-series styling and mixed chart types:
+            - Use the series array in update_chart_configuration() to override chart type or \
+            styling for specific series, matched by name
+            - Call get_plot_options_schema(chartType) to discover available properties
+            - Example: {"series": [{"name": "South", "type": "column", "yAxis": 1}]}
+
+            If the system prompt carries its own instructions, follow them; where \
+            they conflict with this workflow, the system prompt wins.
+            """;
+
+    private final Chart chart;
+    private final QueryExecutor queryExecutor;
+    private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
+    private DataConverter dataConverter;
+
+    /**
+     * Creates a new AI chart controller.
+     *
+     * @param chart
+     *            the chart component to update, not {@code null}
+     * @param queryExecutor
+     *            the query executor for schema and query execution, not
+     *            {@code null}
+     */
+    public ChartAiController(Chart chart, QueryExecutor queryExecutor) {
+        AiExtensionsLicense.check();
+        this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
+        this.queryExecutor = Objects.requireNonNull(queryExecutor,
+                "Query executor cannot be null");
+        this.dataConverter = new DefaultDataConverter();
+    }
+
+    /**
+     * Sets a custom data converter for transforming query results into chart
+     * series data. Replaces the default converter used to produce series points
+     * from the rows returned by the configured SQL queries.
+     *
+     * @param dataConverter
+     *            the data converter to use, not {@code null}
+     */
+    public void setDataConverter(DataConverter dataConverter) {
+        this.dataConverter = Objects.requireNonNull(dataConverter,
+                "Data converter cannot be null");
+    }
+
+    @Override
+    public List<LlmProvider.ToolSpec> getTools() {
+        List<LlmProvider.ToolSpec> tools = new ArrayList<>();
+        tools.add(createInstructionsTool());
+        tools.addAll(QueryExecutorAiTools.createAll(queryExecutor));
+        tools.addAll(ChartAiTools.createAll(new ChartAiTools.Callbacks() {
+            @Override
+            public String getState(String chartId) {
+                return ChartEntry.getStateAsJson(chart, chartId);
+            }
+
+            @Override
+            public void updateConfiguration(String chartId, String configJson) {
+                // Parse eagerly so an invalid configuration is rejected
+                // within the turn. The configuration is authored by the
+                // model itself, so the parse failure reason is safe to
+                // relay via ToolException, letting the model fix its own
+                // payload instead of retrying it unchanged.
+                try {
+                    ChartConfigurationParser.parse(configJson);
+                } catch (IllegalArgumentException e) {
+                    throw new ToolException(e.getMessage(), e);
+                }
+                ChartEntry.getOrCreate(chart, chartId)
+                        .addPendingConfigurationJson(configJson);
+            }
+
+            @Override
+            public void updateData(String chartId, List<String> queries) {
+                // Execute queries eagerly so an invalid query is
+                // rejected within the turn. A QueryExecutor that
+                // throws ToolException gets its message relayed to the
+                // LLM so it can fix the query; any other exception is
+                // replaced with a generic error. Results are only checked
+                // here; they will be re-executed at render time in
+                // ChartRenderer.
+                for (var i = 0; i < queries.size(); i++) {
+                    checkPlottable(i + 1,
+                            queryExecutor.executeQuery(queries.get(i)));
+                }
+                ChartEntry.getOrCreate(chart, chartId)
+                        .setPendingQueries(queries);
+            }
+
+            @Override
+            public Set<String> getChartIds() {
+                return Set.of(CHART_ID);
+            }
+        }));
+        return tools;
+    }
+
+    /**
+     * Rejects a query whose rows convert to series without any point, typically
+     * because the columns the chart reads as numbers hold text or nulls. The
+     * chart would otherwise render empty while the turn reports success. The
+     * error names no row values, and of the column names only the
+     * {@link #NUMERIC_ALIASES} the query uses.
+     */
+    private void checkPlottable(int queryNumber,
+            List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return;
+        }
+        var series = dataConverter.convertToSeries(rows);
+        if (!series.isEmpty()
+                && series.stream().allMatch(ChartAiController::hasNoPoints)) {
+            var aliases = numericAliasesOf(rows.getFirst());
+            throw new ToolException("Query " + queryNumber
+                    + " returned rows, but none of them can be plotted: the"
+                    + " columns the chart reads as numbers"
+                    + (aliases.isEmpty() ? ""
+                            : ", among " + String.join(", ", aliases) + ",")
+                    + " hold text or nulls. Return numbers in them; for a"
+                    + " label, return its position on the axis, starting at"
+                    + " 0, and list the labels in that order in the axis"
+                    + " categories.");
+        }
+    }
+
+    /**
+     * Returns the {@link #NUMERIC_ALIASES} the row has, matched ignoring case
+     * like the default converter does.
+     */
+    private static List<String> numericAliasesOf(Map<String, Object> row) {
+        return NUMERIC_ALIASES.stream().filter(alias -> row.keySet().stream()
+                .anyMatch(alias::equalsIgnoreCase)).toList();
+    }
+
+    /**
+     * Returns whether a series has nothing to draw. A series of a type not
+     * handled here counts as drawable, so a custom converter is never rejected
+     * for a series this check cannot inspect.
+     */
+    private static boolean hasNoPoints(Series series) {
+        return switch (series) {
+        case DataSeries data -> data.getData().isEmpty();
+        case HeatSeries heat -> heat.getData() == null;
+        case TreeSeries tree -> tree.getData().isEmpty();
+        case NodeSeries nodes ->
+            nodes.getData().isEmpty() && nodes.getNodes().isEmpty();
+        case GanttSeries gantt -> gantt.getData().isEmpty();
+        default -> false;
+        };
+    }
+
+    private LlmProvider.ToolSpec createInstructionsTool() {
+        return new LlmProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return INSTRUCTIONS_TOOL_NAME;
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Read this before using any chart or database tool.
+                        Calling this tool returns these same instructions —
+                        normally unnecessary since you are already reading them here.
+
+                        """
+                        + INSTRUCTIONS_TEXT;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(JsonNode arguments) {
+                return INSTRUCTIONS_TEXT;
+            }
+        };
+    }
+
+    /**
+     * Returns the current chart state, including the SQL queries, the chart
+     * configuration and the part of it the LLM has set. Returns {@code null} if
+     * the chart has no data queries.
+     *
+     * @return the current state, or {@code null}
+     */
+    public ChartState getState() {
+        ChartEntry entry = ChartEntry.get(chart);
+        if (entry == null || entry.getQueries().isEmpty()) {
+            return null;
+        }
+        return new ChartState(entry.getQueries(),
+                copyConfiguration(chart.getConfiguration()),
+                copyConfiguration(entry.getLlmConfiguration()));
+    }
+
+    /**
+     * Restores a previously saved chart state. Applies the configuration, sets
+     * the queries, and re-renders the chart.
+     * <p>
+     * Does not fire state change listeners.
+     * </p>
+     *
+     * @param state
+     *            the state to restore, not {@code null}
+     */
+    public void restoreState(ChartState state) {
+        Objects.requireNonNull(state, "State cannot be null");
+        chart.setConfiguration(copyConfiguration(state.configuration()));
+        ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
+        entry.setQueries(state.queries());
+        entry.setLlmConfiguration(copyConfiguration(state.llmConfiguration()));
+        try {
+            render(entry, state.queries(), List.of(), false);
+        } catch (Exception e) {
+            LOGGER.error("Rendering failed during state restore", e);
+        }
+    }
+
+    /**
+     * Adds a listener that is notified when the chart state changes after an AI
+     * request completes successfully. This is typically used to persist the
+     * chart state — for example by calling {@link #getState()} and saving the
+     * result so that it can be reapplied with {@link #restoreState(ChartState)}
+     * after deserialization.
+     * <p>
+     * The listener is not fired by {@link #restoreState(ChartState)}.
+     * </p>
+     *
+     * @param listener
+     *            the listener, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addStateChangeListener(
+            SerializableConsumer<ChartState> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        stateChangeListeners.add(listener);
+        return () -> stateChangeListeners.remove(listener);
+    }
+
+    @Override
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
+        ChartEntry entry = ChartEntry.get(chart);
+        if (error != null) {
+            if (entry != null) {
+                entry.clearPendingState();
+            }
+            return;
+        }
+        if (entry == null || !entry.hasPendingState()) {
+            return;
+        }
+
+        // Pending queries staged this turn replace the current set; if the
+        // turn only updated config, re-render with the current queries.
+        var queriesToRender = entry.getPendingQueries() != null
+                ? entry.getPendingQueries()
+                : entry.getQueries();
+
+        if (queriesToRender.isEmpty()) {
+            // Nothing to render. Consume any empty pending queries (rare:
+            // LLM staged an empty list) but keep the configuration updates
+            // so they apply when data arrives in a later request.
+            entry.setPendingQueries(null);
+            return;
+        }
+
+        // Every configuration update of the turn applies, in order, so a
+        // later update does not undo an earlier one
+        var configJsons = List.copyOf(entry.getPendingConfigurationJsons());
+        // Render synchronously so exceptions propagate to the orchestrator,
+        // which runs this on the UI thread under session lock. Attachment
+        // is not required: Configuration is server-side state and any JS
+        // calls are queued by Flow until the chart attaches.
+        render(entry, queriesToRender, configJsons, true);
+    }
+
+    private void render(ChartEntry entry, List<String> queries,
+            List<String> configJsons, boolean fireListeners) {
+        try {
+            // The application may set the chart type itself. The LLM's
+            // configuration follows it, so a type change in the JSON is
+            // decided the same way for both.
+            entry.getLlmConfiguration().getChart()
+                    .setType(chart.getConfiguration().getChart().getType());
+            ChartRenderer.renderChart(chart, queryExecutor, dataConverter,
+                    queries, configJsons);
+            configJsons.forEach(entry::applyLlmConfiguration);
+            entry.setQueries(queries);
+            if (fireListeners) {
+                fireStateChangeListeners();
+            }
+        } finally {
+            entry.clearPendingState();
+        }
+    }
+
+    private void fireStateChangeListeners() {
+        if (stateChangeListeners.isEmpty()) {
+            return;
+        }
+        ChartState state = getState();
+        if (state != null) {
+            for (var listener : List.copyOf(stateChangeListeners)) {
+                try {
+                    listener.accept(state);
+                } catch (Exception e) {
+                    LOGGER.error("State change listener failed", e);
+                }
+            }
+        }
+    }
+
+    private static Configuration copyConfiguration(
+            Configuration configuration) {
+        String json = ChartSerialization.toJSON(configuration);
+        return ChartConfigurationParser.parse(json);
+    }
+
+}

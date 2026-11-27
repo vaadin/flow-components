@@ -121,12 +121,12 @@ public interface GridMultiSelectionModel<T>
      * even setting {@link SelectAllCheckboxVisibility#VISIBLE} won't make it
      * visible.
      *
-     * @param selectAllCheckBoxVisibility
+     * @param selectAllCheckboxVisibility
      *            the visibility mode to use
      * @see SelectAllCheckboxVisibility
      */
     void setSelectAllCheckboxVisibility(
-            SelectAllCheckboxVisibility selectAllCheckBoxVisibility);
+            SelectAllCheckboxVisibility selectAllCheckboxVisibility);
 
     /**
      * Gets the current mode for the select all checkbox visibility.
