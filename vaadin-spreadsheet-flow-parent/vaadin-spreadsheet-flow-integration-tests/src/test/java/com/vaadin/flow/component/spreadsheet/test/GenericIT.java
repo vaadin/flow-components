@@ -53,6 +53,38 @@ public class GenericIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void closeHandlers_runOnPageHideInsteadOfUnload() {
+        // Chrome reports a permissions policy violation for pages that
+        // register an unload handler
+        Assert.assertNull(executeScript("return window.onunload"));
+        long attachedWidgets = countAttachedWidgets();
+        Assert.assertTrue(attachedWidgets > 0);
+
+        // A page kept in the back/forward cache can be restored, so its
+        // widgets stay attached
+        dispatchPageHide(true);
+        Assert.assertEquals(attachedWidgets, countAttachedWidgets());
+
+        dispatchPageHide(false);
+        Assert.assertTrue(countAttachedWidgets() < attachedWidgets);
+    }
+
+    private void dispatchPageHide(boolean persisted) {
+        executeScript(
+                "window.dispatchEvent(new PageTransitionEvent('pagehide', {persisted: arguments[0]}))",
+                persisted);
+    }
+
+    // GWT clears the event listener of a widget's element when the widget is
+    // detached
+    private long countAttachedWidgets() {
+        return (Long) executeScript(
+                "const root = arguments[0].shadowRoot || arguments[0];"
+                        + "return [...root.querySelectorAll('*')].filter(e => e.__listener).length;",
+                getSpreadsheet());
+    }
+
+    @Test
     public void testDates() {
         setLocale(Locale.US);
         final var a1 = getSpreadsheet().getCellAt("A1");
