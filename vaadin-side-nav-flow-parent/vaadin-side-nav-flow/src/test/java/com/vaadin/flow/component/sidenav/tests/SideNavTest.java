@@ -70,6 +70,26 @@ class SideNavTest {
     }
 
     @Test
+    void setAriaLabel_ariaLabelSetOnRootElement() {
+        sideNav.setAriaLabel("Main navigation");
+
+        Assertions.assertEquals("Main navigation",
+                sideNav.getAriaLabel().orElse(null));
+        Assertions.assertEquals("Main navigation",
+                sideNav.getElement().getAttribute("aria-label"));
+    }
+
+    @Test
+    void setAriaLabelledBy_ariaLabelledBySetOnRootElement() {
+        sideNav.setAriaLabelledBy("nav-heading");
+
+        Assertions.assertEquals("nav-heading",
+                sideNav.getAriaLabelledBy().orElse(null));
+        Assertions.assertEquals("nav-heading",
+                sideNav.getElement().getAttribute("aria-labelledby"));
+    }
+
+    @Test
     void changeLabel_labelChanged() {
         Assertions.assertNull(sideNav.getLabel());
         sideNav.setLabel("Navigation test");
