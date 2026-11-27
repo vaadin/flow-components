@@ -101,7 +101,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.BuildType;
@@ -3683,17 +3683,12 @@ public class Spreadsheet extends Component
             resources.remove(key);
             getElement().removeAttribute("resource-" + key);
         } else {
-            if (resource instanceof AbstractDownloadHandler<?> handler) {
-                // change disposition to inline in pre-defined handlers,
-                // where it is 'attachment' by default
-                handler.inline();
-            }
             resources.put(key, resource.toString());
             getElement().executeJs(SpreadsheetJs.class)
                     .setResources(new HashSet<>(resources.keySet()));
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
-                            this.getElement()));
+                            this.getElement(), DownloadDisposition.INLINE));
         }
     }
 

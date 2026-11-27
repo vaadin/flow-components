@@ -37,7 +37,8 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -534,10 +535,11 @@ public class MessageListItem implements Serializable {
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
      * <p>
-     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
-     * for pre-defined download handlers, created by factory methods in
-     * {@link DownloadHandler}, as well as for other
-     * {@link AbstractDownloadHandler} implementations.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      * <p>
      * The handler is registered as a resource of the message list that the item
      * belongs to while the list is attached, and is unregistered when the list
@@ -552,11 +554,6 @@ public class MessageListItem implements Serializable {
      * @since 24.8
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
-        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
-            // change disposition to inline in pre-defined handlers,
-            // where it is 'attachment' by default
-            handler.inline();
-        }
         setImageSource(downloadHandler, null);
         propsChanged();
     }
@@ -618,8 +615,10 @@ public class MessageListItem implements Serializable {
             // element is detached, so the resource is created for the current
             // host
             imageResource = new StreamResourceRegistry.ElementStreamResource(
-                    imageHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrentOrThrow().getElement());
+                    imageHandler,
+                    getHost() != null ? getHost().getElement()
+                            : UI.getCurrentOrThrow().getElement(),
+                    DownloadDisposition.INLINE);
         }
         if (imageResource == null) {
             return;

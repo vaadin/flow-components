@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -29,7 +30,13 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
+import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -124,8 +131,14 @@ class MapSerializationTest {
         MarkerFeature marker = setupMarker();
         ui.fakeClientCommunication();
 
+        ArgumentCaptor<AbstractStreamResource> registered = ArgumentCaptor
+                .forClass(AbstractStreamResource.class);
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(registered.capture());
+        Assertions.assertSame(Assets.PIN.getHandler(),
+                ((ElementStreamResource) registered.getValue())
+                        .getElementRequestHandler(),
+                "Expected the pin icon to be registered");
         Mockito.clearInvocations(streamResourceRegistryMock);
 
         // Force another sync of the same icon
@@ -133,14 +146,39 @@ class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(AbstractStreamResource.class));
 
         // Sync a different icon with the same resource
         setupMarker();
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(Mockito.any(AbstractStreamResource.class));
+    }
+
+    @Test
+    void serializeIcon_handlerServedInline() throws Exception {
+        Icon.Options options = new Icon.Options();
+        InputStreamDownloadHandler handler = DownloadHandler.fromInputStream(
+                event -> DownloadResponse.error(500), "custom.png");
+        options.setImg(handler);
+        MarkerFeature marker = new MarkerFeature();
+        marker.setIcon(new Icon(options));
+        map.getFeatureLayer().addFeature(marker);
+        ui.fakeClientCommunication();
+
+        ArgumentCaptor<AbstractStreamResource> registered = ArgumentCaptor
+                .forClass(AbstractStreamResource.class);
+        Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
+                .registerResource(registered.capture());
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                ((ElementStreamResource) registered.getValue())
+                        .getDisposition(),
+                "Map images should be served inline");
+        Assertions.assertEquals("attachment; filename=\"custom.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        map.getElement()),
+                "The given handler should not be changed");
     }
 
     @Test
@@ -182,8 +220,15 @@ class MapSerializationTest {
         ui.add(map);
         ui.fakeClientCommunication();
 
+        ArgumentCaptor<AbstractStreamResource> registered = ArgumentCaptor
+                .forClass(AbstractStreamResource.class);
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler(), map.getElement());
+                .registerResource(registered.capture());
+        var resource = (ElementStreamResource) registered.getValue();
+        Assertions.assertSame(Assets.PIN.getHandler(),
+                resource.getElementRequestHandler());
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
     }
 
     private MarkerFeature setupMarker() {

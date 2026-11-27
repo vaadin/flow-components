@@ -36,8 +36,10 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
+import com.vaadin.flow.server.streams.DownloadDisposition;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.tests.DownloadHandlerTestUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -57,6 +59,21 @@ class AvatarGroupItemImageTest {
         item = new AvatarGroupItem("Alice");
         avatarGroup.setItems(item);
         ui.add(avatarGroup);
+    }
+
+    @Test
+    void setImageHandler_servedInline_handlerNotChanged() throws Exception {
+        var handler = createImageHandler();
+        item.setImageHandler(handler);
+
+        var resource = (ElementStreamResource) resolveImage(item.getImage())
+                .orElseThrow();
+        Assertions.assertEquals(DownloadDisposition.INLINE,
+                resource.getDisposition());
+        Assertions.assertEquals("attachment; filename=\"alice.png\"",
+                DownloadHandlerTestUtil.servedContentDisposition(handler,
+                        resource.getOwner()),
+                "The given handler should not be changed");
     }
 
     @Test

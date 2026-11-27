@@ -11,7 +11,6 @@ package com.vaadin.flow.component.map;
 import java.io.Serializable;
 
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -35,11 +34,8 @@ public class Assets {
         private Asset(String fileName, String resourcePath) {
             this.fileName = fileName;
             this.resource = null;
-            // change disposition to inline in pre-defined handlers,
-            // where it is 'attachment' by default
-            this.handler = DownloadHandler
-                    .forClassResource(getClass(), resourcePath, fileName)
-                    .inline();
+            this.handler = DownloadHandler.forClassResource(getClass(),
+                    resourcePath, fileName);
         }
 
         @Deprecated(since = "24.8", forRemoval = true)
@@ -52,11 +48,6 @@ public class Assets {
         private Asset(String fileName, DownloadHandler handler) {
             this.fileName = fileName;
             this.resource = null;
-            if (handler instanceof AbstractDownloadHandler<?> preDefinedHandler) {
-                // change disposition to inline in pre-defined handlers,
-                // where it is 'attachment' by default
-                preDefinedHandler.inline();
-            }
             this.handler = handler;
         }
 

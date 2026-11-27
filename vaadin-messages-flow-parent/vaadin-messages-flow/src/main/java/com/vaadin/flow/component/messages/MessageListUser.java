@@ -30,7 +30,8 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadDisposition;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -186,9 +187,11 @@ public class MessageListUser implements Serializable {
      * and is unregistered when the user is removed from the list or the list is
      * detached.
      * <p>
-     * The {@code Content-Disposition} header is set to {@code inline} for the
-     * handlers created by the factory methods in {@link DownloadHandler}, as
-     * well as for other {@link AbstractDownloadHandler} implementations.
+     * The content is served inline, so that the browser shows it: a file name
+     * the handler gives with {@link DownloadEvent#fileName(String)}, as the
+     * built-in handlers do, is sent with a <code>Content-Disposition:
+     * inline</code> header. A handler that asks for <code>attachment</code>
+     * itself keeps that choice.
      * <p>
      * This removes an image URL set with {@link #setImage(String)}.
      *
@@ -199,11 +202,6 @@ public class MessageListUser implements Serializable {
         releaseImageHandler();
         this.image = null;
 
-        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
-            // Change the disposition to inline in the pre-defined handlers,
-            // where it is 'attachment' by default
-            handler.inline();
-        }
         this.imageHandler = downloadHandler;
         bindImageHandler();
         notifyHost();
@@ -345,7 +343,7 @@ public class MessageListUser implements Serializable {
             return;
         }
         var resource = new StreamResourceRegistry.ElementStreamResource(
-                imageHandler, host.getElement());
+                imageHandler, host.getElement(), DownloadDisposition.INLINE);
         imageRegistration = getHostSession().getResourceRegistry()
                 .registerResource(resource);
         image = imageRegistration.getResourceUri().toASCIIString();
