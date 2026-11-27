@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.junit.After;
@@ -20,6 +21,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.change.NodeAttachChange;
+import com.vaadin.flow.internal.change.NodeChange;
 
 public class TooltipTest {
 
@@ -78,6 +81,40 @@ public class TooltipTest {
         ui.add(component);
 
         Assert.assertTrue(getTooltipElement().isPresent());
+    }
+
+    @Test
+    public void addComponent_createTooltip_moveComponentWithinUI_tooltipNodeIdPreserved() {
+        var parent1 = new Element("div");
+        var parent2 = new Element("div");
+        ui.getElement().appendChild(parent1, parent2);
+        parent1.appendChild(component.getElement());
+        Tooltip.forComponent(component);
+        fakeClientCommunication();
+        var nodeId = getTooltipElement().orElseThrow().getNode().getId();
+
+        parent2.appendChild(component.getElement());
+        fakeClientCommunication();
+
+        Assert.assertEquals(nodeId,
+                getTooltipElement().orElseThrow().getNode().getId());
+    }
+
+    @Test
+    public void addComponent_createTooltip_resync_tooltipNodeAttached() {
+        ui.add(component);
+        Tooltip.forComponent(component);
+        fakeClientCommunication();
+
+        var stateTree = ui.getInternals().getStateTree();
+        stateTree.prepareForResync();
+        var tooltipNode = getTooltipElement().orElseThrow().getNode();
+        var changes = new ArrayList<NodeChange>();
+        stateTree.collectChanges(changes::add);
+
+        Assert.assertTrue(changes.stream()
+                .anyMatch(change -> change instanceof NodeAttachChange
+                        && change.getNode() == tooltipNode));
     }
 
     @Test
@@ -185,6 +222,13 @@ public class TooltipTest {
                 getTooltipElement().get().getProperty("position"));
         Assert.assertEquals(true,
                 getTooltipElement().get().getProperty("manual", false));
+    }
+
+    private void fakeClientCommunication() {
+        // Collect the pending changes as a client round trip would do, which
+        // marks the attached nodes as sent to the client
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private Optional<Element> getTooltipElement() {
