@@ -9,7 +9,9 @@
 package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -111,9 +113,9 @@ public final class GridRenderer implements Serializable {
             column = grid.addColumn(new LocalDateTimeRenderer<>(
                     row -> toLocalDateTime(row.get(columnName))));
         } else if (sampleValue instanceof Number) {
-            column = grid.addColumn(
-                    new NumberRenderer<>(row -> (Number) row.get(columnName),
-                            java.text.NumberFormat.getInstance()));
+            column = grid.addColumn(new NumberRenderer<>(
+                    row -> toDisplayNumber(row.get(columnName)),
+                    createNumberFormat()));
             column.setTextAlign(ColumnTextAlign.END);
         } else {
             column = grid.addColumn(row -> {
@@ -182,6 +184,23 @@ public final class GridRenderer implements Serializable {
     }
 
     // --- Type conversion helpers ---
+
+    private static NumberFormat createNumberFormat() {
+        var format = NumberFormat.getInstance();
+        // The default of three fraction digits would round query results. 340
+        // is the most that DecimalFormat supports for a double.
+        format.setMaximumFractionDigits(340);
+        return format;
+    }
+
+    private static Number toDisplayNumber(Object value) {
+        // NumberFormat widens a float to double, which would show 0.1f as
+        // 0.10000000149011612
+        if (value instanceof Float f && Float.isFinite(f)) {
+            return new BigDecimal(f.toString());
+        }
+        return (Number) value;
+    }
 
     private static LocalDate toLocalDate(Object value) {
         if (value instanceof LocalDate ld) {
