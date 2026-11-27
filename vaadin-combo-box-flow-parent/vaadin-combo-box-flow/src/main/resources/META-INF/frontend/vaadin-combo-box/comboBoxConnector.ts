@@ -41,7 +41,13 @@ export class ComboBoxConnector {
     // considers the requested range as already sent. Make the next request ask
     // the server to send it again.
     comboBox.clearCache = () => {
-      this.#needsDataCommunicatorReset = true;
+      // With client-side filtering, a pending page has already been requested
+      // and the server's answer is still to come. Asking again would make it
+      // send extra answers, which replace the loaded items with placeholders.
+      const { pendingRequests } = comboBox.__dataProviderController.rootCache;
+      if (!comboBox._clientSideFilter || Object.keys(pendingRequests).length === 0) {
+        this.#needsDataCommunicatorReset = true;
+      }
       Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
     };
   }

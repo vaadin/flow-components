@@ -216,6 +216,27 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
     });
 
+    it('should not reset the data communicator when filtering client side during the first page load', async () => {
+      comboBox.$connector.reset();
+      comboBox._clientSideFilter = true;
+      comboBox.opened = true;
+      await nextFrame();
+
+      comboBox.filter = 'Item 1';
+      comboBox.filter = 'Item 11';
+
+      // Compare counts: a failing assertion on the spy itself stalls the runner
+      expect(comboBox.$server.setViewportRange.callCount).to.equal(1);
+      expect(comboBox.$server.resetDataCommunicator.callCount).to.equal(0);
+
+      // The answer to the first request resolves the page that is pending now
+      comboBox.$connector.set(0, [{ key: '11', label: 'Item 11' }], '');
+      comboBox.$connector.confirm(2, '');
+
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests).to.deep.equal({});
+      expect(comboBox.filteredItems?.map((item) => item.label)).to.deep.equal(['Item 11']);
+    });
+
     describe('with filter debouncing', () => {
       let clock: sinon.SinonFakeTimers;
 
