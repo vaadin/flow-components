@@ -598,16 +598,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 endColumn - 1).formatAsString();
     }
 
-    public void insertColumn(String[] values) {
-        for (String value : values) {
-            insertAndRet(value);
+    public void insertColumn(String column, String[] values) {
+        for (int i = 0; i < values.length; i++) {
+            setCellValue(column + (i + 1), values[i]);
         }
-    }
-
-    private void insertAndRet(CharSequence k) {
-        action(k);
-        action(Keys.RETURN);
-        action(Keys.ENTER);
     }
 
     public void action(CharSequence k) {
