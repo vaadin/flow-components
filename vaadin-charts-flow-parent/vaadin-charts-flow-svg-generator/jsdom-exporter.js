@@ -408,7 +408,7 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
         }
 
         // Sanitize the DOM tree and remove the <div> element rendered before the <svg> element
-        let svg = chart.sanitizeSVG(
+        let svg = Highcharts.Exporting.sanitizeSVG(
             chart.container.innerHTML
         ).replace(/^.*<\/div>/g, '');
         
