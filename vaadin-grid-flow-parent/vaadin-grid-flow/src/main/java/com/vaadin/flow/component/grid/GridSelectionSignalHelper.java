@@ -60,7 +60,9 @@ class GridSelectionSignalHelper {
      * @param valueSignal
      *            the signal to bind
      * @param writeCallback
-     *            the callback to propagate value changes back, not {@code null}
+     *            the callback to propagate value changes back, not
+     *            {@code null}. If the signal doesn't hold the new value after
+     *            the callback, the target is reverted to the signal's value.
      * @param <E>
      *            the value change event type
      * @param <V>
@@ -103,6 +105,14 @@ class GridSelectionSignalHelper {
         Registration listenerReg = target.addValueChangeListener(event -> {
             if (!fromSignal[0]) {
                 writeCallback.accept(target.getValue());
+                // Revert the selection if the callback didn't write it to the
+                // signal. This is a no-op if the two are already in sync.
+                try {
+                    fromSignal[0] = true;
+                    target.setValue(valueSignal.peek());
+                } finally {
+                    fromSignal[0] = false;
+                }
             }
         });
 

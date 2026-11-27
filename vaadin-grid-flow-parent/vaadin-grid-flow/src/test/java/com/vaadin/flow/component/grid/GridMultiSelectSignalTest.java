@@ -75,6 +75,22 @@ class GridMultiSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void bindValue_writeCallbackRejectsSelection_selectionReverted() {
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>(Set.of("foo"));
+        int[] callCount = { 0 };
+        grid.asMultiSelect().bindValue(signal, v -> callCount[0]++);
+        UI.getCurrent().add(grid);
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("bar");
+
+        Assertions.assertEquals(Set.of("foo"), grid.asMultiSelect().getValue());
+        Assertions.assertEquals(1, callCount[0]);
+    }
+
+    @Test
     void bindValue_bindAgainWhileBound_throwsException() {
         grid.setItems("foo", "bar");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);

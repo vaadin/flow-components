@@ -72,6 +72,34 @@ class GridSingleSelectSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void bindValue_writeCallbackRejectsSelection_selectionReverted() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, v -> {
+        });
+        UI.getCurrent().add(grid);
+
+        ((GridSingleSelectionModel<String>) grid.getSelectionModel())
+                .selectFromClient("bar");
+
+        Assertions.assertEquals("foo", grid.asSingleSelect().getValue());
+        Assertions.assertEquals("foo", signal.peek());
+    }
+
+    @Test
+    void bindValue_writeCallbackSetsOtherValue_selectionFollowsSignal() {
+        grid.setItems("foo", "bar", "baz");
+        var signal = new ValueSignal<>("foo");
+        grid.asSingleSelect().bindValue(signal, v -> signal.set("baz"));
+        UI.getCurrent().add(grid);
+
+        grid.asSingleSelect().setValue("bar");
+
+        Assertions.assertEquals("baz", grid.asSingleSelect().getValue());
+        Assertions.assertEquals("baz", signal.peek());
+    }
+
+    @Test
     void bindValue_bindAgainWhileBound_throwsException() {
         grid.setItems("foo", "bar");
         var signal = new ValueSignal<String>(null);
