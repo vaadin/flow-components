@@ -12,11 +12,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -194,9 +199,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         }
 
         if (needsSort) {
-            Comparator<String> byString = (String s1, String s2) -> s1
-                    .compareToIgnoreCase(s2);
-            Collections.sort(filterOptions, byString);
+            sortOptions();
         }
 
         // Hide "Select All" when there are no values to control, i.e. all of
@@ -219,6 +222,49 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         filterCheckbox.setItems(filterOptionsProvider);
         filterCheckbox.setValue(visibleValues);
         cancelValueChangeUpdate = false;
+    }
+
+    /**
+     * Sorts the options: the empty value first, then numbers and dates by their
+     * underlying value, then everything else alphabetically.
+     */
+    private void sortOptions() {
+        Map<String, Double> numbers = getNumericValues();
+        Comparator<String> emptyFirst = Comparator
+                .comparing((String option) -> !option.isEmpty());
+        filterOptions
+                .sort(emptyFirst
+                        .thenComparing(numbers::get,
+                                Comparator.nullsLast(
+                                        Comparator.<Double> naturalOrder()))
+                        .thenComparing(String.CASE_INSENSITIVE_ORDER));
+    }
+
+    /**
+     * Maps the displayed value of each numeric or date cell of this column to
+     * its underlying number.
+     */
+    private Map<String, Double> getNumericValues() {
+        Map<String, Double> numbers = new HashMap<>();
+        for (int r = filterRange.getFirstRow(); r <= filterRange
+                .getLastRow(); r++) {
+            Cell cell = spreadsheet.getCell(r, filterRange.getFirstColumn());
+            if (cell == null) {
+                continue;
+            }
+            if (cell.getCellType() == CellType.NUMERIC) {
+                numbers.merge(spreadsheet.getCellValue(cell),
+                        cell.getNumericCellValue(), Math::min);
+            } else if (cell.getCellType() == CellType.FORMULA) {
+                CellValue result = spreadsheet.getFormulaEvaluator()
+                        .evaluate(cell);
+                if (result.getCellType() == CellType.NUMERIC) {
+                    numbers.merge(spreadsheet.getCellValue(cell),
+                            result.getNumberValue(), Math::min);
+                }
+            }
+        }
+        return numbers;
     }
 
     /**
