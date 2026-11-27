@@ -226,8 +226,7 @@ class UploadHandlerTest {
     }
 
     @Test
-    void setUploadHandler_handlerDisallowsInert_allowsInert()
-            throws URISyntaxException {
+    void setUploadHandler_delegatesIsAllowInert() throws URISyntaxException {
         upload.setUploadHandler(new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event) {
@@ -235,12 +234,16 @@ class UploadHandlerTest {
 
             @Override
             public boolean isAllowInert() {
-                return false;
+                return true;
             }
         });
         ui.fakeClientCommunication();
-
         Assertions.assertTrue(getUploadHandler().isAllowInert());
+
+        upload.setUploadHandler(event -> {
+        });
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(getUploadHandler().isAllowInert());
     }
 
     private void simulateUpload() throws IOException, URISyntaxException {

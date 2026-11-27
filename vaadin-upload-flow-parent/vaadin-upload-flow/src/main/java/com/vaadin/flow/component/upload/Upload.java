@@ -147,8 +147,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             this.uploading = isUploading;
         };
 
-        // Uploads are received also while a modal component makes the upload
-        // inert, so their progress is tracked for an inert upload too
+        // An upload request accepted before a modal component made the upload
+        // inert still completes, so its progress is tracked while inert too
         getElement()
                 .addEventListener("upload-start", e -> this.uploading = true)
                 .allowInert();
@@ -972,11 +972,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
      * <p>
-     * Uploads are received also while a modal component makes this component
-     * inert, so that opening a modal before or during an upload does not reject
-     * the files the user selected. The handler's
-     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
-     * disable this component.
+     * While a modal component makes this component inert, upload requests are
+     * rejected unless the handler's {@link UploadHandler#isAllowInert()}
+     * returns {@code true}. This includes files the user selected before the
+     * modal opened but that had not been sent yet.
      * <p>
      * This overload uses the default upload target name {@code "upload"}, which
      * becomes the last segment of the dynamically generated upload URL.
@@ -996,11 +995,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
      * <p>
-     * Uploads are received also while a modal component makes this component
-     * inert, so that opening a modal before or during an upload does not reject
-     * the files the user selected. The handler's
-     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
-     * disable this component.
+     * While a modal component makes this component inert, upload requests are
+     * rejected unless the handler's {@link UploadHandler#isAllowInert()}
+     * returns {@code true}. This includes files the user selected before the
+     * modal opened but that had not been sent yet.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
