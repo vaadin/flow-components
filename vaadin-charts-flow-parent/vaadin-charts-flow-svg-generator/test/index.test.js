@@ -148,6 +148,16 @@ describe('jsdom-exporter', () => {
 
     expect(document.querySelector('.highcharts-exporting-group')).to.be.null;
   });
+
+  it('should render the chart when exporting.allowHTML is set', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: { exporting: { allowHTML: true }, series: [{ data: [1, 2, 3] }] },
+    });
+    const document = parseSVG(result.svgString);
+
+    expect(result.svgString.startsWith('<svg')).to.be.true;
+    expect(document.querySelector('.highcharts-series')).to.be.not.null;
+  });
 });
 
 describe('option values', () => {
