@@ -49,16 +49,20 @@ public final class GridRenderer implements Serializable {
 
     private static final String DEFAULT_EMPTY_STATE_TEXT = "No results";
 
-    // A float holds about seven significant decimal digits
+    // A float or double with at most this many significant digits is shown
+    // as it is. A decimal of up to 15 digits survives a round trip through
+    // a double, so such a value can be the stored one.
     private static final int FLOAT_SIGNIFICANT_DIGITS = 7;
+    private static final int DOUBLE_SIGNIFICANT_DIGITS = 15;
 
-    // A double holds 15 significant decimal digits reliably. Sums over many
-    // rows build up rounding error in the last of them, so two are dropped.
-    private static final int DOUBLE_SIGNIFICANT_DIGITS = 13;
+    // Sums over many rows build up rounding error in the last reliable
+    // digits of a double, so up to two more of them can be rounded away
+    private static final int DOUBLE_ROUNDED_DIGITS = 13;
 
-    // Smaller fractions of a float or double are rounding residue, such as
-    // a balance that should be zero
-    private static final int MAX_FRACTION_DIGITS = 10;
+    // Rounding digits sit next to a shorter number, so rounding them away
+    // leaves zeros at the end of the fraction. With fewer zeros than this,
+    // the digits are taken as the value's own.
+    private static final int MIN_TRAILING_ZEROS = 2;
 
     private GridRenderer() {
     }
@@ -154,25 +158,40 @@ public final class GridRenderer implements Serializable {
         if (value instanceof Float floatValue && Float.isFinite(floatValue)) {
             // The format would widen the float to a double, which adds
             // digits, such as 19.989999771118164 for 19.99f
-            return roundFraction(new BigDecimal(Float.toString(floatValue)),
-                    FLOAT_SIGNIFICANT_DIGITS);
+            return removeRoundingDigits(
+                    new BigDecimal(Float.toString(floatValue)),
+                    FLOAT_SIGNIFICANT_DIGITS, FLOAT_SIGNIFICANT_DIGITS);
         }
         if (value instanceof Double doubleValue
                 && Double.isFinite(doubleValue)) {
-            return roundFraction(BigDecimal.valueOf(doubleValue),
-                    DOUBLE_SIGNIFICANT_DIGITS);
+            return removeRoundingDigits(BigDecimal.valueOf(doubleValue),
+                    DOUBLE_SIGNIFICANT_DIGITS, DOUBLE_ROUNDED_DIGITS);
         }
         return value;
     }
 
-    private static BigDecimal roundFraction(BigDecimal decimal,
-            int significantDigits) {
-        // Integer digits are kept. Rounding the BigDecimal, not the format,
-        // shows a negative residue as 0 instead of -0.
+    private static BigDecimal removeRoundingDigits(BigDecimal decimal,
+            int significantDigits, int roundedDigits) {
+        if (decimal.precision() <= significantDigits) {
+            return decimal;
+        }
+        // Integer digits are kept
         var integerDigits = decimal.precision() - decimal.scale();
-        var fractionDigits = Math.clamp(significantDigits - integerDigits, 0,
-                MAX_FRACTION_DIGITS);
-        return decimal.setScale(fractionDigits, RoundingMode.HALF_EVEN);
+        for (var digits = significantDigits; digits >= roundedDigits; digits--) {
+            var fractionDigits = Math.max(digits - integerDigits, 0);
+            var rounded = decimal.setScale(fractionDigits,
+                    RoundingMode.HALF_EVEN);
+            var trailingZeros = fractionDigits
+                    - Math.max(rounded.stripTrailingZeros().scale(), 0);
+            // The run of zeros has to be at least as long as the digits
+            // that the rounding removes behind it. A shorter run is taken
+            // as part of the value.
+            var removedDigits = decimal.precision() - digits;
+            if (trailingZeros >= Math.max(MIN_TRAILING_ZEROS, removedDigits)) {
+                return rounded;
+            }
+        }
+        return decimal;
     }
 
     private static void applyColumnGrouping(Grid<AiDataRow> grid) {

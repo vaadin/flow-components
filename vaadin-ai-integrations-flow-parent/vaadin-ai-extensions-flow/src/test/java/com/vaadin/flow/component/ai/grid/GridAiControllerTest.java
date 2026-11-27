@@ -936,20 +936,71 @@ class GridAiControllerTest {
         }
 
         @Test
-        void doubleResidue_isShownAsZero() {
-            Assertions.assertEquals("0", renderNumber(2.842170943040401E-14));
-            Assertions.assertEquals("0", renderNumber(-2.842170943040401E-14));
+        void doubleResidue_isNotRoundedToZero() {
+            Assertions.assertEquals("0.00000000000002842170943040401",
+                    renderNumber(2.842170943040401E-14));
+            Assertions.assertEquals("0.00000000000000005551115123125783",
+                    renderNumber(0.1 + 0.2 - 0.3));
+        }
+
+        @Test
+        void tinyComputedDouble_isNotRoundedToZero() {
+            Assertions.assertEquals("0.0000000000045",
+                    renderNumber(3 * 1.5E-12));
+        }
+
+        @Test
+        void doubleWithLongRunOfZeros_hasNoBinaryRoundingDigits() {
+            Assertions.assertEquals("1.234567890123",
+                    renderNumber(1.2345678901230002));
+            Assertions.assertEquals("12,345.6789",
+                    renderNumber(12345.678900001234));
+        }
+
+        @Test
+        void doubleWithShortRunOfZeros_keepsAllDigits() {
+            Assertions.assertEquals("1.2345678900012345",
+                    renderNumber(1.2345678900012345));
+            Assertions.assertEquals("1.2345678901200123",
+                    renderNumber(1.2345678901200123));
+            Assertions.assertEquals("12,345.678910001234",
+                    renderNumber(12345.678910001234));
         }
 
         @Test
         void smallDouble_keepsSignificantDigits() {
             Assertions.assertEquals("0.0000001234", renderNumber(0.0000001234));
+            Assertions.assertEquals("0.000123456789",
+                    renderNumber(0.000123456789));
+        }
+
+        @Test
+        void tinyDouble_isNotRoundedToZero() {
+            Assertions.assertEquals("0.000000000025", renderNumber(2.5E-11));
         }
 
         @Test
         void largeDouble_keepsIntegerDigits() {
             Assertions.assertEquals("1,234,567,890,123,456",
                     renderNumber(1234567890123456.0));
+        }
+
+        @Test
+        void largeDouble_keepsFractionDigits() {
+            Assertions.assertEquals("123,456,789,012.25",
+                    renderNumber(123456789012.25));
+        }
+
+        @Test
+        void preciseDouble_keepsAllDigits() {
+            Assertions.assertEquals("1,234,567.123456789",
+                    renderNumber(1234567.123456789));
+        }
+
+        @Test
+        void doubleWithFifteenDigits_keepsAllDigits() {
+            Assertions.assertEquals("1.00000000000001",
+                    renderNumber(1.00000000000001));
         }
 
         @Test
@@ -970,6 +1021,18 @@ class GridAiControllerTest {
                 sum += 2.4f;
             }
             Assertions.assertEquals("28.8", renderNumber(sum));
+        }
+
+        @Test
+        void preciseFloat_keepsAllDigits() {
+            Assertions.assertEquals("123,456.78", renderNumber(123456.78f));
+            Assertions.assertEquals("1,234,567.5", renderNumber(1234567.5f));
+        }
+
+        @Test
+        void tinyFloat_isNotRoundedToZero() {
+            Assertions.assertEquals("0.0000000000012345678",
+                    renderNumber(1.2345678E-12f));
         }
 
         @Test
