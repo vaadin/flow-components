@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.download.DownloadTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
@@ -123,6 +124,51 @@ class ButtonDownloadHandlerTest {
         Assertions.assertNull(button.getDownloadHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(0, downloadAttributes().count());
+    }
+
+    @Test
+    void handlerAndTargetConstructor_newTab() {
+        parent.remove(button);
+        button = new Button("Report", handler, DownloadTarget.NEW_TAB);
+        parent.add(button);
+
+        Assertions.assertEquals("Report", button.getText());
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        Assertions.assertEquals(DownloadTarget.NEW_TAB,
+                button.getDownloadTarget());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+    }
+
+    @Test
+    void targetChanged_handlerKeptAndRegisteredAgain() {
+        ui.fakeClientCommunication();
+        String saveAsFileAttribute = downloadAttributes().findFirst()
+                .orElseThrow();
+
+        button.setDownloadTarget(DownloadTarget.NEW_TAB);
+
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+        Assertions.assertNotEquals(saveAsFileAttribute,
+                downloadAttributes().findFirst().orElseThrow());
+
+        button.setDownloadHandler(null);
+        button.setDownloadHandler(handler);
+
+        Assertions.assertEquals(DownloadTarget.NEW_TAB,
+                button.getDownloadTarget());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+    }
+
+    @Test
+    void nullTargetOrConstructorHandler_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> button.setDownloadTarget(null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new Button("Report", null, DownloadTarget.SAVE_AS_FILE));
     }
 
     /**
