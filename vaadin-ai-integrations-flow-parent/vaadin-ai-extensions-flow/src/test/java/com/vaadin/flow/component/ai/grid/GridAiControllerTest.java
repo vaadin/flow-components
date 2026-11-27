@@ -973,6 +973,12 @@ class GridAiControllerTest {
         }
 
         @Test
+        void largeFloat_hasNoWideningDigits() {
+            Assertions.assertEquals("100,000,000,000,000,000,000",
+                    renderNumber(1.0E20f));
+        }
+
+        @Test
         void nonFiniteNumber_isRendered() {
             Assertions.assertEquals("NaN", renderNumber(Float.NaN));
             Assertions.assertEquals("NaN", renderNumber(Double.NaN));

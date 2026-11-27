@@ -149,23 +149,26 @@ public final class GridRenderer implements Serializable {
     }
 
     private static Number toFormattableNumber(Number value) {
-        // Floats and doubles carry binary rounding digits, such as
-        // 19.989999771118164 for 19.99f or 434.99999999999994 for 435
+        // Computed floats and doubles carry binary rounding digits, such as
+        // 28.799997 for a float sum of 28.8 or 434.99999999999994 for 435
         if (value instanceof Float floatValue && Float.isFinite(floatValue)) {
-            return roundFraction(floatValue, FLOAT_SIGNIFICANT_DIGITS);
+            // The format would widen the float to a double, which adds
+            // digits, such as 19.989999771118164 for 19.99f
+            return roundFraction(new BigDecimal(Float.toString(floatValue)),
+                    FLOAT_SIGNIFICANT_DIGITS);
         }
         if (value instanceof Double doubleValue
                 && Double.isFinite(doubleValue)) {
-            return roundFraction(doubleValue, DOUBLE_SIGNIFICANT_DIGITS);
+            return roundFraction(BigDecimal.valueOf(doubleValue),
+                    DOUBLE_SIGNIFICANT_DIGITS);
         }
         return value;
     }
 
-    private static BigDecimal roundFraction(double value,
+    private static BigDecimal roundFraction(BigDecimal decimal,
             int significantDigits) {
         // Integer digits are kept. Rounding the BigDecimal, not the format,
         // shows a negative residue as 0 instead of -0.
-        var decimal = BigDecimal.valueOf(value);
         var integerDigits = decimal.precision() - decimal.scale();
         var fractionDigits = Math.clamp(significantDigits - integerDigits, 0,
                 MAX_FRACTION_DIGITS);
