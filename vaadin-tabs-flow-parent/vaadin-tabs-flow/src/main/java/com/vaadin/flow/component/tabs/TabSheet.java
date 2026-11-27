@@ -77,6 +77,19 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         SlotUtils.addToSlot(this, "tabs", tabs);
 
         addSelectedChangeListener(e -> updateContent());
+
+        // The client side TabSheet pushes its own selected index to the tabs
+        // when they are added, e.g. when an initially invisible TabSheet is
+        // made visible, so it needs to know the server side selection
+        tabs.getElement().addPropertyChangeListener("selected", e -> {
+            if (!e.isUserOriginated()) {
+                getElement().setProperty("selected", tabs.getSelectedIndex());
+            }
+        });
+        // Keep track of client side changes to avoid sending a stale value
+        getElement().addPropertyChangeListener("selected", "selected-changed",
+                e -> {
+                });
     }
 
     /**
