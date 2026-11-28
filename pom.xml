@@ -46,7 +46,7 @@
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.2.5</poi.version>
+        <poi.version>5.4.1</poi.version>
         <javaparser.version>3.25.3</javaparser.version>
     </properties>
     <modules>
