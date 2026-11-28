@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -23,13 +24,16 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenListener;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
  * A simple filter for spreadsheet filtering table, filtering cell values with
- * checkboxes.
+ * searchable checkboxes.
  * <p>
  * Has a check box for selecting all items (cell values), and one check box per
  * unique cell value that can be found within the cells of the table column.
@@ -42,6 +46,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     private static final String ITEM_FILTER_LAYOUT_CLASSNAME = "spreadsheet-item-filter-layout";
     private Spreadsheet spreadsheet;
     private CellRangeAddress filterRange;
+    private TextField filterField;
     private Checkbox allItems;
     private CheckboxGroup<String> filterCheckbox;
     private ListDataProvider<String> filterOptionsProvider;
@@ -84,6 +89,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     protected void initComponents() {
         initAllItemsCheckbox();
         initOptions();
+        initFilterField();
         initLayouts();
         initPopupButtonListeners();
     }
@@ -92,6 +98,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      * Creates the base layout for the filter components.
      */
     protected void initLayouts() {
+        add(filterField);
         add(allItems);
         add(filterCheckbox);
 
@@ -108,8 +115,22 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
             @Override
             public void onPopupOpen(PopupOpenEvent event) {
+                filterField.clear();
                 updateOptions();
             }
+        });
+    }
+
+    private void initFilterField() {
+        filterField = new TextField();
+        filterField.setPlaceholder("Search");
+        filterField.setAriaLabel("Search filter options");
+        filterField.setClearButtonVisible(true);
+        filterField.setValueChangeMode(ValueChangeMode.TIMEOUT);
+        filterField.addValueChangeListener(event -> {
+            String filter = event.getValue().trim().toLowerCase(Locale.ROOT);
+            filterOptionsProvider.setFilter(item -> filter.isEmpty()
+                    || item.toLowerCase(Locale.ROOT).contains(filter));
         });
     }
 
@@ -145,6 +166,8 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     protected void initOptions() {
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox = new CheckboxGroup<>();
+        filterCheckbox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
         filterCheckbox.setItems(filterOptionsProvider);
         filterCheckbox.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         filterCheckbox.addValueChangeListener(event -> {
@@ -215,8 +238,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
             allItems.setValue(false);
             allItems.setIndeterminate(true);
         }
-        filterOptionsProvider = new ListDataProvider<>(filterOptions);
-        filterCheckbox.setItems(filterOptionsProvider);
+        filterOptionsProvider.refreshAll();
         filterCheckbox.setValue(visibleValues);
         cancelValueChangeUpdate = false;
     }
@@ -292,6 +314,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
     @Override
     public void clearFilter() {
+        filterField.clear();
         cancelValueChangeUpdate = true;
         allItems.setValue(true);
         filterCheckbox.setValue(new HashSet<>(allCellValues));

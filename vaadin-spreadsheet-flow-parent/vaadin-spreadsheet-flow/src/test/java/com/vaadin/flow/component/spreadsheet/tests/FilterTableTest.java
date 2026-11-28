@@ -9,11 +9,14 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -23,6 +26,7 @@ import com.vaadin.flow.component.spreadsheet.ItemFilter;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetFilterTable;
+import com.vaadin.flow.component.textfield.TextField;
 
 class FilterTableTest {
 
@@ -82,6 +86,169 @@ class FilterTableTest {
         getFilterCheckboxGroup(1).deselect("4");
 
         Assertions.assertTrue(spreadsheet.isRowHidden(3));
+    }
+
+    @Test
+    void filter_searchFiltersOptionsAndClearingRestoresOptions() {
+        TextField searchField = getFilterSearchField(5);
+        searchField.setValue("0");
+
+        Assertions.assertEquals(List.of("10"), getFilterOptions(5));
+
+        searchField.setValue("no match");
+        Assertions.assertTrue(getFilterOptions(5).isEmpty());
+
+        searchField.clear();
+        Assertions.assertEquals(List.of("10", "7", "8", "9"),
+                getFilterOptions(5));
+    }
+
+    @Test
+    void filter_searchResetsWhenPopupOpens() {
+        getFilterCheckboxGroup(1).deselect("4");
+        TextField searchField = getFilterSearchField(1);
+        searchField.setValue("5");
+
+        getPopupButton(1).openPopup();
+
+        Assertions.assertEquals("", searchField.getValue());
+        Assertions.assertEquals(List.of("3", "4", "5", "6"),
+                getFilterOptions(1));
+        Assertions.assertEquals(Set.of("3", "5", "6"),
+                getFilterCheckboxGroup(1).getValue());
+        Assertions.assertTrue(spreadsheet.isRowHidden(3));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "app", "APP", "  pP  " })
+    void search_caseInsensitiveSubstringWithTrimmedQuery_matchesOptions(
+            String query) {
+        List<String> values = List.of("Apple", "Pineapple", "Banana", "Cherry");
+        for (int i = 0; i < values.size(); i++) {
+            spreadsheet.createCell(i + 2, 1, values.get(i));
+        }
+        getItemFilter(1).updateOptions();
+
+        getFilterSearchField(1).setValue(query);
+
+        Assertions.assertEquals(List.of("Apple", "Pineapple"),
+                getFilterOptions(1));
+        Assertions.assertEquals(Set.copyOf(values),
+                getFilterCheckboxGroup(1).getValue());
+        Assertions.assertFalse(getPopupButton(1).isActive());
+    }
+
+    @Test
+    void search_whitespaceQuery_restoresAllOptions() {
+        TextField searchField = getFilterSearchField(1);
+        searchField.setValue("5");
+
+        searchField.setValue("   ");
+
+        Assertions.assertEquals(List.of("3", "4", "5", "6"),
+                getFilterOptions(1));
+        Assertions.assertEquals(Set.of("3", "4", "5", "6"),
+                getFilterCheckboxGroup(1).getValue());
+    }
+
+    @Test
+    void search_selectMatchesAcrossQueries_addsToExistingSelection() {
+        CheckboxGroup<String> group = getFilterCheckboxGroup(1);
+        group.setValue(Set.of("3"));
+        TextField searchField = getFilterSearchField(1);
+
+        searchField.setValue("4");
+        group.select("4");
+        searchField.setValue("6");
+        group.select("6");
+        searchField.clear();
+
+        Assertions.assertEquals(Set.of("3", "4", "6"), group.getValue());
+        Assertions.assertEquals(Set.of(4), getItemFilter(1).getFilteredRows());
+        Assertions.assertFalse(spreadsheet.isRowHidden(2));
+        Assertions.assertFalse(spreadsheet.isRowHidden(3));
+        Assertions.assertTrue(spreadsheet.isRowHidden(4));
+        Assertions.assertFalse(spreadsheet.isRowHidden(5));
+    }
+
+    @Test
+    void search_selectAllControlsAllOptionsNotOnlyMatches() {
+        TextField searchField = getFilterSearchField(1);
+        searchField.setValue("5");
+
+        getSelectAllCheckbox(1).setValue(false);
+
+        Assertions.assertTrue(getFilterCheckboxGroup(1).getValue().isEmpty());
+        Assertions.assertEquals(Set.of(2, 3, 4, 5),
+                getItemFilter(1).getFilteredRows());
+        Assertions.assertEquals(List.of("5"), getFilterOptions(1));
+
+        getSelectAllCheckbox(1).setValue(true);
+        searchField.setValue("no match");
+
+        Assertions.assertTrue(getFilterOptions(1).isEmpty());
+        Assertions.assertEquals(Set.of("3", "4", "5", "6"),
+                getFilterCheckboxGroup(1).getValue());
+        Assertions.assertTrue(getSelectAllCheckbox(1).getValue());
+        Assertions.assertFalse(getSelectAllCheckbox(1).isIndeterminate());
+        Assertions.assertTrue(getItemFilter(1).getFilteredRows().isEmpty());
+        Assertions.assertFalse(getPopupButton(1).isActive());
+    }
+
+    @Test
+    void search_updateOptions_appliesQueryToChangedCellValues() {
+        TextField searchField = getFilterSearchField(1);
+        searchField.setValue("5");
+        spreadsheet.createCell(2, 1, "15");
+        spreadsheet.createCell(4, 1, "8");
+
+        getItemFilter(1).updateOptions();
+
+        Assertions.assertEquals("5", searchField.getValue());
+        Assertions.assertEquals(List.of("15"), getFilterOptions(1));
+        Assertions.assertEquals(Set.of("15", "4", "6", "8"),
+                getFilterCheckboxGroup(1).getValue());
+        Assertions.assertTrue(getItemFilter(1).getFilteredRows().isEmpty());
+    }
+
+    @Test
+    void search_otherColumnHidesMatchingRow_doesNotOfferItsValue() {
+        getFilterCheckboxGroup(2).deselect("4");
+        getPopupButton(1).openPopup();
+
+        getFilterSearchField(1).setValue("3");
+
+        Assertions.assertTrue(getFilterOptions(1).isEmpty());
+        Assertions.assertEquals(Set.of("4", "5", "6"),
+                getFilterCheckboxGroup(1).getValue());
+        Assertions.assertTrue(spreadsheet.isRowHidden(2));
+        Assertions.assertTrue(getItemFilter(1).getFilteredRows().isEmpty());
+
+        getFilterSearchField(1).clear();
+        Assertions.assertEquals(List.of("4", "5", "6"), getFilterOptions(1));
+    }
+
+    @Test
+    void filter_searchPreservesSelectionsAndFilteredRows() {
+        ItemFilter itemFilter = getItemFilter(1);
+        CheckboxGroup<String> group = getFilterCheckboxGroup(1);
+        group.deselect("4");
+
+        TextField searchField = getFilterSearchField(1);
+        searchField.setValue("5");
+
+        Assertions.assertEquals(List.of("5"), getFilterOptions(1));
+        Assertions.assertEquals(Set.of("3", "5", "6"), group.getValue());
+        Assertions.assertEquals(Set.of(3), itemFilter.getFilteredRows());
+
+        group.deselect("5");
+
+        Assertions.assertEquals(Set.of("3", "6"), group.getValue());
+        Assertions.assertEquals(Set.of(3, 4), itemFilter.getFilteredRows());
+
+        searchField.clear();
+        Assertions.assertEquals(List.of("3", "4", "5", "6"),
+                getFilterOptions(1));
     }
 
     @Test
@@ -236,6 +403,18 @@ class FilterTableTest {
         return (CheckboxGroup<String>) getItemFilter(column).getChildren()
                 .filter(component -> component instanceof CheckboxGroup)
                 .findFirst().get();
+    }
+
+    private TextField getFilterSearchField(int column) {
+        return (TextField) getItemFilter(column).getChildren()
+                .filter(component -> component instanceof TextField).findFirst()
+                .get();
+    }
+
+    private List<String> getFilterOptions(int column) {
+        return getFilterCheckboxGroup(column).getChildren()
+                .filter(component -> component instanceof Checkbox)
+                .map(Checkbox.class::cast).map(Checkbox::getLabel).toList();
     }
 
     private ItemFilter getItemFilter(int column) {

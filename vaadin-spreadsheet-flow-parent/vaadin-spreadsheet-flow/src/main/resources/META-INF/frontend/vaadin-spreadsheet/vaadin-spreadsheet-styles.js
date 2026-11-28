@@ -1664,6 +1664,11 @@ export const spreadsheetOverlayStyles = css`
     flex-direction: column;
     gap: 4px;
     max-height: 275px;
+    overflow: hidden;
+  }
+  #spreadsheet-overlays .spreadsheet-item-filter-layout vaadin-checkbox-group {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     scrollbar-gutter: stable;
   }
